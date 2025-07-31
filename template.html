@@ -108,14 +108,15 @@
         }
         
         .container {
-            max-width: 8.5in;
+            max-width: 95%;
             margin: 0 auto;
             background: var(--bg-secondary);
             box-shadow: 0 0 20px var(--shadow);
-            min-height: 11in;
+            min-height: 100vh;
             transition: background-color 0.3s ease;
             position: relative;
             z-index: 1;
+            padding: 1rem;
         }
         
         .header {
@@ -194,9 +195,9 @@
         
         .main-content {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 3fr 1fr;
             gap: 2rem;
-            padding: 2rem;
+            padding: 1rem;
         }
         
         .left-column {
@@ -431,6 +432,11 @@
             }
         }
         
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; }
+            .left-column { padding-right: 0; }
+        }
+        
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             .main-content { grid-template-columns: 1fr; }
@@ -578,10 +584,20 @@
                 {{#if basics.nationality}}
                 <section class="section personal-info">
                     <h3>Personal</h3>
+                    <hr style="border-top: 1px solid var(--border-color); margin: 0.5rem 0 1rem 0;">
                     <ul>
                         <li><strong>Nationality:</strong> {{basics.nationality}}</li>
                     </ul>
                     
+                    {{#if basics.languages}}
+                    <h3>Languages</h3>
+                    <ul>
+                        {{#each basics.languages}}
+                        <li>{{this}}</li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+
                     {{#if basics.licenses}}
                     <h3>Licenses</h3>
                     <ul>

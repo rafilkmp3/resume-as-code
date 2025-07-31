@@ -15,6 +15,7 @@
     "nationality": "Brazilian",
     "licenses": ["Car", "Motorcycle", "Boats", "Jet Ski"],
     "hobbies": ["Outdoor sports", "Sports cars", "Videogames", "Martial arts", "Anything innovative I never tried before"],
+    "languages": ["Portuguese (Native)", "English (Fluent)"],
     "profiles": [
       {
         "network": "LinkedIn",
