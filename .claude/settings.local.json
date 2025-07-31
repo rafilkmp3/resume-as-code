@@ -29,7 +29,9 @@
       "mcp__zen__debug",
       "Bash(curl:*)",
       "Bash(pdfinfo:*)",
-      "Bash(brew install:*)"
+      "Bash(brew install:*)",
+      "Bash(pdftotext:*)",
+      "Bash(pdftoppm:*)"
     ],
     "deny": []
   }
