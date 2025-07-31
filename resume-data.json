@@ -1,0 +1,98 @@
+{
+  "basics": {
+    "name": "Rafael Bernardo Sathler",
+    "label": "Infrastructure / Platform Engineer | DevOps | AWS/GCP Cloud Architect",
+    "email": "rafaelbsathler@gmail.com",
+    "phone": "+55 21 997988682",
+    "url": "https://www.linkedin.com/in/rafaelbsathler/",
+    "summary": "Dynamic Infrastructure Engineer with over 11 years of experience in automating and managing scalable cloud systems, driving substantial improvements in system reliability and performance. Expertise in Google Cloud Platform and Amazon Web Services empowers the implementation of innovative solutions using Terraform and Kubernetes.",
+    "location": {
+      "city": "Rio de Janeiro",
+      "countryCode": "BR",
+      "region": "Brazil"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "rafaelbsathler",
+        "url": "https://www.linkedin.com/in/rafaelbsathler/"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Bluecore",
+      "position": "Platform Engineer",
+      "url": "https://bluecore.com",
+      "startDate": "2024-08-01",
+      "endDate": "2025-06-01",
+      "summary": "Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.",
+      "highlights": [
+        "Migrated hundreds of Datadog assets to Chronosphere's Prometheus-native stack, reducing monitoring costs by ~40%",
+        "Upgraded GKE fleets to Kubernetes 1.32 before Google's auto-release windows, maintaining stability during peak traffic",
+        "Authored over 20 runbooks and documentation updates, streamlining engineering processes"
+      ]
+    },
+    {
+      "name": "Uber",
+      "position": "Senior Software Engineer",
+      "url": "https://uber.com",
+      "startDate": "2023-08-01",
+      "endDate": "2024-08-01",
+      "summary": "Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.",
+      "highlights": [
+        "Drove migration from Atlassian Bamboo to GitHub Actions, scaling a 1,000-node GKE runner fleet serving 5,000 engineers",
+        "Enhanced CI/CD efficiency by implementing Terraform automation, leading to ~$65k annual cost reduction",
+        "Achieved audit-grade compliance by logging all applies in GitHub comments and enforcing security protocols"
+      ]
+    },
+    {
+      "name": "Globo.com",
+      "position": "Senior DevOps Engineer",
+      "url": "https://globo.com",
+      "startDate": "2018-08-01",
+      "endDate": "2022-06-01",
+      "summary": "Ensured continuous functionality of Big Data services and achieved a Guinness World Record for 'Big Brother Brasil' voting system.",
+      "highlights": [
+        "🏆 Ensured continuous functionality of Big Data services contributing to achievement of a Guinness World Record by 'Big Brother Brasil' for most public votes",
+        "Designed, built, deployed, and maintained highly available production systems",
+        "Built and maintained large scale deployment of Hadoop and Kafka clusters"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Universidade do Estado do Rio de Janeiro (UERJ)",
+      "area": "Computer Science",
+      "studyType": "Bachelor",
+      "startDate": "2011-06-01",
+      "endDate": "2016-06-01"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "AWS Certified Solutions Architect - Professional",
+      "date": "2019-02-01",
+      "issuer": "Amazon Web Services"
+    },
+    {
+      "name": "AWS Certified Solutions Architect - Associate",
+      "date": "2018-06-01",
+      "issuer": "Amazon Web Services"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Cloud Platforms",
+      "keywords": ["Google Cloud Platform", "AWS", "Terraform", "Terragrunt"]
+    },
+    {
+      "name": "Container Orchestration",
+      "keywords": ["Kubernetes", "Docker", "Helm", "Kustomize"]
+    },
+    {
+      "name": "Monitoring",
+      "keywords": ["Prometheus", "Grafana", "Datadog", "Chronosphere"]
+    }
+  ]
+}
