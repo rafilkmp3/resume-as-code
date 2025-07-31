@@ -18,7 +18,13 @@
       "Bash(git stash:*)",
       "Bash(cp:*)",
       "Bash(npm run serve:*)",
-      "mcp__zen__consensus"
+      "mcp__zen__consensus",
+      "mcp__zen__thinkdeep",
+      "mcp__zen__chat",
+      "Bash(make:*)",
+      "Bash(grep:*)",
+      "Bash(pkill:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

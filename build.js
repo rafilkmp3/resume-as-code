@@ -1,12 +1,39 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const Handlebars = require('handlebars');
 
 console.log('🏗️  Building resume...');
 
 // Ensure dist directory exists
 if (!fs.existsSync('./dist')) {
   fs.mkdirSync('./dist');
+}
+
+// Generate HTML from template and data
+function generateHTML() {
+  console.log('📝 Generating HTML from template...');
+  
+  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
+  const templateSource = fs.readFileSync('./template.html', 'utf8');
+  const template = Handlebars.compile(templateSource);
+  
+  // Register a helper to stringify JSON
+  Handlebars.registerHelper('json', function(context) {
+      return JSON.stringify(context);
+  });
+
+  // Copy profile image if it exists
+  if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
+    const imagePath = resumeData.basics.image;
+    fs.copyFileSync(imagePath, `./dist/${path.basename(imagePath)}`);
+    console.log(`📸 Copied profile image: ${imagePath}`);
+  }
+  
+  const html = template(resumeData);
+  fs.writeFileSync('./dist/index.html', html);
+  
+  console.log('✅ HTML generated successfully!');
 }
 
 // Generate PDF from HTML
@@ -16,7 +43,7 @@ async function generatePDF() {
       console.log('📄 Generating PDF from HTML...');
       
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
       
@@ -46,7 +73,7 @@ async function generatePDF() {
 
 // Run the build
 async function build() {
-  console.log('✅ HTML files ready in dist/');
+  generateHTML();
   await generatePDF();
   console.log('🎉 Resume build complete!');
   console.log('📁 Files generated in ./dist/');

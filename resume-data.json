@@ -2,15 +2,19 @@
   "basics": {
     "name": "Rafael Bernardo Sathler",
     "label": "Infrastructure / Platform Engineer | DevOps | AWS/GCP Cloud Architect",
+    "image": "eu-no-foguete-perfil.jpeg",
     "email": "rafaelbsathler@gmail.com",
     "phone": "+55 21 997988682",
     "url": "https://www.linkedin.com/in/rafaelbsathler/",
-    "summary": "Senior Infrastructure Engineer with 11+ years driving measurable impact at scale: $65K+ cost savings, 40% efficiency gains, and Guinness World Record achievement. Expert in cloud infrastructure (AWS/GCP), Kubernetes orchestration, and building CI/CD pipelines that serve 5,000+ engineers. Proven track record of leading critical migrations, optimizing high-traffic systems, and implementing enterprise-grade DevOps solutions.",
+    "summary": "🏆 Guinness World Record-holding Senior Platform Engineer specializing in large-scale infrastructure automation and performance optimization. Deep technical expertise in cloud-native architectures (AWS/GCP), Kubernetes orchestration, and CI/CD systems serving 5,000+ engineers. Proven ability to solve complex technical challenges: achieved $65K+ cost savings through automation, 40% efficiency gains via system optimization, and zero-downtime operation of record-breaking voting infrastructure. Passionate about building robust, scalable systems and mentoring engineers through complex technical problems.",
     "location": {
       "city": "Rio de Janeiro",
       "countryCode": "BR",
       "region": "Brazil"
     },
+    "nationality": "Brazilian",
+    "licenses": ["Car", "Motorcycle", "Boats", "Jet Ski"],
+    "hobbies": ["Outdoor sports", "Sports cars", "Videogames", "Martial arts", "Anything innovative I never tried before"],
     "profiles": [
       {
         "network": "LinkedIn",
@@ -26,6 +30,11 @@
         "network": "Calendly",
         "username": "rafaelbsathler",
         "url": "http://calendly.com/rafaelbsathler"
+      },
+      {
+        "network": "Guinness World Record",
+        "username": "Big Brother Brasil",
+        "url": "#guinness-world-record"
       }
     ]
   },
@@ -41,7 +50,7 @@
         "Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)",
         "Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue",
         "Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%",
-        "Cross-functional leadership: Collaborated with 10+ engineering teams to optimize infrastructure and drive innovation initiatives"
+        "Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices"
       ]
     },
     {
@@ -56,7 +65,8 @@
         "Monorepo at scale: Partnered with Bazel core team to optimize Go monorepo builds, implementing distributed caching and remote execution that reduced build times by 60% for 5,000+ engineers",
         "Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%",
         "Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings",
-        "Developer enablement: Created self-service infrastructure platform allowing teams to deploy in <4 hours (previously 24+ hours), authored CI/CD playbooks and Bazel optimization guides"
+        "Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration",
+        "Technical documentation: Authored comprehensive 'CI/CD Playbook' and Bazel optimization guides, becoming the go-to technical resource for platform teams"
       ]
     },
     {
@@ -82,7 +92,7 @@
       "summary": "Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.",
       "highlights": [
         "Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud",
-        "Cross-functional collaboration: Partnered with product teams to translate business requirements into technical architectures and delivery timelines",
+        "Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions",
         "Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%",
         "Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA"
       ]
@@ -98,7 +108,7 @@
         "🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for 'Big Brother Brasil', handling record-breaking public votes that surpassed 'American Idol'",
         "Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability",
         "Production systems: Designed, deployed, and maintained highly available systems supporting Brazil's top media properties with shared ownership model",
-        "Data platform leadership: Built innovative data solutions using Spark/Hadoop ecosystem, enabling real-time analytics and business intelligence"
+        "Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency"
       ]
     },
     {
@@ -126,7 +136,7 @@
         "Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment",
         "Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies",
         "Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution",
-        "Technical leadership: Provided infrastructure expertise to development teams, reducing server-related incidents by 60%"
+        "System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning"
       ]
     },
     {
@@ -153,46 +163,73 @@
       "endDate": "2016-06-01"
     }
   ],
-  "certificates": [
+  "certificates": [],
+  "projects": [
     {
-      "name": "AWS Certified Solutions Architect - Professional",
-      "date": "2019-02-01",
-      "issuer": "Amazon Web Services"
+      "name": "Resume-as-Code Platform",
+      "url": "https://github.com/rafaelbsathler/resume-as-code",
+      "description": "Full-stack resume generation system demonstrating Platform Engineering principles",
+      "highlights": [
+        "Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation",
+        "Implemented dark/light theme with OS preference detection and accessibility features",
+        "Created ATS-friendly export functionality for job application compatibility",
+        "Deployed with GitHub Pages integration and Make-based build system"
+      ],
+      "keywords": ["Node.js", "Handlebars", "Puppeteer", "HTML/CSS", "JavaScript", "CI/CD", "GitHub Pages"]
     },
     {
-      "name": "AWS Certified Solutions Architect - Associate",
-      "date": "2018-06-01",
-      "issuer": "Amazon Web Services"
+      "name": "Infrastructure Automation Toolkit",
+      "url": "",
+      "description": "Collection of Terraform modules and automation scripts for cloud infrastructure",
+      "highlights": [
+        "Developed reusable Terraform modules for AWS/GCP multi-cloud deployments",
+        "Created monitoring and alerting automation reducing MTTR by 70%",
+        "Built cost optimization scripts identifying $200K+ in potential savings",
+        "Implemented security scanning and compliance automation for infrastructure-as-code"
+      ],
+      "keywords": ["Terraform", "AWS", "GCP", "Python", "Bash", "Monitoring", "Security"]
     }
   ],
   "skills": [
     {
-      "name": "Cloud Platforms & IaC",
-      "keywords": ["AWS (Expert)", "Google Cloud Platform", "Terraform", "Terragrunt", "CloudFormation", "Pulumi", "AWS CDK"]
+      "name": "☁️ Cloud Platforms & IaC",
+      "level": "Expert",
+      "keywords": ["AWS (Expert)", "Google Cloud Platform (GCP)", "Terraform", "Ansible", "Helm"]
     },
     {
-      "name": "Container Orchestration", 
+      "name": "🐳 Container Orchestration", 
+      "level": "Expert",
       "keywords": ["Kubernetes", "Docker", "Helm", "Kustomize", "Istio", "ArgoCD", "Google Kubernetes Engine", "Amazon EKS"]
     },
     {
-      "name": "CI/CD & DevOps",
-      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel", "Spinnaker", "Tekton", "Azure DevOps"]
+      "name": "🔄 CI/CD & DevOps",
+      "level": "Expert",
+      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel", "Spinnaker", "Tekton"]
     },
     {
-      "name": "Observability & Monitoring",
-      "keywords": ["Prometheus", "Grafana", "Datadog", "Chronosphere", "New Relic", "ELK Stack", "Loki", "Jaeger", "OpenTelemetry"]
+      "name": "📊 Observability & Monitoring",
+      "level": "Expert",
+      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic"]
     },
     {
-      "name": "Programming & Scripting",
-      "keywords": ["Python", "Go", "Bash/Shell", "JavaScript", "YAML", "HCL", "SQL"]
+      "name": "💻 Programming & Scripting",
+      "level": "Advanced",
+      "keywords": ["Python", "Bash", "Go", "JavaScript", "YAML", "HCL", "SQL"]
     },
     {
-      "name": "Big Data & Databases",
-      "keywords": ["Apache Kafka", "Hadoop", "Apache Spark", "PostgreSQL", "Redis", "Elasticsearch", "BigQuery", "DynamoDB"]
+      "name": "📈 Big Data & Databases",
+      "level": "Advanced",
+      "keywords": ["Apache Kafka", "Hadoop", "Apache Spark", "PostgreSQL", "Redis", "Elasticsearch", "BigQuery"]
     },
     {
-      "name": "Security & Compliance",
+      "name": "🔒 Security & Compliance",
+      "level": "Advanced",
       "keywords": ["RBAC", "SAML/SSO", "Vault", "Security Scanning", "Compliance Auditing", "Infrastructure Security"]
+    },
+    {
+      "name": "🤝 Soft Skills",
+      "level": "Expert",
+      "keywords": ["Effective in cross-functional teams", "Clear technical writing", "Leadership", "Mentoring", "Problem solving"]
     }
   ]
 }

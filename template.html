@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{basics.name}} - {{basics.label}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: white;
+            --bg-accent: #f8f9fa;
+            --text-primary: #333;
+            --text-secondary: #000;
+            --text-muted: #666;
+            --gradient-start: #667eea;
+            --gradient-end: #764ba2;
+            --border-color: #e9ecef;
+            --shadow: rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-accent: #333333;
+            --text-primary: #f0f0f0;
+            --text-secondary: #d0d0d0;
+            --text-muted: #a0a0a0;
+            --gradient-start: #4f5bd5;
+            --gradient-end: #6b47a0;
+            --border-color: #444;
+            --shadow: rgba(0,0,0,0.3);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 120%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px var(--shadow);
+            backdrop-filter: blur(10px);
+            min-width: 80px;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background: var(--gradient-start);
+            color: white;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px var(--shadow);
+            border-color: var(--gradient-start);
+        }
+        
+        .control-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+        
+        .control-btn span:first-child {
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            box-shadow: 0 0 20px var(--shadow);
+            min-height: 11in;
+            transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, #8b5cf6 100%);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        .profile-photo:not([src]), .profile-photo[src=""] {
+            display: none;
+        }
+        
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-content .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .left-column {
+            padding-right: 1rem;
+        }
+        
+        .right-column {
+            background: var(--bg-accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            color: var(--gradient-start);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gradient-start);
+        }
+        
+        .profile-summary {
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: justify;
+        }
+        
+        .work-item {
+            margin-bottom: 2rem;
+            border-left: 3px solid var(--gradient-start);
+            padding-left: 1rem;
+            transition: all 0.3s ease;
+            border-radius: 0 8px 8px 0;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        
+        .work-item:hover {
+            background: var(--bg-accent);
+            border-left-width: 5px;
+            padding-left: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateX(8px) translateZ(0);
+        }
+        
+        .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .work-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        
+        .company {
+            color: var(--gradient-start);
+            font-weight: 500;
+        }
+        
+        .work-date {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .work-summary {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+        
+        .highlights {
+            list-style: none;
+        }
+        
+        .highlights li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .highlights li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--gradient-start);
+            font-size: 0.8rem;
+        }
+        
+        .skill-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .skill-level {
+            background: var(--gradient-start);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            float: right;
+        }
+        
+        .skill-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        
+        .skill-tag {
+            background: var(--border-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+        
+        .skill-tag:hover {
+            background: var(--gradient-start);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+        
+        .personal-info h3 {
+            color: var(--gradient-start);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .personal-info ul {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+        
+        .personal-info li {
+            padding: 0.2rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .link-item {
+            background: var(--gradient-start);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+        
+        .link-item:hover {
+            background: var(--gradient-end);
+        }
+        
+        .certificate-item {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cert-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .cert-issuer {
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .cert-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        @media print {
+            .controls { display: none !important; }
+            body { background: white !important; }
+            .container { box-shadow: none !important; }
+            .main-content { grid-template-columns: 1fr; }
+            .right-column { background: white !important; }
+            * { 
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .main-content { grid-template-columns: 1fr; }
+            .work-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-bg" id="parallaxBg"></div>
+    
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button class="control-btn" id="themeToggle" title="Toggle Dark/Light Mode (Auto-detects OS preference) - Ctrl+Shift+D">
+            <span id="themeIcon">🌙</span>
+            <span id="themeText">Dark</span>
+            <span id="autoIndicator" style="font-size: 0.7em; opacity: 0.7;"></span>
+        </button>
+        <button class="control-btn" onclick="window.print()" title="Print Resume">
+            <span>🖨️</span>
+            <span>Print</span>
+        </button>
+        <button class="control-btn" onclick="downloadPDF()" title="Download PDF">
+            <span>📄</span>
+            <span>PDF</span>
+        </button>
+        <button class="control-btn" onclick="generateATS()" title="Generate ATS-Friendly Version">
+            <span>📄</span>
+            <span>ATS</span>
+        </button>
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            {{#if basics.image}}
+            <img src="{{basics.image}}" alt="{{basics.name}}" class="profile-photo">
+            {{/if}}
+            <div class="header-content">
+                <h1>{{basics.name}}</h1>
+                <div class="subtitle">{{basics.label}}</div>
+                <div class="contact-info">
+                    <div class="contact-item">📍 {{basics.location.city}}, {{basics.location.region}}</div>
+                    <div class="contact-item">📞 <a href="tel:{{basics.phone}}" style="color: inherit; text-decoration: none;">{{basics.phone}}</a></div>
+                    <div class="contact-item">✉️ <a href="mailto:{{basics.email}}" style="color: inherit; text-decoration: none;">{{basics.email}}</a></div>
+                </div>
+                <div class="links">
+                    {{#each basics.profiles}}
+                    <a href="{{url}}" class="link-item" target="_blank">{{network}}</a>
+                    {{/each}}
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <section class="section">
+                    <h2>Profile</h2>
+                    <div class="profile-summary">{{basics.summary}}</div>
+                </section>
+                
+                <section class="section">
+                    <h2>Experience</h2>
+                    {{#each work}}
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">{{position}}</div>
+                                <div class="company">{{name}}</div>
+                            </div>
+                            <div class="work-date">{{startDate}} — {{#if endDate}}{{endDate}}{{else}}Present{{/if}}</div>
+                        </div>
+                        <div class="work-summary">{{summary}}</div>
+                        <ul class="highlights">
+                            {{#each highlights}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/each}}
+                </section>
+                
+                {{#if projects}}
+                <section class="section">
+                    <h2>Key Projects</h2>
+                    {{#each projects}}
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">{{name}}</div>
+                                {{#if url}}<div class="company"><a href="{{url}}" target="_blank" style="color: inherit;">{{url}}</a></div>{{/if}}
+                            </div>
+                        </div>
+                        <div class="work-summary">{{description}}</div>
+                        <ul class="highlights">
+                            {{#each highlights}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                        {{#if keywords}}
+                        <div style="margin-top: 0.5rem;">
+                            {{#each keywords}}
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">{{this}}</span>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+                
+                <section class="section">
+                    <h2>Education</h2>
+                    {{#each education}}
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">{{studyType}} in {{area}}</div>
+                                <div class="company">{{institution}}</div>
+                            </div>
+                            <div class="work-date">{{startDate}} — {{endDate}}</div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </section>
+            </div>
+            
+            <div class="right-column">
+                {{#if basics.nationality}}
+                <section class="section personal-info">
+                    <h3>Personal</h3>
+                    <ul>
+                        <li><strong>Nationality:</strong> {{basics.nationality}}</li>
+                    </ul>
+                    
+                    {{#if basics.licenses}}
+                    <h3>Licenses</h3>
+                    <ul>
+                        {{#each basics.licenses}}
+                        <li>{{this}}</li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                    
+                    {{#if basics.hobbies}}
+                    <h3>Hobbies</h3>
+                    <ul>
+                        {{#each basics.hobbies}}
+                        <li>{{this}}</li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                </section>
+                {{/if}}
+                
+                <section class="section">
+                    <h2>Skills</h2>
+                    {{#each skills}}
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            {{name}}
+                            {{#if level}}
+                            <span class="skill-level">{{level}}</span>
+                            {{/if}}
+                        </div>
+                        <div class="skill-keywords">
+                            {{#each keywords}}
+                            <span class="skill-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </section>
+                
+                {{#if certificates}}
+                <section class="section">
+                    <h2>Certificates</h2>
+                    {{#each certificates}}
+                    <div class="certificate-item">
+                        <div class="cert-name">{{name}}</div>
+                        <div class="cert-issuer">{{issuer}}</div>
+                        <div class="cert-date">{{date}}{{#if endDate}} — {{endDate}}{{/if}}</div>
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    
+    <script id="resume-data" type="application/json">
+        {{{json this}}}
+    </script>
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const autoIndicator = document.getElementById('autoIndicator');
+        const body = document.body;
+        
+        // Function to detect OS theme preference
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        // Function to apply theme
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+            } else {
+                body.removeAttribute('data-theme');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+            }
+            
+            // Update auto indicator
+            const isManuallySet = localStorage.getItem('theme');
+            autoIndicator.textContent = isManuallySet ? '' : '(Auto)';
+            
+            console.log('Applied theme:', theme, 'Body data-theme:', body.getAttribute('data-theme'));
+        }
+        
+        // Initialize theme immediately
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = getSystemTheme();
+            const initialTheme = savedTheme || systemTheme;
+            console.log('Initializing theme:', { initialTheme, savedTheme, systemTheme });
+            applyTheme(initialTheme);
+        }
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeTheme);
+        } else {
+            initializeTheme();
+        }
+        
+        // Listen for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+            // Only auto-switch if user hasn't manually set a preference
+            if (!localStorage.getItem('theme')) {
+                console.log('System theme changed to:', e.matches ? 'dark' : 'light');
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+        
+        // Double-click to reset to auto (system preference)
+        themeToggle.addEventListener('dblclick', () => {
+            localStorage.removeItem('theme');
+            applyTheme(getSystemTheme());
+        });
+        
+        // PDF Download Function
+        function downloadPDF() {
+            const link = document.createElement('a');
+            link.href = 'resume.pdf';
+            link.download = 'Rafael_Sathler_Resume.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // ATS-Friendly Version Generator
+        function generateATS() {
+            // Create ATS-friendly content
+            const resumeData = JSON.parse(document.getElementById('resume-data').textContent);
+            const atsContent = generateATSContent(resumeData);
+            
+            // Create and download as text file
+            const blob = new Blob([atsContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Rafael_Sathler_Resume_ATS.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            showATSMessage();
+        }
+        
+        function generateATSContent(data) {
+            let content = '';
+            
+            // Basics
+            content += `${data.basics.name.toUpperCase()}\n`;
+            content += `${data.basics.label}\n\n`;
+            
+            // Contact
+            content += 'CONTACT INFORMATION\n';
+            content += `Location: ${data.basics.location.city}, ${data.basics.location.region}\n`;
+            content += `Phone: ${data.basics.phone}\n`;
+            content += `Email: ${data.basics.email}\n`;
+            data.basics.profiles.forEach(profile => {
+                if (profile.network !== 'Guinness World Record') {
+                    content += `${profile.network}: ${profile.url}\n`;
+                }
+            });
+            content += '\n';
+
+            // Summary
+            content += 'PROFESSIONAL SUMMARY\n';
+            content += `${data.basics.summary}\n\n`;
+
+            // Skills
+            content += 'CORE COMPETENCIES\n';
+            data.skills.forEach(skill => {
+                content += `• ${skill.name.replace(/☁️|🐳|🔄|📊|💻|📈|🔒|🤝/g, '').trim()}: ${skill.keywords.join(', ')}\n`;
+            });
+            content += '\n';
+
+            // Experience
+            content += 'PROFESSIONAL EXPERIENCE\n\n';
+            data.work.forEach(job => {
+                content += `${job.position.toUpperCase()} | ${job.name} | ${(job.url ? job.url + ' | ' : '')}${job.startDate} - ${job.endDate || 'Present'}\n`;
+                job.highlights.forEach(highlight => {
+                    content += `• ${highlight}\n`;
+                });
+                content += '\n';
+            });
+
+            // Projects
+            if(data.projects && data.projects.length > 0) {
+                content += 'KEY PROJECTS\n\n';
+                data.projects.forEach(project => {
+                    content += `${project.name} | ${project.url}\n`;
+                    content += `${project.description}\n`;
+                    project.highlights.forEach(highlight => {
+                        content += `• ${highlight}\n`;
+                    });
+                    if(project.keywords && project.keywords.length > 0){
+                        content += `Technologies: ${project.keywords.join(', ')}\n`;
+                    }
+                    content += '\n';
+                });
+            }
+
+            // Education
+            content += 'EDUCATION\n';
+            data.education.forEach(edu => {
+                content += `${edu.studyType} in ${edu.area}\n`;
+                content += `${edu.institution} | ${edu.startDate} - ${edu.endDate}\n\n`;
+            });
+
+            // Certifications
+            if(data.certificates && data.certificates.length > 0){
+                content += 'CERTIFICATIONS\n';
+                data.certificates.forEach(cert => {
+                    content += `• ${cert.name} | ${cert.date} | ${cert.issuer}\n`;
+                });
+                content += '\n';
+            }
+
+            // Personal
+            content += 'PERSONAL INFORMATION\n';
+            content += `Nationality: ${data.basics.nationality}\n`;
+            if(data.basics.licenses && data.basics.licenses.length > 0){
+                content += `Licenses: ${data.basics.licenses.join(', ')}\n`;
+            }
+            if(data.basics.hobbies && data.basics.hobbies.length > 0){
+                content += `Hobbies: ${data.basics.hobbies.join(', ')}\n`;
+            }
+
+            return content;
+        }
+        
+        function showATSMessage() {
+            // Create temporary message overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                color: white;
+                font-family: inherit;
+            `;
+            
+            const message = document.createElement('div');
+            message.style.cssText = `
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                max-width: 500px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            message.innerHTML = `
+                <h2 style="margin-bottom: 1rem; color: var(--gradient-start);">✅ ATS Version Generated!</h2>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">Your ATS-friendly resume has been downloaded as <strong>Rafael_Sathler_Resume_ATS.txt</strong></p>
+                <p style="margin-bottom: 1.5rem; font-size: 0.9em; opacity: 0.8;">This plain text version removes emojis and formatting for better compatibility with Applicant Tracking Systems.</p>
+                <button onclick="document.body.removeChild(arguments[0].target.closest('.overlay'))" 
+                        style="background: var(--gradient-start); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Close
+                </button>
+            `;
+            
+            overlay.className = 'overlay';
+            overlay.appendChild(message);
+            document.body.appendChild(overlay);
+            
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+            }, 5000);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Shift + D for dark mode toggle (avoid conflict with browser bookmarks)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                themeToggle.click();
+            }
+            // Ctrl/Cmd + P for print
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+        
+        // Smooth animations for theme transitions
+        document.documentElement.style.setProperty('--transition', 'all 0.3s ease');
+        
+        // Parallax Effect
+        function initParallax() {
+            const parallaxBg = document.getElementById('parallaxBg');
+            
+            function updateParallax() {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                // Move background slower than scroll
+                if (parallaxBg) {
+                    parallaxBg.style.transform = `translate3d(0, ${rate}px, 0)`;
+                }
+            }
+            
+            // Throttled scroll listener for performance
+            let ticking = false;
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', () => {
+                requestTick();
+                ticking = false;
+            });
+            
+            // Initial call
+            updateParallax();
+        }
+        
+        // Initialize parallax after DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initParallax);
+        } else {
+            initParallax();
+        }
+    </script>
+</body>
+</html>
