@@ -62,7 +62,7 @@
       "summary": "Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.",
       "highlights": [
         "Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO",
-        "Monorepo at scale: Partnered with Bazel core team to optimize Go monorepo builds, implementing distributed caching and remote execution that reduced build times by 60% for 5,000+ engineers",
+        "Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers",
         "Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%",
         "Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings",
         "Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration",
