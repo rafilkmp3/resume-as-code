@@ -204,7 +204,7 @@
     {
       "name": "🔄 CI/CD & DevOps",
       "level": "Expert",
-      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel", "Spinnaker", "Tekton"]
+      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel"]
     },
     {
       "name": "📊 Observability & Monitoring",

@@ -538,6 +538,25 @@
             </div>
             
             <div class="right-column">
+                <section class="section">
+                    <h2>Skills</h2>
+                    {{#each skills}}
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            {{name}}
+                            {{#if level}}
+                            <span class="skill-level">{{level}}</span>
+                            {{/if}}
+                        </div>
+                        <div class="skill-keywords">
+                            {{#each keywords}}
+                            <span class="skill-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </section>
+
                 {{#if basics.nationality}}
                 <section class="section personal-info">
                     <h3>Personal</h3>
@@ -564,25 +583,6 @@
                     {{/if}}
                 </section>
                 {{/if}}
-                
-                <section class="section">
-                    <h2>Skills</h2>
-                    {{#each skills}}
-                    <div class="skill-category">
-                        <div class="skill-name">
-                            {{name}}
-                            {{#if level}}
-                            <span class="skill-level">{{level}}</span>
-                            {{/if}}
-                        </div>
-                        <div class="skill-keywords">
-                            {{#each keywords}}
-                            <span class="skill-tag">{{this}}</span>
-                            {{/each}}
-                        </div>
-                    </div>
-                    {{/each}}
-                </section>
                 
                 {{#if certificates}}
                 <section class="section">
