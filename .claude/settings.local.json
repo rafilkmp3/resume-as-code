@@ -17,7 +17,8 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(cp:*)",
-      "Bash(npm run serve:*)"
+      "Bash(npm run serve:*)",
+      "mcp__zen__consensus"
     ],
     "deny": []
   }
