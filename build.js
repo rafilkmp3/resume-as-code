@@ -23,6 +23,11 @@ function generateHTML() {
       return JSON.stringify(context);
   });
 
+  // Register a helper for equality comparison
+  Handlebars.registerHelper('eq', function(a, b) {
+      return a === b;
+  });
+
   // Copy profile image if it exists
   if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
     const imagePath = resumeData.basics.image;
@@ -44,30 +49,52 @@ async function generatePDF() {
       
       const browser = await puppeteer.launch({
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--allow-running-insecure-content']
       });
       
       const page = await browser.newPage();
-      const html = fs.readFileSync('./dist/index.html', 'utf8');
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
+      // Set a larger viewport to ensure proper rendering
+      await page.setViewport({ width: 1200, height: 1600 });
+      
+      // Navigate to the file using file:// protocol to ensure resources load
+      const filePath = path.resolve('./dist/index.html');
+      await page.goto(`file://${filePath}`, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000 
+      });
+      
+      // Wait for images to load
+      await page.waitForSelector('img', { timeout: 5000 }).catch(() => {
+        console.log('⚠️  No images found or timeout waiting for images');
+      });
+      
+      // Add a small delay to ensure everything is rendered
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       await page.pdf({
         path: './dist/resume.pdf',
         format: 'A4',
         printBackground: true,
+        preferCSSPageSize: false,
+        displayHeaderFooter: false,
         margin: {
-          top: '0.5in',
-          bottom: '0.5in',
-          left: '0.5in',
-          right: '0.5in'
-        }
+          top: '0.3in',
+          bottom: '0.3in',
+          left: '0.3in',
+          right: '0.3in'
+        },
+        scale: 1.0,
+        width: '8.27in',
+        height: '11.7in'
       });
 
       await browser.close();
       console.log('✅ PDF generated successfully!');
     }
   } catch (error) {
-    console.log('⚠️  PDF generation failed, skipping...');
+    console.error('❌ PDF generation failed:', error.message);
+    console.log('⚠️  Continuing without PDF...');
   }
 }
 

@@ -1,16 +1,28 @@
-.PHONY: help build dev serve clean install pdf html
+.PHONY: help build dev serve clean install pdf html kill-port status watch live
+
+# Colors for output
+RED=\033[0;31m
+GREEN=\033[0;32m
+YELLOW=\033[1;33m 
+BLUE=\033[0;34m
+PURPLE=\033[0;35m
+CYAN=\033[0;36m
+NC=\033[0m # No Color
 
 # Default target
 help:
 	@echo "📋 Available commands:"
-	@echo "  make install  - Install dependencies"
-	@echo "  make build    - Build HTML and PDF"
-	@echo "  make html     - Generate HTML only"
-	@echo "  make pdf      - Generate PDF only"
-	@echo "  make dev      - Build and serve on localhost:3000"
-	@echo "  make serve    - Serve existing build on localhost:3000"
-	@echo "  make clean    - Clean dist directory"
-	@echo "  make watch    - Watch for changes and rebuild"
+	@echo "  $(CYAN)make install$(NC)    - Install dependencies"
+	@echo "  $(GREEN)make build$(NC)      - Build HTML and PDF"
+	@echo "  $(BLUE)make html$(NC)       - Generate HTML only"
+	@echo "  $(BLUE)make pdf$(NC)        - Generate PDF only"
+	@echo "  $(PURPLE)make dev$(NC)        - Kill port, build and serve on localhost:3000"
+	@echo "  $(PURPLE)make serve$(NC)      - Serve existing build on localhost:3000"
+	@echo "  $(PURPLE)make live$(NC)       - Live development with file watching"
+	@echo "  $(YELLOW)make kill-port$(NC)  - Kill any process running on port 3000"
+	@echo "  $(RED)make clean$(NC)      - Clean dist directory"
+	@echo "  $(CYAN)make watch$(NC)      - Watch for changes and rebuild"
+	@echo "  $(CYAN)make status$(NC)     - Show project status and file info"
 
 # Install dependencies
 install:
@@ -32,45 +44,126 @@ pdf: html
 	@echo "📄 Generating PDF..."
 	node -e "const puppeteer = require('puppeteer'); const fs = require('fs'); (async () => { const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] }); const page = await browser.newPage(); const html = fs.readFileSync('./dist/index.html', 'utf8'); await page.setContent(html, { waitUntil: 'networkidle0' }); await page.pdf({ path: './dist/resume.pdf', format: 'A4', printBackground: true, margin: { top: '0.5in', bottom: '0.5in', left: '0.5in', right: '0.5in' } }); await browser.close(); console.log('✅ PDF generated successfully!'); })();"
 
+# Kill any process running on port 3000
+kill-port:
+	@echo "$(YELLOW)🔍 Checking for processes on port 3000...$(NC)"
+	@if lsof -ti:3000 >/dev/null 2>&1; then \
+		echo "$(RED)💀 Killing process on port 3000...$(NC)"; \
+		kill -9 $$(lsof -ti:3000) 2>/dev/null || true; \
+		sleep 1; \
+		echo "$(GREEN)✅ Port 3000 is now free$(NC)"; \
+	else \
+		echo "$(GREEN)✅ Port 3000 is already free$(NC)"; \
+	fi
+
 # Build and serve (development mode)
-dev: build
-	@echo "🚀 Starting development server..."
-	@echo "📱 Resume available at: http://localhost:3000"
-	@echo "📄 PDF available at: http://localhost:3000/resume.pdf"
-	@echo "🛑 Press Ctrl+C to stop"
+dev: kill-port build
+	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
+	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
+	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	npm run serve
 
 # Serve existing build
-serve:
-	@echo "🌐 Starting server..."
-	@echo "📱 Resume available at: http://localhost:3000"
-	@echo "📄 PDF available at: http://localhost:3000/resume.pdf"
-	@echo "🛑 Press Ctrl+C to stop"
+serve: kill-port
+	@echo "$(PURPLE)🌐 Starting server...$(NC)"
+	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
+	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	npm run serve
 
-# Watch for changes and rebuild
+# Live development with file watching
+live: kill-port
+	@echo "$(PURPLE)🔥 Starting live development mode...$(NC)"
+	@echo "$(CYAN)👀 Watching: resume-data.json, template.html$(NC)"
+	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
+	@trap 'kill %1 2>/dev/null || true; exit' INT; \
+	make build && npm run serve & \
+	while true; do \
+		if command -v fswatch >/dev/null 2>&1; then \
+			fswatch -o resume-data.json template.html | while read; do make build; done; \
+		elif command -v inotifywait >/dev/null 2>&1; then \
+			inotifywait -e modify resume-data.json template.html 2>/dev/null && make build; \
+		else \
+			echo "$(YELLOW)⚠️  No file watcher found (fswatch/inotifywait), using polling...$(NC)"; \
+			sleep 3; \
+			make build; \
+		fi; \
+	done
+
+# Watch for changes and rebuild (without server)
 watch:
-	@echo "👀 Watching for changes..."
-	@echo "📁 Watching: resume-data.json, template.html"
+	@echo "$(CYAN)👀 Watching for changes...$(NC)"
+	@echo "$(CYAN)📁 Watching: resume-data.json, template.html$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	@while true; do \
-		inotifywait -e modify resume-data.json template.html 2>/dev/null || \
-		(echo "⚠️  inotifywait not found, using basic polling..."; sleep 2); \
-		make build; \
-		echo "🔄 Rebuilt at $$(date)"; \
+		if command -v fswatch >/dev/null 2>&1; then \
+			fswatch -o resume-data.json template.html | while read; do \
+				echo "$(GREEN)🔄 File changed, rebuilding...$(NC)"; \
+				make build; \
+				echo "$(GREEN)✅ Rebuilt at $$(date)$(NC)"; \
+			done; \
+		elif command -v inotifywait >/dev/null 2>&1; then \
+			inotifywait -e modify resume-data.json template.html 2>/dev/null; \
+			echo "$(GREEN)🔄 File changed, rebuilding...$(NC)"; \
+			make build; \
+			echo "$(GREEN)✅ Rebuilt at $$(date)$(NC)"; \
+		else \
+			echo "$(YELLOW)⚠️  No file watcher found (fswatch/inotifywait), using polling...$(NC)"; \
+			sleep 3; \
+			make build; \
+		fi; \
 	done
 
 # Clean dist directory
 clean:
-	@echo "🧹 Cleaning dist directory..."
+	@echo "$(RED)🧹 Cleaning dist directory...$(NC)"
 	rm -rf dist/
-	@echo "✅ Clean complete"
+	@echo "$(GREEN)✅ Clean complete$(NC)"
 
-# Quick status check
+# Comprehensive status check
 status:
-	@echo "📊 Resume Status:"
-	@echo "=================="
-	@if [ -f "dist/index.html" ]; then echo "✅ HTML: dist/index.html"; else echo "❌ HTML: Missing"; fi
-	@if [ -f "dist/resume.pdf" ]; then echo "✅ PDF: dist/resume.pdf"; else echo "❌ PDF: Missing"; fi
-	@if [ -f "resume-data.json" ]; then echo "✅ Data: resume-data.json"; else echo "❌ Data: Missing"; fi
-	@if [ -f "template.html" ]; then echo "✅ Template: template.html"; else echo "❌ Template: Missing"; fi
-	@echo "=================="
+	@echo "$(CYAN)📊 Resume Project Status$(NC)"
+	@echo "$(CYAN)========================$(NC)"
+	@if [ -f "dist/index.html" ]; then \
+		SIZE=$$(ls -lh dist/index.html | awk '{print $$5}'); \
+		echo "$(GREEN)✅ HTML: dist/index.html ($$SIZE)$(NC)"; \
+	else \
+		echo "$(RED)❌ HTML: Missing$(NC)"; \
+	fi
+	@if [ -f "dist/resume.pdf" ]; then \
+		SIZE=$$(ls -lh dist/resume.pdf | awk '{print $$5}'); \
+		echo "$(GREEN)✅ PDF: dist/resume.pdf ($$SIZE)$(NC)"; \
+	else \
+		echo "$(RED)❌ PDF: Missing$(NC)"; \
+	fi
+	@if [ -f "resume-data.json" ]; then \
+		echo "$(GREEN)✅ Data: resume-data.json$(NC)"; \
+	else \
+		echo "$(RED)❌ Data: Missing$(NC)"; \
+	fi
+	@if [ -f "template.html" ]; then \
+		echo "$(GREEN)✅ Template: template.html$(NC)"; \
+	else \
+		echo "$(RED)❌ Template: Missing$(NC)"; \
+	fi
+	@if [ -f "eu-no-foguete-perfil.jpeg" ]; then \
+		SIZE=$$(ls -lh eu-no-foguete-perfil.jpeg | awk '{print $$5}'); \
+		echo "$(GREEN)✅ Profile Image: eu-no-foguete-perfil.jpeg ($$SIZE)$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Profile Image: Missing$(NC)"; \
+	fi
+	@echo "$(CYAN)========================$(NC)"
+	@if lsof -ti:3000 >/dev/null 2>&1; then \
+		PID=$$(lsof -ti:3000); \
+		echo "$(YELLOW)🟡 Port 3000: Occupied (PID: $$PID)$(NC)"; \
+	else \
+		echo "$(GREEN)✅ Port 3000: Available$(NC)"; \
+	fi
+	@if command -v node >/dev/null 2>&1; then \
+		VERSION=$$(node --version); \
+		echo "$(GREEN)✅ Node.js: $$VERSION$(NC)"; \
+	else \
+		echo "$(RED)❌ Node.js: Not installed$(NC)"; \
+	fi

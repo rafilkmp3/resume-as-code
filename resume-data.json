@@ -15,7 +15,7 @@
     "nationality": "Brazilian",
     "licenses": ["Car", "Motorcycle", "Boats", "Jet Ski"],
     "hobbies": ["Outdoor sports", "Sports cars", "Videogames", "Martial arts", "Anything innovative I never tried before"],
-    "languages": ["Portuguese (Native)", "English (Fluent)"],
+    "languages": ["Portuguese", "English"],
     "profiles": [
       {
         "network": "LinkedIn",
@@ -173,7 +173,7 @@
   "projects": [
     {
       "name": "Resume-as-Code Platform",
-      "url": "https://github.com/rafaelbsathler/resume-as-code",
+      "url": "https://github.com/rafilkmp3/resume-as-code",
       "description": "Full-stack resume generation system demonstrating Platform Engineering principles",
       "highlights": [
         "Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation",

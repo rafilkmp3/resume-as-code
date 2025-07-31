@@ -24,7 +24,12 @@
       "Bash(make:*)",
       "Bash(grep:*)",
       "Bash(pkill:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(git remote get-url:*)",
+      "mcp__zen__debug",
+      "Bash(curl:*)",
+      "Bash(pdfinfo:*)",
+      "Bash(brew install:*)"
     ],
     "deny": []
   }
