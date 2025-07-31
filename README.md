@@ -82,73 +82,154 @@ This project demonstrates my expertise in **automation**, **CI/CD**, **infrastru
 
 ## 🛠️ Quick Start
 
-> **💡 Tip:** This project uses Make for an enhanced developer experience. All commands are optimized for productivity!
+### 📥 Clone & Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/rafilkmp3/resume-as-code.git
+cd resume-as-code
+
+# Install dependencies (requires Node.js 16+)
+make install
+
+# Start development with live reload
+make dev
+```
+
+> **💡 Pro Tip:** This project leverages **Make** for superior developer experience. All workflows are optimized for productivity and eliminate common development friction!
 
 <table>
 <tr>
 <td width="50%">
 
-### 🚀 Essential Commands
+### 🚀 Development Workflow
 
 ```bash
-# 🎯 Get started
+# 🎯 View all available commands
 make help
 
-# 📦 Setup
-make install
-
-# 🏗️ Build & serve  
+# 🏗️ Build and serve with auto port-cleanup
 make dev
 
-# ✨ Live development
+# ✨ Live development with file watching
 make live
+
+# 📊 Check project health and status
+make status
 ```
+
+**Smart Features:**
+- ⚡ Auto-kills conflicting processes on port 3000
+- 🔄 Live reload on file changes
+- 🎨 Color-coded build output
+- 📈 Real-time file size reporting
 
 </td>
 <td width="50%">
 
-### 🔧 Utility Commands
+### 🔧 Build & Deploy
 
 ```bash
-# 📊 Project status
-make status
-
-# 🧹 Clean build
+# 🧹 Clean build artifacts
 make clean
 
-# 📄 Build only
+# 📄 Generate HTML + PDF
 make build
 
-# 🌐 Serve only  
+# 🌐 Serve production build
 make serve
+
+# 👀 Watch files (CI-friendly)
+make watch
 ```
+
+**Production Ready:**
+- 📱 Mobile-responsive layouts
+- 🖨️ Print-optimized PDF generation
+- 🚀 GitHub Actions deployment
+- ⚡ Optimized asset pipeline
 
 </td>
 </tr>
 </table>
 
 <details>
-<summary><strong>📋 Alternative: Using npm directly</strong></summary>
+<summary><strong>🚨 Why not npm? Make provides superior DX</strong></summary>
+
+<br>
+
+**Make advantages over npm scripts:**
+- 🔧 **Smart port management** - Automatically kills conflicting processes
+- 📊 **Rich status reporting** - File sizes, port status, system info
+- 🎨 **Color-coded output** - Visual feedback for all operations
+- 🔄 **Advanced file watching** - Cross-platform compatibility
+- ⚡ **Dependency management** - Intelligent rebuild detection
+- 🛠️ **Error handling** - Graceful fallbacks and recovery
 
 ```bash
-npm install          # Install dependencies
-npm run build        # Build resume
-npm run serve        # Serve locally
+# Traditional npm approach (limited)
+npm install && npm run build && npm run serve
+
+# Modern Make approach (powerful) 
+make dev  # Handles everything intelligently
 ```
 
 </details>
 
-## 📁 Project Structure
+## 📁 Project Architecture
 
 ```
 resume-as-code/
-├── 📄 resume-data.json      # Structured resume content
-├── 🎨 template.html         # Handlebars template with responsive CSS
-├── 🏗️ build.js             # Puppeteer PDF generation engine
-├── 📋 Makefile             # Developer experience automation
-├── 🚀 .github/workflows/   # CI/CD automation
-└── 📦 dist/                # Generated artifacts (HTML + PDF)
+├── 📄 resume-data.json        # JSON Resume schema-compliant data
+├── 🎨 template.html           # Handlebars template with responsive CSS
+├── 🏗️ build.js               # Puppeteer PDF generation engine
+├── 📋 Makefile               # Developer experience automation
+├── 🚀 .github/
+│   └── workflows/
+│       └── deploy.yml        # GitHub Actions CI/CD pipeline
+├── 📦 dist/                  # Generated artifacts
+│   ├── index.html           # Responsive web resume
+│   ├── resume.pdf           # Print-ready PDF export
+│   └── eu-no-foguete-perfil.jpeg  # Profile image asset
+└── 📋 package.json           # Node.js dependencies and scripts
 ```
+
+### 🔧 Core Technologies Deep Dive
+
+<table>
+<tr>
+<td width="50%">
+
+**🏗️ Build System**
+- **[Handlebars.js](https://handlebarsjs.com/)** - Template engine with helper functions
+- **[Puppeteer](https://pptr.dev/)** - Headless Chrome for PDF generation
+- **[Make](https://www.gnu.org/software/make/)** - Build automation and task runner
+- **Node.js 16+** - JavaScript runtime with ES6+ support
+
+**📊 Data & Content**  
+- **[JSON Resume](https://jsonresume.org/)** schema compliance
+- **Structured data** with semantic markup
+- **Asset pipeline** with automated image copying
+- **Content validation** and error handling
+
+</td>
+<td width="50%">
+
+**🎨 Frontend Stack**
+- **CSS Grid & Flexbox** - Modern responsive layouts
+- **CSS Custom Properties** - Dynamic theming system
+- **Progressive Enhancement** - Core functionality without JS
+- **Print Media Queries** - Optimized PDF typography
+
+**🚀 DevOps & Deployment**
+- **[GitHub Actions](https://github.com/rafilkmp3/resume-as-code/actions)** - Automated CI/CD
+- **GitHub Pages** - Static site hosting
+- **Continuous Deployment** - Push-to-deploy workflow
+- **Build optimization** - Asset minification and caching
+
+</td>
+</tr>
+</table>
 
 ## 🚀 Architecture Highlights
 
@@ -189,48 +270,84 @@ resume-as-code/
 
 </details>
 
-## 🌐 Deployment
+## 🌐 Deployment & CI/CD
+
+### 🚀 GitHub Actions Pipeline
+
+[![Deployment Pipeline](https://img.shields.io/badge/View-GitHub_Actions-blue?style=for-the-badge&logo=github-actions)](https://github.com/rafilkmp3/resume-as-code/actions)
 
 <table>
 <tr>
 <td width="50%">
 
-### 🚀 Automatic GitHub Pages
+### 🔄 Automated Workflow
 
 ```mermaid
-graph LR
-    A[Push Code] --> B[GitHub Actions]
-    B --> C[Build Pipeline]
-    C --> D[Deploy to Pages]
-    D --> E[🌐 Live Site]
+graph TD
+    A[📤 git push] --> B[🚀 GitHub Actions Trigger]
+    B --> C[📦 Install Dependencies]
+    C --> D[🏗️ make build]
+    D --> E[🎨 Generate HTML]
+    E --> F[📄 Generate PDF]
+    F --> G[✅ Quality Checks]
+    G --> H[🌐 Deploy to Pages]
+    H --> I[🔗 Live at rafilkmp3.github.io]
 ```
 
-**Zero-config deployment:**
-1. Push to GitHub
-2. GitHub Actions builds automatically  
-3. Live at `yourusername.github.io/resume-as-code/`
+**Pipeline Features:**
+- ⚡ **Fast builds** with dependency caching
+- 🔍 **Quality gates** with build validation
+- 📊 **Build artifacts** automatically archived
+- 🌍 **Multi-environment** support
 
 </td>
 <td width="50%">
 
-### 🛠️ Manual Deployment
+### 🛠️ Manual Deployment Options
 
 ```bash
-# Build for production
-make build
+# Production build using Make
+make clean && make build
 
-# Deploy dist/ folder to:
-# - GitHub Pages
-# - Netlify
-# - Vercel
-# - Your hosting platform
+# Deploy to various platforms:
+
+# GitHub Pages (automatic)
+git push origin main
+
+# Netlify
+netlify deploy --prod --dir=dist
+
+# Vercel  
+vercel --prod dist/
+
+# AWS S3 + CloudFront
+aws s3 sync dist/ s3://your-bucket/
 ```
 
-**Supports any static hosting provider**
+**Deployment Targets:**
+- ✅ **GitHub Pages** - Zero config required
+- ✅ **Netlify** - Drag & drop or CLI  
+- ✅ **Vercel** - Optimized for modern frameworks
+- ✅ **AWS/GCP** - Enterprise-grade hosting
 
 </td>
 </tr>
 </table>
+
+### 📋 Environment Requirements
+
+```bash
+# System dependencies
+node --version  # v16+ required
+make --version  # GNU Make 3.81+ 
+git --version   # Any modern version
+
+# Platform support
+✅ macOS (native Make support)
+✅ Linux (native Make support)  
+✅ Windows (WSL2 or Git Bash recommended)
+✅ Docker (containerized builds)
+```
 
 ## 🎨 Customization
 
@@ -271,7 +388,7 @@ Adjust print styles in the `@media print` section for PDF-specific formatting.
 - **📄 Print Quality**: Professional PDF output with proper typography
 - **⚡ Performance**: Optimized loading and rendering
 
-## 📝 Technical Stack
+## 📝 Technology Stack & Platform Engineering
 
 <div align="center">
 
@@ -281,16 +398,59 @@ Adjust print styles in the `@media print` section for PDF-specific formatting.
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![Make](https://img.shields.io/badge/Make-427819?style=for-the-badge&logo=gnu&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+![Puppeteer](https://img.shields.io/badge/Puppeteer-40B5A4?style=for-the-badge&logo=puppeteer&logoColor=white)
+![Handlebars](https://img.shields.io/badge/Handlebars.js-f0772b?style=for-the-badge&logo=handlebarsdotjs&logoColor=black)
 
 </div>
 
-**Core Technologies:**
-- **Node.js** - Runtime and build tooling
-- **Puppeteer** - Headless Chrome for PDF generation  
-- **Handlebars** - Template engine for dynamic content
-- **CSS Grid/Flexbox** - Modern responsive layout
-- **Make** - Build automation and developer experience
-- **GitHub Actions** - CI/CD pipeline
+### 🏗️ Platform Engineering Principles Applied
+
+This project demonstrates **Platform Engineering** best practices by treating personal branding as infrastructure:
+
+<table>
+<tr>
+<td width="50%">
+
+**🔧 Developer Experience (DX)**
+- **Self-Service Platform** - One-command build & deploy
+- **Intelligent Tooling** - Make-based workflow automation  
+- **Error Prevention** - Automated port conflict resolution
+- **Observability** - Real-time build status and file monitoring
+- **Documentation as Code** - Living documentation in README
+
+**⚡ Automation & Efficiency**
+- **Infrastructure as Code** - Version-controlled resume data
+- **Continuous Integration** - Automated testing and validation
+- **Continuous Deployment** - Push-to-production workflow
+- **Asset Optimization** - Automated image processing and PDF generation
+
+</td>
+<td width="50%">
+
+**🎯 Reliability & Quality**
+- **Build Reproducibility** - Consistent output across environments
+- **Quality Gates** - Automated validation and testing
+- **Multi-Environment Support** - Dev, staging, production workflows
+- **Graceful Degradation** - Fallback mechanisms for failures
+- **Performance Monitoring** - Build time and asset size tracking
+
+**🚀 Scalability & Maintainability**  
+- **Modular Architecture** - Separation of concerns (data/template/build)
+- **Extensible Design** - Easy addition of new output formats
+- **Cross-Platform** - Works on macOS, Linux, Windows
+- **Dependency Management** - Minimal, locked dependencies
+
+</td>
+</tr>
+</table>
+
+**Core Technologies & Purpose:**
+- **[Node.js 16+](https://nodejs.org/)** - Modern JavaScript runtime with ES6+ features
+- **[Puppeteer](https://pptr.dev/)** - Headless Chrome for high-fidelity PDF generation  
+- **[Handlebars.js](https://handlebarsjs.com/)** - Logic-less templates for content generation
+- **[GNU Make](https://www.gnu.org/software/make/)** - Battle-tested build automation and task orchestration
+- **[GitHub Actions](https://github.com/rafilkmp3/resume-as-code/blob/main/.github/workflows/deploy.yml)** - Cloud-native CI/CD pipeline
+- **Modern CSS** - Grid, Flexbox, Custom Properties for responsive design
 
 ## 🤝 Contributing
 
