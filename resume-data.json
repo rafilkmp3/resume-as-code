@@ -31,11 +31,6 @@
         "url": "http://calendly.com/rafaelbsathler"
       },
       {
-        "network": "Guinness World Record",
-        "username": "Big Brother Brasil",
-        "url": "#guinness-world-record"
-      },
-      {
         "network": "WhatsApp",
         "username": "+5521997988682",
         "url": "https://wa.me/5521997988682"
@@ -237,7 +232,7 @@
     {
       "name": "📊 Observability & Monitoring",
       "level": "Expert",
-      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic"],
+      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic", "SignOz"],
       "links": {
         "Prometheus": "https://prometheus.io/",
         "Grafana": "https://grafana.com/",
@@ -246,7 +241,8 @@
         "Mimir": "https://grafana.com/oss/mimir/",
         "Datadog": "https://www.datadoghq.com/",
         "Chronosphere": "https://chronosphere.io/",
-        "New Relic": "https://newrelic.com/"
+        "New Relic": "https://newrelic.com/",
+        "SignOz": "https://signoz.io/"
       }
     },
     {

@@ -543,7 +543,7 @@
         }
         
         .highlights li::before {
-            content: '▶';
+            content: '•';
             position: absolute;
             left: 0;
             color: var(--gradient-start);
@@ -1277,20 +1277,14 @@
 
                 {{#if basics.nationality}}
                 <section class="section personal-info">
-                    <h3>Nationality & Languages</h3>
+                    <h3>Personal Details</h3>
                     <hr style="border-top: 1px solid var(--border-color); margin: 0.5rem 0 1rem 0;">
                     <ul>
-                        <li><strong>Nationality:</strong> {{basics.nationality}}</li>
+                        <li>🇧🇷 {{basics.nationality}}</li>
+                        {{#if basics.languages}}
+                        <li>💬 {{#each basics.languages}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</li>
+                        {{/if}}
                     </ul>
-                    
-                    {{#if basics.languages}}
-                    <h3>Languages</h3>
-                    <ul>
-                        {{#each basics.languages}}
-                        <li>{{this}}</li>
-                        {{/each}}
-                    </ul>
-                    {{/if}}
 
                     {{#if basics.licenses}}
                     <h3>Licenses</h3>
