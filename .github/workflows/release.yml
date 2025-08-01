@@ -14,6 +14,3 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
-          target-branch: main
-          pull-request-title-pattern: "chore(release): ${version}"
-          release-as: 1.2.2
