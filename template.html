@@ -552,6 +552,37 @@
             color: var(--slate-900);
             box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
         }
+
+        /* Clickable skill link styles */
+        .skill-link {
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .skill-link::after {
+            content: '↗';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            font-size: 0.6rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: currentColor;
+        }
+
+        .skill-link:hover::after {
+            opacity: 1;
+        }
+
+        .skill-link:visited {
+            color: inherit;
+        }
+
+        .skill-link:focus {
+            outline: 2px solid var(--color-interactive-default);
+            outline-offset: 2px;
+        }
         
         .personal-info h3 {
             color: var(--color-text-accent);
@@ -1017,7 +1048,11 @@
                         </div>
                         <div class="skill-keywords">
                             {{#each keywords}}
+                            {{#if (lookup ../links this)}}
+                            <a href="{{lookup ../links this}}" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link">{{this}}</a>
+                            {{else}}
                             <span class="skill-tag">{{this}}</span>
+                            {{/if}}
                             {{/each}}
                         </div>
                     </div>

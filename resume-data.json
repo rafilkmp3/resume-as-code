@@ -198,37 +198,97 @@
     {
       "name": "☁️ Cloud Platforms & IaC",
       "level": "Expert",
-      "keywords": ["AWS (Expert)", "Google Cloud Platform (GCP)", "Terraform", "Ansible", "Helm"]
+      "keywords": ["AWS (Expert)", "Google Cloud Platform (GCP)", "Terraform", "Ansible", "Helm"],
+      "links": {
+        "AWS (Expert)": "https://aws.amazon.com/",
+        "Google Cloud Platform (GCP)": "https://cloud.google.com/",
+        "Terraform": "https://www.terraform.io/",
+        "Ansible": "https://www.ansible.com/",
+        "Helm": "https://helm.sh/"
+      }
     },
     {
       "name": "🐳 Container Orchestration", 
       "level": "Expert",
-      "keywords": ["Kubernetes", "Docker", "Helm", "Kustomize", "Istio", "ArgoCD", "Google Kubernetes Engine", "Amazon EKS"]
+      "keywords": ["Kubernetes", "Docker", "Helm", "Kustomize", "Istio", "ArgoCD", "Google Kubernetes Engine", "Amazon EKS"],
+      "links": {
+        "Kubernetes": "https://kubernetes.io/",
+        "Docker": "https://www.docker.com/",
+        "Helm": "https://helm.sh/",
+        "Kustomize": "https://kustomize.io/",
+        "Istio": "https://istio.io/",
+        "ArgoCD": "https://argoproj.github.io/cd/",
+        "Google Kubernetes Engine": "https://cloud.google.com/kubernetes-engine",
+        "Amazon EKS": "https://aws.amazon.com/eks/"
+      }
     },
     {
       "name": "🔄 CI/CD & DevOps",
       "level": "Expert",
-      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel"]
+      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel"],
+      "links": {
+        "GitHub Actions": "https://github.com/features/actions",
+        "GitLab CI": "https://docs.gitlab.com/ee/ci/",
+        "Jenkins": "https://www.jenkins.io/",
+        "Atlantis": "https://www.runatlantis.io/",
+        "Bazel": "https://bazel.build/"
+      }
     },
     {
       "name": "📊 Observability & Monitoring",
       "level": "Expert",
-      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic"]
+      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic"],
+      "links": {
+        "Prometheus": "https://prometheus.io/",
+        "Grafana": "https://grafana.com/",
+        "ELK": "https://www.elastic.co/elastic-stack",
+        "Loki": "https://grafana.com/oss/loki/",
+        "Mimir": "https://grafana.com/oss/mimir/",
+        "Datadog": "https://www.datadoghq.com/",
+        "Chronosphere": "https://chronosphere.io/",
+        "New Relic": "https://newrelic.com/"
+      }
     },
     {
       "name": "💻 Programming & Scripting",
       "level": "Advanced",
-      "keywords": ["Python", "Bash", "Go", "JavaScript", "YAML", "HCL", "SQL"]
+      "keywords": ["Python", "Bash", "Go", "JavaScript", "YAML", "HCL", "SQL"],
+      "links": {
+        "Python": "https://www.python.org/",
+        "Bash": "https://www.gnu.org/software/bash/",
+        "Go": "https://golang.org/",
+        "JavaScript": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+        "YAML": "https://yaml.org/",
+        "HCL": "https://github.com/hashicorp/hcl",
+        "SQL": "https://www.iso.org/standard/63555.html"
+      }
     },
     {
       "name": "📈 Big Data & Databases",
       "level": "Advanced",
-      "keywords": ["Apache Kafka", "Hadoop", "Apache Spark", "PostgreSQL", "Redis", "Elasticsearch", "BigQuery"]
+      "keywords": ["Apache Kafka", "Hadoop", "Apache Spark", "PostgreSQL", "Redis", "Elasticsearch", "BigQuery"],
+      "links": {
+        "Apache Kafka": "https://kafka.apache.org/",
+        "Hadoop": "https://hadoop.apache.org/",
+        "Apache Spark": "https://spark.apache.org/",
+        "PostgreSQL": "https://www.postgresql.org/",
+        "Redis": "https://redis.io/",
+        "Elasticsearch": "https://www.elastic.co/elasticsearch/",
+        "BigQuery": "https://cloud.google.com/bigquery"
+      }
     },
     {
       "name": "🔒 Security & Compliance",
       "level": "Advanced",
-      "keywords": ["RBAC", "SAML/SSO", "Vault", "Security Scanning", "Compliance Auditing", "Infrastructure Security"]
+      "keywords": ["RBAC", "SAML/SSO", "Vault", "Security Scanning", "Compliance Auditing", "Infrastructure Security"],
+      "links": {
+        "RBAC": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+        "SAML/SSO": "https://auth0.com/intro-to-iam/what-is-saml",
+        "Vault": "https://www.vaultproject.io/",
+        "Security Scanning": "https://owasp.org/www-community/Vulnerability_Scanning_Tools",
+        "Compliance Auditing": "https://www.nist.gov/cyberframework",
+        "Infrastructure Security": "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final"
+      }
     },
     {
       "name": "🤝 Soft Skills",
