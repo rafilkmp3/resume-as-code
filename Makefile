@@ -16,7 +16,7 @@ help:
 	@echo "  $(GREEN)make build$(NC)      - Build HTML and PDF"
 	@echo "  $(BLUE)make html$(NC)       - Generate HTML only"
 	@echo "  $(BLUE)make pdf$(NC)        - Generate PDF only"
-	@echo "  $(PURPLE)make dev$(NC)        - Kill port, build and serve on localhost:3000"
+	@echo "  $(PURPLE)make dev$(NC)        - Hot reload development server on localhost:3000"
 	@echo "  $(PURPLE)make serve$(NC)      - Serve existing build on localhost:3000"
 	@echo "  $(PURPLE)make live$(NC)       - Live development with file watching"
 	@echo "  $(YELLOW)make kill-port$(NC)  - Kill any process running on port 3000"
@@ -56,9 +56,18 @@ kill-port:
 		echo "$(GREEN)✅ Port 3000 is already free$(NC)"; \
 	fi
 
-# Build and serve (development mode)
-dev: kill-port build
-	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
+# Build and serve (development mode with hot reload)
+dev: kill-port
+	@echo "$(PURPLE)🚀 Starting development server with hot reload...$(NC)"
+	@echo "$(CYAN)👀 Watching: resume-data.json, template.html$(NC)"
+	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
+	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
+	npm run dev
+
+# Build and serve (old behavior - no hot reload)
+dev\:old: kill-port build
+	@echo "$(PURPLE)🌐 Starting server (no hot reload)...$(NC)"
 	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
 	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"

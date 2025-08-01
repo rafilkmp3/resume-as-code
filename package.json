@@ -1,12 +1,17 @@
 {
   "name": "resume-as-code",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Rafael Sathler's resume generation system",
   "main": "build.js",
   "scripts": {
     "build": "node build.js",
     "serve": "node -e \"const http = require('http'); const fs = require('fs'); const path = require('path'); const server = http.createServer((req, res) => { const filePath = req.url === '/' ? './dist/index.html' : './dist' + req.url; try { const stat = fs.statSync(filePath); if (stat.isFile()) { const ext = path.extname(filePath); const contentTypes = { '.html': 'text/html', '.pdf': 'application/pdf', '.jpeg': 'image/jpeg', '.jpg': 'image/jpeg', '.png': 'image/png', '.css': 'text/css', '.js': 'application/javascript' }; res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'application/octet-stream' }); res.end(fs.readFileSync(filePath)); } else { res.writeHead(404); res.end('Not found'); } } catch (e) { res.writeHead(404); res.end('Not found'); } }); server.listen(3000, () => console.log('Resume available at http://localhost:3000'));\"",
-    "dev": "npm run build && npm run serve"
+    "dev": "node dev-server.js",
+    "dev:old": "npm run build && npm run serve",
+    "version:patch": "npm version patch && git push --follow-tags",
+    "version:minor": "npm version minor && git push --follow-tags",
+    "version:major": "npm version major && git push --follow-tags",
+    "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
   },
   "dependencies": {
     "handlebars": "^4.7.8",
@@ -20,5 +25,13 @@
     "sre"
   ],
   "author": "Rafael Bernardo Sathler",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rafilkmp3/resume-as-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rafilkmp3/resume-as-code/issues"
+  },
+  "homepage": "https://github.com/rafilkmp3/resume-as-code#readme"
 }
