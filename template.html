@@ -12,38 +12,140 @@
         }
         
         :root {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: white;
-            --bg-accent: #f8f9fa;
-            --text-primary: #333;
-            --text-secondary: #000;
-            --text-muted: #666;
-            --gradient-start: #667eea;
-            --gradient-end: #764ba2;
-            --border-color: #e9ecef;
-            --shadow: rgba(0,0,0,0.1);
+            /* =============================================== */
+            /* Foundation Palette                              */
+            /* =============================================== */
+            /* Slate Scale */
+            --slate-50:  #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            
+            /* Brand Colors */
+            --brand-200: #bfdbfe;
+            --brand-300: #93c5fd;
+            --brand-400: #60a5fa;
+            --brand-500: #3b82f6;
+            --brand-600: #2563eb;
+            --purple-400: #c084fc;
+            --purple-500: #a855f7;
+            --purple-600: #9333ea;
+            
+            /* =============================================== */
+            /* Light Theme Semantic Colors                     */
+            /* =============================================== */
+            /* Backgrounds & Surfaces */
+            --color-background-base:     var(--slate-50);
+            --color-surface-raised:      #ffffff;
+            --color-surface-accent:      var(--slate-100);
+            
+            /* Text */
+            --color-text-default:        var(--slate-700);
+            --color-text-strong:         var(--slate-900);
+            --color-text-subtle:         var(--slate-500);
+            --color-text-accent:         var(--brand-600);
+            
+            /* Borders */
+            --color-border-subtle:       var(--slate-200);
+            --color-border-default:      var(--slate-300);
+            
+            /* Interactive States */
+            --color-interactive-default: var(--brand-500);
+            --color-interactive-hover:   var(--brand-600);
+            --color-interactive-pressed: var(--brand-700);
+            
+            /* Gradients & Accents */
+            --color-gradient-start:      var(--brand-500);
+            --color-gradient-end:        var(--purple-500);
+            
+            /* Shadow */
+            --shadow-default: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            
+            /* Legacy Support (for backward compatibility) */
+            --bg-primary: var(--color-background-base);
+            --bg-secondary: var(--color-surface-raised);
+            --bg-accent: var(--color-surface-accent);
+            --text-primary: var(--color-text-default);
+            --text-secondary: var(--color-text-strong);
+            --text-muted: var(--color-text-subtle);
+            --gradient-start: var(--color-gradient-start);
+            --gradient-end: var(--color-gradient-end);
+            --border-color: var(--color-border-subtle);
+            --shadow: var(--shadow-default);
         }
         
         [data-theme="dark"] {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-accent: #333333;
-            --text-primary: #f0f0f0;
-            --text-secondary: #d0d0d0;
-            --text-muted: #a0a0a0;
-            --gradient-start: #4f5bd5;
-            --gradient-end: #6b47a0;
-            --border-color: #444;
-            --shadow: rgba(0,0,0,0.3);
+            /* =============================================== */
+            /* Dark Theme Semantic Colors                      */
+            /* =============================================== */
+            /* Backgrounds & Surfaces */
+            --color-background-base:     var(--slate-900);
+            --color-surface-raised:      var(--slate-800);
+            --color-surface-accent:      var(--slate-700);
+            
+            /* Text */
+            --color-text-default:        var(--slate-200);
+            --color-text-strong:         var(--slate-50);
+            --color-text-subtle:         var(--slate-400);
+            --color-text-accent:         var(--brand-300);
+            
+            /* Borders */
+            --color-border-subtle:       var(--slate-800);
+            --color-border-default:      var(--slate-700);
+            
+            /* Interactive States */
+            --color-interactive-default: var(--brand-400);
+            --color-interactive-hover:   var(--brand-300);
+            --color-interactive-pressed: var(--brand-500);
+            
+            /* Gradients & Accents */
+            --color-gradient-start:      var(--brand-400);
+            --color-gradient-end:        var(--purple-400);
+            
+            /* Shadow */
+            --shadow-default: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Legacy Support (for backward compatibility) */
+            --bg-primary: var(--color-background-base);
+            --bg-secondary: var(--color-surface-raised);
+            --bg-accent: var(--color-surface-accent);
+            --text-primary: var(--color-text-default);
+            --text-secondary: var(--color-text-strong);
+            --text-muted: var(--color-text-subtle);
+            --gradient-start: var(--color-gradient-start);
+            --gradient-end: var(--color-gradient-end);
+            --border-color: var(--color-border-default);
+            --shadow: var(--shadow-default);
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            color: var(--color-text-default);
+            background: var(--color-background-base);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-x: hidden;
+        }
+        
+        /* Smooth transitions for all elements during theme changes */
+        *, *::before, *::after {
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+            transition-duration: 0.4s;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Respect user's motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition-duration: 0.1s !important;
+                animation-duration: 0.1s !important;
+            }
         }
         
         .parallax-bg {
@@ -72,9 +174,9 @@
         }
         
         .control-btn {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
+            background: var(--color-surface-raised);
+            border: 2px solid var(--color-border-default);
+            color: var(--color-text-default);
             padding: 10px 16px;
             border-radius: 12px;
             cursor: pointer;
@@ -84,18 +186,52 @@
             align-items: center;
             gap: 6px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px var(--shadow);
+            box-shadow: var(--shadow-default);
             backdrop-filter: blur(10px);
             min-width: 80px;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .control-btn:hover::before {
+            left: 100%;
         }
         
         .control-btn:hover {
-            background: var(--gradient-start);
+            background: var(--color-interactive-default);
             color: white;
             transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 20px var(--shadow);
-            border-color: var(--gradient-start);
+            box-shadow: 0 8px 20px var(--shadow-default);
+            border-color: var(--color-interactive-default);
+        }
+        
+        .control-btn:focus {
+            outline: 2px solid var(--color-interactive-default);
+            outline-offset: 2px;
+        }
+        
+        .control-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            background: var(--color-interactive-pressed);
+            border-color: var(--color-interactive-pressed);
+        }
+        
+        [data-theme="dark"] .control-btn:hover {
+            background: var(--color-interactive-hover);
+            color: var(--slate-900);
+            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
         }
         
         .control-btn:active {
@@ -128,6 +264,11 @@
             gap: 2rem;
             position: relative;
             overflow: hidden;
+        }
+        
+        [data-theme="dark"] .header {
+            background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 50%, var(--purple-500) 100%);
+            color: var(--slate-900);
         }
         
         .header::before {
@@ -193,6 +334,10 @@
             gap: 0.3rem;
         }
         
+        [data-theme="dark"] .contact-info a {
+            color: var(--slate-900) !important;
+        }
+        
         .main-content {
             display: grid;
             grid-template-columns: 3fr 1fr;
@@ -216,12 +361,29 @@
         }
         
         .section h2 {
-            color: var(--gradient-start);
+            color: var(--color-text-accent);
             font-size: 1.4rem;
             font-weight: 600;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--gradient-start);
+            border-bottom: 2px solid var(--color-interactive-default);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-interactive-hover);
+            transition: width 0.3s ease;
+        }
+        
+        .section:hover h2::after {
+            width: 60px;
         }
         
         .profile-summary {
@@ -232,20 +394,45 @@
         
         .work-item {
             margin-bottom: 2rem;
-            border-left: 3px solid var(--gradient-start);
-            padding-left: 1rem;
-            transition: all 0.3s ease;
-            border-radius: 0 8px 8px 0;
+            border-left: 3px solid var(--color-interactive-default);
+            padding: 1.2rem;
+            padding-left: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 12px 12px 0;
+            background: var(--color-surface-raised);
+            border: 1px solid var(--color-border-subtle);
+            border-left: 3px solid var(--color-interactive-default);
             transform: translateZ(0);
             will-change: transform;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .work-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--color-interactive-default)08, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .work-item:hover::before {
+            opacity: 1;
         }
         
         .work-item:hover {
-            background: var(--bg-accent);
-            border-left-width: 5px;
-            padding-left: 1.5rem;
-            box-shadow: 0 4px 12px var(--shadow);
-            transform: translateX(8px) translateZ(0);
+            background: var(--color-surface-accent);
+            border-left-width: 4px;
+            border-left-color: var(--color-interactive-hover);
+            padding-left: 1.7rem;
+            box-shadow: var(--shadow-default);
+            transform: translateX(6px) translateZ(0) scale(1.005);
+            border-color: var(--color-border-default);
         }
         
         .work-header {
@@ -258,23 +445,25 @@
         .work-title {
             font-weight: 600;
             font-size: 1.1rem;
-            color: var(--text-primary);
+            color: var(--color-text-strong);
         }
         
         .company {
-            color: var(--gradient-start);
+            color: var(--color-text-accent);
             font-weight: 500;
         }
         
         .work-date {
-            color: var(--text-muted);
+            color: var(--color-text-subtle);
             font-size: 0.9rem;
+            font-weight: 500;
         }
         
         .work-summary {
-            color: var(--text-secondary);
+            color: var(--color-text-default);
             font-style: italic;
             margin-bottom: 0.5rem;
+            font-weight: 400;
         }
         
         .highlights {
@@ -322,27 +511,53 @@
         }
         
         .skill-tag {
-            background: var(--border-color);
+            background: var(--color-surface-accent);
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
             font-size: 0.75rem;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
+            color: var(--color-text-strong);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--color-border-subtle);
             font-weight: 500;
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .skill-tag:hover::before {
+            left: 100%;
         }
         
         .skill-tag:hover {
-            background: var(--gradient-start);
+            background: var(--color-interactive-default);
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--shadow);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-default);
+            border-color: var(--color-interactive-default);
+        }
+        
+        [data-theme="dark"] .skill-tag:hover {
+            background: var(--color-interactive-hover);
+            color: var(--slate-900);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
         }
         
         .personal-info h3 {
-            color: var(--gradient-start);
+            color: var(--color-text-accent);
             font-size: 1rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         
         .personal-info ul {
@@ -377,6 +592,11 @@
         
         .link-item:hover {
             background: var(--gradient-end);
+        }
+        
+        [data-theme="dark"] .link-item:hover {
+            background: var(--color-gradient-end);
+            color: var(--slate-900);
         }
         
         .certificate-item {
@@ -806,7 +1026,7 @@
 
                 {{#if basics.nationality}}
                 <section class="section personal-info">
-                    <h3>Personal</h3>
+                    <h3>Nationality & Languages</h3>
                     <hr style="border-top: 1px solid var(--border-color); margin: 0.5rem 0 1rem 0;">
                     <ul>
                         <li><strong>Nationality:</strong> {{basics.nationality}}</li>
@@ -1039,13 +1259,10 @@
             }
 
             // Personal
-            content += 'PERSONAL INFORMATION\n';
+            content += 'NATIONALITY & LANGUAGES\n';
             content += `Nationality: ${data.basics.nationality}\n`;
-            if(data.basics.licenses && data.basics.licenses.length > 0){
-                content += `Licenses: ${data.basics.licenses.join(', ')}\n`;
-            }
-            if(data.basics.hobbies && data.basics.hobbies.length > 0){
-                content += `Hobbies: ${data.basics.hobbies.join(', ')}\n`;
+            if(data.basics.languages && data.basics.languages.length > 0){
+                content += `Languages: ${data.basics.languages.join(', ')}\n`;
             }
 
             return content;

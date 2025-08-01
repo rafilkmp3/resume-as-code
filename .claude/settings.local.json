@@ -31,7 +31,8 @@
       "Bash(pdfinfo:*)",
       "Bash(brew install:*)",
       "Bash(pdftotext:*)",
-      "Bash(pdftoppm:*)"
+      "Bash(pdftoppm:*)",
+      "mcp__zen__planner"
     ],
     "deny": []
   }
