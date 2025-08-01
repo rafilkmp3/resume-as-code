@@ -34,10 +34,20 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: |
-            Changes in this Release:
-            - Please check CHANGELOG.md for detailed changes
-            
-            **Full Changelog**: https://github.com/rafilkmp3/resume-as-code/blob/main/CHANGELOG.md
+          - name: Extract changelog
+        id: changelog
+        run: |
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          node extract-changelog.js >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ env.RELEASE_NOTES }}
           draft: false
           prerelease: false
