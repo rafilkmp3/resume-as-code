@@ -688,8 +688,8 @@
             body {
                 background: white !important;
                 color: #333 !important;
-                font-size: 12px;
-                line-height: 1.4;
+                font-size: 10px;
+                line-height: 1.2;
                 margin: 0;
                 padding: 0;
             }
@@ -703,62 +703,71 @@
                 page-break-inside: avoid;
             }
             
-            /* Compact header for print */
+            /* Ultra-compact header for print */
             .header {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
                 color: white !important;
-                padding: 0.4rem 0.8rem;
+                padding: 0.2rem 0.4rem;
                 page-break-inside: avoid;
                 page-break-after: avoid;
                 display: flex;
                 align-items: center;
-                gap: 0.8rem;
+                gap: 0.5rem;
                 margin-bottom: 0;
             }
             
             .profile-photo {
-                width: 50px;
-                height: 50px;
+                width: 35px;
+                height: 35px;
                 border-radius: 50%;
-                border: 2px solid rgba(255,255,255,0.3);
+                border: 1px solid rgba(255,255,255,0.3);
                 object-fit: cover;
                 flex-shrink: 0;
             }
             
-            .header-content h1 {
-                font-size: 1.1rem;
-                font-weight: 700;
-                margin-bottom: 0.1rem;
-                color: white !important;
-                line-height: 1.2;
+            .header-content {
+                flex: 1;
             }
             
-            .header-content .subtitle {
-                font-size: 0.7rem;
-                opacity: 0.9;
-                margin-bottom: 0.2rem;
+            .header-content h1 {
+                font-size: 0.9rem;
+                font-weight: 700;
+                margin-bottom: 0.05rem;
                 color: white !important;
                 line-height: 1.1;
             }
             
-            .contact-info, .links {
+            .header-content .subtitle {
                 font-size: 0.6rem;
-                gap: 0.3rem;
-                margin-top: 0.1rem;
+                opacity: 0.9;
+                margin-bottom: 0.1rem;
+                color: white !important;
+                line-height: 1;
+            }
+            
+            .contact-info, .links {
+                font-size: 0.5rem;
+                gap: 0.2rem;
+                margin-top: 0.05rem;
             }
             
             .contact-info {
-                margin-bottom: 0.1rem;
+                margin-bottom: 0.05rem;
             }
             
             .links {
                 margin-bottom: 0;
             }
             
-            /* Single column layout for print */
+            .link-item {
+                padding: 0.1rem 0.3rem;
+                font-size: 0.5rem;
+            }
+            
+            /* Ultra-compact single column layout */
             .main-content {
                 display: block;
-                padding: 0.3rem 0.5rem;
+                padding: 0.1rem 0.4rem;
                 page-break-before: avoid;
                 margin-top: 0;
             }
@@ -767,16 +776,16 @@
                 width: 100%;
                 padding: 0;
                 background: transparent;
-                margin-bottom: 0.8rem;
+                margin-bottom: 0.4rem;
             }
             
-            /* Section styling */
+            /* Ultra-compact section styling */
             .section {
-                margin-bottom: 0.8rem;
+                margin-bottom: 0.4rem;
                 page-break-inside: avoid;
             }
             
-            /* First section should flow with header */
+            /* First section flows with header */
             .section:first-child {
                 page-break-before: avoid;
                 margin-top: 0;
@@ -784,100 +793,125 @@
             
             .section h2 {
                 color: #667eea !important;
-                font-size: 0.9rem;
+                font-size: 0.75rem;
                 font-weight: 600;
-                margin-bottom: 0.3rem;
+                margin-bottom: 0.2rem;
                 margin-top: 0;
-                padding-bottom: 0.1rem;
+                padding-bottom: 0.05rem;
                 border-bottom: 1px solid #667eea !important;
                 page-break-after: avoid;
             }
             
-            /* Profile section flows with header */
+            /* Ultra-compact profile section */
             .profile-summary {
                 page-break-before: avoid;
                 margin-top: 0;
-                font-size: 0.75rem;
-                line-height: 1.3;
+                font-size: 0.65rem;
+                line-height: 1.2;
+                margin-bottom: 0.3rem;
             }
             
-            /* Work experience */
+            /* Ultra-compact work experience */
             .work-item {
-                margin-bottom: 0.6rem;
+                margin-bottom: 0.3rem;
                 page-break-inside: avoid;
                 border-left: 2px solid #667eea;
-                padding-left: 0.4rem;
+                padding-left: 0.3rem;
+            }
+            
+            .work-header {
+                margin-bottom: 0.1rem;
             }
             
             .work-title {
                 font-weight: 600;
-                font-size: 0.8rem;
+                font-size: 0.65rem;
                 color: #333 !important;
-                margin-bottom: 0.1rem;
+                margin-bottom: 0.05rem;
+                line-height: 1.1;
             }
             
             .company {
                 color: #667eea !important;
                 font-weight: 500;
-                font-size: 0.7rem;
+                font-size: 0.6rem;
+                line-height: 1.1;
             }
             
             .work-date {
                 color: #666 !important;
-                font-size: 0.65rem;
+                font-size: 0.55rem;
+                line-height: 1.1;
             }
             
             .work-summary {
-                font-size: 0.7rem;
+                font-size: 0.6rem;
                 font-style: italic;
-                margin-bottom: 0.15rem;
+                margin-bottom: 0.1rem;
                 color: #555 !important;
-                line-height: 1.2;
+                line-height: 1.1;
+            }
+            
+            .highlights {
+                margin-top: 0.1rem;
+                margin-bottom: 0;
             }
             
             .highlights li {
-                font-size: 0.7rem;
-                line-height: 1.2;
-                margin-bottom: 0.05rem;
+                font-size: 0.6rem;
+                line-height: 1.1;
+                margin-bottom: 0.02rem;
                 color: #444 !important;
-                padding-left: 0.8rem;
+                padding-left: 0.6rem;
             }
             
-            /* Skills */
+            /* Ultra-compact skills */
             .skill-category {
-                margin-bottom: 0.8rem;
+                margin-bottom: 0.3rem;
                 page-break-inside: avoid;
             }
             
             .skill-name {
                 font-weight: 600;
-                font-size: 0.8rem;
-                margin-bottom: 0.3rem;
+                font-size: 0.65rem;
+                margin-bottom: 0.15rem;
                 color: #333 !important;
+                line-height: 1.1;
+            }
+            
+            .skill-keywords {
+                line-height: 1.1;
             }
             
             .skill-tag {
                 background: #e9ecef !important;
                 color: #333 !important;
-                padding: 0.1rem 0.3rem;
-                border-radius: 8px;
-                font-size: 0.7rem;
-                margin-right: 0.2rem;
-                margin-bottom: 0.1rem;
+                padding: 0.05rem 0.2rem;
+                border-radius: 6px;
+                font-size: 0.55rem;
+                margin-right: 0.1rem;
+                margin-bottom: 0.05rem;
                 display: inline-block;
+                line-height: 1.1;
             }
             
-            /* Personal info */
+            /* Ultra-compact personal info */
             .personal-info h3 {
-                font-size: 0.8rem;
-                margin-bottom: 0.2rem;
+                font-size: 0.65rem;
+                margin-bottom: 0.1rem;
                 color: #667eea !important;
+                line-height: 1.1;
+            }
+            
+            .personal-info ul {
+                margin-bottom: 0.3rem;
             }
             
             .personal-info li {
-                font-size: 0.75rem;
-                padding: 0.05rem 0;
+                font-size: 0.6rem;
+                padding: 0.02rem 0;
                 color: #333 !important;
+                line-height: 1.1;
             }
             
             /* Footer */
