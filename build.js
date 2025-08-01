@@ -72,21 +72,22 @@ async function generatePDF() {
       // Add a small delay to ensure everything is rendered
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Emulate print media before PDF generation
+      await page.emulateMediaType('print');
+      
       await page.pdf({
         path: './dist/resume.pdf',
         format: 'A4',
         printBackground: true,
-        preferCSSPageSize: false,
+        preferCSSPageSize: true, // Let CSS @page control margins completely
         displayHeaderFooter: false,
         margin: {
-          top: '0.3in',
-          bottom: '0.3in',
-          left: '0.3in',
-          right: '0.3in'
+          top: '0',
+          bottom: '0', 
+          left: '0',
+          right: '0'
         },
-        scale: 1.0,
-        width: '8.27in',
-        height: '11.7in'
+        scale: 1.0
       });
 
       await browser.close();

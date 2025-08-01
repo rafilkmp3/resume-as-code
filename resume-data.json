@@ -47,8 +47,8 @@
       "name": "Bluecore",
       "position": "Platform Engineer",
       "url": "https://bluecore.com",
-      "startDate": "2024-08-01",
-      "endDate": "2025-06-01",
+      "startDate": "2024-08",
+      "endDate": "2025-06",
       "summary": "Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.",
       "highlights": [
         "Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)",
@@ -61,8 +61,8 @@
       "name": "Uber",
       "position": "Senior Software Engineer",
       "url": "https://uber.com",
-      "startDate": "2023-08-01",
-      "endDate": "2024-08-01",
+      "startDate": "2023-08",
+      "endDate": "2024-08",
       "summary": "Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.",
       "highlights": [
         "Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO",
@@ -77,8 +77,8 @@
       "name": "Triumph Technology Solutions LLC",
       "position": "Solutions Architect",
       "url": "",
-      "startDate": "2023-04-01",
-      "endDate": "2023-07-01",
+      "startDate": "2023-04",
+      "endDate": "2023-07",
       "summary": "Led enterprise AWS cloud transformation and migration projects for Fortune 500 clients.",
       "highlights": [
         "AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design",
@@ -91,8 +91,8 @@
       "name": "Toptal",
       "position": "Infrastructure Engineer",
       "url": "https://toptal.com",
-      "startDate": "2022-03-01",
-      "endDate": "2023-02-01",
+      "startDate": "2022-03",
+      "endDate": "2023-02",
       "summary": "Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.",
       "highlights": [
         "Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud",
@@ -105,8 +105,8 @@
       "name": "Globo.com",
       "position": "Senior DevOps Engineer",
       "url": "https://globo.com",
-      "startDate": "2018-08-01",
-      "endDate": "2022-06-01",
+      "startDate": "2018-08",
+      "endDate": "2022-06",
       "summary": "Achieved Guinness World Record supporting Big Data infrastructure for Brazil's largest media company.",
       "highlights": [
         "🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for 'Big Brother Brasil', handling record-breaking public votes that surpassed 'American Idol'",
@@ -119,8 +119,8 @@
       "name": "MeuPatrocínio",
       "position": "Senior DevOps Engineer", 
       "url": "",
-      "startDate": "2016-12-01",
-      "endDate": "2018-08-01",
+      "startDate": "2016-12",
+      "endDate": "2018-08",
       "summary": "Led infrastructure automation and security initiatives for Brazilian fintech platform.",
       "highlights": [
         "Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings",
@@ -133,8 +133,8 @@
       "name": "Funcional Health Tech | Fidelize",
       "position": "Infrastructure Engineer",
       "url": "",
-      "startDate": "2015-04-01", 
-      "endDate": "2016-03-01",
+      "startDate": "2015-04", 
+      "endDate": "2016-03",
       "summary": "Managed pharmaceutical industry infrastructure with focus on compliance and reliability.",
       "highlights": [
         "Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment",
@@ -147,8 +147,8 @@
       "name": "Acol Consultoria & Sistemas", 
       "position": "Support Specialist",
       "url": "",
-      "startDate": "2014-08-01",
-      "endDate": "2015-04-01",
+      "startDate": "2014-08",
+      "endDate": "2015-04",
       "summary": "Advanced from intern to specialist role, managing enterprise IT infrastructure and client support.",
       "highlights": [
         "Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery",
@@ -163,8 +163,8 @@
       "institution": "Universidade do Estado do Rio de Janeiro (UERJ)",
       "area": "Computer Science",
       "studyType": "Bachelor",
-      "startDate": "2011-06-01",
-      "endDate": "2016-06-01"
+      "startDate": "2011-06",
+      "endDate": "2016-06"
     }
   ],
   "certificates": [],
