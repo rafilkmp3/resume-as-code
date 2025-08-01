@@ -703,21 +703,22 @@
                 page-break-inside: avoid;
             }
             
-            /* Header styling - keep together with content */
+            /* Compact header for print */
             .header {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
                 color: white !important;
-                padding: 0.8rem;
+                padding: 0.4rem 0.8rem;
                 page-break-inside: avoid;
                 page-break-after: avoid;
                 display: flex;
                 align-items: center;
-                gap: 1rem;
+                gap: 0.8rem;
+                margin-bottom: 0;
             }
             
             .profile-photo {
-                width: 70px;
-                height: 70px;
+                width: 50px;
+                height: 50px;
                 border-radius: 50%;
                 border: 2px solid rgba(255,255,255,0.3);
                 object-fit: cover;
@@ -725,41 +726,53 @@
             }
             
             .header-content h1 {
-                font-size: 1.4rem;
+                font-size: 1.1rem;
                 font-weight: 700;
-                margin-bottom: 0.2rem;
+                margin-bottom: 0.1rem;
                 color: white !important;
+                line-height: 1.2;
             }
             
             .header-content .subtitle {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
                 opacity: 0.9;
-                margin-bottom: 0.4rem;
+                margin-bottom: 0.2rem;
                 color: white !important;
+                line-height: 1.1;
             }
             
             .contact-info, .links {
-                font-size: 0.7rem;
-                gap: 0.4rem;
+                font-size: 0.6rem;
+                gap: 0.3rem;
+                margin-top: 0.1rem;
+            }
+            
+            .contact-info {
+                margin-bottom: 0.1rem;
+            }
+            
+            .links {
+                margin-bottom: 0;
             }
             
             /* Single column layout for print */
             .main-content {
                 display: block;
-                padding: 0.5rem;
+                padding: 0.3rem 0.5rem;
                 page-break-before: avoid;
+                margin-top: 0;
             }
             
             .left-column, .right-column {
                 width: 100%;
                 padding: 0;
                 background: transparent;
-                margin-bottom: 1rem;
+                margin-bottom: 0.8rem;
             }
             
             /* Section styling */
             .section {
-                margin-bottom: 1rem;
+                margin-bottom: 0.8rem;
                 page-break-inside: avoid;
             }
             
@@ -771,9 +784,10 @@
             
             .section h2 {
                 color: #667eea !important;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 font-weight: 600;
-                margin-bottom: 0.4rem;
+                margin-bottom: 0.3rem;
+                margin-top: 0;
                 padding-bottom: 0.1rem;
                 border-bottom: 1px solid #667eea !important;
                 page-break-after: avoid;
@@ -783,45 +797,50 @@
             .profile-summary {
                 page-break-before: avoid;
                 margin-top: 0;
+                font-size: 0.75rem;
+                line-height: 1.3;
             }
             
             /* Work experience */
             .work-item {
-                margin-bottom: 0.8rem;
+                margin-bottom: 0.6rem;
                 page-break-inside: avoid;
                 border-left: 2px solid #667eea;
-                padding-left: 0.5rem;
+                padding-left: 0.4rem;
             }
             
             .work-title {
                 font-weight: 600;
-                font-size: 0.9rem;
+                font-size: 0.8rem;
                 color: #333 !important;
+                margin-bottom: 0.1rem;
             }
             
             .company {
                 color: #667eea !important;
                 font-weight: 500;
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
             .work-date {
                 color: #666 !important;
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
             
             .work-summary {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
                 font-style: italic;
-                margin-bottom: 0.2rem;
+                margin-bottom: 0.15rem;
                 color: #555 !important;
+                line-height: 1.2;
             }
             
             .highlights li {
-                font-size: 0.75rem;
-                line-height: 1.3;
-                margin-bottom: 0.1rem;
+                font-size: 0.7rem;
+                line-height: 1.2;
+                margin-bottom: 0.05rem;
                 color: #444 !important;
+                padding-left: 0.8rem;
             }
             
             /* Skills */
