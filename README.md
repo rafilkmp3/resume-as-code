@@ -17,7 +17,7 @@
 
 ---
 
-This project demonstrates my expertise in **automation**, **CI/CD**, **infrastructure design**, and **developer experience** by creating a fully automated resume platform with professional PDF generation, responsive web design, and streamlined development workflows.
+This is a resume-as-code project, built with Node.js, Handlebars, and Puppeteer.
 
 <details>
 <summary><strong>🏆 Professional Highlights</strong></summary>
