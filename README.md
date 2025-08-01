@@ -375,8 +375,8 @@ Adjust print styles in the `@media print` section for PDF-specific formatting.
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Resume-blue?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![Download PDF](https://img.shields.io/badge/📄_Download-Resume_PDF-red?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/resume.pdf)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Resume-blue?style=for-the-badge&logo=github)](https://rafilkmp3.github.io/resume-as-code/)
+[![Download PDF](https://img.shields.io/badge/📄_Download-Resume_PDF-red?style=for-the-badge&logo=adobe)](https://rafilkmp3.github.io/resume-as-code/resume.pdf)
 
 </div>
 
@@ -459,3 +459,5 @@ This project demonstrates Platform Engineering principles applied to personal br
 ## 📄 License
 
 MIT License - Feel free to use this project as inspiration for your own resume automation!
+
+<!-- Trigger release-please -->
