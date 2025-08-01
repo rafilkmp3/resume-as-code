@@ -675,207 +675,182 @@
         }
         
         @media print {
-            .controls { display: none !important; }
-            .parallax-bg { display: none !important; }
-            body { 
-                background: white !important; 
-                color: #333 !important;
-                font-size: 14px !important;
-                line-height: 1.5 !important;
-                margin: 0 !important;
-                padding: 0 !important;
+            /* Hide interactive elements */
+            .controls, .parallax-bg { display: none; }
+            
+            /* Reset page styling */
+            body {
+                background: white;
+                color: #333;
+                font-size: 12px;
+                line-height: 1.4;
+                margin: 0;
+                padding: 0;
             }
-            .container { 
-                box-shadow: none !important; 
-                max-width: 100% !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
             }
+            
+            /* Header styling - keep together */
             .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-                color: white !important;
-                padding: 1rem !important;
-                page-break-inside: avoid !important;
-                display: flex !important;
-                align-items: center !important;
-                gap: 1rem !important;
-                width: 100% !important;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
+                color: white;
+                padding: 1rem;
+                page-break-inside: avoid;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
             }
+            
             .profile-photo {
-                width: 80px !important;
-                height: 80px !important;
-                border-radius: 50% !important;
-                border: 2px solid rgba(255,255,255,0.3) !important;
-                object-fit: cover !important;
-                display: block !important;
-                flex-shrink: 0 !important;
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                border: 2px solid rgba(255,255,255,0.3);
+                object-fit: cover;
+                flex-shrink: 0;
             }
-            .header-content {
-                flex: 1 !important;
-            }
+            
             .header-content h1 {
-                font-size: 1.6rem !important;
-                font-weight: 700 !important;
-                margin-bottom: 0.3rem !important;
-                color: white !important;
+                font-size: 1.4rem;
+                font-weight: 700;
+                margin-bottom: 0.2rem;
+                color: white;
             }
+            
             .header-content .subtitle {
-                font-size: 0.9rem !important;
-                opacity: 0.9 !important;
-                margin-bottom: 0.5rem !important;
-                color: white !important;
+                font-size: 0.8rem;
+                opacity: 0.9;
+                margin-bottom: 0.4rem;
+                color: white;
             }
-            .contact-info {
-                font-size: 0.8rem !important;
-                gap: 0.5rem !important;
+            
+            .contact-info, .links {
+                font-size: 0.7rem;
+                gap: 0.4rem;
             }
-            .links {
-                gap: 0.3rem !important;
-                margin-top: 0.5rem !important;
+            
+            /* Single column layout for print */
+            .main-content {
+                display: block;
+                padding: 0.5rem;
             }
-            .link-item {
-                padding: 0.2rem 0.5rem !important;
-                font-size: 0.85rem !important;
-                border-radius: 3px !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                gap: 0.2rem !important;
+            
+            .left-column, .right-column {
+                width: 100%;
+                padding: 0;
+                background: transparent;
+                margin-bottom: 1rem;
             }
-            .main-content { 
-                display: grid !important;
-                grid-template-columns: 1.8fr 1fr !important; 
-                gap: 1rem !important;
-                padding: 0.8rem !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+            
+            /* Section styling */
+            .section {
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
             }
-            .left-column {
-                padding-right: 0.5rem !important;
+            
+            .section h2 {
+                color: #667eea;
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 0.4rem;
+                padding-bottom: 0.1rem;
+                border-bottom: 1px solid #667eea;
+                page-break-after: avoid;
             }
-            .right-column { 
-                background: #f8f9fa !important; 
-                padding: 0.8rem !important;
-                border-radius: 6px !important;
-                page-break-inside: avoid !important;
+            
+            /* Work experience */
+            .work-item {
+                margin-bottom: 0.8rem;
+                page-break-inside: avoid;
+                border-left: 2px solid #667eea;
+                padding-left: 0.5rem;
             }
-            .section { 
-                margin-bottom: 1rem !important; 
-                page-break-inside: avoid !important;
-            }
-            .section h2 { 
-                color: #667eea !important;
-                font-size: 1.1rem !important;
-                font-weight: 600 !important;
-                margin-bottom: 0.5rem !important;
-                padding-bottom: 0.2rem !important;
-                border-bottom: 1.5px solid #667eea !important;
-                page-break-after: avoid !important;
-            }
-            .profile-summary {
-                font-size: 1.0rem !important;
-                line-height: 1.5 !important;
-                text-align: justify !important;
-                margin-bottom: 1rem !important;
-            }
-            .work-item { 
-                margin-bottom: 0.8rem !important;
-                page-break-inside: avoid !important;
-                border-left: 2px solid #667eea !important;
-                padding-left: 0.6rem !important;
-            }
-            .work-item:hover {
-                background: transparent !important;
-                transform: none !important;
-                box-shadow: none !important;
-            }
-            .work-header {
-                margin-bottom: 0.3rem !important;
-            }
+            
             .work-title {
-                font-weight: 600 !important;
-                font-size: 0.95rem !important;
-                color: #333 !important;
-                line-height: 1.2 !important;
+                font-weight: 600;
+                font-size: 0.9rem;
+                color: #333;
             }
+            
             .company {
-                color: #667eea !important;
-                font-weight: 500 !important;
-                font-size: 0.85rem !important;
+                color: #667eea;
+                font-weight: 500;
+                font-size: 0.8rem;
             }
+            
             .work-date {
-                color: #666 !important;
-                font-size: 0.75rem !important;
+                color: #666;
+                font-size: 0.7rem;
             }
+            
             .work-summary {
-                font-size: 0.8rem !important;
-                font-style: italic !important;
-                margin-bottom: 0.3rem !important;
-                color: #555 !important;
+                font-size: 0.75rem;
+                font-style: italic;
+                margin-bottom: 0.2rem;
+                color: #555;
             }
-            .highlights {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
+            
             .highlights li {
-                font-size: 1.0rem !important;
-                line-height: 1.5 !important;
-                margin-bottom: 0.2rem !important;
-                padding-left: 1rem !important;
-                color: #444 !important;
+                font-size: 0.75rem;
+                line-height: 1.3;
+                margin-bottom: 0.1rem;
+                color: #444;
             }
-            .highlights li::before {
-                font-size: 0.7rem !important;
-            }
+            
+            /* Skills */
             .skill-category {
-                margin-bottom: 1rem !important;
-                page-break-inside: avoid !important;
+                margin-bottom: 0.8rem;
+                page-break-inside: avoid;
             }
+            
             .skill-name {
-                font-weight: 600 !important;
-                font-size: 0.85rem !important;
-                margin-bottom: 0.4rem !important;
-                color: #333 !important;
+                font-weight: 600;
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+                color: #333;
             }
-            .skill-keywords {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 0.2rem !important;
-            }
+            
             .skill-tag {
-                background: #e9ecef !important;
-                color: #333 !important;
-                padding: 0.15rem 0.4rem !important;
-                border-radius: 10px !important;
-                font-size: 0.9rem !important;
-                margin-right: 0.2rem !important;
-                margin-bottom: 0.2rem !important;
-                display: inline-block !important;
-                line-height: 1.2 !important;
+                background: #e9ecef;
+                color: #333;
+                padding: 0.1rem 0.3rem;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                margin-right: 0.2rem;
+                margin-bottom: 0.1rem;
+                display: inline-block;
             }
+            
+            /* Personal info */
             .personal-info h3 {
-                font-size: 0.85rem !important;
-                margin-bottom: 0.3rem !important;
-                color: #667eea !important;
+                font-size: 0.8rem;
+                margin-bottom: 0.2rem;
+                color: #667eea;
             }
-            .personal-info ul {
-                margin-bottom: 0.8rem !important;
-            }
+            
             .personal-info li {
-                font-size: 0.9rem !important;
-                padding: 0.1rem 0 !important;
+                font-size: 0.75rem;
+                padding: 0.05rem 0;
             }
+            
+            /* Footer */
             .footer {
-                margin-top: 1rem !important;
-                padding: 0.8rem !important;
-                font-size: 0.7rem !important;
-                page-break-inside: avoid !important;
+                margin-top: 1rem;
+                padding: 0.5rem;
+                font-size: 0.6rem;
+                page-break-inside: avoid;
             }
-            * { 
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            
+            /* Ensure colors print correctly */
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
         
@@ -905,10 +880,6 @@
         <button class="control-btn" onclick="window.print()" title="Print Resume">
             <span>🖨️</span>
             <span>Print</span>
-        </button>
-        <button class="control-btn" onclick="downloadPDF()" title="Download PDF">
-            <span>📄</span>
-            <span>PDF</span>
         </button>
         <button class="control-btn" onclick="generateATS()" title="Generate ATS-Friendly Version">
             <span>📄</span>
@@ -1190,15 +1161,6 @@
             applyTheme(getSystemTheme());
         });
         
-        // PDF Download Function
-        function downloadPDF() {
-            const link = document.createElement('a');
-            link.href = 'resume.pdf';
-            link.download = 'Rafael_Sathler_Resume.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
         
         // ATS-Friendly Version Generator
         function generateATS() {

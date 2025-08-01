@@ -32,7 +32,10 @@
       "Bash(brew install:*)",
       "Bash(pdftotext:*)",
       "Bash(pdftoppm:*)",
-      "mcp__zen__planner"
+      "mcp__zen__planner",
+      "mcp__zen__refactor",
+      "Bash(awk:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }
