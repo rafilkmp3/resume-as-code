@@ -1,0 +1,222 @@
+# Page snapshot
+
+```yaml
+- link "Skip to main content":
+  - /url: "#main-content"
+- button "☀️ Light (Auto)"
+- button "🖨️ Print"
+- button "📄 PDF"
+- button "📋 ATS"
+- banner:
+  - img "Rafael Bernardo Sathler"
+  - heading "Rafael Bernardo Sathler" [level=1]
+  - text: Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect 📍 Rio de Janeiro, Brazil 📞
+  - link "+55 21 997988682":
+    - /url: tel:+55 21 997988682
+  - text: ✉️
+  - link "rafaelbsathler@gmail.com":
+    - /url: mailto:rafaelbsathler@gmail.com
+  - link "LinkedIn":
+    - /url: https://www.linkedin.com/in/rafaelbsathler/
+    - img
+    - text: LinkedIn
+  - link "GitHub":
+    - /url: https://github.com/rafaelbsathler
+    - img
+    - text: GitHub
+  - link "Calendly":
+    - /url: http://calendly.com/rafaelbsathler
+    - img
+    - text: Calendly
+  - link "WhatsApp":
+    - /url: https://wa.me/5521997988682
+    - img
+    - text: WhatsApp
+- heading "Profile" [level=2]
+- text: Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.
+- heading "Experience" [level=2]
+- text: Platform Engineer Bluecore 2024-08 — 2025-06 Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.
+- list:
+  - 'button "Achievement: Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)"': "• Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)"
+  - 'button "Achievement: Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue"': "• Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue"
+  - 'button "Achievement: Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%"': "• Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%"
+  - 'button "Achievement: Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices"': "• Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices"
+- text: Senior Software Engineer Uber 2023-08 — 2024-08 Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.
+- list:
+  - 'button "Achievement: Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO"': "• Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO"
+  - 'button "Achievement: Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers"': "• Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers"
+  - 'button "Achievement: Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%"': "• Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%"
+  - 'button "Achievement: Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings"': "• Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings"
+  - 'button "Achievement: Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration"': "• Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration"
+  - 'button "Achievement: Technical documentation: Authored comprehensive ''CI/CD Playbook'' and Bazel optimization guides, becoming the go-to technical resource for platform teams"': "• Technical documentation: Authored comprehensive 'CI/CD Playbook' and Bazel optimization guides, becoming the go-to technical resource for platform teams"
+- text: Solutions Architect Triumph Technology Solutions LLC 2023-04 — 2023-07 Led enterprise AWS cloud transformation and migration projects for Fortune 500 clients.
+- list:
+  - 'button "Achievement: AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design"': "• AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design"
+  - 'button "Achievement: Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%"': "• Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%"
+  - 'button "Achievement: Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments"': "• Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments"
+  - 'button "Achievement: DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows"': "• DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows"
+- text: Infrastructure Engineer Toptal 2022-03 — 2023-02 Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.
+- list:
+  - 'button "Achievement: Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud"': "• Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud"
+  - 'button "Achievement: Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions"': "• Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions"
+  - 'button "Achievement: Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%"': "• Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%"
+  - 'button "Achievement: Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA"': "• Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA"
+- text: Senior DevOps Engineer Globo.com 2018-08 — 2022-06 Achieved Guinness World Record supporting Big Data infrastructure for Brazil's largest media company.
+- list:
+  - 'button "Achievement: 🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for ''Big Brother Brasil'', handling record-breaking public votes that surpassed ''American Idol''"': "• 🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for 'Big Brother Brasil', handling record-breaking public votes that surpassed 'American Idol'"
+  - 'button "Achievement: Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability"': "• Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability"
+  - 'button "Achievement: Production systems: Designed, deployed, and maintained highly available systems supporting Brazil''s top media properties with shared ownership model"': "• Production systems: Designed, deployed, and maintained highly available systems supporting Brazil's top media properties with shared ownership model"
+  - 'button "Achievement: Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency"': "• Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency"
+- text: Senior DevOps Engineer MeuPatrocínio 2016-12 — 2018-08 Led infrastructure automation and security initiatives for Brazilian fintech platform.
+- list:
+  - 'button "Achievement: Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings"': "• Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings"
+  - 'button "Achievement: CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%"': "• CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%"
+  - 'button "Achievement: Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance"': "• Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance"
+  - 'button "Achievement: Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments"': "• Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments"
+- text: Infrastructure Engineer Funcional Health Tech | Fidelize 2015-04 — 2016-03 Managed pharmaceutical industry infrastructure with focus on compliance and reliability.
+- list:
+  - 'button "Achievement: Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment"': "• Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment"
+  - 'button "Achievement: Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies"': "• Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies"
+  - 'button "Achievement: Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution"': "• Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution"
+  - 'button "Achievement: System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning"': "• System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning"
+- text: Support Specialist Acol Consultoria & Sistemas 2014-08 — 2015-04 Advanced from intern to specialist role, managing enterprise IT infrastructure and client support.
+- list:
+  - 'button "Achievement: Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery"': "• Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery"
+  - 'button "Achievement: Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings"': "• Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings"
+  - 'button "Achievement: Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies"': "• Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies"
+  - 'button "Achievement: System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications"': "• System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications"
+- heading "Key Projects" [level=2]
+- text: Resume-as-Code Platform
+- link "https://github.com/rafilkmp3/resume-as-code":
+  - /url: https://github.com/rafilkmp3/resume-as-code
+- text: Full-stack resume generation system demonstrating Platform Engineering principles
+- list:
+  - 'button "Achievement: Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation"': • Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation
+  - 'button "Achievement: Implemented dark/light theme with OS preference detection and accessibility features"': • Implemented dark/light theme with OS preference detection and accessibility features
+  - 'button "Achievement: Created ATS-friendly export functionality for job application compatibility"': • Created ATS-friendly export functionality for job application compatibility
+  - 'button "Achievement: Deployed with GitHub Pages integration and Make-based build system"': • Deployed with GitHub Pages integration and Make-based build system
+- text: Node.js Handlebars Puppeteer HTML/CSS JavaScript CI/CD GitHub Pages Infrastructure Automation Toolkit Collection of Terraform modules and automation scripts for cloud infrastructure
+- list:
+  - 'button "Achievement: Developed reusable Terraform modules for AWS/GCP multi-cloud deployments"': • Developed reusable Terraform modules for AWS/GCP multi-cloud deployments
+  - 'button "Achievement: Created monitoring and alerting automation reducing MTTR by 70%"': • Created monitoring and alerting automation reducing MTTR by 70%
+  - 'button "Achievement: Built cost optimization scripts identifying $200K+ in potential savings"': • Built cost optimization scripts identifying $200K+ in potential savings
+  - 'button "Achievement: Implemented security scanning and compliance automation for infrastructure-as-code"': • Implemented security scanning and compliance automation for infrastructure-as-code
+- text: Terraform AWS GCP Python Bash Monitoring Security
+- heading "Education" [level=2]
+- text: Bachelor in Computer Science Universidade do Estado do Rio de Janeiro (UERJ) 2011-06 — 2016-06
+- heading "Skills" [level=2]
+- text: ☁️ Cloud Platforms & IaC
+- link "AWS (Expert) ↗":
+  - /url: https://aws.amazon.com/
+- link "Google Cloud Platform (GCP) ↗":
+  - /url: https://cloud.google.com/
+- link "Terraform ↗":
+  - /url: https://www.terraform.io/
+- link "Ansible ↗":
+  - /url: https://www.ansible.com/
+- link "Helm ↗":
+  - /url: https://helm.sh/
+- text: 🐳 Container Orchestration
+- link "Kubernetes ↗":
+  - /url: https://kubernetes.io/
+- link "Docker ↗":
+  - /url: https://www.docker.com/
+- link "Helm ↗":
+  - /url: https://helm.sh/
+- link "Kustomize ↗":
+  - /url: https://kustomize.io/
+- link "Istio ↗":
+  - /url: https://istio.io/
+- link "ArgoCD ↗":
+  - /url: https://argoproj.github.io/cd/
+- link "Google Kubernetes Engine ↗":
+  - /url: https://cloud.google.com/kubernetes-engine
+- link "Amazon EKS ↗":
+  - /url: https://aws.amazon.com/eks/
+- text: 🔄 CI/CD & DevOps
+- link "GitHub Actions ↗":
+  - /url: https://github.com/features/actions
+- link "GitLab CI ↗":
+  - /url: https://docs.gitlab.com/ee/ci/
+- link "Jenkins ↗":
+  - /url: https://www.jenkins.io/
+- link "Atlantis ↗":
+  - /url: https://www.runatlantis.io/
+- link "Bazel ↗":
+  - /url: https://bazel.build/
+- text: 📊 Observability & Monitoring
+- link "Prometheus ↗":
+  - /url: https://prometheus.io/
+- link "Grafana ↗":
+  - /url: https://grafana.com/
+- link "ELK ↗":
+  - /url: https://www.elastic.co/elastic-stack
+- link "Loki ↗":
+  - /url: https://grafana.com/oss/loki/
+- link "Mimir ↗":
+  - /url: https://grafana.com/oss/mimir/
+- link "Datadog ↗":
+  - /url: https://www.datadoghq.com/
+- link "Chronosphere ↗":
+  - /url: https://chronosphere.io/
+- link "New Relic ↗":
+  - /url: https://newrelic.com/
+- link "SignOz ↗":
+  - /url: https://signoz.io/
+- text: 💻 Programming & Scripting
+- link "Python ↗":
+  - /url: https://www.python.org/
+- link "Bash ↗":
+  - /url: https://www.gnu.org/software/bash/
+- link "Go ↗":
+  - /url: https://golang.org/
+- link "JavaScript ↗":
+  - /url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+- link "YAML ↗":
+  - /url: https://yaml.org/
+- link "HCL ↗":
+  - /url: https://github.com/hashicorp/hcl
+- link "SQL ↗":
+  - /url: https://www.iso.org/standard/63555.html
+- text: 📈 Big Data & Databases
+- link "Apache Kafka ↗":
+  - /url: https://kafka.apache.org/
+- link "Hadoop ↗":
+  - /url: https://hadoop.apache.org/
+- link "Apache Spark ↗":
+  - /url: https://spark.apache.org/
+- link "PostgreSQL ↗":
+  - /url: https://www.postgresql.org/
+- link "Redis ↗":
+  - /url: https://redis.io/
+- link "Elasticsearch ↗":
+  - /url: https://www.elastic.co/elasticsearch/
+- link "BigQuery ↗":
+  - /url: https://cloud.google.com/bigquery
+- text: 🔒 Security & Compliance
+- link "RBAC ↗":
+  - /url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+- link "SAML/SSO ↗":
+  - /url: https://auth0.com/intro-to-iam/what-is-saml
+- link "Vault ↗":
+  - /url: https://www.vaultproject.io/
+- link "Security Scanning ↗":
+  - /url: https://owasp.org/www-community/Vulnerability_Scanning_Tools
+- link "Compliance Auditing ↗":
+  - /url: https://www.nist.gov/cyberframework
+- link "Infrastructure Security ↗":
+  - /url: https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final
+- text: 🤝 Soft Skills
+- 'button "Skill: Effective in cross-functional teams"': Effective in cross-functional teams
+- 'button "Skill: Clear technical writing"': Clear technical writing
+- 'button "Skill: Leadership"': Leadership
+- 'button "Skill: Mentoring"': Mentoring
+- 'button "Skill: Problem solving"': Problem solving
+- heading "Personal Details" [level=2]
+- text: Nationality
+- 'button "Nationality: Brazilian"': Brazilian
+- text: Languages
+- 'button "Language: Portuguese"': Portuguese
+- 'button "Language: English"': English
+- contentinfo: Developed with ❤️ in Rio de Janeiro
+```

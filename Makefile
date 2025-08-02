@@ -1,4 +1,4 @@
-.PHONY: help build dev serve clean install pdf html kill-port status watch live
+.PHONY: help build dev serve clean install pdf html kill-port status watch live test test-quick test-visual test-a11y test-perf test-ci fix-layout lint-check
 
 # Colors for output
 RED=\033[0;31m
@@ -23,6 +23,15 @@ help:
 	@echo "  $(RED)make clean$(NC)      - Clean dist directory"
 	@echo "  $(CYAN)make watch$(NC)      - Watch for changes and rebuild"
 	@echo "  $(CYAN)make status$(NC)     - Show project status and file info"
+	@echo ""
+	@echo "🧪 Testing commands:"
+	@echo "  $(GREEN)make test$(NC)       - Run all tests (visual, accessibility, performance)"
+	@echo "  $(BLUE)make test-quick$(NC)  - Run quick tests only"
+	@echo "  $(BLUE)make test-visual$(NC) - Run visual regression tests"
+	@echo "  $(BLUE)make test-a11y$(NC)   - Run accessibility tests"
+	@echo "  $(BLUE)make test-perf$(NC)   - Run performance tests"
+	@echo "  $(CYAN)make test-ci$(NC)     - Run all tests for CI (with retries)"
+	@echo "  $(YELLOW)make fix-layout$(NC)  - Auto-fix mobile layout issues"
 
 # Install dependencies
 install:
@@ -176,3 +185,52 @@ status:
 	else \
 		echo "$(RED)❌ Node.js: Not installed$(NC)"; \
 	fi
+
+# Mobile layout auto-fix
+fix-layout:
+	@echo "$(YELLOW)🔧 Running mobile layout auto-fix...$(NC)"
+	node scripts/auto-fix-layout.js
+	@echo "$(GREEN)✅ Layout fixes completed$(NC)"
+
+# Quick tests (essential only)
+test-quick: build
+	@echo "$(BLUE)🧪 Running quick tests...$(NC)"
+	npx playwright test tests/e2e/issue-detection.spec.js --project=chromium
+	@echo "$(GREEN)✅ Quick tests completed$(NC)"
+
+# Visual regression tests  
+test-visual: build
+	@echo "$(BLUE)📸 Running visual regression tests...$(NC)"
+	npx playwright test tests/visual/comprehensive-visual.spec.js
+	@echo "$(GREEN)✅ Visual tests completed$(NC)"
+
+# Accessibility tests
+test-a11y: build
+	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
+	npx playwright test tests/accessibility/a11y.spec.js
+	@echo "$(GREEN)✅ Accessibility tests completed$(NC)"
+
+# Performance tests
+test-perf: build
+	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
+	npx playwright test tests/performance/perf.spec.js
+	@echo "$(GREEN)✅ Performance tests completed$(NC)"
+
+# Full test suite
+test: build
+	@echo "$(GREEN)🚀 Running complete test suite...$(NC)"
+	@echo "$(CYAN)Running visual regression tests...$(NC)"
+	npx playwright test tests/visual/
+	@echo "$(CYAN)Running e2e tests...$(NC)"
+	npx playwright test tests/e2e/
+	@echo "$(CYAN)Running accessibility tests...$(NC)"
+	npx playwright test tests/accessibility/
+	@echo "$(CYAN)Running performance tests...$(NC)"
+	npx playwright test tests/performance/
+	@echo "$(GREEN)✅ All tests completed$(NC)"
+
+# CI-optimized tests (with retries and parallel execution)
+test-ci: build
+	@echo "$(CYAN)🔄 Running CI test suite...$(NC)"
+	CI=true npx playwright test --retries=2 --workers=1
+	@echo "$(GREEN)✅ CI tests completed$(NC)"

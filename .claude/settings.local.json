@@ -41,7 +41,12 @@
       "mcp__zen__challenge",
       "WebFetch(domain:m3.material.io)",
       "WebFetch(domain:developer.apple.com)",
-      "WebFetch(domain:sarunw.com)"
+      "WebFetch(domain:sarunw.com)",
+      "mcp__zen__analyze",
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(find:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

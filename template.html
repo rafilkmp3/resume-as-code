@@ -1655,7 +1655,7 @@
         }
         
         /* Mobile portrait */
-        @media (max-width: 480px) {
+        @media (max-width: 430px) {
             .header {
                 padding: 1.5rem 0.75rem;
             }
@@ -1698,7 +1698,7 @@
             }
             
             .container {
-                margin: 0.5rem;
+                margin: 0;
                 padding: 0;
             }
             
@@ -1760,7 +1760,153 @@
         }
         
         /* Print media query stays the same for clean PDF */
-    </style>
+    
+        /* Mobile container fixes */
+        @media (max-width: 430px) {
+            .container {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box;
+            }
+            
+            .main-content {
+                padding: 0 1rem !important;
+            }
+            
+            .header {
+                padding: 1.5rem 1rem !important;
+            }
+        }
+
+        /* Touch target optimizations */
+        @media (pointer: coarse) {
+            .contact-link, .skill-tag, .social-link, a, button {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                padding: 12px 16px !important;
+                margin: 4px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+            }
+            
+            .skill-tag {
+                font-size: 14px !important;
+                line-height: 1.2 !important;
+            }
+        }
+
+        /* Mobile text size fixes */
+        @media (max-width: 768px) {
+            body, p, span, div, li {
+                font-size: 16px !important;
+                line-height: 1.5 !important;
+            }
+            
+            h1 {
+                font-size: 24px !important;
+            }
+            
+            h2 {
+                font-size: 20px !important;
+            }
+            
+            h3 {
+                font-size: 18px !important;
+            }
+            
+            .skill-tag {
+                font-size: 14px !important;
+                line-height: 1.2 !important;
+            }
+        }
+
+        /* Mobile container fixes */
+        @media (max-width: 768px) {
+            html, body {
+                width: 100% !important;
+                overflow-x: hidden !important;
+            }
+            
+            .container, .main-content, .content, .page {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 0.75rem !important;
+                box-sizing: border-box !important;
+            }
+            
+            .header {
+                padding: 1rem 0.75rem !important;
+            }
+            
+            /* Fix any div that might cause overflow */
+            div, section, article, main {
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+        }
+
+        /* Touch target optimizations */
+        @media (max-width: 768px) {
+            a, button, .contact-link, .skill-tag, .social-link, [role="button"], [tabindex="0"] {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                padding: 12px 16px !important;
+                margin: 4px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                touch-action: manipulation !important;
+            }
+            
+            .skill-tag {
+                font-size: 16px !important;
+                line-height: 1.2 !important;
+                padding: 8px 12px !important;
+            }
+        }
+
+        /* Mobile text size fixes */
+        @media (max-width: 768px) {
+            * {
+                font-size: 16px !important;
+                line-height: 1.5 !important;
+            }
+            
+            h1 {
+                font-size: 28px !important;
+                line-height: 1.3 !important;
+            }
+            
+            h2 {
+                font-size: 24px !important;
+                line-height: 1.3 !important;
+            }
+            
+            h3 {
+                font-size: 20px !important;
+                line-height: 1.3 !important;
+            }
+            
+            h4, h5, h6 {
+                font-size: 18px !important;
+                line-height: 1.3 !important;
+            }
+            
+            .skill-tag {
+                font-size: 16px !important;
+                line-height: 1.2 !important;
+            }
+            
+            small, .small {
+                font-size: 16px !important;
+            }
+        }
+</style>
 </head>
 <body>
     <!-- Skip Link for Accessibility -->

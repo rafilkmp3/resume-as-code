@@ -31,8 +31,11 @@ function generateHTML() {
   // Copy profile image if it exists
   if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
     const imagePath = resumeData.basics.image;
-    fs.copyFileSync(imagePath, `./dist/${path.basename(imagePath)}`);
-    console.log(`📸 Copied profile image: ${imagePath}`);
+    const imageName = path.basename(imagePath);
+    fs.copyFileSync(imagePath, `./dist/${imageName}`);
+    console.log(`📸 Copied profile image: ${imageName}`);
+    // Update path in HTML to use local copy
+    resumeData.basics.image = imageName;
   }
   
   const html = template(resumeData);
