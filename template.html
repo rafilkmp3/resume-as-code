@@ -358,6 +358,20 @@
             border-color: var(--brand-600);
         }
         
+        /* Dark theme mobile controls styling */
+        @media (max-width: 768px) {
+            [data-theme="dark"] .controls {
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+            }
+            
+            [data-theme="dark"] .control-btn {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: var(--color-text-primary);
+            }
+        }
+        
         .control-btn:active {
             transform: translateY(-1px) scale(1.02);
             transition: all 0.1s ease;
@@ -1639,12 +1653,20 @@
                 right: 1rem;
                 flex-direction: column;
                 gap: 0.5rem;
+                background: rgba(0, 0, 0, 0.05);
+                padding: 0.5rem;
+                border-radius: 16px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
             
             .control-btn {
-                padding: 0.6rem 0.8rem;
-                font-size: 0.8rem;
-                min-width: 60px;
+                padding: 0.5rem 0.7rem;
+                font-size: 0.75rem;
+                min-width: 50px;
+                border-radius: 10px;
+                box-shadow: none;
+                backdrop-filter: none;
             }
             
             .profile-photo {
@@ -1680,16 +1702,30 @@
             .controls {
                 bottom: 0.5rem;
                 right: 0.5rem;
+                background: rgba(0, 0, 0, 0.1);
+                padding: 0.3rem;
+                border-radius: 12px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
             
             .control-btn {
-                padding: 0.5rem;
+                padding: 0.4rem;
                 font-size: 0.7rem;
-                min-width: 50px;
+                min-width: 40px;
+                border-radius: 8px;
+                box-shadow: none;
+                backdrop-filter: none;
+                border: 1px solid rgba(255, 255, 255, 0.2);
             }
             
             .control-btn span:last-child {
                 display: none; /* Hide text on very small screens */
+            }
+            
+            .control-btn span:first-child {
+                font-size: 14px; /* Slightly larger emoji for better visibility */
             }
             
             .profile-photo {

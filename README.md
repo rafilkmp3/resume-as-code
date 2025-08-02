@@ -51,6 +51,13 @@ This is a resume-as-code project, built with Node.js, Handlebars, and Puppeteer.
 - Continuous integration with quality checks
 - Infrastructure-as-code principles
 
+**🧪 Testing & Quality Assurance**
+- Comprehensive mobile testing with Playwright
+- Visual regression testing across 12+ screen sizes
+- Accessibility testing with axe-core (WCAG compliance)
+- Performance testing with Core Web Vitals monitoring
+- Auto-fix scripts for common mobile layout issues
+
 </td>
 <td width="50%">
 
@@ -60,11 +67,18 @@ This is a resume-as-code project, built with Node.js, Handlebars, and Puppeteer.
 - ATS-friendly plain text export
 - Cross-platform compatibility
 
-**🎨 Frontend Engineering**
-- Responsive design with modern CSS Grid/Flexbox
+**📱 Mobile-First Design**
+- Touch-optimized UI with 44px minimum targets
+- Responsive breakpoints from 320px to 4K displays
+- iOS and Android design guideline compliance
 - Dark/light theme with OS preference detection
-- Interactive elements with accessibility support
-- Professional UI with gradient animations
+- Professional animations and interactive elements
+
+**🖼️ Asset Optimization**
+- Automated image processing and optimization
+- Organized asset directory structure
+- WebP format recommendations for better compression
+- Responsive image sizing for different screen densities
 
 </td>
 </tr>
@@ -116,6 +130,15 @@ make live
 
 # 📊 Check project health and status
 make status
+
+# 🧪 Run comprehensive testing suite
+make test
+
+# 📱 Quick mobile layout tests
+make test-quick
+
+# 🔧 Auto-fix mobile layout issues
+make fix-layout
 ```
 
 **Smart Features:**
@@ -123,6 +146,8 @@ make status
 - 🔄 Live reload on file changes
 - 🎨 Color-coded build output
 - 📈 Real-time file size reporting
+- 🧪 Comprehensive mobile testing across 12+ screen sizes
+- 🔧 Automated mobile layout fixes
 
 </td>
 <td width="50%">
@@ -187,10 +212,22 @@ resume-as-code/
 ├── 🚀 .github/
 │   └── workflows/
 │       └── deploy.yml        # GitHub Actions CI/CD pipeline
+├── 🧪 tests/                 # Comprehensive testing suite
+│   ├── accessibility/        # WCAG compliance testing
+│   ├── e2e/                  # End-to-end testing
+│   ├── performance/          # Core Web Vitals monitoring
+│   └── visual/               # Visual regression testing
+├── 🔧 scripts/               # Automation and optimization scripts
+│   ├── auto-fix-layout.js    # Mobile layout auto-fixes
+│   └── optimize-images.js    # Image optimization tools
+├── 🖼️ assets/
+│   └── images/               # Organized asset directory
+│       └── rafael-sathler-profile.jpeg  # Optimized profile image
 ├── 📦 dist/                  # Generated artifacts
 │   ├── index.html           # Responsive web resume
 │   ├── resume.pdf           # Print-ready PDF export
-│   └── eu-no-foguete-perfil.jpeg  # Profile image asset
+│   └── rafael-sathler-profile.jpeg  # Profile image asset
+├── ⚙️ playwright.config.js   # Testing configuration
 └── 📋 package.json           # Node.js dependencies and scripts
 ```
 
@@ -267,6 +304,13 @@ resume-as-code/
 | `make clean` | 🧹 Remove generated files | Fresh start |
 | `make status` | 📊 Project health check | Debugging |
 | `make watch` | 👀 Watch files without server | CI/CD usage |
+| `make test` | 🧪 Run comprehensive test suite | Quality assurance |
+| `make test-quick` | ⚡ Quick mobile layout tests | Rapid validation |
+| `make test-visual` | 📸 Visual regression testing | UI validation |
+| `make test-a11y` | ♿ Accessibility compliance tests | WCAG validation |
+| `make test-perf` | ⚡ Performance testing | Core Web Vitals |
+| `make test-ci` | 🔄 CI-optimized testing | Automated pipelines |
+| `make fix-layout` | 🔧 Auto-fix mobile issues | Layout optimization |
 
 </details>
 

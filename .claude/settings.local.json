@@ -46,7 +46,9 @@
       "Bash(npx playwright:*)",
       "Bash(node:*)",
       "Bash(find:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run:*)"
     ],
     "deny": []
   }
