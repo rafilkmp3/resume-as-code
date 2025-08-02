@@ -49,7 +49,16 @@
       "Bash(mv:*)",
       "Bash(gh run list:*)",
       "Bash(gh run:*)",
-      "Bash(nproc)"
+      "Bash(nproc)",
+      "Bash(gh browse:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh api:*)",
+      "Bash(magick:*)",
+      "Bash(for file in *.png)",
+      "Bash(do magick \"$file\" -quality 85 \"$file%.png.jpg\")",
+      "Bash(done)",
+      "Bash(for:*)",
+      "Bash(git lfs:*)"
     ],
     "deny": []
   }

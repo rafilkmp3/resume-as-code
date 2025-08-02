@@ -32,6 +32,7 @@ help:
 	@echo "  $(BLUE)make test-perf$(NC)   - Run performance tests"
 	@echo "  $(CYAN)make test-ci$(NC)     - Run all tests for CI (with retries)"
 	@echo "  $(YELLOW)make fix-layout$(NC)  - Auto-fix mobile layout issues"
+	@echo "  $(PURPLE)make screenshots$(NC) - Generate documentation screenshots"
 
 # Install dependencies
 install:
@@ -234,3 +235,10 @@ test-ci: build
 	@echo "$(CYAN)🔄 Running CI test suite...$(NC)"
 	CI=true npx playwright test --retries=1 --workers=2 --reporter=dot
 	@echo "$(GREEN)✅ CI tests completed$(NC)"
+
+# Generate documentation screenshots
+screenshots: build
+	@echo "$(CYAN)📸 Generating documentation screenshots...$(NC)"
+	@echo "$(YELLOW)This will take a few minutes to capture all screen sizes and themes$(NC)"
+	npx playwright test tests/visual/generate-screenshots.spec.js --project=chromium
+	@echo "$(GREEN)✅ Screenshots generated in docs/screenshots/$(NC)"
