@@ -48,7 +48,8 @@
       "Bash(find:*)",
       "Bash(mv:*)",
       "Bash(gh run list:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(nproc)"
     ],
     "deny": []
   }

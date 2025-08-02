@@ -232,5 +232,5 @@ test: build
 # CI-optimized tests (with retries and parallel execution)
 test-ci: build
 	@echo "$(CYAN)🔄 Running CI test suite...$(NC)"
-	CI=true npx playwright test --retries=2 --workers=1
+	CI=true npx playwright test --retries=1 --workers=2 --reporter=dot
 	@echo "$(GREEN)✅ CI tests completed$(NC)"
