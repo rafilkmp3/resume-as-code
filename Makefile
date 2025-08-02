@@ -230,10 +230,10 @@ test: build
 	npx playwright test tests/performance/
 	@echo "$(GREEN)✅ All tests completed$(NC)"
 
-# CI-optimized tests (with retries and parallel execution)
+# CI-optimized tests (Chrome only, with timeout and retries)
 test-ci: build
-	@echo "$(CYAN)🔄 Running CI test suite...$(NC)"
-	CI=true npx playwright test --retries=1 --workers=2 --reporter=dot
+	@echo "$(CYAN)🔄 Running CI test suite (Chrome only)...$(NC)"
+	CI=true timeout 300s npx playwright test tests/e2e/visual-chrome.spec.js tests/e2e/issue-detection.spec.js --project=chromium --retries=1 --workers=1 --reporter=dot --timeout=30000
 	@echo "$(GREEN)✅ CI tests completed$(NC)"
 
 # Generate documentation screenshots

@@ -143,10 +143,6 @@ original-pdf-not-ai/
 dist/
 build/
 
-# Generated/built assets (keep source only)
-docs/images/devices/
-docs/images/gallery/
-
 # Playwright test results and artifacts
 test-results/
 playwright-report/
@@ -155,8 +151,6 @@ playwright/.cache/
 # Temporary files
 *.tmp
 *.temp
-.DS_Store
-Thumbs.db
 
 # Backup files
 *.backup
@@ -183,10 +177,8 @@ Thumbs.db
 *.processing
 temp-images/
 
-# Keep docs/images/ structure but ignore temp files
-docs/images/temp/
-docs/images/.processing/
+# Claude workspace
+.claude/
 
-# Profile image working files (keep optimized versions)
-rafael-sathler-profile.jpeg.tmp
-profile-temp/
+# Temporary test files
+tests/**/*.tmp

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
+const QRCode = require('qrcode');
 
 console.log('🏗️  Building resume...');
 
@@ -11,7 +12,7 @@ if (!fs.existsSync('./dist')) {
 }
 
 // Generate HTML from template and data
-function generateHTML() {
+async function generateHTML() {
   console.log('📝 Generating HTML from template...');
   
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
@@ -28,14 +29,48 @@ function generateHTML() {
       return a === b;
   });
 
-  // Copy profile image if it exists
+  // Generate QR code
+  if (resumeData.basics.url) {
+    try {
+      const qrCodeDataUrl = await QRCode.toDataURL(resumeData.basics.url, {
+        errorCorrectionLevel: 'H',
+        type: 'image/webp',
+        quality: 0.9,
+        margin: 1,
+      });
+      resumeData.basics.qrCode = qrCodeDataUrl;
+      console.log('🔗 Generated QR code for live resume');
+    } catch (err) {
+      console.error('❌ Failed to generate QR code:', err);
+    }
+  }
+
+  // Copy all profile images
+  const profileDir = './images/profile';
+  const distProfileDir = './dist/images/profile';
+  
+  if (fs.existsSync(profileDir)) {
+    // Create profile directory in dist
+    if (!fs.existsSync('./dist/images')) {
+      fs.mkdirSync('./dist/images');
+    }
+    if (!fs.existsSync(distProfileDir)) {
+      fs.mkdirSync(distProfileDir);
+    }
+    
+    // Copy all profile images
+    const profileFiles = fs.readdirSync(profileDir);
+    profileFiles.forEach(file => {
+      if (file.match(/\.(webp|jpg|jpeg|png)$/i)) {
+        fs.copyFileSync(path.join(profileDir, file), path.join(distProfileDir, file));
+        console.log(`📸 Copied profile image: ${file}`);
+      }
+    });
+  }
+  
+  // Copy main profile image if it exists
   if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
-    const imagePath = resumeData.basics.image;
-    const imageName = path.basename(imagePath);
-    fs.copyFileSync(imagePath, `./dist/${imageName}`);
-    console.log(`📸 Copied profile image: ${imageName}`);
-    // Update path in HTML to use local copy
-    resumeData.basics.image = imageName;
+    console.log(`📸 Profile image configured: ${resumeData.basics.image}`);
   }
   
   const html = template(resumeData);

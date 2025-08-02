@@ -5,7 +5,7 @@ const { exec } = require('child_process');
 
 const PORT = 3000;
 const DIST_DIR = './dist';
-const WATCH_FILES = ['template.html', 'resume-data.json'];
+const WATCH_FILES = ['template.html', 'resume-data.json', 'images/profile/', 'assets/'];
 
 let isBuilding = false;
 
@@ -39,15 +39,48 @@ function watchFiles() {
     
     WATCH_FILES.forEach(file => {
         if (fs.existsSync(file)) {
-            fs.watchFile(file, { interval: 1000 }, (curr, prev) => {
-                if (curr.mtime !== prev.mtime) {
-                    console.log(`📝 ${file} changed`);
+            const stat = fs.statSync(file);
+            
+            if (stat.isDirectory()) {
+                // Watch directory recursively
+                watchDirectory(file);
+                console.log(`   - ${file}/ (directory)`);
+            } else {
+                // Watch individual file
+                fs.watchFile(file, { interval: 1000 }, (curr, prev) => {
+                    if (curr.mtime !== prev.mtime) {
+                        console.log(`📝 ${file} changed`);
+                        buildResume();
+                    }
+                });
+                console.log(`   - ${file}`);
+            }
+        }
+    });
+}
+
+// Watch directory recursively
+function watchDirectory(dir) {
+    function watchDirRecursive(dirPath) {
+        try {
+            const watcher = fs.watch(dirPath, { recursive: true }, (eventType, filename) => {
+                if (filename && (eventType === 'change' || eventType === 'rename')) {
+                    console.log(`📝 ${path.join(dirPath, filename)} ${eventType}`);
                     buildResume();
                 }
             });
-            console.log(`   - ${file}`);
+            
+            // Handle watcher errors
+            watcher.on('error', (error) => {
+                console.error(`Watcher error for ${dirPath}:`, error.message);
+            });
+            
+        } catch (error) {
+            console.error(`Failed to watch directory ${dirPath}:`, error.message);
         }
-    });
+    }
+    
+    watchDirRecursive(dir);
 }
 
 // Simple HTTP server
@@ -66,6 +99,7 @@ function createServer() {
                     '.jpeg': 'image/jpeg',
                     '.jpg': 'image/jpeg',
                     '.png': 'image/png',
+                    '.webp': 'image/webp',
                     '.css': 'text/css',
                     '.js': 'application/javascript'
                 };

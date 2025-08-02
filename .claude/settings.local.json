@@ -58,7 +58,10 @@
       "Bash(do magick \"$file\" -quality 85 \"$file%.png.jpg\")",
       "Bash(done)",
       "Bash(for:*)",
-      "Bash(git lfs:*)"
+      "Bash(git lfs:*)",
+      "Bash(timeout 30s npx playwright test:*)",
+      "Bash(timeout 30s make build)",
+      "Bash(git rm:*)"
     ],
     "deny": []
   }
