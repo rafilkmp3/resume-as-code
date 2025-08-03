@@ -65,6 +65,27 @@
     </script>
 
     <style>
+        /* DISABLE LOAD ANIMATIONS BUT KEEP USER INTERACTIONS */
+        .fade-in-section {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+        }
+        
+        .container {
+            animation: none !important;
+        }
+        
+        .left-column, .right-column {
+            animation: none !important;
+        }
+        
+        /* Disable slide-in keyframes animations */
+        @keyframes slideInLeft { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes slideInRight { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes slideInUp { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes fadeInScale { 0%, 100% { opacity: 1; transform: none; } }
+        
         * {
             margin: 0;
             padding: 0;
@@ -1763,8 +1784,7 @@
     </style>
 </head>
 <body>
-    <!-- Skip Link for Accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <!-- Skip Link removed for cleaner recruiter presentation -->
     
     <!-- Parallax Background -->
     <div class="parallax-bg" id="parallaxBg"></div>
@@ -2268,18 +2288,12 @@
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         });
 
-        // Fade-in animations with delay to prevent scroll issues
-        const sections = document.querySelectorAll('.section');
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                }
-            });
-        }, { 
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px' // Only trigger when element is more visible
+        // Immediately show all sections for instant loading
+        const sections = document.querySelectorAll('.fade-in-section');
+        sections.forEach(section => {
+            section.classList.add('is-visible');
+            section.style.opacity = '1';
+            section.style.transform = 'none';
         });
 
         // Add a small delay to prevent initial scroll jumping
