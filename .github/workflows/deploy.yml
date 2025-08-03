@@ -16,13 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Parallel test execution across multiple runners
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test-group: [quick, visual, accessibility]
-      fail-fast: false  # Continue other tests even if one fails
     steps:
       - name: Skip Duplicate Actions
         uses: fkirc/skip-duplicate-actions@v5
@@ -35,8 +30,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          lfs: true  # Enable Git LFS for image assets
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -47,70 +40,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
       - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: |
-          # Install only browsers needed for this test group
-          if [ "${{ matrix.test-group }}" = "quick" ]; then
-            npx playwright install chromium
-          else
-            npx playwright install
-          fi
-
-      - name: Auto-fix mobile layout issues
-        run: node scripts/auto-fix-layout.js
+        run: npx playwright install --with-deps chromium
 
       - name: Build resume for testing
         run: npm run build
 
-      - name: Run parallel tests with maximum CPU utilization
-        if: "!contains(github.event.head_commit.message, 'skip-tests')"
-        run: |
-          GITHUB_RUNNER_CORES=$(nproc)
-          echo "🚀 Using $GITHUB_RUNNER_CORES CPU cores for parallel testing"
-          echo "📊 Test group: ${{ matrix.test-group }}"
-          
-          case "${{ matrix.test-group }}" in
-            "quick")
-              echo "🏃 Running quick mobile tests..."
-              CI=true npx playwright test tests/e2e/issue-detection.spec.js \
-                --workers=$GITHUB_RUNNER_CORES \
-                --reporter=dot \
-                --project=chromium
-              ;;
-            "visual")
-              echo "📸 Running visual regression tests..."
-              CI=true npx playwright test tests/visual/ \
-                --workers=$((GITHUB_RUNNER_CORES / 2)) \
-                --reporter=dot
-              ;;
-            "accessibility")
-              echo "♿ Running accessibility tests..."
-              CI=true npx playwright test tests/accessibility/ \
-                --workers=$GITHUB_RUNNER_CORES \
-                --reporter=dot
-              ;;
-          esac
-        continue-on-error: true
+      - name: Run tests
+        run: make test-ci
 
-  # Separate build job for deployment
   build:
     runs-on: ubuntu-latest
-    needs: test  # Wait for all tests to complete
+    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          lfs: true  # Enable Git LFS for image assets
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

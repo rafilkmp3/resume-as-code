@@ -5,12 +5,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI ? 'dot' : 'html',
+  workers: process.env.CI ? 4 : undefined, // Use 4 workers for multicore
+  reporter: process.env.CI ? 'dot' : 'list',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001', // Use port 3001 for tests, keep 3000 for dev
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    headless: true, // Always run headless
   },
   projects: [
     {
@@ -35,8 +36,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run serve',
-    url: 'http://localhost:3000',
+    command: 'npx serve dist -p 3001',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
+    timeout: 10000,
   },
 });
