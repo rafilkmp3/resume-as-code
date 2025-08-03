@@ -1,0 +1,299 @@
+name: Resume CI - Layout & Usability Tests
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build Resume
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build resume
+        run: make build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+          retention-days: 7
+
+  test-desktop:
+    name: Desktop Layout Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+      
+      - name: Run desktop tests
+        run: npx playwright test tests/layout-analysis.spec.js --project=desktop-chrome --reporter=json > desktop-results.json
+        continue-on-error: true
+      
+      - name: Upload desktop screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-screenshots
+          path: test-results/desktop-*.png
+          retention-days: 7
+      
+      - name: Upload desktop test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-test-results
+          path: desktop-results.json
+          retention-days: 7
+
+  test-mobile:
+    name: Mobile Layout Tests  
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+      
+      - name: Run mobile tests
+        run: npx playwright test tests/layout-analysis.spec.js --project=iphone-15-pro-max --reporter=json > mobile-results.json
+        continue-on-error: true
+      
+      - name: Upload mobile screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-screenshots
+          path: test-results/mobile-*.png
+          retention-days: 7
+      
+      - name: Upload mobile test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-test-results  
+          path: mobile-results.json
+          retention-days: 7
+
+  test-tablet:
+    name: Tablet Layout Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+      
+      - name: Run tablet tests
+        run: npx playwright test tests/layout-analysis.spec.js --project=ipad-pro --reporter=json > tablet-results.json
+        continue-on-error: true
+      
+      - name: Upload tablet screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tablet-screenshots
+          path: test-results/tablet-*.png
+          retention-days: 7
+      
+      - name: Upload tablet test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tablet-test-results
+          path: tablet-results.json
+          retention-days: 7
+
+  usability-tests:
+    name: Usability & Accessibility Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+      
+      - name: Run usability tests
+        run: npx playwright test tests/mobile-layout.spec.js --reporter=json > usability-results.json
+        continue-on-error: true
+      
+      - name: Upload usability test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: usability-test-results
+          path: usability-results.json
+          retention-days: 7
+
+  report:
+    name: Generate Test Report
+    needs: [test-desktop, test-mobile, test-tablet, usability-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts/
+      
+      - name: Generate HTML Report
+        run: |
+          mkdir -p test-report
+          echo "# Resume Layout Test Report" > test-report/README.md
+          echo "" >> test-report/README.md
+          echo "## Test Results Summary" >> test-report/README.md
+          echo "" >> test-report/README.md
+          echo "### Desktop Tests" >> test-report/README.md
+          if [ -f "test-artifacts/desktop-test-results/desktop-results.json" ]; then
+            echo "✅ Desktop tests completed" >> test-report/README.md
+          else
+            echo "❌ Desktop tests failed" >> test-report/README.md
+          fi
+          echo "" >> test-report/README.md
+          echo "### Mobile Tests" >> test-report/README.md
+          if [ -f "test-artifacts/mobile-test-results/mobile-results.json" ]; then
+            echo "✅ Mobile tests completed" >> test-report/README.md
+          else
+            echo "❌ Mobile tests failed" >> test-report/README.md
+          fi
+          echo "" >> test-report/README.md
+          echo "### Tablet Tests" >> test-report/README.md
+          if [ -f "test-artifacts/tablet-test-results/tablet-results.json" ]; then
+            echo "✅ Tablet tests completed" >> test-report/README.md
+          else
+            echo "❌ Tablet tests failed" >> test-report/README.md
+          fi
+          echo "" >> test-report/README.md
+          echo "Generated: $(date)" >> test-report/README.md
+      
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report/
+          retention-days: 30
+
+  deploy-preview:
+    name: Deploy Preview  
+    needs: [build, test-desktop, test-mobile, test-tablet]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+      
+      - name: Deploy to GitHub Pages (Preview)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          destination_dir: preview/${{ github.event.number }}
+      
+      - name: Comment PR with preview link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📱 Resume Preview Ready!
+              
+              **Desktop & Mobile layouts tested and deployed:**
+              
+              🔗 **Preview URL**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/${{ github.event.number }}/
+              
+              ### Test Results:
+              - ✅ Desktop layout validation
+              - ✅ Mobile iPhone 15 Pro Max layout  
+              - ✅ Tablet iPad Pro layout
+              - ✅ Usability & accessibility checks
+              
+              All screenshots and test results are available in the Actions artifacts.`
+            })

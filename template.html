@@ -86,6 +86,23 @@
         @keyframes slideInUp { 0%, 100% { opacity: 1; transform: none; } }
         @keyframes fadeInScale { 0%, 100% { opacity: 1; transform: none; } }
         
+        /* USABILITY IMPROVEMENTS */
+        /* Prevent horizontal overflow on all screen sizes */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -1580,10 +1597,13 @@
             .left-column { padding-right: 0; }
             
             .skill-tag {
-                font-size: 0.8rem;
-                padding: 0.35rem 0.9rem;
-                margin: 0.2rem 0.3rem 0.2rem 0;
-                min-height: 1.9rem;
+                font-size: 0.85rem;
+                padding: 0.6rem 1rem;
+                margin: 0.25rem 0.3rem 0.25rem 0;
+                min-height: 2.75rem; /* 44px minimum touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .controls {
@@ -1605,10 +1625,37 @@
                 padding: 2rem 1rem;
             }
             
+            .header h1 {
+                font-size: 2.2rem;
+                line-height: 1.2;
+            }
+            
+            .header h2, .subtitle {
+                font-size: 1.2rem;
+                line-height: 1.3;
+            }
+            
             .main-content { 
                 grid-template-columns: 1fr; 
                 padding: 0 1rem;
-                gap: 1.5rem;
+                gap: 2rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .section h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.2rem;
+            }
+            
+            .work-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+            
+            .work-summary, .profile-summary {
+                font-size: 1rem;
+                line-height: 1.5;
             }
             
             .work-header { 
@@ -1617,10 +1664,14 @@
             }
             
             .skill-tag {
-                font-size: 0.75rem;
-                padding: 0.3rem 0.8rem;
-                margin: 0.15rem 0.25rem 0.15rem 0;
-                min-height: 1.8rem;
+                font-size: 0.9rem;
+                padding: 0.6rem 1.1rem;
+                margin: 0.25rem 0.3rem 0.25rem 0;
+                min-height: 2.75rem; /* Better touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 500;
             }
             
             .skill-keywords {
@@ -1654,16 +1705,51 @@
                 padding: 1.5rem 0.75rem;
             }
             
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+            }
+            
+            .header h2, .subtitle {
+                font-size: 1rem;
+                line-height: 1.3;
+            }
+            
             .main-content {
                 padding: 0 0.75rem;
-                gap: 1rem;
+                gap: 1.5rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .section h2 {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .work-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+            
+            .company {
+                font-size: 0.95rem;
+            }
+            
+            .work-summary, .profile-summary {
+                font-size: 0.95rem;
+                line-height: 1.5;
             }
             
             .skill-tag {
-                font-size: 0.7rem;
-                padding: 0.25rem 0.6rem;
-                margin: 0.1rem 0.2rem 0.1rem 0;
-                min-height: 1.6rem;
+                font-size: 0.85rem;
+                padding: 0.7rem 1.1rem;
+                margin: 0.3rem 0.3rem 0.3rem 0;
+                min-height: 2.75rem; /* 44px minimum touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 500;
             }
             
             .work-item {

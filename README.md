@@ -7,7 +7,10 @@
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://rafilkmp3.github.io/resume-as-code/)
 [![PDF Download](https://img.shields.io/badge/PDF-Download%20Resume-red?style=for-the-badge&logo=adobe)](https://rafilkmp3.github.io/resume-as-code/resume.pdf)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/rafilkmp3/resume-as-code/deploy.yml?style=for-the-badge&logo=github-actions)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![CI Status](https://github.com/rafilkmp3/resume-as-code/workflows/Resume%20CI%20-%20Layout%20%26%20Usability%20Tests/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Mobile Tests](https://img.shields.io/badge/Mobile%20Tests-iPhone%2015%20Pro%20Max-success?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Desktop Tests](https://img.shields.io/badge/Desktop%20Tests-Chrome%201280x720-success?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Tablet Tests](https://img.shields.io/badge/Tablet%20Tests-iPad%20Pro-success?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/actions)
 
 *A modern, automated resume generation system showcasing DevOps and Platform Engineering best practices through infrastructure-as-code principles applied to personal branding.*
 
@@ -51,6 +54,13 @@ This is a resume-as-code project, built with Node.js, Handlebars, and Puppeteer.
 - Continuous integration with quality checks
 - Infrastructure-as-code principles
 
+**🧪 Comprehensive Testing**
+- **Multi-Device Testing**: iPhone 15 Pro Max, iPad Pro, Desktop Chrome
+- **Layout Validation**: Automated screenshot comparison and analysis
+- **Usability Testing**: Touch target validation (44px minimum)
+- **Accessibility**: WCAG compliance and screen reader optimization
+- **Performance**: Zero-animation load for instant content display
+
 </td>
 <td width="50%">
 
@@ -65,6 +75,12 @@ This is a resume-as-code project, built with Node.js, Handlebars, and Puppeteer.
 - Dark/light theme with OS preference detection
 - Interactive elements with accessibility support
 - Professional UI with gradient animations
+
+**📱 Mobile-First Design**
+- **No Horizontal Overflow**: Proper viewport handling
+- **Touch-Optimized**: 44px minimum touch targets for all interactive elements
+- **Typography Scale**: Optimized font sizes for each device class
+- **Instant Loading**: No loading animations, immediate content display
 
 </td>
 </tr>

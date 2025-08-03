@@ -13,12 +13,22 @@ module.exports = defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'desktop-chrome',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 }
+      },
     },
     {
       name: 'iphone-15-pro-max',
       use: { ...devices['iPhone 15 Pro Max'] },
+    },
+    {
+      name: 'ipad-pro',
+      use: { 
+        ...devices['iPad Pro'],
+        viewport: { width: 1024, height: 1366 }
+      },
     },
   ],
   webServer: {
