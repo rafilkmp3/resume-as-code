@@ -320,7 +320,66 @@
             will-change: transform;
         }
         
-        /* Controls removed for cleaner mobile experience */
+        /* Dark mode toggle - positioned to avoid blocking mobile UI */
+        .dark-toggle {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1rem;
+            background: var(--color-surface-raised);
+            border: 2px solid var(--color-border-default);
+            color: var(--color-text-default);
+            padding: 0.8rem;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            z-index: 1000;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            opacity: 0.9;
+        }
+        
+        .dark-toggle:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 
+                0 8px 25px -5px rgba(0, 0, 0, 0.3),
+                0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        /* Desktop positioning - non-intrusive */
+        @media (min-width: 1200px) {
+            .dark-toggle {
+                top: 1.5rem;
+                right: 1.5rem;
+                bottom: auto;
+            }
+        }
+        
+        /* Mobile positioning - smaller and less intrusive */
+        @media (max-width: 768px) {
+            .dark-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 3rem;
+                height: 3rem;
+                padding: 0.6rem;
+                font-size: 1rem;
+                opacity: 0.8;
+            }
+        }
         
         /* Control button styles removed for cleaner mobile experience */
         
@@ -1848,7 +1907,10 @@
     <!-- Parallax Background -->
     <div class="parallax-bg" id="parallaxBg"></div>
     
-    <!-- Control buttons removed for cleaner mobile experience -->
+    <!-- Dark mode toggle button - positioned to not block content -->
+    <button class="dark-toggle" id="darkToggle" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">🌙</span>
+    </button>
     
     <div class="container">
         <header class="header">
@@ -2038,11 +2100,9 @@
         {{{json this}}}
     </script>
     <script>
-        // Theme Toggle Functionality
-        const themeToggle = document.getElementById('themeToggle');
+        // Dark Mode Toggle Functionality
+        const themeToggle = document.getElementById('darkToggle');
         const themeIcon = document.getElementById('themeIcon');
-        const themeText = document.getElementById('themeText');
-        const autoIndicator = document.getElementById('autoIndicator');
         const body = document.body;
         
         // Function to detect OS theme preference
@@ -2054,19 +2114,11 @@
         function applyTheme(theme) {
             if (theme === 'dark') {
                 body.setAttribute('data-theme', 'dark');
-                themeIcon.textContent = '🌙';
-                themeText.textContent = 'Dark';
+                themeIcon.textContent = '☀️'; // Sun icon when in dark mode (to switch to light)
             } else {
                 body.removeAttribute('data-theme');
-                themeIcon.textContent = '☀️';
-                themeText.textContent = 'Light';
+                themeIcon.textContent = '🌙'; // Moon icon when in light mode (to switch to dark)
             }
-            
-            // Update auto indicator
-            const isManuallySet = localStorage.getItem('theme');
-            autoIndicator.textContent = isManuallySet ? '' : '(Auto)';
-            
-            console.log('Applied theme:', theme, 'Body data-theme:', body.getAttribute('data-theme'));
         }
         
         // Initialize theme immediately
