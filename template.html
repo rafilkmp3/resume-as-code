@@ -303,36 +303,9 @@
             will-change: transform;
         }
         
-        .controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 8px;
-            z-index: 1000;
-            flex-wrap: wrap;
-        }
+        /* Controls removed for cleaner mobile experience */
         
-        .control-btn {
-            background: var(--color-surface-raised);
-            border: 2px solid var(--color-border-default);
-            color: var(--color-text-default);
-            padding: 10px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-default);
-            backdrop-filter: blur(10px);
-            min-width: 80px;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+        /* Control button styles removed for cleaner mobile experience */
         
         .control-btn::before {
             content: '';
@@ -1789,26 +1762,7 @@
     <!-- Parallax Background -->
     <div class="parallax-bg" id="parallaxBg"></div>
     
-    <!-- Control Buttons -->
-    <div class="controls">
-        <button class="control-btn" id="themeToggle" title="Toggle Dark/Light Mode (Auto-detects OS preference) - Ctrl+Shift+D">
-            <span id="themeIcon">🌙</span>
-            <span id="themeText">Dark</span>
-            <span id="autoIndicator" style="font-size: 0.7em; opacity: 0.7;"></span>
-        </button>
-        <button class="control-btn" onclick="window.print()" title="Print Clean Resume Version">
-            <span>🖨️</span>
-            <span>Print</span>
-        </button>
-        <button class="control-btn" onclick="window.open('./resume.pdf', '_blank')" title="Open Pre-built PDF Resume">
-            <span>📄</span>
-            <span>PDF</span>
-        </button>
-        <button class="control-btn" onclick="generateATS()" title="Generate ATS-Friendly Version">
-            <span>📋</span>
-            <span>ATS</span>
-        </button>
-    </div>
+    <!-- Control buttons removed for cleaner mobile experience -->
     
     <div class="container">
         <header class="header">
