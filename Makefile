@@ -1,4 +1,4 @@
-.PHONY: help build dev serve clean install pdf html kill-port status watch live test test-quick test-visual test-a11y test-perf test-ci fix-layout lint-check
+.PHONY: help build dev serve clean install test test-dev test-fast test-pdf test-focused kill-port status
 
 # Colors for output
 RED=\033[0;31m
@@ -11,129 +11,87 @@ NC=\033[0m # No Color
 
 # Default target
 help:
-	@echo "📋 Available commands:"
-	@echo "  $(CYAN)make install$(NC)    - Install dependencies"
-	@echo "  $(GREEN)make build$(NC)      - Build HTML and PDF"
-	@echo "  $(BLUE)make html$(NC)       - Generate HTML only"
-	@echo "  $(BLUE)make pdf$(NC)        - Generate PDF only"
-	@echo "  $(PURPLE)make dev$(NC)        - Hot reload development server on localhost:3000"
-	@echo "  $(PURPLE)make serve$(NC)      - Serve existing build on localhost:3000"
-	@echo "  $(PURPLE)make live$(NC)       - Live development with file watching"
-	@echo "  $(YELLOW)make kill-port$(NC)  - Kill any process running on port 3000"
-	@echo "  $(RED)make clean$(NC)      - Clean dist directory"
-	@echo "  $(CYAN)make watch$(NC)      - Watch for changes and rebuild"
-	@echo "  $(CYAN)make status$(NC)     - Show project status and file info"
+	@echo "📋 Resume-as-Code Development Commands:"
 	@echo ""
-	@echo "🧪 Testing commands:"
-	@echo "  $(GREEN)make test$(NC)       - Run all tests (visual, accessibility, performance)"
-	@echo "  $(BLUE)make test-quick$(NC)  - Run quick tests only"
-	@echo "  $(BLUE)make test-visual$(NC) - Run visual regression tests"
-	@echo "  $(BLUE)make test-a11y$(NC)   - Run accessibility tests"
-	@echo "  $(BLUE)make test-perf$(NC)   - Run performance tests"
-	@echo "  $(CYAN)make test-ci$(NC)     - Run all tests for CI (with retries)"
-	@echo "  $(YELLOW)make fix-layout$(NC)  - Auto-fix mobile layout issues"
-	@echo "  $(PURPLE)make screenshots$(NC) - Generate documentation screenshots"
+	@echo "🔥 Core Development:"
+	@echo "  $(GREEN)make install$(NC)      - Install dependencies"
+	@echo "  $(PURPLE)make dev$(NC)          - Start development server"
+	@echo "  $(GREEN)make build$(NC)        - Build for production"
+	@echo "  $(BLUE)make serve$(NC)         - Serve built application"
+	@echo "  $(RED)make clean$(NC)         - Clean build directory"
+	@echo ""
+	@echo "🧪 Fast Testing (Fail-Fast Development):"
+	@echo "  $(GREEN)make test-fast$(NC)    - Quick PWA tests (build + focused tests)"
+	@echo "  $(BLUE)make test-focused$(NC)  - Run only PWA tests (fast)"
+	@echo "  $(PURPLE)make test-pdf$(NC)     - Test PDF generation"
+	@echo "  $(CYAN)make test-dev$(NC)      - All dev tests with 10 cores"
+	@echo "  $(YELLOW)make test$(NC)         - Full test suite"
+	@echo ""
+	@echo "🛠️  Utilities:"
+	@echo "  $(YELLOW)make kill-port$(NC)    - Kill processes on port 3000"
+	@echo "  $(CYAN)make status$(NC)        - Show project status"
 
 # Install dependencies
 install:
 	@echo "📦 Installing dependencies..."
 	npm install
 
-# Build everything
+# Build everything (Next.js)
 build:
-	@echo "🏗️  Building resume..."
+	@echo "🏗️  Building resume with Next.js..."
 	npm run build
 
-# Generate HTML only
-html:
-	@echo "📝 Generating HTML..."
-	node -e "const fs = require('fs'); const path = require('path'); const Handlebars = require('handlebars'); if (!fs.existsSync('./dist')) { fs.mkdirSync('./dist'); } const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8')); if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) { fs.copyFileSync(resumeData.basics.image, \`./dist/\${path.basename(resumeData.basics.image)}\`); console.log('📸 Copied profile image'); } const templateSource = fs.readFileSync('./template.html', 'utf8'); const template = Handlebars.compile(templateSource); const html = template(resumeData); fs.writeFileSync('./dist/index.html', html); console.log('✅ HTML generated successfully!');"
-
-# Generate PDF only (requires HTML to exist)
-pdf: html
-	@echo "📄 Generating PDF..."
-	node -e "const puppeteer = require('puppeteer'); const fs = require('fs'); (async () => { const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] }); const page = await browser.newPage(); const html = fs.readFileSync('./dist/index.html', 'utf8'); await page.setContent(html, { waitUntil: 'networkidle0' }); await page.pdf({ path: './dist/resume.pdf', format: 'A4', printBackground: true, margin: { top: '0.5in', bottom: '0.5in', left: '0.5in', right: '0.5in' } }); await browser.close(); console.log('✅ PDF generated successfully!'); })();"
-
-# Kill any process running on port 3000
-kill-port:
-	@echo "$(YELLOW)🔍 Checking for processes on port 3000...$(NC)"
-	@if lsof -ti:3000 >/dev/null 2>&1; then \
-		echo "$(RED)💀 Killing process on port 3000...$(NC)"; \
-		kill -9 $$(lsof -ti:3000) 2>/dev/null || true; \
-		sleep 1; \
-		echo "$(GREEN)✅ Port 3000 is now free$(NC)"; \
-	else \
-		echo "$(GREEN)✅ Port 3000 is already free$(NC)"; \
-	fi
-
-# Build and serve (development mode with hot reload)
+# Development server
 dev: kill-port
-	@echo "$(PURPLE)🚀 Starting development server with hot reload...$(NC)"
-	@echo "$(CYAN)👀 Watching: resume-data.json, template.html$(NC)"
+	@echo "$(PURPLE)🚀 Starting Next.js development server...$(NC)"
 	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
-	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	npm run dev
 
-# Build and serve (old behavior - no hot reload)
-dev\:old: kill-port build
-	@echo "$(PURPLE)🌐 Starting server (no hot reload)...$(NC)"
-	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
-	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
-	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	npm run serve
-
-# Serve existing build
+# Serve built application
 serve: kill-port
-	@echo "$(PURPLE)🌐 Starting server...$(NC)"
+	@echo "$(BLUE)🌐 Starting server...$(NC)"
 	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
-	@echo "$(CYAN)📄 PDF available at: http://localhost:3000/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	npm run serve
 
-# Live development with file watching
-live: kill-port
-	@echo "$(PURPLE)🔥 Starting live development mode...$(NC)"
-	@echo "$(CYAN)👀 Watching: resume-data.json, template.html$(NC)"
-	@echo "$(CYAN)📱 Resume available at: http://localhost:3000$(NC)"
-	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@trap 'kill %1 2>/dev/null || true; exit' INT; \
-	make build && npm run serve & \
-	while true; do \
-		if command -v fswatch >/dev/null 2>&1; then \
-			fswatch -o resume-data.json template.html | while read; do make build; done; \
-		elif command -v inotifywait >/dev/null 2>&1; then \
-			inotifywait -e modify resume-data.json template.html 2>/dev/null && make build; \
-		else \
-			echo "$(YELLOW)⚠️  No file watcher found (fswatch/inotifywait), using polling...$(NC)"; \
-			sleep 3; \
-			make build; \
-		fi; \
-	done
+# Fast Testing Commands
+test-fast:
+	@echo "$(GREEN)🧪 Running fast PWA tests...$(NC)"
+	npm run test:fast
 
-# Watch for changes and rebuild (without server)
-watch:
-	@echo "$(CYAN)👀 Watching for changes...$(NC)"
-	@echo "$(CYAN)📁 Watching: resume-data.json, template.html$(NC)"
-	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@while true; do \
-		if command -v fswatch >/dev/null 2>&1; then \
-			fswatch -o resume-data.json template.html | while read; do \
-				echo "$(GREEN)🔄 File changed, rebuilding...$(NC)"; \
-				make build; \
-				echo "$(GREEN)✅ Rebuilt at $$(date)$(NC)"; \
-			done; \
-		elif command -v inotifywait >/dev/null 2>&1; then \
-			inotifywait -e modify resume-data.json template.html 2>/dev/null; \
-			echo "$(GREEN)🔄 File changed, rebuilding...$(NC)"; \
-			make build; \
-			echo "$(GREEN)✅ Rebuilt at $$(date)$(NC)"; \
+test-focused:
+	@echo "$(BLUE)🎯 Running focused PWA tests...$(NC)"
+	npm run test:focused
+
+test-pdf:
+	@echo "$(PURPLE)📄 Testing PDF generation...$(NC)"
+	npm run test:pdf
+
+test-dev:
+	@echo "$(CYAN)🚀 Running all development tests...$(NC)"
+	npm run test:dev
+
+test: build
+	@echo "$(YELLOW)🧪 Running full test suite...$(NC)"
+	npm run test
+
+# Smart port cleanup for dev (only if not npm run dev)
+kill-port:
+	@echo "$(YELLOW)🔍 Checking for non-dev processes on port 3000...$(NC)"
+	@if lsof -ti:3000 >/dev/null 2>&1; then \
+		PROCESS_CMD=$$(ps -p $$(lsof -ti:3000) -o command= 2>/dev/null || echo ""); \
+		if echo "$$PROCESS_CMD" | grep -q "npm run dev\|nodemon\|node.*dev"; then \
+			echo "$(CYAN)ℹ️  Dev server already running on port 3000 - keeping alive$(NC)"; \
 		else \
-			echo "$(YELLOW)⚠️  No file watcher found (fswatch/inotifywait), using polling...$(NC)"; \
-			sleep 3; \
-			make build; \
+			echo "$(RED)💀 Killing non-dev process on port 3000...$(NC)"; \
+			kill -9 $$(lsof -ti:3000) 2>/dev/null || true; \
+			sleep 1; \
+			echo "$(GREEN)✅ Port 3000 is now free$(NC)"; \
 		fi; \
-	done
+	else \
+		echo "$(GREEN)✅ Port 3000 is already free$(NC)"; \
+	fi
 
 # Clean dist directory
 clean:
@@ -141,7 +99,7 @@ clean:
 	rm -rf dist/
 	@echo "$(GREEN)✅ Clean complete$(NC)"
 
-# Comprehensive status check
+# Show project status
 status:
 	@echo "$(CYAN)📊 Resume Project Status$(NC)"
 	@echo "$(CYAN)========================$(NC)"
@@ -151,27 +109,10 @@ status:
 	else \
 		echo "$(RED)❌ HTML: Missing$(NC)"; \
 	fi
-	@if [ -f "dist/resume.pdf" ]; then \
-		SIZE=$$(ls -lh dist/resume.pdf | awk '{print $$5}'); \
-		echo "$(GREEN)✅ PDF: dist/resume.pdf ($$SIZE)$(NC)"; \
-	else \
-		echo "$(RED)❌ PDF: Missing$(NC)"; \
-	fi
 	@if [ -f "resume-data.json" ]; then \
 		echo "$(GREEN)✅ Data: resume-data.json$(NC)"; \
 	else \
 		echo "$(RED)❌ Data: Missing$(NC)"; \
-	fi
-	@if [ -f "template.html" ]; then \
-		echo "$(GREEN)✅ Template: template.html$(NC)"; \
-	else \
-		echo "$(RED)❌ Template: Missing$(NC)"; \
-	fi
-	@if [ -f "eu-no-foguete-perfil.jpeg" ]; then \
-		SIZE=$$(ls -lh eu-no-foguete-perfil.jpeg | awk '{print $$5}'); \
-		echo "$(GREEN)✅ Profile Image: eu-no-foguete-perfil.jpeg ($$SIZE)$(NC)"; \
-	else \
-		echo "$(YELLOW)⚠️  Profile Image: Missing$(NC)"; \
 	fi
 	@echo "$(CYAN)========================$(NC)"
 	@if lsof -ti:3000 >/dev/null 2>&1; then \
@@ -186,59 +127,3 @@ status:
 	else \
 		echo "$(RED)❌ Node.js: Not installed$(NC)"; \
 	fi
-
-# Mobile layout auto-fix
-fix-layout:
-	@echo "$(YELLOW)🔧 Running mobile layout auto-fix...$(NC)"
-	node scripts/auto-fix-layout.js
-	@echo "$(GREEN)✅ Layout fixes completed$(NC)"
-
-# Quick tests (essential only)
-test-quick: build
-	@echo "$(BLUE)🧪 Running quick tests...$(NC)"
-	npx playwright test tests/e2e/issue-detection.spec.js --project=chromium
-	@echo "$(GREEN)✅ Quick tests completed$(NC)"
-
-# Visual regression tests  
-test-visual: build
-	@echo "$(BLUE)📸 Running visual regression tests...$(NC)"
-	npx playwright test tests/visual/comprehensive-visual.spec.js
-	@echo "$(GREEN)✅ Visual tests completed$(NC)"
-
-# Accessibility tests
-test-a11y: build
-	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
-	npx playwright test tests/accessibility/a11y.spec.js
-	@echo "$(GREEN)✅ Accessibility tests completed$(NC)"
-
-# Performance tests
-test-perf: build
-	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
-	npx playwright test tests/performance/perf.spec.js
-	@echo "$(GREEN)✅ Performance tests completed$(NC)"
-
-# Full test suite
-test: build
-	@echo "$(GREEN)🚀 Running complete test suite...$(NC)"
-	@echo "$(CYAN)Running visual regression tests...$(NC)"
-	npx playwright test tests/visual/
-	@echo "$(CYAN)Running e2e tests...$(NC)"
-	npx playwright test tests/e2e/
-	@echo "$(CYAN)Running accessibility tests...$(NC)"
-	npx playwright test tests/accessibility/
-	@echo "$(CYAN)Running performance tests...$(NC)"
-	npx playwright test tests/performance/
-	@echo "$(GREEN)✅ All tests completed$(NC)"
-
-# CI-optimized tests (Chrome only, with timeout and retries)
-test-ci: build
-	@echo "$(CYAN)🔄 Running CI test suite (Chrome only)...$(NC)"
-	CI=true timeout 300s npx playwright test tests/e2e/visual-chrome.spec.js tests/e2e/issue-detection.spec.js --project=chromium --retries=1 --workers=1 --reporter=dot --timeout=30000
-	@echo "$(GREEN)✅ CI tests completed$(NC)"
-
-# Generate documentation screenshots
-screenshots: build
-	@echo "$(CYAN)📸 Generating documentation screenshots...$(NC)"
-	@echo "$(YELLOW)This will take a few minutes to capture all screen sizes and themes$(NC)"
-	npx playwright test tests/visual/generate-screenshots.spec.js --project=chromium
-	@echo "$(GREEN)✅ Screenshots generated in docs/screenshots/$(NC)"

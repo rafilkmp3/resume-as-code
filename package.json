@@ -2,23 +2,36 @@
   "name": "resume-as-code",
   "version": "1.2.1",
   "description": "Rafael Sathler's resume generation system",
-  "main": "build.js",
+  "main": "src/app/page.tsx",
   "scripts": {
-    "build": "node build.js",
-    "serve": "python3 -m http.server 3000 --directory dist",
-    "dev": "node dev-server.js",
-    "dev:old": "npm run build && npm run serve",
-    "test": "playwright test",
-    "test:ci": "playwright test --reporter=dot",
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "export": "next build && next export",
+    "serve": "npx serve out -p 3000",
+    "test": "npx playwright test",
+    "test:dev": "npx playwright test --config=playwright.dev.config.js",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
     "version:patch": "npm version patch && git push --follow-tags",
     "version:minor": "npm version minor && git push --follow-tags",
     "version:major": "npm version major && git push --follow-tags",
     "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
   },
   "dependencies": {
-    "handlebars": "^4.7.8",
-    "puppeteer": "^22.8.2",
-    "qrcode": "^1.5.4"
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/node": "^24.1.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.21",
+    "next": "^15.4.5",
+    "postcss": "^8.5.6",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-qr-code": "^2.0.18",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2"
   },
   "keywords": [
     "resume",
@@ -39,8 +52,13 @@
   "homepage": "https://github.com/rafilkmp3/resume-as-code#readme",
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
+    "@nx/next": "^21.3.11",
+    "@nx/playwright": "^21.3.11",
     "@playwright/test": "^1.54.2",
     "lighthouse": "^12.8.1",
-    "lighthouse-ci": "^1.13.1"
-  }
+    "lighthouse-ci": "^1.13.1",
+    "nx": "21.3.11",
+    "serve": "^14.2.4"
+  },
+  "nx": {}
 }
