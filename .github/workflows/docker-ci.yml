@@ -31,134 +31,84 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'chore(main): release')"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            network=host
 
-      - name: Build resume with Docker
+      - name: Build resume with Docker (Fast)
         run: |
-          echo "🐳 Building resume using Docker-first approach..."
-          make build
+          echo "🐳 Building resume using optimized Docker build with caching..."
+          docker buildx build \
+            --target builder \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --tag resume-as-code:fast \
+            --file Dockerfile.fast \
+            --load \
+            .
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:fast sh -c "cp -r /app/dist/* /tmp/dist/"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: resume-build-${{ github.sha }}
           path: dist/
           retention-days: 30
 
-  # Unit Tests
-  test-unit:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  # Parallel Test Matrix
+  test:
+    name: Test Suite (${{ matrix.test-type }})
+    runs-on: ubuntu-latest-4-cores
+    timeout-minutes: 10
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [unit, e2e, visual, accessibility, performance]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: resume-build-${{ github.sha }}
           path: dist/
       
-      - name: Run unit tests
-        run: make test-unit
-
-  # End-to-End Tests
-  test-e2e:
-    name: End-to-End Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build-${{ github.sha }}
-          path: dist/
-      
-      - name: Run E2E tests
-        run: make test-e2e
-
-  # Visual Regression Tests
-  test-visual:
-    name: Visual Regression Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build-${{ github.sha }}
-          path: dist/
-      
-      - name: Run visual regression tests
-        run: make test-visual
-
-  # Accessibility Tests
-  test-accessibility:
-    name: Accessibility Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build-${{ github.sha }}
-          path: dist/
-      
-      - name: Run accessibility tests
-        run: make test-accessibility
-
-  # Performance Tests
-  test-performance:
-    name: Performance Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build-${{ github.sha }}
-          path: dist/
-      
-      - name: Run performance tests
-        run: make test-performance
+      - name: Run ${{ matrix.test-type }} tests
+        run: |
+          case "${{ matrix.test-type }}" in
+            unit) make test-unit ;;
+            e2e) make test-e2e ;;
+            visual) make test-visual ;;
+            accessibility) make test-accessibility ;;
+            performance) make test-performance ;;
+          esac
 
   # Build and push Docker image
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
+    needs: [build, test]
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            network=host
 
       - name: Log in to Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -176,7 +126,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: production
@@ -239,7 +189,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docker-ci-report
           path: test-report/
@@ -253,17 +203,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
+    needs: [build, test]
     if: >-
       github.ref == 'refs/heads/main' && 
       github.event_name == 'push' && 
       !contains(github.event.head_commit.message, 'chore(main): release')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: resume-build-${{ github.sha }}
           path: dist/
@@ -285,23 +235,23 @@ jobs:
     name: Deploy PR Preview
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
+    needs: [build, test]
     if: github.event_name == 'pull_request'
     permissions:
       contents: write
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: resume-build-${{ github.sha }}
           path: dist/
 
       - name: Deploy to GitHub Pages (Preview)
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
