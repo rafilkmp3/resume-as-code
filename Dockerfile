@@ -30,7 +30,7 @@ RUN npm ci --only=production && npm cache clean --force
 COPY . .
 
 # Build the resume
-RUN make build
+RUN make build-internal
 
 # Production stage
 FROM node:18-alpine AS production

@@ -1,4 +1,4 @@
-.PHONY: help install build dev serve test test-unit test-e2e test-visual test-accessibility test-performance clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
 
 # Colors for output
 RED=\033[0;31m
@@ -62,6 +62,12 @@ build: docker-check
 	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
 	@echo "  - PDF:  $(GREEN)./dist/resume.pdf$(NC)"
 	@echo "  - Assets: $(GREEN)./dist/assets/$(NC)"
+
+# Build resume inside Docker container (no docker-check needed)
+build-internal:
+	@echo "$(GREEN)🏗️  Building resume...$(NC)"
+	@npm run build
+	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 
 # Development server with hot reload - Docker only
 dev: docker-check
