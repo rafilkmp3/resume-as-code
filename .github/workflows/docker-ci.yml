@@ -27,6 +27,7 @@ jobs:
   build:
     name: Build Resume
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: "!contains(github.event.head_commit.message, 'chore(main): release')"
     steps:
       - name: Checkout code
@@ -51,6 +52,7 @@ jobs:
   test-unit:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: build
     steps:
       - name: Checkout code
@@ -69,6 +71,7 @@ jobs:
   test-e2e:
     name: End-to-End Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: build
     steps:
       - name: Checkout code
@@ -87,6 +90,7 @@ jobs:
   test-visual:
     name: Visual Regression Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: build
     steps:
       - name: Checkout code
@@ -105,6 +109,7 @@ jobs:
   test-accessibility:
     name: Accessibility Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: build
     steps:
       - name: Checkout code
@@ -123,6 +128,7 @@ jobs:
   test-performance:
     name: Performance Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: build
     steps:
       - name: Checkout code
@@ -141,6 +147,7 @@ jobs:
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
     if: github.event_name != 'pull_request'
     steps:
@@ -245,6 +252,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
     if: >-
       github.ref == 'refs/heads/main' && 
@@ -276,6 +284,7 @@ jobs:
   deploy-preview:
     name: Deploy PR Preview
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [build, test-unit, test-e2e, test-visual, test-accessibility, test-performance]
     if: github.event_name == 'pull_request'
     permissions:
@@ -329,6 +338,7 @@ jobs:
   release-job:
     name: Release Acknowledgment
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: "contains(github.event.head_commit.message, 'chore(main): release')"
     steps:
       - name: Acknowledge Release Commit

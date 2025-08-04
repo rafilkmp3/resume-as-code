@@ -81,7 +81,6 @@ FROM node:18-alpine AS development
 RUN apk add --no-cache \
     chromium \
     firefox \
-    webkit2gtk \
     nss \
     freetype \
     freetype-dev \
