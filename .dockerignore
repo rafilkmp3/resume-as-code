@@ -1,0 +1,55 @@
+# Version control (largest space saver)
+.git
+.gitignore
+.gitattributes
+.githooks
+
+# Dependencies (will be installed fresh inside container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs (will be generated inside container)
+dist
+coverage
+.next
+.nyc_output
+
+# Test outputs (not needed for build)
+test-results
+playwright-report
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Development tools and IDE
+.vscode
+.idea
+.claude
+*.swp
+*.swo
+*~
+
+# Docker files (don't need inside container)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD (not needed for build)
+.github
+
+# Documentation (not needed for build)
+README.md
+CHANGELOG.md
+
+# Temporary files
+*.tmp
+*.temp
