@@ -17,65 +17,83 @@ permissions:
   id-token: write
 
 jobs:
-  # Build and test in parallel
-  build-and-test:
-    name: Build & Test (${{ matrix.test-type }})
+  # Build first - needed for all tests
+  build:
+    name: Build Resume
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Build with Docker
+        run: make build
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  # Tests that actually exist and work
+  test:
+    name: Test (${{ matrix.test-type }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: build
     strategy:
       fail-fast: false
       matrix:
-        test-type: [build, unit, e2e, visual, accessibility, performance, security]
+        test-type: [unit, playwright, security]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Setup Node.js (for non-build tests)
-        if: matrix.test-type != 'build'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
       
-      - name: Install dependencies (for non-build tests)
-        if: matrix.test-type != 'build'
+      - name: Install dependencies
         run: |
           npm ci
-          if [ "${{ matrix.test-type }}" != "unit" ] && [ "${{ matrix.test-type }}" != "security" ]; then
+          if [ "${{ matrix.test-type }}" = "playwright" ]; then
             npx playwright install --with-deps chromium
           fi
 
-      - name: System info
-        run: |
-          echo "🔍 System: $(nproc) cores, $(free -h | grep '^Mem:' | awk '{print $2}') RAM"
-          
-      - name: Run ${{ matrix.test-type }}
+      - name: Download build artifacts (for Playwright tests)
+        if: matrix.test-type == 'playwright'
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+
+      - name: Run tests
         run: |
           case "${{ matrix.test-type }}" in
-            build) make build ;;
-            unit) make test-unit-internal ;;
-            e2e) make test-e2e-internal ;;
-            visual) make test-visual-internal ;;
-            accessibility) make test-accessibility-internal ;;
-            performance) make test-performance-internal ;;
-            security) npm audit --audit-level=high ;;
+            unit) 
+              echo "🧪 Running unit tests..."
+              npm run test:unit
+              ;;
+            playwright)
+              echo "🎭 Running Playwright tests (E2E, Visual, Accessibility, Performance)..."
+              echo "✅ Using build artifacts from build job"
+              npx playwright test
+              ;;
+            security)
+              echo "🔒 Running security audit..."
+              npm audit --audit-level=high
+              ;;
           esac
       
-      - name: Upload artifacts
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.test-type }}-results-${{ github.sha }}
           path: |
-            dist/
             coverage/
             test-results/
             playwright-report/
@@ -85,7 +103,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build-and-test
+    needs: [build, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -95,7 +113,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-results-${{ github.sha }}
+          name: build-${{ github.sha }}
           path: dist/
 
       - name: Setup Pages
@@ -109,19 +127,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # Quality gates
-  quality-check:
-    name: Quality Gates
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Check build status
-        run: |
-          if [ "${{ needs.build-and-test.result }}" = "success" ]; then
-            echo "✅ All tests passed! Ready for production."
-          else
-            echo "❌ Some tests failed. Check the build matrix above."
-            exit 1
-          fi
