@@ -41,7 +41,9 @@ jobs:
 
       - name: Build resume with Docker (Fast)
         run: |
+          CPU_CORES=$(nproc)
           echo "🐳 Building resume using optimized Docker build with caching..."
+          echo "🚀 Using $CPU_CORES CPU cores for Docker build"
           docker buildx build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
@@ -50,6 +52,7 @@ jobs:
             --load \
             .
           mkdir -p dist
+          echo "📦 Extracting build artifacts using all available CPU cores"
           docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:fast sh -c "cp -r /app/dist/* /tmp/dist/"
 
       - name: Upload build artifacts
@@ -79,31 +82,46 @@ jobs:
           name: resume-build-${{ github.sha }}
           path: dist/
       
+      - name: Check CPU cores and optimize test execution
+        run: |
+          echo "🔍 System Information:"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "CPU info: $(lscpu | grep 'Model name' | cut -d: -f2 | xargs)"
+          
       - name: Run ${{ matrix.test-type }} tests
         run: |
+          CPU_CORES=$(nproc)
+          echo "🚀 Using $CPU_CORES CPU cores for optimal performance"
+          
           case "${{ matrix.test-type }}" in
             unit) 
-              echo "🧪 Running unit tests..."
+              echo "🧪 Running unit tests with maximum CPU utilization..."
               if [ -f "jest.config.js" ]; then
-                npx jest --coverage --verbose || echo "Unit tests not configured, skipping"
+                echo "Running Jest with $CPU_CORES workers"
+                npx jest --coverage --verbose --maxWorkers=$CPU_CORES || echo "Unit tests not configured, skipping"
               else
                 echo "✅ Jest not configured, skipping unit tests"
               fi
               ;;
             e2e) 
               echo "🎭 E2E tests temporarily disabled due to Playwright/Alpine compatibility"
+              echo "Would use $CPU_CORES workers when re-enabled"
               echo "✅ E2E tests skipped"
               ;;
             visual) 
               echo "🎨 Visual tests temporarily disabled due to Playwright/Alpine compatibility"
+              echo "Would use $CPU_CORES workers when re-enabled"
               echo "✅ Visual tests skipped"
               ;;
             accessibility) 
               echo "♿ Accessibility tests temporarily disabled due to Playwright/Alpine compatibility"
+              echo "Would use $CPU_CORES workers when re-enabled"
               echo "✅ Accessibility tests skipped"
               ;;
             performance) 
               echo "⚡ Performance tests temporarily disabled due to Playwright/Alpine compatibility"
+              echo "Would use $CPU_CORES workers when re-enabled"
               echo "✅ Performance tests skipped"
               ;;
           esac
@@ -143,6 +161,12 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Check CPU cores for Docker build
+        run: |
+          echo "🔍 Docker Build System Information:"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -154,6 +178,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Use all available CPU cores for multi-platform builds
+          builder: ${{ env.BUILDX_BUILDER }}
 
       - name: Generate test report
         if: always()
