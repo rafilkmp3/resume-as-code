@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: write
@@ -22,41 +22,68 @@ jobs:
     name: Build Resume
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
+      - name: Display runtime info
+        run: |
+          echo "::group::Runtime Environment"
+          echo "GitHub Runner: ${{ runner.os }} ${{ runner.arch }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "CPU Cores: $(nproc)"
+          echo "Memory: $(free -h | awk '/^Mem:/ {print $2}')"
+          echo "Disk: $(df -h / | awk 'NR==2 {print $4}')"
+          echo "::endgroup::"
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
       - name: Build with Docker (with caching)
         run: |
-          echo "🚀 Building with Docker layer caching..."
+          echo "::group::🚀 Building with Docker layer caching"
+          echo "Runner: ${{ runner.os }} ${{ runner.arch }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Ref: ${{ github.ref_name }}"
           START_TIME=$(date +%s)
           
-          docker buildx create --use --driver docker-container --name builder || true
+          docker buildx create --use --driver docker-container --name builder-${{ github.run_id }} || true
           docker buildx build \
             --target builder \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
-            --tag resume-as-code:builder \
+            --cache-from type=gha,scope=${{ github.ref_name }} \
+            --cache-to type=gha,mode=max,scope=${{ github.ref_name }} \
+            --tag resume-as-code:builder-${{ github.sha }} \
             --load \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
             .
           mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:builder sh -c "cp -r /app/dist/* /tmp/dist/"
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:builder-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
           
           END_TIME=$(date +%s)
           BUILD_TIME=$((END_TIME - START_TIME))
           echo "✅ Build completed with caching in ${BUILD_TIME}s"
           echo "📁 Generated files:"
           ls -la dist/
+          echo "::endgroup::"
+        env:
+          DOCKER_BUILDKIT: 1
         
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.sha }}
+          name: build-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}
           path: dist/
-          retention-days: 7
+          retention-days: ${{ github.event_name == 'pull_request' && '7' || '30' }}
+          compression-level: 6
 
   # Tests that actually exist and work
   test:
@@ -68,6 +95,10 @@ jobs:
       fail-fast: false
       matrix:
         test-type: [unit, playwright, security]
+    env:
+      CI: true
+      NODE_ENV: test
+      FORCE_COLOR: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,52 +114,71 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-playwright-
             ${{ runner.os }}-playwright-
       
       - name: Install dependencies
         run: |
-          npm ci
+          echo "::group::Installing npm dependencies"
+          npm ci --prefer-offline --no-audit
+          echo "::endgroup::"
+          
           if [ "${{ matrix.test-type }}" = "playwright" ]; then
+            echo "::group::Installing Playwright browsers"
             npx playwright install --with-deps chromium
+            echo "::endgroup::"
           fi
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: ${{ matrix.test-type != 'playwright' && 'true' || 'false' }}
 
       - name: Download build artifacts (for Playwright tests)
         if: matrix.test-type == 'playwright'
         uses: actions/download-artifact@v4
         with:
-          name: build-${{ github.sha }}
+          name: build-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}
           path: dist/
 
       - name: Run tests
         run: |
           case "${{ matrix.test-type }}" in
             unit) 
-              echo "🧪 Running unit tests..."
+              echo "::group::🧪 Running unit tests"
               npm run test:unit
+              echo "::endgroup::"
               ;;
             playwright)
-              echo "🎭 Running Playwright tests (E2E, Visual, Accessibility, Performance)..."
+              echo "::group::🎭 Running Playwright tests"
               echo "✅ Using build artifacts from build job"
-              npx playwright test
+              echo "Runner: ${{ runner.os }} ${{ runner.arch }}"
+              echo "Workers: ${{ runner.os == 'Linux' && '2' || '1' }}"
+              npx playwright test --workers=${{ runner.os == 'Linux' && '2' || '1' }}
+              echo "::endgroup::"
               ;;
             security)
-              echo "🔒 Running security audit..."
-              npm audit --audit-level=high
+              echo "::group::🔒 Running security audit"
+              npm audit --audit-level=high --prefer-offline
+              echo "::endgroup::"
               ;;
           esac
+        env:
+          PWTEST_SKIP_TEST_OUTPUT: true
+          CI_COMMIT_SHA: ${{ github.sha }}
+          CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+          CI_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.test-type }}-results-${{ github.sha }}
+          name: ${{ matrix.test-type }}-results-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}
           path: |
             coverage/
             test-results/
             playwright-report/
-          retention-days: 7
+          retention-days: ${{ github.event_name == 'pull_request' && '7' || '30' }}
+          include-hidden-files: true
 
   # Deploy only after all tests pass
   deploy:
@@ -144,7 +194,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-${{ github.sha }}
+          name: build-${{ github.sha }}-Linux-X64
           path: dist/
 
       - name: Setup Pages
@@ -158,3 +208,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: Generate job summary
+        if: always()
+        run: |
+          echo "## 🚀 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Workflow** | ${{ github.workflow }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Event** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Ref** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deploy URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Resume successfully built, tested, and deployed!" >> $GITHUB_STEP_SUMMARY
