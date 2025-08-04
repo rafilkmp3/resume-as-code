@@ -104,11 +104,11 @@ COPY Makefile ./
 # Install all dependencies (including dev)
 RUN npm ci && npm cache clean --force
 
-# Install Playwright browsers
-RUN npx playwright install --with-deps chromium
-
 # Copy source code
 COPY . .
+
+# Install Playwright browsers (without --with-deps since we already have system deps)
+RUN npx playwright install chromium
 
 # Expose ports
 EXPOSE 3000 3001
@@ -129,6 +129,9 @@ RUN addgroup -g 1001 -S testuser && \
     chown -R testuser:testuser /app
 
 USER testuser
+
+# Install Playwright browsers as testuser
+RUN npx playwright install chromium
 
 # Default CI command - run all tests
 CMD ["make", "test"]
