@@ -41,7 +41,10 @@
       "mcp__zen__challenge",
       "WebFetch(domain:m3.material.io)",
       "WebFetch(domain:developer.apple.com)",
-      "WebFetch(domain:sarunw.com)"
+      "WebFetch(domain:sarunw.com)",
+      "Bash(gh workflow:*)",
+      "Bash(tree:*)",
+      "Bash(timeout 30s make test-e2e)"
     ],
     "deny": []
   }

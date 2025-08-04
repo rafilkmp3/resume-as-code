@@ -138,3 +138,34 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 original-pdf-not-ai/
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows system files
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Test results
+test-results/
+/test-reports/
+/playwright-report/
+playwright/.cache/
+
+# Jest
+jest_*.json
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

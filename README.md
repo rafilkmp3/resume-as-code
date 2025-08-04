@@ -206,7 +206,9 @@ resume-as-code/
 ├── 📦 dist/                  # Generated artifacts
 │   ├── index.html           # Responsive web resume
 │   ├── resume.pdf           # Print-ready PDF export
-│   └── eu-no-foguete-perfil.jpeg  # Profile image asset
+│   └── assets/
+│       └── images/
+│           └── profile.jpeg      # Profile image asset
 └── 📋 package.json           # Node.js dependencies and scripts
 ```
 

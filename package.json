@@ -33,5 +33,14 @@
   "bugs": {
     "url": "https://github.com/rafilkmp3/resume-as-code/issues"
   },
-  "homepage": "https://github.com/rafilkmp3/resume-as-code#readme"
+  "homepage": "https://github.com/rafilkmp3/resume-as-code#readme",
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@playwright/test": "^1.54.2",
+    "babel-jest": "^30.0.5",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^26.1.0"
+  }
 }

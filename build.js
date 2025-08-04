@@ -28,12 +28,57 @@ function generateHTML() {
       return a === b;
   });
 
-  // Copy profile image if it exists
-  if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
-    const imagePath = resumeData.basics.image;
-    fs.copyFileSync(imagePath, `./dist/${path.basename(imagePath)}`);
-    console.log(`📸 Copied profile image: ${imagePath}`);
+  // Copy assets directory to dist
+  function copyAssets() {
+    const assetsDir = './assets';
+    const distAssetsDir = './dist/assets';
+    
+    if (fs.existsSync(assetsDir)) {
+      // Create assets directory in dist
+      if (!fs.existsSync(distAssetsDir)) {
+        fs.mkdirSync(distAssetsDir, { recursive: true });
+      }
+      
+      // Copy all files and subdirectories
+      function copyRecursive(src, dest) {
+        const entries = fs.readdirSync(src, { withFileTypes: true });
+        
+        for (const entry of entries) {
+          const srcPath = path.join(src, entry.name);
+          const destPath = path.join(dest, entry.name);
+          
+          if (entry.isDirectory()) {
+            if (!fs.existsSync(destPath)) {
+              fs.mkdirSync(destPath, { recursive: true });
+            }
+            copyRecursive(srcPath, destPath);
+          } else {
+            fs.copyFileSync(srcPath, destPath);
+          }
+        }
+      }
+      
+      copyRecursive(assetsDir, distAssetsDir);
+      console.log('📁 Copied assets directory to dist/');
+    }
+    
+    // Also copy profile image if it exists (backward compatibility)
+    if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
+      const imagePath = resumeData.basics.image;
+      const destPath = `./dist/${imagePath}`;
+      const destDir = path.dirname(destPath);
+      
+      // Ensure destination directory exists
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      
+      fs.copyFileSync(imagePath, destPath);
+      console.log(`📸 Copied profile image: ${imagePath}`);
+    }
   }
+  
+  copyAssets();
   
   const html = template(resumeData);
   fs.writeFileSync('./dist/index.html', html);
