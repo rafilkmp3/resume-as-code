@@ -251,6 +251,8 @@ jobs:
     needs: [build, test-desktop, test-mobile, test-tablet]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
