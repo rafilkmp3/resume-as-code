@@ -59,7 +59,8 @@
       "Bash(docker:*)",
       "WebFetch(domain:github.com)",
       "Bash(gh pr view:*)",
-      "Bash(gh pr close:*)"
+      "Bash(gh pr close:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
