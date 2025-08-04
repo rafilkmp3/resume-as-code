@@ -56,7 +56,10 @@
       "Bash(pip3 install:*)",
       "Bash(yamllint:*)",
       "Bash(docker build:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr close:*)"
     ],
     "deny": []
   }
