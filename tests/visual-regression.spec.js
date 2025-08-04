@@ -2,7 +2,10 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Visual Regression Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use file:// protocol to avoid server dependency for CI compatibility
+    const filePath = `file://${process.cwd()}/dist/index.html`;
+    await page.goto(filePath);
+    await page.waitForLoadState('networkidle');
     // Wait for page to load completely
     await expect(page.locator('h1')).toContainText('Rafael Bernardo Sathler');
     // Wait for any animations or transitions to complete

@@ -8,7 +8,7 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'dot',
   use: {
-    baseURL: 'http://localhost:3000',
+    headless: true, // Force headless mode for CI compatibility
     trace: 'on-first-retry',
   },
   projects: [
@@ -31,9 +31,5 @@ module.exports = defineConfig({
       },
     },
   ],
-  webServer: {
-    command: 'npm run serve',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-  },
+  // Removed webServer config - tests use file:// protocol instead
 });

@@ -934,6 +934,11 @@
         .footer:hover::before {
             left: 100%;
         }
+        
+        /* Hide QR code section in screen mode */
+        .print-qr-section {
+            display: none;
+        }
 
         /* =============================================== */
         /* AMAZING WEB ANIMATIONS & EFFECTS              */
@@ -1349,8 +1354,37 @@
         @media print {
             /* CLEAN SIMPLE PRINT LAYOUT FOR PROFESSIONAL PDF */
             
-            /* Hide interactive elements */
-            .controls, .parallax-bg, .fade-in-section { display: none !important; }
+            /* Hide interactive elements but NOT content sections */
+            .controls, .parallax-bg { display: none !important; }
+            
+            /* Show content sections that were hidden by fade-in animations */
+            .fade-in-section {
+                display: block !important;
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+            
+            /* Force all sections to be visible and properly spaced */
+            .section {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin: 1rem 0 !important;
+                padding: 0.5rem 0 !important;
+            }
+            
+            /* Ensure left and right columns show in single column for print */
+            .left-column, .right-column {
+                display: block !important;
+                width: 100% !important;
+                float: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             
             /* Clean print setup */
             @page {
@@ -1358,19 +1392,122 @@
                 size: A4;
             }
             
-            * {
+            /* Targeted styling instead of destructive wildcard */
+            body {
                 background: white !important;
                 color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            /* Remove shadows from all elements without breaking layout */
+            * {
                 box-shadow: none !important;
                 text-shadow: none !important;
             }
             
+            /* Ensure content sections maintain visibility and proper layout */
+            .main-content {
+                background: transparent !important;
+                color: #000 !important;
+                display: block !important; /* Override grid layout for print */
+                grid-template-columns: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            .section, .work-item, .project-item, .education-item {
+                background: transparent !important;
+                color: #000 !important;
+                page-break-inside: avoid;
+                margin-bottom: 1rem !important;
+            }
+            
+            /* Fix header for print - remove gradient background */
+            .header {
+                background: white !important;
+                color: #000 !important;
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
+                border-bottom: 2px solid #000 !important;
+            }
+            
+            .header h1, .header h2, .header .subtitle, .header * {
+                color: #000 !important;
+            }
+            
+            /* Hide dark mode toggle specifically */
+            .dark-toggle, .controls {
+                display: none !important;
+            }
+            
+            /* Add QR code for print version */
+            .print-qr-section {
+                display: block !important;
+                text-align: center !important;
+                margin: 2rem 0 !important;
+                padding: 1rem !important;
+                border-top: 1px solid #000 !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .print-qr-code {
+                width: 100px !important;
+                height: 100px !important;
+                margin: 0 auto 0.5rem !important;
+                display: block !important;
+            }
+            
+            .print-qr-text {
+                font-size: 10pt !important;
+                color: #000 !important;
+                margin: 0 !important;
+            }
+            
             body {
                 font-family: "Times New Roman", serif;
-                font-size: 11pt;
-                line-height: 1.2;
+                font-size: 10pt; /* Smaller font for more compact layout */
+                line-height: 1.1; /* Tighter line spacing */
                 margin: 0;
                 padding: 0;
+            }
+            
+            /* Compact section spacing for print */
+            .section h2 {
+                font-size: 14pt !important;
+                margin: 0.8rem 0 0.4rem 0 !important;
+                padding: 0 !important;
+                font-weight: bold !important;
+            }
+            
+            .work-item, .project-item, .education-item {
+                margin-bottom: 0.6rem !important;
+                padding: 0.2rem 0 !important;
+            }
+            
+            .work-item h3, .project-item h3 {
+                font-size: 11pt !important;
+                margin: 0 0 0.1rem 0 !important;
+                font-weight: bold !important;
+            }
+            
+            .work-item .meta, .project-item .meta {
+                font-size: 9pt !important;
+                margin-bottom: 0.2rem !important;
+                font-style: italic !important;
+            }
+            
+            .work-item ul, .project-item ul {
+                margin: 0.2rem 0 !important;
+                padding-left: 1rem !important;
+            }
+            
+            .work-item li, .project-item li {
+                margin-bottom: 0.1rem !important;
+                font-size: 9pt !important;
+                line-height: 1.1 !important;
             }
             
             .container {
@@ -1388,7 +1525,13 @@
             }
             
             .profile-photo {
-                display: none !important;
+                display: block !important;
+                width: 80px !important;
+                height: 80px !important;
+                border-radius: 50% !important;
+                float: right !important;
+                margin: 0 0 1rem 1rem !important;
+                border: 2px solid #000 !important;
             }
             
             .header-content h1 {
@@ -1507,31 +1650,117 @@
                 line-height: 1.2;
             }
             
-            /* Simple skills */
+            /* Professional skills section - optimized for compact print */
             .skill-category {
-                margin-bottom: 8pt;
+                margin-bottom: 6pt;
+                page-break-inside: avoid;
             }
             
             .skill-name {
-                font-weight: bold;
-                font-size: 11pt;
+                font-weight: 600;
+                font-size: 10pt;
                 margin: 0 0 2pt 0;
                 color: #000 !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5pt;
             }
             
             .skill-keywords {
-                line-height: 1.3;
+                line-height: 1.2;
+                margin-bottom: 4pt;
             }
             
             .skill-tag {
                 color: #000 !important;
-                font-size: 10pt;
-                margin: 0 4pt 2pt 0;
+                font-size: 9pt;
+                margin: 0 3pt 1pt 0;
                 display: inline;
+                padding: 0;
+                border: none;
+                background: none;
             }
             
-            .skill-tag::after {
-                content: ", ";
+            .skill-tag:after {
+                content: ',';
+                margin-right: 2pt;
+            }
+            
+            .skill-tag:last-child:after {
+                content: '';
+            }
+            
+            /* Professional section separators */
+            .section {
+                border-bottom: 1pt solid #ddd !important;
+                padding-bottom: 8pt !important;
+                margin-bottom: 10pt !important;
+            }
+            
+            .section:last-child {
+                border-bottom: none !important;
+            }
+            
+            /* Section headers with better styling */
+            .section h2 {
+                font-size: 12pt !important;
+                font-weight: 700 !important;
+                color: #000 !important;
+                margin: 0 0 6pt 0 !important;
+                padding: 2pt 0 4pt 0 !important;
+                text-transform: uppercase;
+                letter-spacing: 1pt;
+                border-bottom: 0.5pt solid #000 !important;
+            }
+            
+            /* Professional education section */
+            .education-item {
+                margin-bottom: 6pt !important;
+                page-break-inside: avoid;
+            }
+            
+            .education-item h3 {
+                font-size: 10pt !important;
+                font-weight: 600 !important;
+                margin: 0 0 1pt 0 !important;
+                color: #000 !important;
+            }
+            
+            .education-item .edu-institution {
+                font-size: 9pt !important;
+                font-weight: 500 !important;
+                color: #333 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .education-item .edu-date {
+                font-size: 8pt !important;
+                color: #666 !important;
+                margin: 0 !important;
+            }
+            
+            /* Certificates section */
+            .certificate-item {
+                margin-bottom: 4pt !important;
+                page-break-inside: avoid;
+            }
+            
+            .cert-name {
+                font-size: 9pt !important;
+                font-weight: 600 !important;
+                color: #000 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .cert-issuer {
+                font-size: 8pt !important;
+                color: #333 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .cert-date {
+                font-size: 8pt !important;
+                color: #666 !important;
+                margin: 0 !important;
             }
             
             .skill-tag:last-child::after {
@@ -1826,10 +2055,10 @@
             }
         }
         
-        /* Mobile portrait */
+        /* Mobile portrait - Enhanced 2024 Standards */
         @media (max-width: 480px) {
             .header {
-                padding: 1.5rem 0.75rem;
+                padding: 2rem 1rem; /* Increased for better breathing room */
             }
             
             .header h1 {
@@ -1919,6 +2148,38 @@
             
             .header-content .subtitle {
                 font-size: 1rem;
+            }
+            
+            /* Enhanced Touch Targets - 2024 WCAG Standards */
+            .links .link-item {
+                min-width: 44px;
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+                margin: 0.25rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+            }
+            
+            /* Better spacing for social media buttons */
+            .links {
+                gap: 0.5rem;
+                justify-content: center;
+                flex-wrap: wrap;
+                padding: 1rem 0;
+            }
+            
+            /* Improved contact info layout */
+            .contact-info {
+                font-size: 0.9rem;
+                line-height: 1.4;
+                margin: 1rem 0;
+            }
+            
+            .contact-item {
+                margin: 0.25rem 0.5rem;
+                display: inline-block;
             }
         }
         
@@ -2159,6 +2420,16 @@
                 {{/if}}
             </div>
         </div>
+        
+        <!-- QR Code Section - Only visible in print -->
+        <div class="print-qr-section">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAMGklEQVR4Xu2dQXLjOAyFv5p7dWrSnE5OnMksd2qvzjJrz8ZZubIKk4LAN/jzXS7SFEXwIwBScrxer9e3ePENAQhshOBNQBECAAIQEBAwAhCAAAQgYAQgAAEIQMEoQgACENgIQAACEICAEYAABCAABaMIAQhAYCMAAQhAAAJGAAIQgAAEjCIEIACBjQAEIAABCBgBCEAAAhAwiRBAAGAgYAEQgAAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAQgAAEIAABCCAAQhAAAIQgAAEIAABCEAAAhCAAAQgAAEIQAAC7/8HgwAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAQwAAEIAABCAAAQgAAIEIAABCAAAQhAAAIQgAAEIQAACEIAABCAAAAhCAAAQgAAEIQAACEIAABCAAAQgAAI" class="print-qr-code" alt="QR Code to online resume">
+            <p class="print-qr-text">
+                <strong>View online version:</strong><br>
+                rafilkmp3.github.io/resume-as-code
+            </p>
+        </div>
+        
         <footer class="footer">
             Developed with ❤️ in Rio de Janeiro
         </footer>

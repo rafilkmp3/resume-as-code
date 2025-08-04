@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Security audit (npm audit)
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level=high
+          echo "✅ Security audit completed - no high/critical vulnerabilities found"
+      
       - name: Build resume
         run: make build
       

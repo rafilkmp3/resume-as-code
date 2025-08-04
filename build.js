@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
+const QRCode = require('qrcode');
 
 console.log('🏗️  Building resume...');
 
@@ -10,8 +11,29 @@ if (!fs.existsSync('./dist')) {
   fs.mkdirSync('./dist');
 }
 
+// Generate QR code for the online version
+async function generateQRCode() {
+  console.log('🔗 Generating QR code for online version...');
+  
+  const onlineUrl = 'https://rafilkmp3.github.io/resume-as-code/';
+  try {
+    const qrCodeDataURL = await QRCode.toDataURL(onlineUrl, {
+      width: 200,
+      margin: 1,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+    return qrCodeDataURL;
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    return null;
+  }
+}
+
 // Generate HTML from template and data
-function generateHTML() {
+async function generateHTML() {
   console.log('📝 Generating HTML from template...');
   
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
@@ -80,7 +102,19 @@ function generateHTML() {
   
   copyAssets();
   
-  const html = template(resumeData);
+  // Generate QR code
+  const qrCodeDataURL = await generateQRCode();
+  
+  // Replace the placeholder QR code with the real one
+  let html = template(resumeData);
+  if (qrCodeDataURL) {
+    html = html.replace(
+      /src="data:image\/png;base64,[^"]*"/,
+      `src="${qrCodeDataURL}"`
+    );
+    console.log('✅ QR code integrated successfully!');
+  }
+  
   fs.writeFileSync('./dist/index.html', html);
   
   console.log('✅ HTML generated successfully!');
@@ -154,7 +188,7 @@ async function generatePDF() {
 
 // Run the build
 async function build() {
-  generateHTML();
+  await generateHTML();
   await generatePDF();
   console.log('🎉 Resume build complete!');
   console.log('📁 Files generated in ./dist/');

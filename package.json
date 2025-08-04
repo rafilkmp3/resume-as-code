@@ -41,6 +41,7 @@
     "babel-jest": "^30.0.5",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "qrcode": "^1.5.4"
   }
 }
