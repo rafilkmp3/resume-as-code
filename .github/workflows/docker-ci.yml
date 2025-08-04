@@ -89,31 +89,31 @@ jobs:
           echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
           echo "CPU info: $(lscpu | grep 'Model name' | cut -d: -f2 | xargs)"
           
-      - name: Run ${{ matrix.test-type }} tests via Docker/Makefile
+      - name: Run ${{ matrix.test-type }} tests
         run: |
           CPU_CORES=$(nproc)
           echo "🚀 Using $CPU_CORES CPU cores for optimal performance"
-          echo "🐳 Running tests in Docker container via Makefile"
+          echo "🏗️ Running tests via standard Makefile targets (same as local)"
           
           case "${{ matrix.test-type }}" in
             unit) 
-              echo "🧪 Running unit tests via make test-unit..."
+              echo "🧪 Running: make test-unit"
               make test-unit
               ;;
             e2e) 
-              echo "🎭 Running E2E tests via make test-e2e..."
+              echo "🎭 Running: make test-e2e"
               make test-e2e
               ;;
             visual) 
-              echo "🎨 Running visual tests via make test-visual..."
+              echo "🎨 Running: make test-visual"
               make test-visual
               ;;
             accessibility) 
-              echo "♿ Running accessibility tests via make test-accessibility..."
+              echo "♿ Running: make test-accessibility"
               make test-accessibility
               ;;
             performance) 
-              echo "⚡ Running performance tests via make test-performance..."
+              echo "⚡ Running: make test-performance"
               make test-performance
               ;;
           esac

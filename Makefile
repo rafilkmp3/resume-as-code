@@ -19,21 +19,21 @@ DOCKER_TAG=latest
 help:
 	@echo "$(CYAN)📋 Resume-as-Code - Available Commands$(NC)"
 	@echo ""
-	@echo "$(GREEN)🐳 Docker-First Commands (Local binaries deprecated):$(NC)"
-	@echo "  $(CYAN)make docker-check$(NC)   - Check if Docker is running"
-	@echo ""
 	@echo "$(GREEN)🏗️  Build & Development:$(NC)"
-	@echo "  $(GREEN)make build$(NC)         - Build HTML and PDF resume (Docker)"
-	@echo "  $(PURPLE)make dev$(NC)           - Development server with hot reload (Docker)"
-	@echo "  $(PURPLE)make serve$(NC)         - Serve built resume (Docker)"
+	@echo "  $(GREEN)make build$(NC)         - Build HTML and PDF resume"
+	@echo "  $(PURPLE)make dev$(NC)           - Development server with hot reload"
+	@echo "  $(PURPLE)make serve$(NC)         - Serve built resume"
 	@echo ""
 	@echo "$(GREEN)🧪 Testing & Quality:$(NC)"
-	@echo "  $(BLUE)make test$(NC)          - Run all tests (Docker)"
-	@echo "  $(BLUE)make test-unit$(NC)     - Run unit tests with coverage (Docker)"
-	@echo "  $(BLUE)make test-e2e$(NC)      - Run end-to-end tests (Docker)"
-	@echo "  $(BLUE)make test-visual$(NC)   - Run visual regression tests (Docker)"
-	@echo "  $(BLUE)make test-accessibility$(NC) - Run accessibility tests (Docker)"
-	@echo "  $(BLUE)make test-performance$(NC) - Run performance tests (Docker)"
+	@echo "  $(BLUE)make test$(NC)          - Run all tests"
+	@echo "  $(BLUE)make test-unit$(NC)     - Run unit tests with coverage"
+	@echo "  $(BLUE)make test-e2e$(NC)      - Run end-to-end tests"
+	@echo "  $(BLUE)make test-visual$(NC)   - Run visual regression tests"
+	@echo "  $(BLUE)make test-accessibility$(NC) - Run accessibility tests"
+	@echo "  $(BLUE)make test-performance$(NC) - Run performance tests"
+	@echo ""
+	@echo "$(GREEN)🐳 Docker:$(NC)"
+	@echo "  $(CYAN)make docker-check$(NC)   - Check if Docker is running"
 	@echo ""
 	@echo "$(GREEN)🛠️  Utilities:$(NC)"
 	@echo "  $(CYAN)make status$(NC)         - Show project status and health check"
@@ -51,13 +51,13 @@ docker-check:
 	@docker info >/dev/null 2>&1 || { echo "$(RED)❌ Docker daemon is not running. Please start Docker first.$(NC)"; exit 1; }
 	@echo "$(GREEN)✅ Docker is running$(NC)"
 
-# Build resume (HTML + PDF + assets) - Docker only
+# Build resume (HTML + PDF + assets)
 build: docker-check
-	@echo "$(GREEN)🐳 Building resume in Docker...$(NC)"
+	@echo "$(GREEN)🏗️ Building resume...$(NC)"
 	@docker build --target builder -t $(DOCKER_IMAGE):builder .
 	@mkdir -p dist
 	@docker run --rm -v "$(PWD):/host" $(DOCKER_IMAGE):builder sh -c "cp -r /app/dist/* /host/dist/ || cp -r /app/dist/. /host/dist/"
-	@echo "$(GREEN)✅ Docker build completed successfully!$(NC)"
+	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 	@echo "$(CYAN)📁 Output files:$(NC)"
 	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
 	@echo "  - PDF:  $(GREEN)./dist/resume.pdf$(NC)"
@@ -69,33 +69,33 @@ build-internal:
 	@npm run build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 
-# Development server with hot reload - Docker only
+# Development server with hot reload
 dev: docker-check
-	@echo "$(PURPLE)🐳 Starting development server in Docker...$(NC)"
+	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
 	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"
 	@echo "$(CYAN)📄 PDF: http://localhost:$(DEV_PORT)/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	@docker-compose up dev
 
-# Serve built resume - Docker only
+# Serve built resume
 serve: docker-check
-	@echo "$(PURPLE)🐳 Starting production server in Docker...$(NC)"
+	@echo "$(PURPLE)🌐 Starting production server...$(NC)"
 	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"
 	@echo "$(CYAN)📄 PDF: http://localhost:$(DEV_PORT)/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
 	@docker-compose up production
 
-# Run all tests - Docker only
+# Run all tests
 test: docker-check test-unit test-e2e test-visual test-accessibility test-performance
-	@echo "$(GREEN)🎉 All Docker tests completed!$(NC)"
+	@echo "$(GREEN)🎉 All tests completed!$(NC)"
 
 # Internal test runner (runs inside Docker container)
 test-internal: test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
 	@echo "$(GREEN)✅ All internal tests completed$(NC)"
 
-# Run unit tests - Docker only
+# Run unit tests
 test-unit: docker-check
-	@echo "$(BLUE)🐳 Running unit tests in Docker...$(NC)"
+	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
 	@docker-compose run --rm ci make test-unit-internal
 
 test-unit-internal:
@@ -106,9 +106,9 @@ test-unit-internal:
 		echo "$(YELLOW)⚠️  Jest not configured, skipping unit tests$(NC)"; \
 	fi
 
-# Run end-to-end tests - Docker only
+# Run end-to-end tests
 test-e2e: docker-check
-	@echo "$(BLUE)🐳 Running E2E tests in Docker...$(NC)"
+	@echo "$(BLUE)🎭 Running E2E tests...$(NC)"
 	@docker-compose run --rm ci make test-e2e-internal
 
 test-e2e-internal:
@@ -119,9 +119,9 @@ test-e2e-internal:
 		echo "$(YELLOW)⚠️  Playwright not configured, skipping E2E tests$(NC)"; \
 	fi
 
-# Run visual regression tests - Docker only
+# Run visual regression tests
 test-visual: docker-check
-	@echo "$(BLUE)🐳 Running visual tests in Docker...$(NC)"
+	@echo "$(BLUE)🎨 Running visual tests...$(NC)"
 	@docker-compose run --rm ci make test-visual-internal
 
 test-visual-internal:
@@ -132,9 +132,9 @@ test-visual-internal:
 		echo "$(YELLOW)⚠️  Playwright not configured, skipping visual tests$(NC)"; \
 	fi
 
-# Run accessibility tests - Docker only
+# Run accessibility tests
 test-accessibility: docker-check
-	@echo "$(BLUE)🐳 Running accessibility tests in Docker...$(NC)"
+	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
 	@docker-compose run --rm ci make test-accessibility-internal
 
 test-accessibility-internal:
@@ -145,9 +145,9 @@ test-accessibility-internal:
 		echo "$(YELLOW)⚠️  Playwright not configured, skipping accessibility tests$(NC)"; \
 	fi
 
-# Run performance tests - Docker only
+# Run performance tests
 test-performance: docker-check
-	@echo "$(BLUE)🐳 Running performance tests in Docker...$(NC)"
+	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
 	@docker-compose run --rm ci make test-performance-internal
 
 test-performance-internal:
