@@ -118,7 +118,7 @@ test.describe('Performance Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
-    const cssCoverage = await page.coverage.stopCSSCoverage();
+    const cssCoverage = await page.coverage.stopCSSCoverage(); // Stop coverage here to get data
     
     let totalBytes = 0;
     let usedBytes = 0;
@@ -137,7 +137,8 @@ test.describe('Performance Tests', () => {
       expect(usagePercentage).toBeGreaterThan(40);
     }
     
-    // Restart coverage for cleanup in afterEach
+    // Re-enable coverage for subsequent tests in the same file, if any.
+    // The afterEach hook will handle the final stop.
     await page.coverage.startCSSCoverage();
   });
 
@@ -153,7 +154,7 @@ test.describe('Performance Tests', () => {
       await darkToggle.click();
     }
     
-    const jsCoverage = await page.coverage.stopJSCoverage();
+    const jsCoverage = await page.coverage.stopJSCoverage(); // Stop coverage here to get data
     
     let totalBytes = 0;
     let usedBytes = 0;
@@ -172,7 +173,8 @@ test.describe('Performance Tests', () => {
       expect(usagePercentage).toBeGreaterThan(30);
     }
     
-    // Restart coverage for cleanup in afterEach
+    // Re-enable coverage for subsequent tests in the same file, if any.
+    // The afterEach hook will handle the final stop.
     await page.coverage.startJSCoverage();
   });
 
