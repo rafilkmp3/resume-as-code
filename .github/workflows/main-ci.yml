@@ -1,11 +1,12 @@
-name: Comprehensive CI/CD Workflow
+name: Comprehensive CI/CD Workflow (DEPRECATED)
 
-on:
-  push:
-    branches: [ main, develop, 'feature/**' ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+# Disabled - replaced by docker-ci.yml
+# on:
+#   push:
+#     branches: [ main, develop, 'feature/**' ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
 
 permissions:
   contents: write
