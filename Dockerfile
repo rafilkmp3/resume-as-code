@@ -1,59 +1,76 @@
 # Multi-stage Dockerfile for Resume-as-Code CI/CD
-FROM node:18-alpine AS builder
+FROM node:22-slim AS builder
 
-# Install system dependencies for PDF generation
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    make
-
-# Set environment for Puppeteer
+# Set environment for Puppeteer and install dependencies in one layer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    DEBIAN_FRONTEND=noninteractive
 
-# Create app directory
+# Install system dependencies and create app directory in one layer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chromium \
+        fonts-liberation \
+        libatk-bridge2.0-0 \
+        libdrm2 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libgbm1 \
+        libxss1 \
+        libasound2 \
+        make \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && mkdir -p /app
+
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY Makefile ./
+# Copy package files for dependency caching
+COPY package*.json Makefile ./
 
-# Install dependencies (including dev dependencies for build process)
-RUN npm ci && npm cache clean --force
+# Install dependencies (including dev for build process)
+RUN npm ci \
+    && npm cache clean --force
 
 # Copy source code
 COPY . .
 
 # Build the resume
-RUN make build-internal
+RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:22-slim AS production
 
-# Install minimal runtime dependencies
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    dumb-init
-
-# Set environment
+# Set environment and install runtime dependencies in one layer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    NODE_ENV=production \
+    DEBIAN_FRONTEND=noninteractive
 
-# Create app directory and user
+# Install runtime dependencies, create user, and setup app in one layer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chromium \
+        fonts-liberation \
+        libatk-bridge2.0-0 \
+        libdrm2 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libgbm1 \
+        libxss1 \
+        libasound2 \
+        dumb-init \
+        wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && addgroup --gid 1001 nodejs \
+    && adduser --disabled-password --gecos '' --uid 1001 --gid 1001 resume \
+    && mkdir -p /app \
+    && chown resume:nodejs /app
+
 WORKDIR /app
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S resume -u 1001
 
 # Copy built application from builder stage
 COPY --from=builder --chown=resume:nodejs /app/dist ./dist
@@ -75,24 +92,29 @@ ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "serve"]
 
 # Development stage
-FROM node:18-alpine AS development
+FROM node:22-slim AS development
 
 # Install development dependencies including Playwright
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     chromium \
-    firefox \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
+    firefox-esr \
+    fonts-liberation \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2 \
     make \
-    git
+    git \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Set environment
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     NODE_ENV=development
 
 WORKDIR /app
