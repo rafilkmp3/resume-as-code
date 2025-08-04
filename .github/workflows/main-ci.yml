@@ -676,8 +676,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: [build, quality-gate]
-    # Only deploy from main branch and not from release PRs
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore(main): release')
+    # Only deploy from main branch and not from release PRs  
+    if: false  # Temporarily disabled to fix workflow syntax
     steps:
       - name: Checkout
         uses: actions/checkout@v4
