@@ -1,0 +1,127 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  # Build and test in parallel
+  build-and-test:
+    name: Build & Test (${{ matrix.test-type }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [build, unit, e2e, visual, accessibility, performance, security]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Setup Node.js (for non-build tests)
+        if: matrix.test-type != 'build'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies (for non-build tests)
+        if: matrix.test-type != 'build'
+        run: |
+          npm ci
+          if [ "${{ matrix.test-type }}" != "unit" ] && [ "${{ matrix.test-type }}" != "security" ]; then
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: System info
+        run: |
+          echo "🔍 System: $(nproc) cores, $(free -h | grep '^Mem:' | awk '{print $2}') RAM"
+          
+      - name: Run ${{ matrix.test-type }}
+        run: |
+          case "${{ matrix.test-type }}" in
+            build) make build ;;
+            unit) make test-unit-internal ;;
+            e2e) make test-e2e-internal ;;
+            visual) make test-visual-internal ;;
+            accessibility) make test-accessibility-internal ;;
+            performance) make test-performance-internal ;;
+            security) npm audit --audit-level=high ;;
+          esac
+      
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.test-type }}-results-${{ github.sha }}
+          path: |
+            dist/
+            coverage/
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # Deploy only after all tests pass
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-results-${{ github.sha }}
+          path: dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Quality gates
+  quality-check:
+    name: Quality Gates
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.build-and-test.result }}" = "success" ]; then
+            echo "✅ All tests passed! Ready for production."
+          else
+            echo "❌ Some tests failed. Check the build matrix above."
+            exit 1
+          fi
