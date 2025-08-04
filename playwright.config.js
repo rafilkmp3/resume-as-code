@@ -33,8 +33,9 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'npx http-server dist',
-    url: 'http://localhost:8080',
+    command: process.env.CI ? 'PORT=3001 node server.js' : 'npm run serve:test',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
 });

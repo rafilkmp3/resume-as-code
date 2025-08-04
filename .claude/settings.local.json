@@ -65,7 +65,9 @@
       "Bash(npm outdated)",
       "Bash(gh api:*)",
       "Bash(npm show:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(python3:*)"
     ],
     "deny": []
   }

@@ -53,6 +53,23 @@ else
     echo -e "${YELLOW}⚠️  Python not available, skipping YAML validation${NC}"
 fi
 
+# Validate GitHub Actions schema (if ajv-cli is available)
+echo -e "\n${BLUE}📋 Validating GitHub Actions schema...${NC}"
+if command -v npx >/dev/null 2>&1; then
+    for workflow in .github/workflows/*.yml; do
+        if [[ -f "$workflow" ]]; then
+            echo "  Schema validation for $workflow..."
+            if npx --yes ajv-cli validate -s https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json -d "$workflow" --spec=draft2019-09 2>/dev/null; then
+                echo -e "  ${GREEN}✅ $workflow passes GitHub Actions schema validation${NC}"
+            else
+                echo -e "  ${YELLOW}⚠️  $workflow schema validation failed (continuing anyway)${NC}"
+            fi
+        fi
+    done
+else
+    echo -e "${YELLOW}⚠️  npx not available, skipping GitHub Actions schema validation${NC}"
+fi
+
 # Validate Jest config
 echo -e "\n${BLUE}🧪 Validating Jest configuration...${NC}"
 if [[ -f "jest.config.js" ]]; then
