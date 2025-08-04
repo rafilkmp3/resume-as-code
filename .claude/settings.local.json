@@ -49,7 +49,14 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh pr list:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(node:*)",
+      "Bash(git config:*)",
+      "Bash(./scripts/validate-config.sh:*)",
+      "Bash(pip3 install:*)",
+      "Bash(yamllint:*)",
+      "Bash(docker build:*)",
+      "Bash(docker:*)"
     ],
     "deny": []
   }

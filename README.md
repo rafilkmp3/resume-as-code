@@ -108,6 +108,10 @@ make dev
 # 📄 PDF: http://localhost:3000/resume.pdf
 ```
 
+### **Port Strategy**
+- **Port 3000**: Development server (manual testing, preview)
+- **Port 3001**: Automated testing server (CI/CD, test automation)
+
 ### Docker Development (Recommended)
 
 ```bash
