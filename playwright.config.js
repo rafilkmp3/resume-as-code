@@ -31,5 +31,9 @@ module.exports = defineConfig({
       },
     },
   ],
-  // Removed webServer config - tests use file:// protocol instead
+  webServer: {
+    command: 'npx http-server dist',
+    url: 'http://localhost:8080',
+    reuseExistingServer: !process.env.CI,
+  },
 });
