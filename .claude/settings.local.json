@@ -48,7 +48,8 @@
       "Bash(npm run test:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
-      "Bash(gh pr list:*)"
+      "Bash(gh pr list:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
