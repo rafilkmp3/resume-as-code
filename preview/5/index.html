@@ -1,0 +1,2947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafael Bernardo Sathler - Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect</title>
+    <meta name="author" content="Rafael Bernardo Sathler">
+    <meta name="description" content="Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.">
+    <meta name="keywords" content="resume, cv, Rafael Bernardo Sathler, Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect, platform engineer, devops, cloud architect, aws, gcp, kubernetes">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rafaelbsathler.github.io/resume-as-code/">
+    <meta property="og:title" content="Rafael Bernardo Sathler - Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect">
+    <meta property="og:description" content="Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.">
+    <meta property="og:image" content="assets/images/profile.jpeg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://rafaelbsathler.github.io/resume-as-code/">
+    <meta property="twitter:title" content="Rafael Bernardo Sathler - Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect">
+    <meta property="twitter:description" content="Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.">
+    <meta property="twitter:image" content="assets/images/profile.jpeg">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1L4XD6LG6Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1L4XD6LG6Z');
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Rafael Bernardo Sathler",
+      "url": "https://www.linkedin.com/in/rafaelbsathler/",
+      "image": "assets/images/profile.jpeg",
+      "sameAs": [
+        "https://www.linkedin.com/in/rafaelbsathler/",
+        "https://github.com/rafaelbsathler",
+        "http://calendly.com/rafaelbsathler",
+        "https://wa.me/5521997988682"
+      ],
+      "jobTitle": "Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Bluecore"
+      },
+      "alumniOf": {
+        "@type": "CollegeOrUniversity",
+        "name": "Universidade do Estado do Rio de Janeiro (UERJ)"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Rio de Janeiro",
+        "addressRegion": "Brazil",
+        "addressCountry": "BR"
+      },
+      "email": "mailto:rafaelbsathler@gmail.com",
+      "telephone": "+55 21 997988682"
+    }
+    </script>
+
+    <style>
+        /* DISABLE LOAD ANIMATIONS BUT KEEP USER INTERACTIONS */
+        .fade-in-section {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+        }
+        
+        .container {
+            animation: none !important;
+        }
+        
+        .left-column, .right-column {
+            animation: none !important;
+        }
+        
+        /* Disable slide-in keyframes animations */
+        @keyframes slideInLeft { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes slideInRight { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes slideInUp { 0%, 100% { opacity: 1; transform: none; } }
+        @keyframes fadeInScale { 0%, 100% { opacity: 1; transform: none; } }
+        
+        /* USABILITY IMPROVEMENTS */
+        /* Prevent horizontal overflow on all screen sizes */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* =============================================== */
+            /* Professional Color System (Material Design 3 + Apple HIG Inspired) */
+            /* =============================================== */
+            
+            /* Neutral Scale - High Contrast & Accessible */
+            --neutral-50:  #fafafa;
+            --neutral-100: #f5f5f5;
+            --neutral-200: #eeeeee;
+            --neutral-300: #e0e0e0;
+            --neutral-400: #bdbdbd;
+            --neutral-500: #9e9e9e;
+            --neutral-600: #757575;
+            --neutral-700: #616161;
+            --neutral-800: #424242;
+            --neutral-900: #212121;
+            
+            /* Primary Brand Colors - Professional Blue (Apple System Blue Inspired) */
+            --primary-50:  #e3f2fd;
+            --primary-100: #bbdefb;
+            --primary-200: #90caf9;
+            --primary-300: #64b5f6;
+            --primary-400: #42a5f5;
+            --primary-500: #2196f3;  /* Main brand color */
+            --primary-600: #1e88e5;
+            --primary-700: #1976d2;
+            --primary-800: #1565c0;
+            --primary-900: #0d47a1;
+            
+            /* Secondary Colors - Professional Purple */
+            --secondary-50:  #f3e5f5;
+            --secondary-100: #e1bee7;
+            --secondary-200: #ce93d8;
+            --secondary-300: #ba68c8;
+            --secondary-400: #ab47bc;
+            --secondary-500: #9c27b0;
+            --secondary-600: #8e24aa;
+            --secondary-700: #7b1fa2;
+            --secondary-800: #6a1b9a;
+            --secondary-900: #4a148c;
+            
+            /* =============================================== */
+            /* Light Theme Semantic Colors (Material Design 3 + Apple HIG)  */
+            /* =============================================== */
+            
+            /* Backgrounds & Surfaces */
+            --color-background-base:     #ffffff;
+            --color-surface-raised:      #ffffff;
+            --color-surface-accent:      var(--neutral-50);
+            --color-surface-variant:     var(--neutral-100);
+            
+            /* Text Colors - High Contrast for Accessibility */
+            --color-text-primary:        var(--neutral-900);   /* Main text */
+            --color-text-secondary:      var(--neutral-700);   /* Secondary text */
+            --color-text-tertiary:       var(--neutral-600);   /* Subtle text */
+            --color-text-accent:         var(--primary-700);   /* Brand accent text */
+            --color-text-on-primary:     #ffffff;               /* Text on primary bg */
+            
+            /* Legacy aliases for compatibility */
+            --color-text-default:        var(--color-text-secondary);
+            --color-text-strong:         var(--color-text-primary);
+            --color-text-subtle:         var(--color-text-tertiary);
+            
+            /* Borders */
+            --color-border-subtle:       var(--neutral-200);
+            --color-border-default:      var(--neutral-300);
+            --color-border-strong:       var(--neutral-400);
+            
+            /* Interactive States */
+            --color-interactive-default: var(--primary-500);
+            --color-interactive-hover:   var(--primary-600);
+            --color-interactive-pressed: var(--primary-700);
+            --color-interactive-disabled: var(--neutral-300);
+            
+            /* Gradients & Accents */
+            --color-gradient-start:      var(--primary-500);
+            --color-gradient-end:        var(--secondary-500);
+            
+            /* Shadow */
+            --shadow-default: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            
+            /* Legacy Support (for backward compatibility) */
+            --bg-primary: var(--color-background-base);
+            --bg-secondary: var(--color-surface-raised);
+            --bg-accent: var(--color-surface-accent);
+            --text-primary: var(--color-text-secondary);
+            --text-secondary: var(--color-text-primary);
+            --text-muted: var(--color-text-tertiary);
+            --gradient-start: var(--color-gradient-start);
+            --gradient-end: var(--color-gradient-end);
+            --border-color: var(--color-border-subtle);
+            --shadow: var(--shadow-default);
+            
+            /* Brand shortcuts for easy access */
+            --brand-200: var(--primary-200);
+            --brand-300: var(--primary-300);
+            --brand-400: var(--primary-400);
+            --brand-500: var(--primary-500);
+            --brand-600: var(--primary-600);
+            --brand-700: var(--primary-700);
+            --brand-800: var(--primary-800);
+            --purple-400: var(--secondary-400);
+            --purple-500: var(--secondary-500);
+            --purple-600: var(--secondary-600);
+            
+            /* Neutral shortcuts */
+            --slate-50: var(--neutral-50);
+            --slate-100: var(--neutral-100);
+            --slate-200: var(--neutral-200);
+            --slate-300: var(--neutral-300);
+            --slate-400: var(--neutral-400);
+            --slate-500: var(--neutral-500);
+            --slate-600: var(--neutral-600);
+            --slate-700: var(--neutral-700);
+            --slate-800: var(--neutral-800);
+            --slate-900: var(--neutral-900);
+        }
+        
+        [data-theme="dark"] {
+            /* =============================================== */
+            /* Dark Theme Semantic Colors (Apple Dark Mode + Material Design 3) */
+            /* =============================================== */
+            
+            /* Backgrounds & Surfaces - True Dark Mode */
+            --color-background-base:     #000000;               /* Pure black for OLED */
+            --color-surface-raised:      var(--neutral-900);    /* Elevated surfaces */
+            --color-surface-accent:      var(--neutral-800);    /* Accent surfaces */
+            --color-surface-variant:     var(--neutral-800);
+            
+            /* Text Colors - Optimized for Dark Mode Readability */
+            --color-text-primary:        #ffffff;               /* High contrast white */
+            --color-text-secondary:      var(--neutral-200);    /* Secondary text */
+            --color-text-tertiary:       var(--neutral-400);    /* Subtle text */
+            --color-text-accent:         var(--primary-300);    /* Lighter brand accent */
+            --color-text-on-primary:     var(--neutral-900);    /* Dark text on primary bg */
+            
+            /* Legacy aliases for compatibility */
+            --color-text-default:        var(--color-text-secondary);
+            --color-text-strong:         var(--color-text-primary);
+            --color-text-subtle:         var(--color-text-tertiary);
+            
+            /* Borders - Subtle but Visible */
+            --color-border-subtle:       var(--neutral-800);
+            --color-border-default:      var(--neutral-700);
+            --color-border-strong:       var(--neutral-600);
+            
+            /* Interactive States - Brighter for Dark Mode */
+            --color-interactive-default: var(--primary-400);
+            --color-interactive-hover:   var(--primary-300);
+            --color-interactive-pressed: var(--primary-500);
+            --color-interactive-disabled: var(--neutral-700);
+            
+            /* Gradients & Accents - Enhanced Vibrancy */
+            --color-gradient-start:      var(--primary-400);
+            --color-gradient-end:        var(--secondary-400);
+            
+            /* Shadow */
+            --shadow-default: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Legacy Support (for backward compatibility) */
+            --bg-primary: var(--color-background-base);
+            --bg-secondary: var(--color-surface-raised);
+            --bg-accent: var(--color-surface-accent);
+            --text-primary: var(--color-text-default);
+            --text-secondary: var(--color-text-strong);
+            --text-muted: var(--color-text-subtle);
+            --gradient-start: var(--color-gradient-start);
+            --gradient-end: var(--color-gradient-end);
+            --border-color: var(--color-border-default);
+            --shadow: var(--shadow-default);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--color-text-default);
+            background: var(--color-background-base);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
+        }
+        
+        /* Smooth transitions for all elements during theme changes */
+        *, *::before, *::after {
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+            transition-duration: 0.4s;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Respect user's motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition-duration: 0.1s !important;
+                animation-duration: 0.1s !important;
+            }
+        }
+        
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 120%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        
+        /* Dark mode toggle - positioned to avoid blocking mobile UI */
+        .dark-toggle {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1rem;
+            background: var(--color-surface-raised);
+            border: 2px solid var(--color-border-default);
+            color: var(--color-text-default);
+            padding: 0.8rem;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            z-index: 1000;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            opacity: 0.9;
+        }
+        
+        .dark-toggle:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 
+                0 8px 25px -5px rgba(0, 0, 0, 0.3),
+                0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        /* Desktop positioning - non-intrusive */
+        @media (min-width: 1200px) {
+            .dark-toggle {
+                top: 1.5rem;
+                right: 1.5rem;
+                bottom: auto;
+            }
+        }
+        
+        /* Mobile positioning - smaller and less intrusive */
+        @media (max-width: 768px) {
+            .dark-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 3rem;
+                height: 3rem;
+                padding: 0.6rem;
+                font-size: 1rem;
+                opacity: 0.8;
+            }
+        }
+        
+        /* Control button styles removed for cleaner mobile experience */
+        
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .control-btn:hover::before {
+            left: 100%;
+        }
+        
+        .control-btn:hover {
+            background: var(--color-interactive-default);
+            color: white;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px var(--shadow-default);
+            border-color: var(--color-interactive-default);
+        }
+        
+        .control-btn:focus {
+            outline: 2px solid var(--color-interactive-default);
+            outline-offset: 2px;
+        }
+        
+        .control-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            background: var(--color-interactive-pressed);
+            border-color: var(--color-interactive-pressed);
+        }
+        
+        [data-theme="dark"] .control-btn:hover {
+            background: var(--brand-500);
+            color: white;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        [data-theme="dark"] .control-btn:active {
+            background: var(--brand-600);
+            border-color: var(--brand-600);
+        }
+        
+        .control-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+        
+        .control-btn span:first-child {
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            box-shadow: 0 0 20px var(--shadow);
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 1;
+            padding: 1rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, #8b5cf6 100%);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .header {
+            background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 50%, var(--purple-500) 100%);
+            color: var(--slate-50);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        .profile-photo:not([src]), .profile-photo[src=""] {
+            display: none;
+        }
+        
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.3),
+                0 1px 2px rgba(0, 0, 0, 0.5);
+            -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-content .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+            text-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.4),
+                0 1px 1px rgba(0, 0, 0, 0.6);
+            -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.9rem;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            text-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.5),
+                0 1px 1px rgba(0, 0, 0, 0.7);
+            -webkit-text-stroke: 0.2px rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] .contact-info a {
+            color: var(--slate-50) !important;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        .left-column {
+            padding-right: 1rem;
+        }
+        
+        .right-column {
+            background: var(--bg-accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section h2 {
+            color: var(--color-text-accent);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            padding-left: 1rem;
+            border-left: 4px solid var(--brand-600);
+            border-bottom: 2px solid var(--color-interactive-default);
+            position: relative;
+            transition: all 0.3s ease;
+            margin-left: 0;
+        }
+        
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-interactive-hover);
+            transition: width 0.3s ease;
+        }
+        
+        .section:hover h2::after {
+            width: 60px;
+        }
+        
+        .profile-summary {
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: justify;
+        }
+        
+        .work-item {
+            margin-bottom: 2rem;
+            border-left: 3px solid var(--color-interactive-default);
+            padding: 1.2rem;
+            padding-left: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 12px 12px 0;
+            background: var(--color-surface-raised);
+            border: 1px solid var(--color-border-subtle);
+            border-left: 3px solid var(--color-interactive-default);
+            transform: translateZ(0);
+            will-change: transform;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .work-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--color-interactive-default)08, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .work-item:hover::before {
+            opacity: 1;
+        }
+        
+        .work-item:hover {
+            background: var(--color-surface-accent);
+            border-left-width: 4px;
+            border-left-color: var(--color-interactive-hover);
+            padding-left: 1.7rem;
+            box-shadow: var(--shadow-default);
+            transform: translateX(6px) translateZ(0) scale(1.005);
+            border-color: var(--color-border-default);
+        }
+        
+        .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .work-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--color-text-strong);
+        }
+        
+        .company {
+            color: var(--color-text-accent);
+            font-weight: 500;
+        }
+        
+        .work-date {
+            color: var(--color-text-subtle);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .work-summary {
+            color: var(--color-text-default);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+        
+        .highlights {
+            list-style: none;
+        }
+        
+        .highlights li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .highlights li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--gradient-start);
+            font-size: 0.8rem;
+        }
+        
+        .skill-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .skill-level {
+            background: var(--gradient-start);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            float: right;
+        }
+        
+        .skill-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            justify-content: flex-start;
+            align-items: flex-start;
+            line-height: 1;
+        }
+        
+        .skill-tag {
+            background: var(--color-surface-accent);
+            padding: 0.4rem 1rem;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            color: var(--color-text-strong);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--color-border-subtle);
+            font-weight: 500;
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+            margin: 0.25rem 0.4rem 0.25rem 0;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2rem;
+            line-height: 1.3;
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .skill-tag:hover::before {
+            left: 100%;
+        }
+        
+        .skill-tag:hover {
+            background: var(--color-interactive-default);
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-default);
+            border-color: var(--color-interactive-default);
+        }
+        
+        [data-theme="dark"] .skill-tag:hover {
+            background: var(--color-interactive-hover);
+            color: var(--slate-50);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        }
+
+        /* Clickable skill link styles */
+        .skill-link {
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .skill-link::after {
+            content: '↗';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            font-size: 0.6rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: currentColor;
+        }
+
+        .skill-link:hover::after {
+            opacity: 1;
+        }
+
+        .skill-link:visited {
+            color: inherit;
+        }
+
+        .skill-link:focus {
+            outline: 2px solid var(--color-interactive-default);
+            outline-offset: 2px;
+        }
+        
+        .personal-info h3 {
+            color: var(--color-text-accent);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .personal-info ul {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+        
+        .personal-info li {
+            padding: 0.2rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .link-item {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: 2px solid rgba(255,255,255,0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            min-height: 2.5rem;
+            text-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .link-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 
+                0 8px 25px -5px rgba(0, 0, 0, 0.25),
+                0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] .link-item:hover {
+            background: var(--color-gradient-end);
+            color: var(--slate-50);
+        }
+        
+        .certificate-item {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cert-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .cert-issuer {
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .cert-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, var(--color-interactive-default), var(--color-interactive-hover));
+            color: white;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            margin-top: 2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            opacity: 0.95;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.4),
+                0 1px 1px rgba(0, 0, 0, 0.6);
+            -webkit-text-stroke: 0.2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .footer:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .footer:hover::before {
+            left: 100%;
+        }
+        
+        /* Hide QR code section in screen mode */
+        .print-qr-section {
+            display: none;
+        }
+
+        /* =============================================== */
+        /* AMAZING WEB ANIMATIONS & EFFECTS              */
+        /* =============================================== */
+        
+        /* Removed performance-heavy infinite animations to improve page load speed */
+        
+        @keyframes slideInLeft {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-50px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        @keyframes slideInRight {
+            0% { 
+                opacity: 0; 
+                transform: translateX(50px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        @keyframes slideInUp {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+        
+        @keyframes fadeSparkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Enhanced fade-in sections with stagger */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        /* First section starts visible to prevent scroll issues */
+        .fade-in-section:first-child {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .fade-in-section:nth-child(1) { transition-delay: 0s; }
+        .fade-in-section:nth-child(2) { transition-delay: 0.1s; }
+        .fade-in-section:nth-child(3) { transition-delay: 0.2s; }
+        .fade-in-section:nth-child(4) { transition-delay: 0.3s; }
+        .fade-in-section:nth-child(5) { transition-delay: 0.4s; }
+        
+        /* Animated backgrounds - theme aware */
+        .header {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="light"] .header {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #8b5cf6, #6366f1);
+        }
+        
+        [data-theme="dark"] .header {
+            background: linear-gradient(-45deg, #4c46e6, #5b21b6, #7c3aed, #4338ca);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .header:hover::before {
+            left: 100%;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Enhanced profile photo */
+        .profile-photo {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        /* Interactive skill tags */
+        .skill-tag {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .skill-tag:hover,
+        .skill-tag:focus {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            outline: 2px solid var(--brand-400);
+            outline-offset: 2px;
+        }
+        
+        .skill-tag:hover::before {
+            left: 100%;
+        }
+        
+        /* Work experience cards with hover effects */
+        .work-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .work-item:hover,
+        .work-item:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            outline: none;
+        }
+        
+        [data-theme="light"] .work-item:hover,
+        [data-theme="light"] .work-item:focus-within {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(116, 75, 162, 0.03));
+        }
+        
+        [data-theme="dark"] .work-item:hover,
+        [data-theme="dark"] .work-item:focus-within {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(116, 75, 162, 0.1));
+        }
+        
+        /* Enhanced controls with animations */
+        .control-btn {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .control-btn:hover,
+        .control-btn:focus {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            outline: 2px solid var(--brand-400);
+            outline-offset: 2px;
+        }
+        
+        /* Subtle parallax background enhancement */
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        [data-theme="light"] .parallax-bg {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(116, 75, 162, 0.05) 0%, transparent 50%);
+        }
+        
+        [data-theme="dark"] .parallax-bg {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(116, 75, 162, 0.08) 0%, transparent 50%);
+        }
+        
+        /* Section headers with underline animation */
+        .section h2 {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--brand-500), var(--purple-500));
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .section:hover h2::after {
+            width: 100%;
+        }
+        
+        /* Contact info with hover effects */
+        .contact-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .contact-item:hover,
+        .contact-item:focus {
+            transform: scale(1.02);
+            outline: none;
+        }
+        
+        [data-theme="light"] .contact-item:hover,
+        [data-theme="light"] .contact-item:focus {
+            color: var(--brand-600) !important;
+        }
+        
+        [data-theme="dark"] .contact-item:hover,
+        [data-theme="dark"] .contact-item:focus {
+            color: var(--brand-300) !important;
+        }
+        
+        /* Link items with enhanced effects */
+        .link-item {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+        
+        .link-item:hover,
+        .link-item:focus {
+            transform: translateY(-1px) scale(1.05);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            outline: 2px solid var(--brand-400);
+            outline-offset: 2px;
+        }
+        
+        /* Container entrance animation */
+        .container {
+            animation: slideInUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        /* Left column slides in from left */
+        .left-column {
+            animation: slideInLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+        }
+        
+        /* Right column slides in from right */
+        .right-column {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+        }
+        
+        /* Enhanced highlight effects for achievements - magnify content */
+        .highlights li {
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .highlights li:hover,
+        .highlights li:focus {
+            transform: scale(1.02);
+            padding: 6px 12px;
+            font-weight: 500;
+            outline: none;
+        }
+        
+        [data-theme="light"] .highlights li:hover,
+        [data-theme="light"] .highlights li:focus {
+            background: rgba(102, 126, 234, 0.08);
+            color: var(--brand-800);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+        
+        [data-theme="dark"] .highlights li:hover,
+        [data-theme="dark"] .highlights li:focus {
+            background: rgba(102, 126, 234, 0.15);
+            color: var(--brand-200);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+        }
+        
+        /* Smooth scrolling behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Loading animation */
+        @keyframes fadeInScale {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.9) translateY(20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+        
+        body {
+            animation: fadeInScale 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        /* =============================================== */
+        /* KEYBOARD ACCESSIBILITY & FOCUS STYLES         */
+        /* =============================================== */
+        
+        /* Focus visible for better keyboard navigation */
+        *:focus-visible {
+            outline: 2px solid var(--brand-400);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        
+        /* Make interactive elements keyboard accessible */
+        .highlights li,
+        .skill-tag,
+        .work-item,
+        .project-item,
+        .section {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Add tabindex support for highlight items */
+        .highlights li[tabindex] {
+            cursor: pointer;
+        }
+        
+        /* Skip link for screen readers */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--brand-600);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            z-index: 100;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        /* Improved focus styles for different themes */
+        [data-theme="light"] *:focus-visible {
+            outline-color: var(--brand-600);
+        }
+        
+        [data-theme="dark"] *:focus-visible {
+            outline-color: var(--brand-300);
+        }
+        
+        /* Ensure keyboard navigation works well */
+        .skill-tag:focus,
+        .link-item:focus,
+        .control-btn:focus {
+            z-index: 1;
+        }
+        
+        @media print {
+            /* CLEAN SIMPLE PRINT LAYOUT FOR PROFESSIONAL PDF */
+            
+            /* Hide interactive elements but NOT content sections */
+            .controls, .parallax-bg { display: none !important; }
+            
+            /* Show content sections that were hidden by fade-in animations */
+            .fade-in-section {
+                display: block !important;
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+            
+            /* Force all sections to be visible and properly spaced */
+            .section {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin: 1rem 0 !important;
+                padding: 0.5rem 0 !important;
+            }
+            
+            /* Ensure left and right columns show in single column for print */
+            .left-column, .right-column {
+                display: block !important;
+                width: 100% !important;
+                float: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Clean print setup */
+            @page {
+                margin: 0.5in;
+                size: A4;
+            }
+            
+            /* Targeted styling instead of destructive wildcard */
+            body {
+                background: white !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            /* Remove shadows from all elements without breaking layout */
+            * {
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            
+            /* Ensure content sections maintain visibility and proper layout */
+            .main-content {
+                background: transparent !important;
+                color: #000 !important;
+                display: block !important; /* Override grid layout for print */
+                grid-template-columns: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            .section, .work-item, .project-item, .education-item {
+                background: transparent !important;
+                color: #000 !important;
+                page-break-inside: avoid;
+                margin-bottom: 1rem !important;
+            }
+            
+            /* Fix header for print - remove gradient background */
+            .header {
+                background: white !important;
+                color: #000 !important;
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
+                border-bottom: 2px solid #000 !important;
+            }
+            
+            .header h1, .header h2, .header .subtitle, .header * {
+                color: #000 !important;
+            }
+            
+            /* Hide dark mode toggle specifically */
+            .dark-toggle, .controls {
+                display: none !important;
+            }
+            
+            /* Add QR code for print version */
+            .print-qr-section {
+                display: block !important;
+                text-align: center !important;
+                margin: 2rem 0 !important;
+                padding: 1rem !important;
+                border-top: 1px solid #000 !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .print-qr-code {
+                width: 100px !important;
+                height: 100px !important;
+                margin: 0 auto 0.5rem !important;
+                display: block !important;
+            }
+            
+            .print-qr-text {
+                font-size: 10pt !important;
+                color: #000 !important;
+                margin: 0 !important;
+            }
+            
+            body {
+                font-family: "Times New Roman", serif;
+                font-size: 10pt; /* Smaller font for more compact layout */
+                line-height: 1.1; /* Tighter line spacing */
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* Compact section spacing for print */
+            .section h2 {
+                font-size: 14pt !important;
+                margin: 0.8rem 0 0.4rem 0 !important;
+                padding: 0 !important;
+                font-weight: bold !important;
+            }
+            
+            .work-item, .project-item, .education-item {
+                margin-bottom: 0.6rem !important;
+                padding: 0.2rem 0 !important;
+            }
+            
+            .work-item h3, .project-item h3 {
+                font-size: 11pt !important;
+                margin: 0 0 0.1rem 0 !important;
+                font-weight: bold !important;
+            }
+            
+            .work-item .meta, .project-item .meta {
+                font-size: 9pt !important;
+                margin-bottom: 0.2rem !important;
+                font-style: italic !important;
+            }
+            
+            .work-item ul, .project-item ul {
+                margin: 0.2rem 0 !important;
+                padding-left: 1rem !important;
+            }
+            
+            .work-item li, .project-item li {
+                margin-bottom: 0.1rem !important;
+                font-size: 9pt !important;
+                line-height: 1.1 !important;
+            }
+            
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* Simple header with just text */
+            .header {
+                border-bottom: 2pt solid #000;
+                padding-bottom: 6pt;
+                margin-bottom: 8pt;
+                text-align: center;
+            }
+            
+            .profile-photo {
+                display: block !important;
+                width: 80px !important;
+                height: 80px !important;
+                border-radius: 50% !important;
+                float: right !important;
+                margin: 0 0 1rem 1rem !important;
+                border: 2px solid #000 !important;
+            }
+            
+            .header-content h1 {
+                font-size: 18pt;
+                font-weight: bold;
+                margin: 0 0 3pt 0;
+                color: #000 !important;
+            }
+            
+            .header-content .subtitle {
+                font-size: 12pt;
+                margin: 0 0 4pt 0;
+                color: #000 !important;
+                font-style: italic;
+            }
+            
+            .contact-info {
+                font-size: 10pt;
+                margin: 0;
+                text-align: center;
+            }
+            
+            .contact-item {
+                color: #000 !important;
+                margin: 0 8pt;
+            }
+            
+            .links {
+                display: none !important;
+            }
+            
+            /* Single column layout for simplicity */
+            .main-content {
+                display: block;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .left-column, .right-column {
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Simple section styling */
+            .section {
+                margin-bottom: 12pt;
+                page-break-inside: avoid;
+            }
+            
+            .section h2 {
+                color: #000 !important;
+                font-size: 14pt;
+                font-weight: bold;
+                margin: 0 0 6pt 0;
+                padding: 0;
+                border: none;
+                text-transform: uppercase;
+                letter-spacing: 1pt;
+            }
+            
+            .profile-summary {
+                font-size: 11pt;
+                line-height: 1.3;
+                margin-bottom: 8pt;
+                text-align: justify;
+            }
+            
+            /* Clean work experience */
+            .work-item {
+                margin-bottom: 8pt;
+                padding: 0;
+                border: none;
+                page-break-inside: avoid;
+            }
+            
+            .work-header {
+                margin-bottom: 3pt;
+            }
+            
+            .work-title {
+                font-weight: bold;
+                font-size: 12pt;
+                color: #000 !important;
+                margin: 0;
+            }
+            
+            .company {
+                font-weight: normal;
+                font-size: 11pt;
+                color: #000 !important;
+                margin: 0;
+            }
+            
+            .work-date {
+                font-size: 10pt;
+                color: #000 !important;
+                float: right;
+            }
+            
+            .work-summary {
+                font-size: 10pt;
+                font-style: italic;
+                margin: 2pt 0;
+                color: #000 !important;
+            }
+            
+            .highlights {
+                margin: 4pt 0;
+                padding-left: 15pt;
+            }
+            
+            .highlights li {
+                font-size: 10pt;
+                margin-bottom: 2pt;
+                line-height: 1.2;
+            }
+            
+            /* Professional skills section - optimized for compact print */
+            .skill-category {
+                margin-bottom: 6pt;
+                page-break-inside: avoid;
+            }
+            
+            .skill-name {
+                font-weight: 600;
+                font-size: 10pt;
+                margin: 0 0 2pt 0;
+                color: #000 !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5pt;
+            }
+            
+            .skill-keywords {
+                line-height: 1.2;
+                margin-bottom: 4pt;
+            }
+            
+            .skill-tag {
+                color: #000 !important;
+                font-size: 9pt;
+                margin: 0 3pt 1pt 0;
+                display: inline;
+                padding: 0;
+                border: none;
+                background: none;
+            }
+            
+            .skill-tag:after {
+                content: ',';
+                margin-right: 2pt;
+            }
+            
+            .skill-tag:last-child:after {
+                content: '';
+            }
+            
+            /* Professional section separators */
+            .section {
+                border-bottom: 1pt solid #ddd !important;
+                padding-bottom: 8pt !important;
+                margin-bottom: 10pt !important;
+            }
+            
+            .section:last-child {
+                border-bottom: none !important;
+            }
+            
+            /* Section headers with better styling */
+            .section h2 {
+                font-size: 12pt !important;
+                font-weight: 700 !important;
+                color: #000 !important;
+                margin: 0 0 6pt 0 !important;
+                padding: 2pt 0 4pt 0 !important;
+                text-transform: uppercase;
+                letter-spacing: 1pt;
+                border-bottom: 0.5pt solid #000 !important;
+            }
+            
+            /* Professional education section */
+            .education-item {
+                margin-bottom: 6pt !important;
+                page-break-inside: avoid;
+            }
+            
+            .education-item h3 {
+                font-size: 10pt !important;
+                font-weight: 600 !important;
+                margin: 0 0 1pt 0 !important;
+                color: #000 !important;
+            }
+            
+            .education-item .edu-institution {
+                font-size: 9pt !important;
+                font-weight: 500 !important;
+                color: #333 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .education-item .edu-date {
+                font-size: 8pt !important;
+                color: #666 !important;
+                margin: 0 !important;
+            }
+            
+            /* Certificates section */
+            .certificate-item {
+                margin-bottom: 4pt !important;
+                page-break-inside: avoid;
+            }
+            
+            .cert-name {
+                font-size: 9pt !important;
+                font-weight: 600 !important;
+                color: #000 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .cert-issuer {
+                font-size: 8pt !important;
+                color: #333 !important;
+                margin: 0 0 1pt 0 !important;
+            }
+            
+            .cert-date {
+                font-size: 8pt !important;
+                color: #666 !important;
+                margin: 0 !important;
+            }
+            
+            .skill-tag:last-child::after {
+                content: "";
+            }
+            
+            /* Education */
+            .education-item {
+                margin-bottom: 8pt;
+            }
+            
+            .education-item h3 {
+                font-size: 12pt;
+                font-weight: bold;
+                margin: 0 0 2pt 0;
+                color: #000 !important;
+            }
+            
+            .education-item p {
+                font-size: 10pt;
+                margin: 0;
+                color: #000 !important;
+            }
+            
+            /* Personal info */
+            .personal-info {
+                margin-bottom: 8pt;
+            }
+            
+            .personal-info h3 {
+                font-size: 11pt;
+                font-weight: bold;
+                margin: 0 0 2pt 0;
+                color: #000 !important;
+            }
+            
+            .personal-info ul {
+                margin: 0;
+                padding-left: 15pt;
+                list-style: disc;
+            }
+            
+            .personal-info li {
+                font-size: 10pt;
+                margin-bottom: 1pt;
+                color: #000 !important;
+            }
+            
+            /* Projects */
+            .project-item {
+                margin-bottom: 8pt;
+            }
+            
+            .project-header h3 {
+                font-size: 12pt;
+                font-weight: bold;
+                margin: 0 0 2pt 0;
+                color: #000 !important;
+            }
+            
+            .project-summary {
+                font-size: 10pt;
+                margin: 0 0 2pt 0;
+                font-style: italic;
+            }
+            
+            .project-highlights {
+                font-size: 10pt;
+                margin: 0;
+                padding-left: 15pt;
+            }
+            
+            .project-highlights li {
+                margin-bottom: 2pt;
+            }
+            
+            /* Print URLs for links */
+            a[href^="http"]:after,
+            a[href^="mailto:"]:after,
+            a[href^="tel:"]:after {
+                content: " (" attr(href) ")";
+                font-size: 9pt;
+                color: #666 !important;
+                font-style: italic;
+                word-break: break-all;
+            }
+            
+            /* Don't print URLs for social media icons in header */
+            .header a[href]:after,
+            .link-item[href]:after {
+                content: none !important;
+            }
+            
+            /* Better page breaks for work experience */
+            .work-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Keep section headers with content */
+            .section h2 {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            /* Prevent orphaned lines */
+            p, li {
+                orphans: 3;
+                widows: 3;
+            }
+            
+            /* Optimize contact info for print */
+            .contact-info {
+                display: block !important;
+                text-align: center;
+                line-height: 1.1;
+            }
+            
+            .contact-item {
+                display: inline-block;
+                margin: 0 6pt;
+                font-size: 10pt;
+            }
+            
+            /* Simple footer */
+            .footer {
+                display: none !important;
+            }
+        }
+        
+        /* =============================================== */
+        /* ENHANCED RESPONSIVE DESIGN                    */
+        /* =============================================== */
+        
+        /* Extra large screens - 4K and ultrawide */
+        @media (min-width: 1920px) {
+            .container {
+                max-width: 1600px;
+                margin: 0 auto;
+            }
+            
+            .skill-tag {
+                font-size: 1rem;
+                padding: 0.5rem 1.3rem;
+                margin: 0.35rem 0.6rem 0.35rem 0;
+                min-height: 2.5rem;
+            }
+            
+            .header {
+                padding: 3rem;
+            }
+            
+            .profile-photo {
+                width: 180px;
+                height: 180px;
+            }
+        }
+        
+        /* Large desktop */
+        @media (min-width: 1400px) and (max-width: 1919px) {
+            .skill-tag {
+                font-size: 0.9rem;
+                padding: 0.45rem 1.2rem;
+                margin: 0.3rem 0.5rem 0.3rem 0;
+                min-height: 2.2rem;
+            }
+            
+            .profile-photo {
+                width: 160px;
+                height: 160px;
+            }
+        }
+        
+        /* Standard desktop */
+        @media (min-width: 1024px) and (max-width: 1399px) {
+            .skill-tag {
+                font-size: 0.85rem;
+                padding: 0.4rem 1.1rem;
+                margin: 0.25rem 0.4rem 0.25rem 0;
+                min-height: 2rem;
+            }
+        }
+        
+        /* Tablet landscape */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .main-content { 
+                grid-template-columns: 1fr; 
+                gap: 2rem;
+            }
+            .left-column { padding-right: 0; }
+            
+            .skill-tag {
+                font-size: 0.85rem;
+                padding: 0.6rem 1rem;
+                margin: 0.25rem 0.3rem 0.25rem 0;
+                min-height: 2.75rem; /* 44px minimum touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .controls {
+                right: 1rem;
+                top: 1rem;
+            }
+            
+            .control-btn {
+                padding: 0.7rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Tablet portrait and mobile landscape */
+        @media (max-width: 768px) and (min-width: 481px) {
+            .header { 
+                flex-direction: column; 
+                text-align: center; 
+                padding: 2rem 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+                line-height: 1.2;
+            }
+            
+            .header h2, .subtitle {
+                font-size: 1.2rem;
+                line-height: 1.3;
+            }
+            
+            .main-content { 
+                grid-template-columns: 1fr; 
+                padding: 0 1rem;
+                gap: 2rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .section h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.2rem;
+            }
+            
+            .work-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+            
+            .work-summary, .profile-summary {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            .work-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            
+            .skill-tag {
+                font-size: 0.9rem;
+                padding: 0.6rem 1.1rem;
+                margin: 0.25rem 0.3rem 0.25rem 0;
+                min-height: 2.75rem; /* Better touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 500;
+            }
+            
+            .skill-keywords {
+                justify-content: center;
+            }
+            
+            .controls {
+                position: fixed;
+                bottom: 1rem;
+                right: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .control-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
+                min-width: 60px;
+            }
+            
+            .profile-photo {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        /* Mobile portrait - Enhanced 2024 Standards */
+        @media (max-width: 480px) {
+            .header {
+                padding: 2rem 1rem; /* Increased for better breathing room */
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+            }
+            
+            .header h2, .subtitle {
+                font-size: 1rem;
+                line-height: 1.3;
+            }
+            
+            .main-content {
+                padding: 0 0.75rem;
+                gap: 1.5rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .section h2 {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .work-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+            
+            .company {
+                font-size: 0.95rem;
+            }
+            
+            .work-summary, .profile-summary {
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            
+            .skill-tag {
+                font-size: 0.85rem;
+                padding: 0.7rem 1.1rem;
+                margin: 0.3rem 0.3rem 0.3rem 0;
+                min-height: 2.75rem; /* 44px minimum touch target */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 500;
+            }
+            
+            .work-item {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .controls {
+                bottom: 0.5rem;
+                right: 0.5rem;
+            }
+            
+            .control-btn {
+                padding: 0.5rem;
+                font-size: 0.7rem;
+                min-width: 50px;
+            }
+            
+            .control-btn span:last-child {
+                display: none; /* Hide text on very small screens */
+            }
+            
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .container {
+                margin: 0.5rem;
+                padding: 0;
+            }
+            
+            .section {
+                margin-bottom: 1.5rem;
+            }
+            
+            .header-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header-content .subtitle {
+                font-size: 1rem;
+            }
+            
+            /* Enhanced Touch Targets - 2024 WCAG Standards */
+            .links .link-item {
+                min-width: 44px;
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+                margin: 0.25rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+            }
+            
+            /* Better spacing for social media buttons */
+            .links {
+                gap: 0.5rem;
+                justify-content: center;
+                flex-wrap: wrap;
+                padding: 1rem 0;
+            }
+            
+            /* Improved contact info layout */
+            .contact-info {
+                font-size: 0.9rem;
+                line-height: 1.4;
+                margin: 1rem 0;
+            }
+            
+            .contact-item {
+                margin: 0.25rem 0.5rem;
+                display: inline-block;
+            }
+        }
+        
+        /* Ultra-wide screens */
+        @media (min-width: 2560px) {
+            .container {
+                max-width: 2000px;
+            }
+            
+            .main-content {
+                gap: 4rem;
+            }
+            
+            .skill-tag {
+                font-size: 1.1rem;
+                padding: 0.6rem 1.5rem;
+                margin: 0.4rem 0.7rem 0.4rem 0;
+                min-height: 3rem;
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .profile-photo {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+        
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .parallax-bg {
+                animation: none;
+            }
+            
+            .header {
+                animation: none;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+        }
+        
+        /* Print media query stays the same for clean PDF */
+    </style>
+</head>
+<body>
+    <!-- Skip Link removed for cleaner recruiter presentation -->
+    
+    <!-- Parallax Background -->
+    <div class="parallax-bg" id="parallaxBg"></div>
+    
+    <!-- Dark mode toggle button - positioned to not block content -->
+    <button class="dark-toggle" id="darkToggle" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">🌙</span>
+    </button>
+    
+    <div class="container">
+        <header class="header">
+            <img src="assets/images/profile.jpeg" alt="Rafael Bernardo Sathler" class="profile-photo">
+            <div class="header-content">
+                <h1>Rafael Bernardo Sathler</h1>
+                <div class="subtitle">Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect</div>
+                <div class="contact-info">
+                    <div class="contact-item">📍 Rio de Janeiro, Brazil</div>
+                    <div class="contact-item">📞 <a href="tel:+55 21 997988682" style="color: inherit; text-decoration: none;">+55 21 997988682</a></div>
+                    <div class="contact-item">✉️ <a href="mailto:rafaelbsathler@gmail.com" style="color: inherit; text-decoration: none;">rafaelbsathler@gmail.com</a></div>
+                </div>
+                <div class="links">
+                    <a href="https://www.linkedin.com/in/rafaelbsathler/" class="link-item" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/rafaelbsathler" class="link-item" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </a>
+                    <a href="http://calendly.com/rafaelbsathler" class="link-item" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Calendly
+                    </a>
+                    <a href="https://wa.me/5521997988682" class="link-item" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488"/>
+                        </svg>
+                        WhatsApp
+                    </a>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content" id="main-content">
+            <div class="left-column">
+                <section class="section fade-in-section">
+                    <h2>Profile</h2>
+                    <div class="profile-summary">Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.</div>
+                </section>
+                
+                <section class="section fade-in-section">
+                    <h2>Experience</h2>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Platform Engineer</div>
+                                <div class="company">Bluecore</div>
+                            </div>
+                            <div class="work-date">2024-08 — 2025-06</div>
+                        </div>
+                        <div class="work-summary">Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)">Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue">Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%">Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices">Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Senior Software Engineer</div>
+                                <div class="company">Uber</div>
+                            </div>
+                            <div class="work-date">2023-08 — 2024-08</div>
+                        </div>
+                        <div class="work-summary">Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and &lt;5min job startup SLO">Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and &lt;5min job startup SLO</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers">Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%">Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Security &amp; compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings">Security &amp; compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to &lt;4 hours through advanced automation and orchestration">Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to &lt;4 hours through advanced automation and orchestration</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Technical documentation: Authored comprehensive &#x27;CI/CD Playbook&#x27; and Bazel optimization guides, becoming the go-to technical resource for platform teams">Technical documentation: Authored comprehensive &#x27;CI/CD Playbook&#x27; and Bazel optimization guides, becoming the go-to technical resource for platform teams</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Solutions Architect</div>
+                                <div class="company">Triumph Technology Solutions LLC</div>
+                            </div>
+                            <div class="work-date">2023-04 — 2023-07</div>
+                        </div>
+                        <div class="work-summary">Led enterprise AWS cloud transformation and migration projects for Fortune 500 clients.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design">AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%">Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments">Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows">DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Infrastructure Engineer</div>
+                                <div class="company">Toptal</div>
+                            </div>
+                            <div class="work-date">2022-03 — 2023-02</div>
+                        </div>
+                        <div class="work-summary">Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud">Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions">Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%">Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA">Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Senior DevOps Engineer</div>
+                                <div class="company">Globo.com</div>
+                            </div>
+                            <div class="work-date">2018-08 — 2022-06</div>
+                        </div>
+                        <div class="work-summary">Achieved Guinness World Record supporting Big Data infrastructure for Brazil&#x27;s largest media company.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: 🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for &#x27;Big Brother Brasil&#x27;, handling record-breaking public votes that surpassed &#x27;American Idol&#x27;">🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for &#x27;Big Brother Brasil&#x27;, handling record-breaking public votes that surpassed &#x27;American Idol&#x27;</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability">Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Production systems: Designed, deployed, and maintained highly available systems supporting Brazil&#x27;s top media properties with shared ownership model">Production systems: Designed, deployed, and maintained highly available systems supporting Brazil&#x27;s top media properties with shared ownership model</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency">Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Senior DevOps Engineer</div>
+                                <div class="company">MeuPatrocínio</div>
+                            </div>
+                            <div class="work-date">2016-12 — 2018-08</div>
+                        </div>
+                        <div class="work-summary">Led infrastructure automation and security initiatives for Brazilian fintech platform.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings">Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%">CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance">Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments">Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Infrastructure Engineer</div>
+                                <div class="company">Funcional Health Tech | Fidelize</div>
+                            </div>
+                            <div class="work-date">2015-04 — 2016-03</div>
+                        </div>
+                        <div class="work-summary">Managed pharmaceutical industry infrastructure with focus on compliance and reliability.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment">Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies">Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution">Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning">System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning</li>
+                        </ul>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Support Specialist</div>
+                                <div class="company">Acol Consultoria &amp; Sistemas</div>
+                            </div>
+                            <div class="work-date">2014-08 — 2015-04</div>
+                        </div>
+                        <div class="work-summary">Advanced from intern to specialist role, managing enterprise IT infrastructure and client support.</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery">Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings">Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies">Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications">System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <section class="section fade-in-section">
+                    <h2>Key Projects</h2>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Resume-as-Code Platform</div>
+                                <div class="company"><a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" style="color: inherit;">https://github.com/rafilkmp3/resume-as-code</a></div>
+                            </div>
+                        </div>
+                        <div class="work-summary">Full-stack resume generation system demonstrating Platform Engineering principles</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation">Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Implemented dark/light theme with OS preference detection and accessibility features">Implemented dark/light theme with OS preference detection and accessibility features</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Created ATS-friendly export functionality for job application compatibility">Created ATS-friendly export functionality for job application compatibility</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Deployed with GitHub Pages integration and Make-based build system">Deployed with GitHub Pages integration and Make-based build system</li>
+                        </ul>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Node.js</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Handlebars</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Puppeteer</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">HTML/CSS</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">JavaScript</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">CI/CD</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">GitHub Pages</span>
+                        </div>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Infrastructure Automation Toolkit</div>
+                                
+                            </div>
+                        </div>
+                        <div class="work-summary">Collection of Terraform modules and automation scripts for cloud infrastructure</div>
+                        <ul class="highlights">
+                            <li tabindex="0" role="button" aria-label="Achievement: Developed reusable Terraform modules for AWS/GCP multi-cloud deployments">Developed reusable Terraform modules for AWS/GCP multi-cloud deployments</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Created monitoring and alerting automation reducing MTTR by 70%">Created monitoring and alerting automation reducing MTTR by 70%</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Built cost optimization scripts identifying $200K+ in potential savings">Built cost optimization scripts identifying $200K+ in potential savings</li>
+                            <li tabindex="0" role="button" aria-label="Achievement: Implemented security scanning and compliance automation for infrastructure-as-code">Implemented security scanning and compliance automation for infrastructure-as-code</li>
+                        </ul>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Terraform</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">AWS</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">GCP</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Python</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Bash</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Monitoring</span>
+                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">Security</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="section fade-in-section">
+                    <h2>Education</h2>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div>
+                                <div class="work-title">Bachelor in Computer Science</div>
+                                <div class="company">Universidade do Estado do Rio de Janeiro (UERJ)</div>
+                            </div>
+                            <div class="work-date">2011-06 — 2016-06</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="right-column">
+                <section class="section fade-in-section">
+                    <h2>Skills</h2>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            ☁️ Cloud Platforms &amp; IaC
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://aws.amazon.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about AWS (Expert)">AWS (Expert)</a>
+                            <a href="https://cloud.google.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Google Cloud Platform (GCP)">Google Cloud Platform (GCP)</a>
+                            <a href="https://www.terraform.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Terraform">Terraform</a>
+                            <a href="https://www.ansible.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Ansible">Ansible</a>
+                            <a href="https://helm.sh/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Helm">Helm</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            🐳 Container Orchestration
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://kubernetes.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Kubernetes">Kubernetes</a>
+                            <a href="https://www.docker.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Docker">Docker</a>
+                            <a href="https://helm.sh/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Helm">Helm</a>
+                            <a href="https://kustomize.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Kustomize">Kustomize</a>
+                            <a href="https://istio.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Istio">Istio</a>
+                            <a href="https://argoproj.github.io/cd/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about ArgoCD">ArgoCD</a>
+                            <a href="https://cloud.google.com/kubernetes-engine" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Google Kubernetes Engine">Google Kubernetes Engine</a>
+                            <a href="https://aws.amazon.com/eks/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Amazon EKS">Amazon EKS</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            🔄 CI/CD &amp; DevOps
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://github.com/features/actions" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about GitHub Actions">GitHub Actions</a>
+                            <a href="https://docs.gitlab.com/ee/ci/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about GitLab CI">GitLab CI</a>
+                            <a href="https://www.jenkins.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Jenkins">Jenkins</a>
+                            <a href="https://www.runatlantis.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Atlantis">Atlantis</a>
+                            <a href="https://bazel.build/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Bazel">Bazel</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            📊 Observability &amp; Monitoring
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://prometheus.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Prometheus">Prometheus</a>
+                            <a href="https://grafana.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Grafana">Grafana</a>
+                            <a href="https://www.elastic.co/elastic-stack" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about ELK">ELK</a>
+                            <a href="https://grafana.com/oss/loki/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Loki">Loki</a>
+                            <a href="https://grafana.com/oss/mimir/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Mimir">Mimir</a>
+                            <a href="https://www.datadoghq.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Datadog">Datadog</a>
+                            <a href="https://chronosphere.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Chronosphere">Chronosphere</a>
+                            <a href="https://newrelic.com/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about New Relic">New Relic</a>
+                            <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about SignOz">SignOz</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            💻 Programming &amp; Scripting
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Python">Python</a>
+                            <a href="https://www.gnu.org/software/bash/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Bash">Bash</a>
+                            <a href="https://golang.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Go">Go</a>
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about JavaScript">JavaScript</a>
+                            <a href="https://yaml.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about YAML">YAML</a>
+                            <a href="https://github.com/hashicorp/hcl" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about HCL">HCL</a>
+                            <a href="https://www.iso.org/standard/63555.html" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about SQL">SQL</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            📈 Big Data &amp; Databases
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://kafka.apache.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Apache Kafka">Apache Kafka</a>
+                            <a href="https://hadoop.apache.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Hadoop">Hadoop</a>
+                            <a href="https://spark.apache.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Apache Spark">Apache Spark</a>
+                            <a href="https://www.postgresql.org/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about PostgreSQL">PostgreSQL</a>
+                            <a href="https://redis.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Redis">Redis</a>
+                            <a href="https://www.elastic.co/elasticsearch/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Elasticsearch">Elasticsearch</a>
+                            <a href="https://cloud.google.com/bigquery" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about BigQuery">BigQuery</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            🔒 Security &amp; Compliance
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about RBAC">RBAC</a>
+                            <a href="https://auth0.com/intro-to-iam/what-is-saml" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about SAML/SSO">SAML/SSO</a>
+                            <a href="https://www.vaultproject.io/" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Vault">Vault</a>
+                            <a href="https://owasp.org/www-community/Vulnerability_Scanning_Tools" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Security Scanning">Security Scanning</a>
+                            <a href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Compliance Auditing">Compliance Auditing</a>
+                            <a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank" rel="noopener noreferrer" class="skill-tag skill-link" tabindex="0" title="Learn more about Infrastructure Security">Infrastructure Security</a>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">
+                            🤝 Soft Skills
+                            
+                        </div>
+                        <div class="skill-keywords">
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Skill: Effective in cross-functional teams">Effective in cross-functional teams</span>
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Skill: Clear technical writing">Clear technical writing</span>
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Skill: Leadership">Leadership</span>
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Skill: Mentoring">Mentoring</span>
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Skill: Problem solving">Problem solving</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section fade-in-section">
+                    <h2>Personal Details</h2>
+                    <div class="skill-category">
+                        <div class="skill-name">Nationality</div>
+                        <div class="skill-keywords">
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Nationality: Brazilian">Brazilian</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-name">Languages</div>
+                        <div class="skill-keywords">
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Language: Portuguese">Portuguese</span>
+                            <span class="skill-tag" tabindex="0" role="button" aria-label="Language: English">English</span>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </div>
+        
+        <!-- QR Code Section - Only visible in print -->
+        <div class="print-qr-section">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAAAklEQVR4AewaftIAAAcTSURBVO3BUW7EWJIEwfCHuv+VffubkwmQoErQdocZ/iNVNTqpqtVJVa1Oqmp1UlWrk6pafbIA8pepeQvIRM0EyJWanwDkSs0EyLeomQC5UvMEkL9MzdVJVa1Oqmp1UlWrk6panVTV6pOH1PwmIH+FmreATNS8peYuIE+ouQIyUfOEmt8E5K6TqlqdVNXqpKpWJ1W1Oqmq1Sc/BMhbat4CMlFzpWYCZKLmLiATNW+puQvIE0Amaq7UfAuQt9S8dVJVq5OqWp1U1eqkqlaf1P9QMwFypWaiZgJkouYuIBM1V2omQCZqJkDuUvNvcVJVq5OqWp1U1eqkqlYnVbX65D8CyJWaCZC3gDwB5C41dwGZqJkAmaj5LzqpqtVJVa1Oqmp1UlWrk6paffJD1Pxlau5SMwHylpq3gNyl5gk1EyB3qXlLzV9wUlWrk6panVTV6qSqVp88BOTfAshEzW8DcqXmCTVXQCZqJkAmaq6A/AQgf9VJVa1Oqmp1UlWrk6panVTV6pOFmn8TIFdqJkAmav4yIHcBeQLIlZon1Px/c1JVq5OqWp1U1eqkqlYnVbXCf2QAZKJmAuQ3qXkCyF+gZgLkLjUTIHepmQB5S80EyG9S89ZJVa1Oqmp1UlWrk6panVTV6pMfouYKyFtqJkCeUHMFZKLmLiD/JmomQK7UfIuaCZC3gEzUXJ1U1eqkqlYnVbU6qarVJz8EyF1q7gLyhJoJkCs1vw3It6i5AvIEkImat9TcBWSiZgLkCshEzV0nVbU6qarVSVWtTqpqdVJVK/xHBkDeUjMBMlFzF5CJmruAfIuaJ4C8peY3AfkJaq6AfIuau06qanVSVauTqlqdVNXqpKpWn/wQNd8A5AkgEzVXar4FyETNXWqeAPKXqZkAeUvNFZAJkImaq5OqWp1U1eqkqlYnVbX65CE1EyB3qblLzQTIRM0EyJWaCZC31EyATNTcBWSi5jcBmaiZAJmouQvIBMg3nFTV6qSqVidVtTqpqtVJVa3wH/kBQK7UTID8NjVvAblS8wSQu9S8BeQnqLkLyBNq7gLylpq7TqpqdVJVq5OqWp1U1eqkqlafLIA8oeYuNRMgV2omQP4CID9BzTeomQB5AsiVmm8BMlEzAXKl5q2TqlqdVNXqpKpWJ1W1Oqmq1ScPqZkAeUvNFZCJmgmQt4C8pWYC5C4gEzVvqZkAuQvIE2omQN5ScxeQiZqrk6panVTV6qSqVidVtfrkh6i5AjJRMwFypWYC5C0gEzXfouYuNRMgf4GaCZAJkLvUTIDcpeatk6panVTV6qSqVidVtTqpqtUnf4iaKyA/AciVmieA3KVmAuQuNU+ouQLyhJq7gHwLkImaCZArIBM1d51U1eqkqlYnVbU6qarVSVWt8B/5AUC+Qc0EyETNXUCeUHMF5Ak1EyBXap4A8pvUTID8ZWruOqmq1UlVrU6qanVSVatPHgJyl5q3gDwBZKLmLjV3qZkAeULNXUAmau4CMlFzF5An1EyAvKXmCshbJ1W1Oqmq1UlVrU6qanVSVSv8RwZA3lIzATJRcxeQJ9S8BeRKzRNA7lLzFpDfpmYC5C41EyATNXcBmai5Oqmq1UlVrU6qanVSVauTqlp98pCaCZArIBM1dwF5Qs0EyF1qvkXNXUDeUjMBMlHzLWruAvIEkLvU3HVSVauTqlqdVNXqpKpWJ1W1+uQPAXKl5q9QcxeQiZoJkCs1EyB3AfkrgNylZgLkLSATNVcnVbU6qarVSVWtTqpq9ckXqZkAuQvIRM0EyF1q3gIyUfOEmisgb6n5FiDfAmSi5i0gd51U1eqkqlYnVbU6qarVSVWtPlmoeULNXWp+m5orIBM1d6mZAJmomQD5BiATNRMgEzV3qXkLyBNAvuGkqlYnVbU6qarVSVWtTqpq9ckCyF+mZqJmAuQuIBM1bwF5S81vA/IWkIma36TmrpOqWp1U1eqkqlYnVbU6qarVJw+p+U1AngDylprfpuYKyATIW2omaiZA3lLzFpC3gEzUXJ1U1eqkqlYnVbU6qarVJz8EyFtq/gIg36JmAuRKzRNA7gLyhJorIBMgv03NN5xU1eqkqlYnVbU6qarVSVWtPvmPUHMFZKLmLSATIBM1V0CeUHMXkImaCZC31NwFZKJmAuRKzQTIRM3VSVWtTqpqdVJVq5OqWp1U1eqT+h9A7lLzE4DcpeYuIBM1T6i5AjJRMwFyl5oJkLfU3HVSVauTqlqdVNXqpKpWn/wQNX+BmgmQKzVPALlLzQTIRM1dQCZqrtRMgDyh5krNBMhEzV1A/oKTqlqdVNXqpKpWJ1W1Oqmq1ScPAfnLgNwFZKJmouYKyETNW0Amat5S8wSQu9Q8AeRKzQTIRM0VkImau06qanVSVauTqlqdVNXqpKpW+I9U1eikqlYnVbU6qarVSVWt/g9+EhGy44jFKgAAAABJRU5ErkJggg==" class="print-qr-code" alt="QR Code to online resume">
+            <p class="print-qr-text">
+                <strong>View online version:</strong><br>
+                rafilkmp3.github.io/resume-as-code
+            </p>
+        </div>
+        
+        <footer class="footer">
+            Developed with ❤️ in Rio de Janeiro
+        </footer>
+    </div>
+    
+    <script id="resume-data" type="application/json">
+        {"basics":{"name":"Rafael Bernardo Sathler","label":"Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect","image":"assets/images/profile.jpeg","email":"rafaelbsathler@gmail.com","phone":"+55 21 997988682","url":"https://www.linkedin.com/in/rafaelbsathler/","summary":"Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence.","location":{"city":"Rio de Janeiro","countryCode":"BR","region":"Brazil"},"nationality":"Brazilian","languages":["Portuguese","English"],"profiles":[{"network":"LinkedIn","username":"rafaelbsathler","url":"https://www.linkedin.com/in/rafaelbsathler/"},{"network":"GitHub","username":"rafaelbsathler","url":"https://github.com/rafaelbsathler"},{"network":"Calendly","username":"rafaelbsathler","url":"http://calendly.com/rafaelbsathler"},{"network":"WhatsApp","username":"+5521997988682","url":"https://wa.me/5521997988682"}]},"work":[{"name":"Bluecore","position":"Platform Engineer","url":"https://bluecore.com","startDate":"2024-08","endDate":"2025-06","summary":"Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.","highlights":["Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)","Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue","Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%","Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices"]},{"name":"Uber","position":"Senior Software Engineer","url":"https://uber.com","startDate":"2023-08","endDate":"2024-08","summary":"Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.","highlights":["Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO","Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers","Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%","Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings","Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration","Technical documentation: Authored comprehensive 'CI/CD Playbook' and Bazel optimization guides, becoming the go-to technical resource for platform teams"]},{"name":"Triumph Technology Solutions LLC","position":"Solutions Architect","url":"","startDate":"2023-04","endDate":"2023-07","summary":"Led enterprise AWS cloud transformation and migration projects for Fortune 500 clients.","highlights":["AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design","Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%","Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments","DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows"]},{"name":"Toptal","position":"Infrastructure Engineer","url":"https://toptal.com","startDate":"2022-03","endDate":"2023-02","summary":"Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.","highlights":["Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud","Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions","Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%","Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA"]},{"name":"Globo.com","position":"Senior DevOps Engineer","url":"https://globo.com","startDate":"2018-08","endDate":"2022-06","summary":"Achieved Guinness World Record supporting Big Data infrastructure for Brazil's largest media company.","highlights":["🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for 'Big Brother Brasil', handling record-breaking public votes that surpassed 'American Idol'","Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability","Production systems: Designed, deployed, and maintained highly available systems supporting Brazil's top media properties with shared ownership model","Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency"]},{"name":"MeuPatrocínio","position":"Senior DevOps Engineer","url":"","startDate":"2016-12","endDate":"2018-08","summary":"Led infrastructure automation and security initiatives for Brazilian fintech platform.","highlights":["Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings","CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%","Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance","Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments"]},{"name":"Funcional Health Tech | Fidelize","position":"Infrastructure Engineer","url":"","startDate":"2015-04","endDate":"2016-03","summary":"Managed pharmaceutical industry infrastructure with focus on compliance and reliability.","highlights":["Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment","Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies","Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution","System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning"]},{"name":"Acol Consultoria & Sistemas","position":"Support Specialist","url":"","startDate":"2014-08","endDate":"2015-04","summary":"Advanced from intern to specialist role, managing enterprise IT infrastructure and client support.","highlights":["Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery","Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings","Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies","System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications"]}],"education":[{"institution":"Universidade do Estado do Rio de Janeiro (UERJ)","area":"Computer Science","studyType":"Bachelor","startDate":"2011-06","endDate":"2016-06"}],"certificates":[],"projects":[{"name":"Resume-as-Code Platform","url":"https://github.com/rafilkmp3/resume-as-code","description":"Full-stack resume generation system demonstrating Platform Engineering principles","highlights":["Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation","Implemented dark/light theme with OS preference detection and accessibility features","Created ATS-friendly export functionality for job application compatibility","Deployed with GitHub Pages integration and Make-based build system"],"keywords":["Node.js","Handlebars","Puppeteer","HTML/CSS","JavaScript","CI/CD","GitHub Pages"]},{"name":"Infrastructure Automation Toolkit","url":"","description":"Collection of Terraform modules and automation scripts for cloud infrastructure","highlights":["Developed reusable Terraform modules for AWS/GCP multi-cloud deployments","Created monitoring and alerting automation reducing MTTR by 70%","Built cost optimization scripts identifying $200K+ in potential savings","Implemented security scanning and compliance automation for infrastructure-as-code"],"keywords":["Terraform","AWS","GCP","Python","Bash","Monitoring","Security"]}],"skills":[{"name":"☁️ Cloud Platforms & IaC","level":"Expert","keywords":["AWS (Expert)","Google Cloud Platform (GCP)","Terraform","Ansible","Helm"],"links":{"AWS (Expert)":"https://aws.amazon.com/","Google Cloud Platform (GCP)":"https://cloud.google.com/","Terraform":"https://www.terraform.io/","Ansible":"https://www.ansible.com/","Helm":"https://helm.sh/"}},{"name":"🐳 Container Orchestration","level":"Expert","keywords":["Kubernetes","Docker","Helm","Kustomize","Istio","ArgoCD","Google Kubernetes Engine","Amazon EKS"],"links":{"Kubernetes":"https://kubernetes.io/","Docker":"https://www.docker.com/","Helm":"https://helm.sh/","Kustomize":"https://kustomize.io/","Istio":"https://istio.io/","ArgoCD":"https://argoproj.github.io/cd/","Google Kubernetes Engine":"https://cloud.google.com/kubernetes-engine","Amazon EKS":"https://aws.amazon.com/eks/"}},{"name":"🔄 CI/CD & DevOps","level":"Expert","keywords":["GitHub Actions","GitLab CI","Jenkins","Atlantis","Bazel"],"links":{"GitHub Actions":"https://github.com/features/actions","GitLab CI":"https://docs.gitlab.com/ee/ci/","Jenkins":"https://www.jenkins.io/","Atlantis":"https://www.runatlantis.io/","Bazel":"https://bazel.build/"}},{"name":"📊 Observability & Monitoring","level":"Expert","keywords":["Prometheus","Grafana","ELK","Loki","Mimir","Datadog","Chronosphere","New Relic","SignOz"],"links":{"Prometheus":"https://prometheus.io/","Grafana":"https://grafana.com/","ELK":"https://www.elastic.co/elastic-stack","Loki":"https://grafana.com/oss/loki/","Mimir":"https://grafana.com/oss/mimir/","Datadog":"https://www.datadoghq.com/","Chronosphere":"https://chronosphere.io/","New Relic":"https://newrelic.com/","SignOz":"https://signoz.io/"}},{"name":"💻 Programming & Scripting","level":"Advanced","keywords":["Python","Bash","Go","JavaScript","YAML","HCL","SQL"],"links":{"Python":"https://www.python.org/","Bash":"https://www.gnu.org/software/bash/","Go":"https://golang.org/","JavaScript":"https://developer.mozilla.org/en-US/docs/Web/JavaScript","YAML":"https://yaml.org/","HCL":"https://github.com/hashicorp/hcl","SQL":"https://www.iso.org/standard/63555.html"}},{"name":"📈 Big Data & Databases","level":"Advanced","keywords":["Apache Kafka","Hadoop","Apache Spark","PostgreSQL","Redis","Elasticsearch","BigQuery"],"links":{"Apache Kafka":"https://kafka.apache.org/","Hadoop":"https://hadoop.apache.org/","Apache Spark":"https://spark.apache.org/","PostgreSQL":"https://www.postgresql.org/","Redis":"https://redis.io/","Elasticsearch":"https://www.elastic.co/elasticsearch/","BigQuery":"https://cloud.google.com/bigquery"}},{"name":"🔒 Security & Compliance","level":"Advanced","keywords":["RBAC","SAML/SSO","Vault","Security Scanning","Compliance Auditing","Infrastructure Security"],"links":{"RBAC":"https://kubernetes.io/docs/reference/access-authn-authz/rbac/","SAML/SSO":"https://auth0.com/intro-to-iam/what-is-saml","Vault":"https://www.vaultproject.io/","Security Scanning":"https://owasp.org/www-community/Vulnerability_Scanning_Tools","Compliance Auditing":"https://www.nist.gov/cyberframework","Infrastructure Security":"https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final"}},{"name":"🤝 Soft Skills","level":"Expert","keywords":["Effective in cross-functional teams","Clear technical writing","Leadership","Mentoring","Problem solving"]}]}
+    </script>
+    <script>
+        // Dark Mode Toggle Functionality
+        const themeToggle = document.getElementById('darkToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+        
+        // Function to detect OS theme preference
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        // Function to apply theme
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️'; // Sun icon when in dark mode (to switch to light)
+            } else {
+                body.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙'; // Moon icon when in light mode (to switch to dark)
+            }
+        }
+        
+        // Initialize theme immediately
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = getSystemTheme();
+            const initialTheme = savedTheme || systemTheme;
+            console.log('Initializing theme:', { initialTheme, savedTheme, systemTheme });
+            applyTheme(initialTheme);
+        }
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeTheme);
+        } else {
+            initializeTheme();
+        }
+        
+        // Listen for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+            // Only auto-switch if user hasn't manually set a preference
+            if (!localStorage.getItem('theme')) {
+                console.log('System theme changed to:', e.matches ? 'dark' : 'light');
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+        
+        // Double-click to reset to auto (system preference)
+        themeToggle.addEventListener('dblclick', () => {
+            localStorage.removeItem('theme');
+            applyTheme(getSystemTheme());
+        });
+        
+        
+        // ATS-Friendly Version Generator
+        function generateATS() {
+            // Create ATS-friendly content
+            const resumeData = JSON.parse(document.getElementById('resume-data').textContent);
+            const atsContent = generateATSContent(resumeData);
+            
+            // Create and download as text file
+            const blob = new Blob([atsContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Rafael_Sathler_Resume_ATS.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            showATSMessage();
+        }
+        
+        function generateATSContent(data) {
+            let content = '';
+            
+            // Basics
+            content += `${data.basics.name.toUpperCase()}\n`;
+            content += `${data.basics.label}\n\n`;
+            
+            // Contact
+            content += 'CONTACT INFORMATION\n';
+            content += `Location: ${data.basics.location.city}, ${data.basics.location.region}\n`;
+            content += `Phone: ${data.basics.phone}\n`;
+            content += `Email: ${data.basics.email}\n`;
+            data.basics.profiles.forEach(profile => {
+                if (profile.network !== 'Guinness World Record') {
+                    content += `${profile.network}: ${profile.url}\n`;
+                }
+            });
+            content += '\n';
+
+            // Summary
+            content += 'PROFESSIONAL SUMMARY\n';
+            content += `${data.basics.summary}\n\n`;
+
+            // Skills
+            content += 'CORE COMPETENCIES\n';
+            data.skills.forEach(skill => {
+                content += `• ${skill.name.replace(/☁️|🐳|🔄|📊|💻|📈|🔒|🤝/g, '').trim()}: ${skill.keywords.join(', ')}\n`;
+            });
+            content += '\n';
+
+            // Experience
+            content += 'PROFESSIONAL EXPERIENCE\n\n';
+            data.work.forEach(job => {
+                content += `${job.position.toUpperCase()} | ${job.name} | ${(job.url ? job.url + ' | ' : '')}${job.startDate} - ${job.endDate || 'Present'}\n`;
+                job.highlights.forEach(highlight => {
+                    content += `• ${highlight}\n`;
+                });
+                content += '\n';
+            });
+
+            // Projects
+            if(data.projects && data.projects.length > 0) {
+                content += 'KEY PROJECTS\n\n';
+                data.projects.forEach(project => {
+                    content += `${project.name} | ${project.url}\n`;
+                    content += `${project.description}\n`;
+                    project.highlights.forEach(highlight => {
+                        content += `• ${highlight}\n`;
+                    });
+                    if(project.keywords && project.keywords.length > 0){
+                        content += `Technologies: ${project.keywords.join(', ')}\n`;
+                    }
+                    content += '\n';
+                });
+            }
+
+            // Education
+            content += 'EDUCATION\n';
+            data.education.forEach(edu => {
+                content += `${edu.studyType} in ${edu.area}\n`;
+                content += `${edu.institution} | ${edu.startDate} - ${edu.endDate}\n\n`;
+            });
+
+            // Certifications
+            if(data.certificates && data.certificates.length > 0){
+                content += 'CERTIFICATIONS\n';
+                data.certificates.forEach(cert => {
+                    content += `• ${cert.name} | ${cert.date} | ${cert.issuer}\n`;
+                });
+                content += '\n';
+            }
+
+            // Personal
+            content += 'NATIONALITY & LANGUAGES\n';
+            content += `Nationality: ${data.basics.nationality}\n`;
+            if(data.basics.languages && data.basics.languages.length > 0){
+                content += `Languages: ${data.basics.languages.join(', ')}\n`;
+            }
+
+            return content;
+        }
+        
+        function showATSMessage() {
+            // Create temporary message overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                color: white;
+                font-family: inherit;
+            `;
+            
+            const message = document.createElement('div');
+            message.style.cssText = `
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                max-width: 500px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            message.innerHTML = `
+                <h2 style="margin-bottom: 1rem; color: var(--gradient-start);">✅ ATS Version Generated!</h2>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">Your ATS-friendly resume has been downloaded as <strong>Rafael_Sathler_Resume_ATS.txt</strong></p>
+                <p style="margin-bottom: 1.5rem; font-size: 0.9em; opacity: 0.8;">This plain text version removes emojis and formatting for better compatibility with Applicant Tracking Systems.</p>
+                <button onclick="document.body.removeChild(arguments[0].target.closest('.overlay'))" 
+                        style="background: var(--gradient-start); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Close
+                </button>
+            `;
+            
+            overlay.className = 'overlay';
+            overlay.appendChild(message);
+            document.body.appendChild(overlay);
+            
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+            }, 5000);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Shift + D for dark mode toggle (avoid conflict with browser bookmarks)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                themeToggle.click();
+            }
+            // Ctrl/Cmd + P for print
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+        
+        // Smooth animations for theme transitions
+        document.documentElement.style.setProperty('--transition', 'all 0.3s ease');
+        
+        // Parallax Effect
+        function initParallax() {
+            const parallaxBg = document.getElementById('parallaxBg');
+            
+            function updateParallax() {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                // Move background slower than scroll
+                if (parallaxBg) {
+                    parallaxBg.style.transform = `translate3d(0, ${rate}px, 0)`;
+                }
+            }
+            
+            // Throttled scroll listener for performance
+            let ticking = false;
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', () => {
+                requestTick();
+                ticking = false;
+            });
+            
+            // Initial call
+            updateParallax();
+        }
+        
+        // Initialize parallax after DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initParallax);
+        } else {
+            initParallax();
+        }
+
+        // Fix auto-scroll bug - ensure page stays at top
+        window.addEventListener('load', () => {
+            // Force scroll to top after everything loads
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        });
+
+        // Immediately show all sections for instant loading
+        const sections = document.querySelectorAll('.fade-in-section');
+        sections.forEach(section => {
+            section.classList.add('is-visible');
+            section.style.opacity = '1';
+            section.style.transform = 'none';
+        });
+
+        // Add a small delay to prevent initial scroll jumping
+        setTimeout(() => {
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        }, 100);
+    </script>
+</body>
+</html>
