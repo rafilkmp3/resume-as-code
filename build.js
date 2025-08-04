@@ -132,7 +132,15 @@ async function generatePDF() {
           left: '0',
           right: '0'
         },
-        scale: 1.0
+        scale: 0.95, // Slight scale down for better fit and margins
+        tagged: true, // Generate tagged PDF for accessibility
+        // Professional PDF metadata
+        title: 'Rafael Bernardo Sathler - Resume',
+        author: 'Rafael Bernardo Sathler',
+        subject: 'Infrastructure Engineer Resume - Platform Engineering and DevOps Portfolio',
+        keywords: 'Infrastructure Engineer, DevOps, Platform Engineer, AWS, GCP, Kubernetes, CI/CD, Cloud Architect',
+        creator: 'Resume-as-Code System',
+        producer: 'Puppeteer PDF Generator'
       });
 
       await browser.close();

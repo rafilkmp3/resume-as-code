@@ -41,6 +41,29 @@ jobs:
           name: resume-build
           path: dist/
           retention-days: 7
+      
+      - name: Upload versioned PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-pdf-${{ github.run_number }}
+          path: dist/resume.pdf
+          retention-days: 30
+      
+      - name: Create versioned PDF with metadata
+        run: |
+          # Create versioned copy with build metadata
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          VERSION_PDF="dist/resume-rafael-sathler-${SHORT_SHA}-build${{ github.run_number }}.pdf"
+          cp dist/resume.pdf "$VERSION_PDF"
+          echo "Generated versioned PDF: $(basename "$VERSION_PDF")"
+          ls -la dist/*.pdf
+      
+      - name: Upload versioned PDF with metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-versioned-${{ github.sha }}
+          path: dist/resume-rafael-sathler-*.pdf
+          retention-days: 90
 
   unit-tests:
     name: Unit Tests

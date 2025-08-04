@@ -1608,6 +1608,54 @@
                 margin-bottom: 2pt;
             }
             
+            /* Print URLs for links */
+            a[href^="http"]:after,
+            a[href^="mailto:"]:after,
+            a[href^="tel:"]:after {
+                content: " (" attr(href) ")";
+                font-size: 9pt;
+                color: #666 !important;
+                font-style: italic;
+                word-break: break-all;
+            }
+            
+            /* Don't print URLs for social media icons in header */
+            .header a[href]:after,
+            .link-item[href]:after {
+                content: none !important;
+            }
+            
+            /* Better page breaks for work experience */
+            .work-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Keep section headers with content */
+            .section h2 {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            /* Prevent orphaned lines */
+            p, li {
+                orphans: 3;
+                widows: 3;
+            }
+            
+            /* Optimize contact info for print */
+            .contact-info {
+                display: block !important;
+                text-align: center;
+                line-height: 1.1;
+            }
+            
+            .contact-item {
+                display: inline-block;
+                margin: 0 6pt;
+                font-size: 10pt;
+            }
+            
             /* Simple footer */
             .footer {
                 display: none !important;
