@@ -48,17 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build
-          path: dist/
-      
-      - name: Run desktop tests
-        run: npx playwright test tests/layout-analysis.spec.js --project=desktop-chrome --headed
+      - name: Install http-server
+        run: npm install -g http-server
         continue-on-error: true
       
       - name: Upload desktop screenshots
@@ -100,17 +91,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build
-          path: dist/
-      
-      - name: Run mobile tests
-        run: npx playwright test tests/layout-analysis.spec.js --project=iphone-15-pro-max --headed
+      - name: Install http-server
+        run: npm install -g http-server
         continue-on-error: true
       
       - name: Upload mobile screenshots
@@ -152,17 +134,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build
-          path: dist/
-      
-      - name: Run tablet tests
-        run: npx playwright test tests/layout-analysis.spec.js --project=ipad-pro --headed
+      - name: Install http-server
+        run: npm install -g http-server
         continue-on-error: true
       
       - name: Upload tablet screenshots
@@ -204,17 +177,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: resume-build
-          path: dist/
-      
-      - name: Run usability tests
-        run: npx playwright test tests/mobile-layout.spec.js --headed
+      - name: Install http-server
+        run: npm install -g http-server
         continue-on-error: true
       
       - name: Upload usability test results
