@@ -26,8 +26,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Build with Docker
-        run: make build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('**/Dockerfile', '**/package*.json') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+        
+      - name: Build with Docker (with caching)
+        run: |
+          echo "🚀 Building with Docker layer caching..."
+          START_TIME=$(date +%s)
+          
+          docker buildx create --use --driver docker-container --name builder || true
+          docker buildx build \
+            --target builder \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --tag resume-as-code:builder \
+            --load \
+            .
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:builder sh -c "cp -r /app/dist/* /tmp/dist/"
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "✅ Build completed with caching in ${BUILD_TIME}s"
+          echo "📁 Generated files:"
+          ls -la dist/
         
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -55,6 +85,15 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+      
+      - name: Cache Playwright browsers
+        if: matrix.test-type == 'playwright'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
       
       - name: Install dependencies
         run: |
