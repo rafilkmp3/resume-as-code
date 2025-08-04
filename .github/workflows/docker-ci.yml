@@ -89,42 +89,45 @@ jobs:
           echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
           echo "CPU info: $(lscpu | grep 'Model name' | cut -d: -f2 | xargs)"
           
-      - name: Run ${{ matrix.test-type }} tests
+      - name: Run ${{ matrix.test-type }} tests via Docker/Makefile
         run: |
           CPU_CORES=$(nproc)
           echo "🚀 Using $CPU_CORES CPU cores for optimal performance"
+          echo "🐳 Running tests in Docker container via Makefile"
           
           case "${{ matrix.test-type }}" in
             unit) 
-              echo "🧪 Running unit tests with maximum CPU utilization..."
-              if [ -f "jest.config.js" ]; then
-                echo "Running Jest with $CPU_CORES workers"
-                npx jest --coverage --verbose --maxWorkers=$CPU_CORES || echo "Unit tests not configured, skipping"
-              else
-                echo "✅ Jest not configured, skipping unit tests"
-              fi
+              echo "🧪 Running unit tests via make test-unit..."
+              make test-unit
               ;;
             e2e) 
-              echo "🎭 E2E tests temporarily disabled due to Playwright/Alpine compatibility"
-              echo "Would use $CPU_CORES workers when re-enabled"
-              echo "✅ E2E tests skipped"
+              echo "🎭 Running E2E tests via make test-e2e..."
+              make test-e2e
               ;;
             visual) 
-              echo "🎨 Visual tests temporarily disabled due to Playwright/Alpine compatibility"
-              echo "Would use $CPU_CORES workers when re-enabled"
-              echo "✅ Visual tests skipped"
+              echo "🎨 Running visual tests via make test-visual..."
+              make test-visual
               ;;
             accessibility) 
-              echo "♿ Accessibility tests temporarily disabled due to Playwright/Alpine compatibility"
-              echo "Would use $CPU_CORES workers when re-enabled"
-              echo "✅ Accessibility tests skipped"
+              echo "♿ Running accessibility tests via make test-accessibility..."
+              make test-accessibility
               ;;
             performance) 
-              echo "⚡ Performance tests temporarily disabled due to Playwright/Alpine compatibility"
-              echo "Would use $CPU_CORES workers when re-enabled"
-              echo "✅ Performance tests skipped"
+              echo "⚡ Running performance tests via make test-performance..."
+              make test-performance
               ;;
           esac
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-type }}-${{ github.sha }}
+          path: |
+            coverage/
+            test-results/
+            playwright-report/
+          retention-days: 7
 
   # Build and push Docker image
   docker-build:
@@ -328,12 +331,3 @@ jobs:
               **Ready for production deployment! 🎉**`
             })
 
-  # Release acknowledgment (skip CI for release commits)
-  release-job:
-    name: Release Acknowledgment
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    if: "contains(github.event.head_commit.message, 'chore(main): release')"
-    steps:
-      - name: Acknowledge Release Commit
-        run: echo "🎉 Release commit detected. Skipping Docker CI pipeline for release."

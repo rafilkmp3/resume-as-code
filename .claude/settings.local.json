@@ -60,7 +60,12 @@
       "WebFetch(domain:github.com)",
       "Bash(gh pr view:*)",
       "Bash(gh pr close:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__zen__analyze",
+      "Bash(npm outdated)",
+      "Bash(gh api:*)",
+      "Bash(npm show:*)",
+      "Bash(gh run watch:*)"
     ],
     "deny": []
   }
