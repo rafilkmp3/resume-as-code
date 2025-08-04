@@ -581,7 +581,7 @@ jobs:
     name: Deploy Preview with Test Results
     needs: [build, comprehensive-report]
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && !contains(github.head_ref, 'dependabot')
     permissions:
       contents: write
       pull-requests: write
@@ -675,13 +675,21 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [build, quality-gate, deploy-preview]
+    needs: [build, quality-gate]
+    # Only deploy from main branch and not from release PRs
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore(main): release')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-build
+          path: dist/
+
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

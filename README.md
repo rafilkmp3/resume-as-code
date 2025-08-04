@@ -7,8 +7,8 @@
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://rafilkmp3.github.io/resume-as-code/)
 [![PDF Download](https://img.shields.io/badge/PDF-Download%20Resume-red?style=for-the-badge&logo=adobe)](https://rafilkmp3.github.io/resume-as-code/resume.pdf)
-[![Comprehensive CI](https://github.com/rafilkmp3/resume-as-code/workflows/Comprehensive%20Resume%20CI%20-%20All%20Tests/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Deployment](https://github.com/rafilkmp3/resume-as-code/workflows/Build%20and%20Deploy%20Resume%20to%20GitHub%20Pages/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Comprehensive CI](https://github.com/rafilkmp3/resume-as-code/workflows/Comprehensive%20CI/CD%20Workflow/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Release Please](https://github.com/rafilkmp3/resume-as-code/workflows/Release%20Please/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
 
 [![Visual Regression](https://img.shields.io/badge/Visual%20Regression-Baseline%20Protected-success?style=flat-square&logo=playwright)](https://github.com/rafilkmp3/resume-as-code/actions)
 [![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-success?style=flat-square&logo=web-accessibility)](https://github.com/rafilkmp3/resume-as-code/actions)
@@ -393,18 +393,32 @@ graph TB
 
 ## 🚀 Deployment Strategy
 
+### **🔄 Trunk-Based Development with Release Please**
+This project uses trunk-based development with automated release management:
+
+1. **Feature Development** → Direct commits to `main` branch
+2. **Release Please Bot** → Automatically creates release PRs based on conventional commits
+3. **Release PR** → Accumulates unreleased changes with auto-generated changelog
+4. **Merge Release PR** → Triggers production deployment and GitHub release
+5. **Semantic Versioning** → Automatic version bumping based on commit types:
+   - `feat:` → Minor version bump (new features)
+   - `fix:` → Patch version bump (bug fixes)
+   - `BREAKING CHANGE:` → Major version bump (breaking changes)
+
 ### **🔄 Automated Deployment Pipeline**
 1. **Code Push** → Triggers comprehensive CI/CD pipeline
 2. **Quality Gates** → All tests must pass before deployment
 3. **Build Artifacts** → HTML, PDF, and optimized assets generated
-4. **GitHub Pages** → Automated deployment to live environment
-5. **Validation** → Post-deployment health checks
+4. **GitHub Pages** → Automated deployment to live environment (main branch only)
+5. **Release Deployment** → Additional deployment on release with versioned assets
+6. **Validation** → Post-deployment health checks
 
 ### **🌐 Production Environment**
 - **Hosting**: GitHub Pages with global CDN
 - **Domain**: Custom domain with HTTPS enforcement
 - **Monitoring**: Automated uptime and performance monitoring
 - **Rollback**: Git-based rollback strategy
+- **Release Assets**: Versioned PDF downloads attached to GitHub releases
 
 ## 🤝 Contributing
 
