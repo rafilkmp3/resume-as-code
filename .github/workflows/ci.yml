@@ -354,16 +354,32 @@ jobs:
       - name: Generate job summary
         if: always()
         run: |
-          echo "## 🚀 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 🚀 Resume CI/CD Pipeline - Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 📊 Pipeline Information" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Workflow** | ${{ github.workflow }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Event** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Ref** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch/Ref** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Deploy URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Resume successfully built, tested, and deployed!" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🌐 Live Resume" >> $GITHUB_STEP_SUMMARY
+          echo "Your resume has been successfully deployed and is available at:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 [**View Resume**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## ✅ Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ **Build**: Resume HTML/PDF generated successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 **Tests**: Unit and security tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎭 **E2E Tests**: Multi-browser testing completed using prebuilt Docker images" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Deploy**: Published to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 **Resume successfully built, tested, and deployed!**" >> $GITHUB_STEP_SUMMARY

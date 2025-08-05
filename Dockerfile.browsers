@@ -44,6 +44,55 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
+# Create hello world test directory and embedded test
+RUN mkdir -p /app/tests/hello-world
+
+# Create the embedded hello world test file
+RUN cat > /app/tests/hello-world/hello-world.spec.js << 'EOF'
+const { test, expect } = require('@playwright/test');
+
+test.describe('Hello World Browser Test', () => {
+  test('should load a simple page and verify browser functionality', async ({ page, browserName }) => {
+    console.log(`🧪 Running Hello World test for ${browserName}`);
+    
+    // Create a simple HTML page
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Hello World Test - ${browserName}</title>
+        </head>
+        <body>
+          <h1 id="greeting">Hello World from ${browserName}!</h1>
+          <p id="status">Browser is working correctly</p>
+          <button id="test-btn">Click me</button>
+          <script>
+            document.getElementById('test-btn').onclick = function() {
+              document.getElementById('status').textContent = 'Button clicked successfully!';
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    // Verify page loaded
+    await expect(page.locator('#greeting')).toHaveText(`Hello World from ${browserName}!`);
+    
+    // Test basic interactivity
+    await page.click('#test-btn');
+    await expect(page.locator('#status')).toHaveText('Button clicked successfully!');
+    
+    console.log(`✅ Hello World test passed for ${browserName}`);
+  });
+});
+EOF
+
+# Create test user and set permissions
+RUN groupadd -g 1001 testuser && \
+    useradd -u 1001 -g testuser -m testuser && \
+    chown -R testuser:testuser /app && \
+    chown -R testuser:testuser /home/testuser
+
 # ===== CHROMIUM STAGE =====
 FROM base AS chromium
 
@@ -61,18 +110,16 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 RUN npx playwright install chromium && \
     npx playwright install-deps chromium
 
-# Create test user and set permissions
-RUN groupadd -g 1001 testuser && \
-    useradd -u 1001 -g testuser -m testuser && \
-    chown -R testuser:testuser /app && \
-    chown -R testuser:testuser /home/testuser && \
-    chmod -R 755 /ms-playwright || true && \
+# Set permissions for browser directories
+RUN chmod -R 755 /ms-playwright || true && \
     chown -R testuser:testuser /ms-playwright || true && \
     chmod -R 755 /opt/playwright || true && \
     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
-CMD ["npx", "playwright", "test", "--project=chromium"]
+
+# Default command runs the embedded hello world test
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-chrome"]
 
 # ===== FIREFOX STAGE =====
 FROM base AS firefox
@@ -88,18 +135,16 @@ RUN apt-get update \
 RUN npx playwright install firefox && \
     npx playwright install-deps firefox
 
-# Create test user and set permissions
-RUN groupadd -g 1001 testuser && \
-    useradd -u 1001 -g testuser -m testuser && \
-    chown -R testuser:testuser /app && \
-    chown -R testuser:testuser /home/testuser && \
-    chmod -R 755 /ms-playwright || true && \
+# Set permissions for browser directories
+RUN chmod -R 755 /ms-playwright || true && \
     chown -R testuser:testuser /ms-playwright || true && \
     chmod -R 755 /opt/playwright || true && \
     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
-CMD ["npx", "playwright", "test", "--project=firefox"]
+
+# Default command runs the embedded hello world test
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-firefox"]
 
 # ===== WEBKIT STAGE =====
 FROM base AS webkit
@@ -124,15 +169,13 @@ RUN apt-get update \
 RUN npx playwright install webkit && \
     npx playwright install-deps webkit
 
-# Create test user and set permissions
-RUN groupadd -g 1001 testuser && \
-    useradd -u 1001 -g testuser -m testuser && \
-    chown -R testuser:testuser /app && \
-    chown -R testuser:testuser /home/testuser && \
-    chmod -R 755 /ms-playwright || true && \
+# Set permissions for browser directories
+RUN chmod -R 755 /ms-playwright || true && \
     chown -R testuser:testuser /ms-playwright || true && \
     chmod -R 755 /opt/playwright || true && \
     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
-CMD ["npx", "playwright", "test", "--project=webkit"]
+
+# Default command runs the embedded hello world test
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-webkit"]
