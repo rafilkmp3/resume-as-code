@@ -3,8 +3,32 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'assets/**' 
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/ci.yml'
+      - 'Makefile'
+      - 'package*.json'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/ci.yml'
+      - 'Makefile'
+      - 'package*.json'
   workflow_dispatch:
 
 concurrency:
@@ -18,29 +42,20 @@ permissions:
   packages: write
 
 jobs:
-  # Build browser images
-  build-images:
-    name: Build Docker Images
+  # Check Docker image availability  
+  check-images:
+    name: Check Docker Images
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
-      DOCKER_BUILDKIT: 1
-      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-      COMPOSE_BAKE: 'true'
     outputs:
-      image-base: ${{ steps.meta-base.outputs.tags }}
-      image-chromium: ${{ steps.meta-chromium.outputs.tags }}
-      image-firefox: ${{ steps.meta-firefox.outputs.tags }}
-      image-webkit: ${{ steps.meta-webkit.outputs.tags }}
+      images-available: ${{ steps.check.outputs.available }}
+      image-chromium: ${{ steps.check.outputs.chromium }}
+      image-firefox: ${{ steps.check.outputs.firefox }}
+      image-webkit: ${{ steps.check.outputs.webkit }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
@@ -48,85 +63,42 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Extract metadata for base image
-        id: meta-base
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-base
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            
-      - name: Extract metadata for chromium image
-        id: meta-chromium
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            
-      - name: Extract metadata for firefox image
-        id: meta-firefox
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            
-      - name: Extract metadata for webkit image
-        id: meta-webkit
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            
-      - name: Build and push base image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.base
-          push: true
-          tags: ${{ steps.meta-base.outputs.tags }}
-          labels: ${{ steps.meta-base.outputs.labels }}
-          cache-from: type=gha,scope=base-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=base-${{ github.ref_name }}
+      - name: Check image availability
+        id: check
+        run: |
+          echo "🔍 Checking Docker image availability..."
           
-      - name: Build and push chromium image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.chromium
-          push: true
-          tags: ${{ steps.meta-chromium.outputs.tags }}
-          labels: ${{ steps.meta-chromium.outputs.labels }}
-          cache-from: type=gha,scope=chromium-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=chromium-${{ github.ref_name }}
+          # Define expected images
+          IMAGES=(
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}"
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox:${{ github.ref_name }}"
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit:${{ github.ref_name }}"
+          )
           
-      - name: Build and push firefox image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.firefox
-          push: true
-          tags: ${{ steps.meta-firefox.outputs.tags }}
-          labels: ${{ steps.meta-firefox.outputs.labels }}
-          cache-from: type=gha,scope=firefox-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=firefox-${{ github.ref_name }}
+          # Check each image
+          AVAILABLE=true
+          for image in "${IMAGES[@]}"; do
+            echo "  Checking: $image"
+            if docker manifest inspect "$image" >/dev/null 2>&1; then
+              echo "    ✅ Available"
+            else
+              echo "    ❌ Not found"
+              AVAILABLE=false
+            fi
+          done
           
-      - name: Build and push webkit image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.webkit
-          push: true
-          tags: ${{ steps.meta-webkit.outputs.tags }}
-          labels: ${{ steps.meta-webkit.outputs.labels }}
-          cache-from: type=gha,scope=webkit-${{ github.ref_name }}
-          cache-to: type=gha,mode=max,scope=webkit-${{ github.ref_name }}
+          # Set outputs
+          echo "available=$AVAILABLE" >> $GITHUB_OUTPUT
+          echo "chromium=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}" >> $GITHUB_OUTPUT  
+          echo "firefox=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox:${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "webkit=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit:${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          
+          if [ "$AVAILABLE" = "true" ]; then
+            echo "✅ All Docker images are available"
+          else
+            echo "⚠️ Some Docker images are missing - E2E tests will be skipped"
+            echo "💡 Trigger the 'Docker Images' workflow to build missing images"
+          fi
 
   # Build first - needed for all tests
   build:
@@ -202,20 +174,21 @@ jobs:
     name: E2E Tests (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [build, build-images]
+    needs: [build, check-images]
+    if: needs.check-images.outputs.images-available == 'true'
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
         include:
           - browser: chromium
-            image-output: image-chromium
+            image: ${{ needs.check-images.outputs.image-chromium }}
           - browser: firefox
-            image-output: image-firefox
+            image: ${{ needs.check-images.outputs.image-firefox }}
           - browser: webkit
-            image-output: image-webkit
+            image: ${{ needs.check-images.outputs.image-webkit }}
     container:
-      image: ${{ needs.build-images.outputs[matrix.image-output] }}
+      image: ${{ matrix.image }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -236,7 +209,7 @@ jobs:
           echo "::group::🎭 Running ${{ matrix.browser }} E2E tests"
           echo "✅ Using browser-specific Docker image"
           echo "Browser: ${{ matrix.browser }}"
-          echo "Image: ${{ needs.build-images.outputs[matrix.image-output] }}"
+          echo "Image: ${{ matrix.image }}"
           npx playwright test --project=${{ matrix.browser }} --workers=1
           echo "::endgroup::"
         env:

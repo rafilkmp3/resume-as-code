@@ -1,0 +1,314 @@
+name: Docker Images
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile*'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docker-images.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile*'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docker-images.yml'
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild all images'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: docker-images-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Detect which images need to be rebuilt
+  detect-changes:
+    name: Detect Changed Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      base-changed: ${{ steps.changes.outputs.base }}
+      chromium-changed: ${{ steps.changes.outputs.chromium }}
+      firefox-changed: ${{ steps.changes.outputs.firefox }}
+      webkit-changed: ${{ steps.changes.outputs.webkit }}
+      any-changed: ${{ steps.changes.outputs.any }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect file changes
+        id: changes
+        run: |
+          echo "Detecting changes for efficient Docker builds..."
+          
+          # Force rebuild if requested
+          if [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
+            echo "🔄 Force rebuild requested"
+            echo "base=true" >> $GITHUB_OUTPUT
+            echo "chromium=true" >> $GITHUB_OUTPUT
+            echo "firefox=true" >> $GITHUB_OUTPUT
+            echo "webkit=true" >> $GITHUB_OUTPUT
+            echo "any=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Check for changes in specific Dockerfiles or dependencies
+          BASE_CHANGED=false
+          CHROMIUM_CHANGED=false
+          FIREFOX_CHANGED=false
+          WEBKIT_CHANGED=false
+          
+          # Get changed files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only HEAD~1)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || echo "Dockerfile.base Dockerfile.chromium Dockerfile.firefox Dockerfile.webkit")
+          fi
+          
+          echo "Changed files: $CHANGED_FILES"
+          
+          # Check each Dockerfile and shared dependencies
+          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile\.base|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
+            BASE_CHANGED=true
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile\.chromium|package\.json|package-lock\.json)" || [ "$BASE_CHANGED" = "true" ]; then
+            CHROMIUM_CHANGED=true
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile\.firefox|package\.json|package-lock\.json)" || [ "$BASE_CHANGED" = "true" ]; then
+            FIREFOX_CHANGED=true
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile\.webkit|package\.json|package-lock\.json)" || [ "$BASE_CHANGED" = "true" ]; then
+            WEBKIT_CHANGED=true
+          fi
+          
+          # Set outputs
+          echo "base=$BASE_CHANGED" >> $GITHUB_OUTPUT
+          echo "chromium=$CHROMIUM_CHANGED" >> $GITHUB_OUTPUT
+          echo "firefox=$FIREFOX_CHANGED" >> $GITHUB_OUTPUT
+          echo "webkit=$WEBKIT_CHANGED" >> $GITHUB_OUTPUT
+          
+          ANY_CHANGED=false
+          if [ "$BASE_CHANGED" = "true" ] || [ "$CHROMIUM_CHANGED" = "true" ] || [ "$FIREFOX_CHANGED" = "true" ] || [ "$WEBKIT_CHANGED" = "true" ]; then
+            ANY_CHANGED=true
+          fi
+          echo "any=$ANY_CHANGED" >> $GITHUB_OUTPUT
+          
+          echo "📊 Change Detection Results:"
+          echo "  Base: $BASE_CHANGED"
+          echo "  Chromium: $CHROMIUM_CHANGED" 
+          echo "  Firefox: $FIREFOX_CHANGED"
+          echo "  WebKit: $WEBKIT_CHANGED"
+          echo "  Any: $ANY_CHANGED"
+
+  # Build and test images in parallel
+  build-images:
+    name: Build & Test (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: detect-changes
+    if: needs.detect-changes.outputs.any-changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: base
+            dockerfile: Dockerfile.base
+            should-build: ${{ needs.detect-changes.outputs.base-changed }}
+          - browser: chromium
+            dockerfile: Dockerfile.chromium
+            should-build: ${{ needs.detect-changes.outputs.chromium-changed }}
+          - browser: firefox
+            dockerfile: Dockerfile.firefox
+            should-build: ${{ needs.detect-changes.outputs.firefox-changed }}
+          - browser: webkit
+            dockerfile: Dockerfile.webkit
+            should-build: ${{ needs.detect-changes.outputs.webkit-changed }}
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+    steps:
+      - name: Skip if no changes
+        if: matrix.should-build != 'true'
+        run: |
+          echo "⏭️ Skipping ${{ matrix.browser }} - no changes detected"
+          exit 0
+
+      - name: Checkout
+        if: matrix.should-build == 'true'
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        if: matrix.should-build == 'true'
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Log in to Container Registry
+        if: matrix.should-build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata
+        if: matrix.should-build == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            
+      - name: Build image
+        if: matrix.should-build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
+
+      - name: Run smoke tests
+        if: matrix.should-build == 'true' && matrix.browser != 'base'
+        run: |
+          echo "🧪 Running smoke tests for ${{ matrix.browser }}"
+          
+          # Get the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing image: $IMAGE_TAG"
+          
+          # Test 1: Basic container startup
+          echo "  ✓ Testing container startup..."
+          docker run --rm $IMAGE_TAG echo "Container started successfully"
+          
+          # Test 2: Node.js and npm are available
+          echo "  ✓ Testing Node.js environment..."
+          docker run --rm $IMAGE_TAG node --version
+          docker run --rm $IMAGE_TAG npm --version
+          
+          # Test 3: Playwright is installed
+          echo "  ✓ Testing Playwright installation..."
+          docker run --rm $IMAGE_TAG npx playwright --version
+          
+          # Test 4: Browser-specific test
+          echo "  ✓ Testing ${{ matrix.browser }} browser availability..."
+          case "${{ matrix.browser }}" in
+            chromium)
+              docker run --rm $IMAGE_TAG npx playwright install-deps chromium
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
+              ;;
+            firefox)
+              docker run --rm $IMAGE_TAG npx playwright install-deps firefox  
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
+              ;;
+            webkit)
+              docker run --rm $IMAGE_TAG npx playwright install-deps webkit
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
+              ;;
+          esac
+          
+          echo "✅ All smoke tests passed for ${{ matrix.browser }}"
+
+      - name: Push image
+        if: matrix.should-build == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
+
+      - name: Image summary
+        if: matrix.should-build == 'true'
+        run: |
+          echo "## 🐳 ${{ matrix.browser }} Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Browser** | ${{ matrix.browser }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Dockerfile** | ${{ matrix.dockerfile }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Registry** | ${{ env.REGISTRY }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Pushed** | ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🧪 **Smoke tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  # Summary job
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [detect-changes, build-images]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🐳 Docker Images Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.detect-changes.outputs.any-changed }}" != "true" ]; then
+            echo "ℹ️ **No changes detected** - All Docker images are up to date" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          echo "| Image | Changed | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Check each image status
+          for image in base chromium firefox webkit; do
+            case $image in
+              base) changed="${{ needs.detect-changes.outputs.base-changed }}" ;;
+              chromium) changed="${{ needs.detect-changes.outputs.chromium-changed }}" ;;
+              firefox) changed="${{ needs.detect-changes.outputs.firefox-changed }}" ;;
+              webkit) changed="${{ needs.detect-changes.outputs.webkit-changed }}" ;;
+            esac
+            
+            if [ "$changed" = "true" ]; then
+              if [ "${{ needs.build-images.result }}" = "success" ]; then
+                status="✅ Built & Tested"
+              else
+                status="❌ Failed"
+              fi
+            else
+              status="⏭️ Skipped"
+            fi
+            
+            echo "| $image | $changed | $status |" >> $GITHUB_STEP_SUMMARY
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Images published** to GitHub Container Registry" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -38,11 +38,11 @@ jobs:
         browser: [chromium, firefox, webkit]
         include:
           - browser: chromium
-            image: ghcr.io/${{ github.repository }}-chromium:main
+            image: ghcr.io/${{ github.repository }}-chromium:${{ github.ref_name }}
           - browser: firefox
-            image: ghcr.io/${{ github.repository }}-firefox:main
+            image: ghcr.io/${{ github.repository }}-firefox:${{ github.ref_name }}
           - browser: webkit
-            image: ghcr.io/${{ github.repository }}-webkit:main
+            image: ghcr.io/${{ github.repository }}-webkit:${{ github.ref_name }}
     container:
       image: ${{ matrix.image }}
       credentials:
