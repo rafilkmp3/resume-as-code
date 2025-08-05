@@ -21,6 +21,20 @@ module.exports = defineConfig({
       },
     },
     {
+      name: 'desktop-firefox',
+      use: { 
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 720 }
+      },
+    },
+    {
+      name: 'desktop-webkit',
+      use: { 
+        ...devices['Desktop Safari'],
+        viewport: { width: 1280, height: 720 }
+      },
+    },
+    {
       name: 'iphone-15-pro-max',
       use: { ...devices['iPhone 15 Pro Max'] },
     },
