@@ -271,31 +271,25 @@ status:
 	@echo "$(CYAN)================================$(NC)"
 
 # Build all browser-specific Docker images
-build-images: docker-check build-base build-chromium build-firefox build-webkit
+build-images: docker-check build-chromium build-firefox build-webkit
 	@echo "$(GREEN)🎉 All browser images built successfully!$(NC)"
-
-# Build base image with common dependencies
-build-base: docker-check
-	@echo "$(CYAN)🏗️ Building base image...$(NC)"
-	@docker build -f Dockerfile.base -t resume-as-code:base .
-	@echo "$(GREEN)✅ Base image built successfully!$(NC)"
 
 # Build Chromium-specific image
 build-chromium: docker-check
 	@echo "$(CYAN)🏗️ Building Chromium image...$(NC)"
-	@docker build -f Dockerfile.chromium -t resume-as-code:chromium .
+	@docker build -f Dockerfile.browsers --target chromium -t resume-as-code:chromium .
 	@echo "$(GREEN)✅ Chromium image built successfully!$(NC)"
 
 # Build Firefox-specific image  
 build-firefox: docker-check
 	@echo "$(CYAN)🏗️ Building Firefox image...$(NC)"
-	@docker build -f Dockerfile.firefox -t resume-as-code:firefox .
+	@docker build -f Dockerfile.browsers --target firefox -t resume-as-code:firefox .
 	@echo "$(GREEN)✅ Firefox image built successfully!$(NC)"
 
 # Build WebKit-specific image
 build-webkit: docker-check
 	@echo "$(CYAN)🏗️ Building WebKit image...$(NC)"
-	@docker build -f Dockerfile.webkit -t resume-as-code:webkit .
+	@docker build -f Dockerfile.browsers --target webkit -t resume-as-code:webkit .
 	@echo "$(GREEN)✅ WebKit image built successfully!$(NC)"
 
 # Run visual monitoring tests (non-blocking)

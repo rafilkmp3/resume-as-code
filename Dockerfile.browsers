@@ -1,0 +1,138 @@
+# Multi-stage Dockerfile for browser-specific testing environments
+FROM node:22-slim AS base
+
+# Common environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    NODE_ENV=test \
+    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+
+# Install common dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        fonts-liberation \
+        libatk-bridge2.0-0 \
+        libdrm2 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libgbm1 \
+        libxss1 \
+        libasound2 \
+        libgtk-3-0 \
+        libgbm-dev \
+        libnss3 \
+        libgconf-2-4 \
+        libxtst6 \
+        libpangocairo-1.0-0 \
+        libatk1.0-0 \
+        libcairo-gobject2 \
+        libgdk-pixbuf2.0-0 \
+        make \
+        git \
+        wget \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && mkdir -p /opt/playwright
+
+WORKDIR /app
+
+# Copy package files and install npm dependencies
+COPY package*.json Makefile ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# ===== CHROMIUM STAGE =====
+FROM base AS chromium
+
+# Install Chromium browser and additional dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chromium \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Chromium-specific environment
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Install Playwright Chromium browser
+RUN npx playwright install chromium && \
+    npx playwright install-deps chromium
+
+# Create test user and set permissions
+RUN groupadd -g 1001 testuser && \
+    useradd -u 1001 -g testuser -m testuser && \
+    chown -R testuser:testuser /app && \
+    chown -R testuser:testuser /home/testuser && \
+    chmod -R 755 /ms-playwright || true && \
+    chown -R testuser:testuser /ms-playwright || true && \
+    chmod -R 755 /opt/playwright || true && \
+    chown -R testuser:testuser /opt/playwright || true
+
+USER testuser
+CMD ["npx", "playwright", "test", "--project=chromium"]
+
+# ===== FIREFOX STAGE =====
+FROM base AS firefox
+
+# Install Firefox browser and additional dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        firefox-esr \
+        libdbus-glib-1-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright Firefox browser
+RUN npx playwright install firefox && \
+    npx playwright install-deps firefox
+
+# Create test user and set permissions
+RUN groupadd -g 1001 testuser && \
+    useradd -u 1001 -g testuser -m testuser && \
+    chown -R testuser:testuser /app && \
+    chown -R testuser:testuser /home/testuser && \
+    chmod -R 755 /ms-playwright || true && \
+    chown -R testuser:testuser /ms-playwright || true && \
+    chmod -R 755 /opt/playwright || true && \
+    chown -R testuser:testuser /opt/playwright || true
+
+USER testuser
+CMD ["npx", "playwright", "test", "--project=firefox"]
+
+# ===== WEBKIT STAGE =====
+FROM base AS webkit
+
+# Install WebKit-specific dependencies (no system browser needed)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libopus0 \
+        libwebp7 \
+        libenchant-2-2 \
+        libgudev-1.0-0 \
+        libsecret-1-0 \
+        libhyphen0 \
+        libegl1 \
+        libnotify4 \
+        libxslt1.1 \
+        libevent-2.1-7 \
+        libgles2-mesa \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright WebKit browser
+RUN npx playwright install webkit && \
+    npx playwright install-deps webkit
+
+# Create test user and set permissions
+RUN groupadd -g 1001 testuser && \
+    useradd -u 1001 -g testuser -m testuser && \
+    chown -R testuser:testuser /app && \
+    chown -R testuser:testuser /home/testuser && \
+    chmod -R 755 /ms-playwright || true && \
+    chown -R testuser:testuser /ms-playwright || true && \
+    chmod -R 755 /opt/playwright || true && \
+    chown -R testuser:testuser /opt/playwright || true
+
+USER testuser
+CMD ["npx", "playwright", "test", "--project=webkit"]
