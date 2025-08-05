@@ -181,7 +181,7 @@ jobs:
           platforms: linux/amd64
           push: false
           load: true
-          tags: ${{ steps.meta.outputs.tags }}-test
+          tags: test-${{ matrix.browser }}:local
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
@@ -190,8 +190,8 @@ jobs:
         run: |
           echo "🧪 Running smoke tests for ${{ matrix.browser }} (AMD64)"
           
-          # Use test tag for smoke tests
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)-test
+          # Use local test tag for smoke tests
+          IMAGE_TAG="test-${{ matrix.browser }}:local"
           echo "Testing image: $IMAGE_TAG"
           
           # Test 1: Basic container startup
