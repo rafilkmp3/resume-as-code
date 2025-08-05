@@ -3,6 +3,7 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
 const QRCode = require('qrcode');
+const { copyRecursive } = require('./utils/fs-utils');
 
 console.log('🏗️  Building resume...');
 
@@ -12,20 +13,10 @@ if (!fs.existsSync('./dist')) {
 }
 
 // Generate QR code for the online version
-async function generateQRCode() {
+async function generateQRCode(url, options) {
   console.log('🔗 Generating QR code for online version...');
-  
-  const onlineUrl = 'https://rafilkmp3.github.io/resume-as-code/';
   try {
-    const qrCodeDataURL = await QRCode.toDataURL(onlineUrl, {
-      width: 200,
-      margin: 1,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
-    return qrCodeDataURL;
+    return await QRCode.toDataURL(url, options);
   } catch (error) {
     console.error('Error generating QR code:', error);
     return null;
@@ -33,11 +24,10 @@ async function generateQRCode() {
 }
 
 // Generate HTML from template and data
-async function generateHTML() {
+async function generateHTML(resumeData, templatePath) {
   console.log('📝 Generating HTML from template...');
   
-  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
-  const templateSource = fs.readFileSync('./template.html', 'utf8');
+  const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = Handlebars.compile(templateSource);
   
   // Register a helper to stringify JSON
@@ -51,59 +41,17 @@ async function generateHTML() {
   });
 
   // Copy assets directory to dist
-  function copyAssets() {
-    const assetsDir = './assets';
-    const distAssetsDir = './dist/assets';
-    
-    if (fs.existsSync(assetsDir)) {
-      // Create assets directory in dist
-      if (!fs.existsSync(distAssetsDir)) {
-        fs.mkdirSync(distAssetsDir, { recursive: true });
-      }
-      
-      // Copy all files and subdirectories
-      function copyRecursive(src, dest) {
-        const entries = fs.readdirSync(src, { withFileTypes: true });
-        
-        for (const entry of entries) {
-          const srcPath = path.join(src, entry.name);
-          const destPath = path.join(dest, entry.name);
-          
-          if (entry.isDirectory()) {
-            if (!fs.existsSync(destPath)) {
-              fs.mkdirSync(destPath, { recursive: true });
-            }
-            copyRecursive(srcPath, destPath);
-          } else {
-            fs.copyFileSync(srcPath, destPath);
-          }
-        }
-      }
-      
-      copyRecursive(assetsDir, distAssetsDir);
-      console.log('📁 Copied assets directory to dist/');
-    }
-    
-    // Also copy profile image if it exists (backward compatibility)
-    if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
-      const imagePath = resumeData.basics.image;
-      const destPath = `./dist/${imagePath}`;
-      const destDir = path.dirname(destPath);
-      
-      // Ensure destination directory exists
-      if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true });
-      }
-      
-      fs.copyFileSync(imagePath, destPath);
-      console.log(`📸 Copied profile image: ${imagePath}`);
-    }
-  }
-  
-  copyAssets();
+  copyAssets(resumeData);
   
   // Generate QR code
-  const qrCodeDataURL = await generateQRCode();
+  const qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
+    width: 200,
+    margin: 1,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }
+  });
   
   // Replace the placeholder QR code with the real one
   let html = template(resumeData);
@@ -120,8 +68,39 @@ async function generateHTML() {
   console.log('✅ HTML generated successfully!');
 }
 
+// Copy assets to the dist folder
+function copyAssets(resumeData) {
+  const assetsDir = './assets';
+  const distAssetsDir = './dist/assets';
+  
+  if (fs.existsSync(assetsDir)) {
+    // Create assets directory in dist
+    if (!fs.existsSync(distAssetsDir)) {
+      fs.mkdirSync(distAssetsDir, { recursive: true });
+    }
+    
+    copyRecursive(assetsDir, distAssetsDir);
+    console.log('📁 Copied assets directory to dist/');
+  }
+  
+  // Also copy profile image if it exists (backward compatibility)
+  if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
+    const imagePath = resumeData.basics.image;
+    const destPath = `./dist/${imagePath}`;
+    const destDir = path.dirname(destPath);
+    
+    // Ensure destination directory exists
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+    
+    fs.copyFileSync(imagePath, destPath);
+    console.log(`📸 Copied profile image: ${imagePath}`);
+  }
+}
+
 // Generate PDF from HTML
-async function generatePDF() {
+async function generatePDF(resumeData) {
   try {
     if (fs.existsSync('./dist/index.html')) {
       console.log('📄 Generating PDF from HTML...');
@@ -169,10 +148,10 @@ async function generatePDF() {
         scale: 0.95, // Slight scale down for better fit and margins
         tagged: true, // Generate tagged PDF for accessibility
         // Professional PDF metadata
-        title: 'Rafael Bernardo Sathler - Resume',
-        author: 'Rafael Bernardo Sathler',
-        subject: 'Infrastructure Engineer Resume - Platform Engineering and DevOps Portfolio',
-        keywords: 'Infrastructure Engineer, DevOps, Platform Engineer, AWS, GCP, Kubernetes, CI/CD, Cloud Architect',
+        title: `${resumeData.basics.name} - Resume`,
+        author: resumeData.basics.name,
+        subject: resumeData.basics.label,
+        keywords: resumeData.basics.keywords.join(', '),
         creator: 'Resume-as-Code System',
         producer: 'Puppeteer PDF Generator'
       });
@@ -188,8 +167,9 @@ async function generatePDF() {
 
 // Run the build
 async function build() {
-  await generateHTML();
-  await generatePDF();
+  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
+  await generateHTML(resumeData, './template.html');
+  await generatePDF(resumeData);
   console.log('🎉 Resume build complete!');
   console.log('📁 Files generated in ./dist/');
   console.log('🌐 HTML: ./dist/index.html');

@@ -1,10 +1,8 @@
 const fs = require('fs');
-const path = require('path');
-const http = require('http');
 const { exec } = require('child_process');
+const createSimpleServer = require('./utils/server-utils');
 
 const PORT = 3000;
-const DIST_DIR = './dist';
 const WATCH_FILES = ['template.html', 'resume-data.json'];
 
 let isBuilding = false;
@@ -16,7 +14,7 @@ function buildResume() {
     isBuilding = true;
     console.log('🔄 Building resume...');
     
-    exec('node build.js', (error, stdout, stderr) => {
+    exec('node scripts/build.js', (error, stdout, stderr) => {
         isBuilding = false;
         
         if (error) {
@@ -50,47 +48,6 @@ function watchFiles() {
     });
 }
 
-// Simple HTTP server
-function createServer() {
-    const server = http.createServer((req, res) => {
-        const filePath = req.url === '/' ? './dist/index.html' : './dist' + req.url;
-        
-        try {
-            const stat = fs.statSync(filePath);
-            
-            if (stat.isFile()) {
-                const ext = path.extname(filePath);
-                const contentTypes = {
-                    '.html': 'text/html',
-                    '.pdf': 'application/pdf',
-                    '.jpeg': 'image/jpeg',
-                    '.jpg': 'image/jpeg',
-                    '.png': 'image/png',
-                    '.css': 'text/css',
-                    '.js': 'application/javascript'
-                };
-                
-                res.writeHead(200, { 
-                    'Content-Type': contentTypes[ext] || 'application/octet-stream',
-                    'Cache-Control': 'no-cache' // Disable caching for development
-                });
-                res.end(fs.readFileSync(filePath));
-            } else {
-                res.writeHead(404);
-                res.end('Not found');
-            }
-        } catch (e) {
-            res.writeHead(404);
-            res.end('Not found');
-        }
-    });
-    
-    server.listen(PORT, () => {
-        console.log(`🚀 Development server running at http://localhost:${PORT}`);
-        console.log('   Press Ctrl+C to stop');
-    });
-}
-
 // Initialize
 console.log('🏗️  Resume-as-Code Development Server');
 console.log('=====================================');
@@ -102,7 +59,7 @@ buildResume();
 watchFiles();
 
 // Start server
-createServer();
+createSimpleServer(PORT, './dist', true).start();
 
 // Graceful shutdown
 process.on('SIGINT', () => {

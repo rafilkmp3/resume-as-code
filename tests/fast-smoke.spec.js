@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Fast Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the application
-    await page.goto('http://localhost:3001');
+    await page.goto('http://localhost:3001', { waitUntil: 'networkidle' });
     // Wait for essential content to load
     await expect(page.locator('h1')).toContainText('Rafael Bernardo Sathler');
   });
@@ -19,13 +19,15 @@ test.describe('Fast Smoke Tests', () => {
     // Test dark mode functionality
     const darkToggle = page.locator('#darkToggle');
     await expect(darkToggle).toBeVisible();
-    
+
     // Toggle to dark mode
     await darkToggle.click();
+    await page.waitForSelector('body[data-theme="dark"]');
     await expect(page.locator('body')).toHaveAttribute('data-theme', 'dark');
-    
+
     // Toggle back to light mode
     await darkToggle.click();
+    await page.waitForSelector('body[data-theme="light"]');
     await expect(page.locator('body')).toHaveAttribute('data-theme', 'light');
   });
 
@@ -69,10 +71,11 @@ test.describe('Fast Smoke Tests', () => {
   });
 
   test('Page accessibility basics', async ({ page }) => {
+    await page.waitForSelector('title');
     // Check for basic accessibility attributes
     await expect(page.locator('html')).toHaveAttribute('lang');
     await expect(page.locator('title')).toHaveText(/Rafael/);
-    
+
     // Check that images have alt text
     const images = page.locator('img');
     const count = await images.count();
@@ -151,17 +154,21 @@ test.describe('Fast Integration Tests', () => {
     expect(tooltipText).toMatch(/Duration: \d+/);
   });
 
-  test('Date hover works on mobile viewports', async ({ page }) => {
+  test('Date hover works on mobile viewports', async ({ page, isMobile }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('http://localhost:3001');
-    
+
     // Check that work dates are still accessible on mobile
     const workDates = page.locator('.work-date');
     await expect(workDates.first()).toBeVisible();
-    
+
     // On mobile, tap should work
-    await workDates.first().tap();
+    if (isMobile) {
+      await workDates.first().tap();
+    } else {
+      await workDates.first().click();
+    }
     const tooltip = workDates.first().locator('.duration-tooltip');
     const tooltipText = await tooltip.textContent();
     expect(tooltipText).toContain('Duration:');
