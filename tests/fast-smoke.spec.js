@@ -123,4 +123,47 @@ test.describe('Fast Integration Tests', () => {
     // Should load within 3 seconds
     expect(loadTime).toBeLessThan(3000);
   });
+
+  test('Work experience dates are interactive with hover tooltips', async ({ page }) => {
+    await page.goto('http://localhost:3001');
+    
+    // Check that work dates exist
+    const workDates = page.locator('.work-date');
+    const count = await workDates.count();
+    expect(count).toBeGreaterThan(0);
+    
+    // Check first work date has proper structure
+    const firstWorkDate = workDates.first();
+    await expect(firstWorkDate).toBeVisible();
+    await expect(firstWorkDate.locator('.date-range')).toBeVisible();
+    await expect(firstWorkDate.locator('.duration-tooltip')).toBeAttached();
+    
+    // Check hover behavior and wait for tooltip
+    await firstWorkDate.hover();
+    const tooltip = firstWorkDate.locator('.duration-tooltip');
+    
+    // Wait a moment for tooltip to be populated
+    await page.waitForTimeout(100);
+    
+    // Tooltip should contain duration information
+    const tooltipText = await tooltip.textContent();
+    expect(tooltipText).toContain('Duration:');
+    expect(tooltipText).toMatch(/Duration: \d+/);
+  });
+
+  test('Date hover works on mobile viewports', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('http://localhost:3001');
+    
+    // Check that work dates are still accessible on mobile
+    const workDates = page.locator('.work-date');
+    await expect(workDates.first()).toBeVisible();
+    
+    // On mobile, tap should work
+    await workDates.first().tap();
+    const tooltip = workDates.first().locator('.duration-tooltip');
+    const tooltipText = await tooltip.textContent();
+    expect(tooltipText).toContain('Duration:');
+  });
 });
