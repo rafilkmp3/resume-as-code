@@ -44,7 +44,8 @@ help:
 	@echo "$(GREEN)🛠️  Utilities:$(NC)"
 	@echo "  $(CYAN)make status$(NC)         - Show project status and health check"
 	@echo "  $(PURPLE)make monitor$(NC)        - Run visual monitoring (non-blocking)"
-	@echo "  $(RED)make clean$(NC)         - Clean all generated files"
+	@echo "  $(RED)make clean$(NC)          - Clean local environment (CI/CD parity)"
+	@echo "  $(RED)make clean-docker$(NC)   - Clean Docker only (legacy)"
 
 # Install dependencies (deprecated - Docker handles this)
 install:
@@ -178,14 +179,21 @@ test-performance-internal:
 		echo "$(YELLOW)⚠️  Playwright not configured, skipping performance tests$(NC)"; \
 	fi
 
-# Clean Docker containers and images
-clean: docker-check
+# Clean local environment to match GitHub Actions runner (CI/CD Parity)
+clean:
+	@echo "$(CYAN)🧹 Running comprehensive local cleanup (CI/CD parity)...$(NC)"
+	@chmod +x scripts/clean-local.sh
+	@scripts/clean-local.sh
+	@echo "$(GREEN)✅ Local environment now matches fresh GitHub Actions runner$(NC)"
+
+# Legacy clean command (Docker only)
+clean-docker: docker-check
 	@echo "$(RED)🐳 Cleaning Docker containers and generated files...$(NC)"
 	@docker-compose down --volumes --remove-orphans 2>/dev/null || true
 	@docker system prune -f 2>/dev/null || true
 	@docker container prune -f 2>/dev/null || true
 	@rm -rf dist/ coverage/ test-results/ playwright-report/ .nyc_output/
-	@echo "$(GREEN)✅ Cleanup completed$(NC)"
+	@echo "$(GREEN)✅ Docker cleanup completed$(NC)"
 
 # Project status and health check
 status:

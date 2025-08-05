@@ -1,0 +1,9 @@
+# This directory contains test coverage reports
+#
+# Files in this directory are created by:
+# - Jest unit tests with --coverage flag
+# - NYC coverage reports
+# - LCOV coverage data for CI/CD integration
+#
+# This .gitkeep ensures the directory structure is preserved
+# in version control while the actual coverage reports are ignored

@@ -1,96 +1,170 @@
+# .dockerignore - Industry standard Docker context exclusions
+# Keep Docker builds clean, fast, and secure
+
 # Version control (largest space saver)
-.git
+.git/
 .gitignore
 .gitattributes
-.githooks
+.githooks/
+*.git*
 
-# Dependencies (will be installed fresh inside container)
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Documentation and README files (not needed in container)
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+docs/
 
-# Build outputs (will be generated inside container)
-dist
-coverage
-.next
-.nyc_output
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.editorconfig
+.claude/
+*.swp
+*.swo
+*~
 
-# Test outputs (not needed for build)
-test-results
-playwright-report
-*.log
-
-# OS generated files
+# macOS system files
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+.AppleDouble
+.LSOverride
+
+# Windows system files
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
-# Development tools and IDE
-.vscode
-.idea
-.claude
-*.swp
-*.swo
+# Linux system files
 *~
+.directory
 
-# Docker files (don't need inside container)
+# Dependencies (will be installed fresh inside container)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm/
+.yarn-integrity
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Build artifacts and outputs (will be generated inside container)
+dist/
+build/
+out/
+temp/
+*.pdf
+*.zip
+*.tar.gz
+*.tgz
+coverage/
+.next/
+.nyc_output/
+
+# Test artifacts and reports (not needed for build)
+test-results/
+test-reports/
+playwright-report/
+playwright/.cache/
+jest_*.json
+*.lcov
+lighthouse-reports/
+*.lighthouse.json
+
+# Logs and runtime data
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment and secrets (critical for Docker builds)
+.env*
+!.env.example
+*.pem
+*.key
+secrets/
+.secrets/
+.aws/
+
+# Cache directories
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Docker files (avoid recursive Docker builds)
 Dockerfile*
 docker-compose*.yml
 .dockerignore
 
-# CI/CD (not needed for build)
-.github
+# CI/CD configuration (not needed for build)
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+.jenkins/
 
-# Documentation (not needed for build)
-README.md
-CHANGELOG.md
+# Security scanning
+.snyk
+.trivyignore
 
-# Temporary files
-*.tmp
-*.temp
+# Terraform and infrastructure
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
 
-# Additional security (critical for Docker builds)
-*.pem
-*.key
-.secrets/
-secrets/
-.aws/
-
-# Additional test artifacts
-playwright/.cache/
-lighthouse-reports/
-*.lighthouse.json
-
-# Local development overrides
-docker-compose.override.yml
-.docker/
-
-# Additional IDE files
-*.swp
-*.swo
-*~
-.claude/
-
-# Performance and profiling
+# Performance and monitoring
 *.perf
 *.cpuprofile
 
-# Backup files
+# Backup and temporary files
 *.backup
 *.bak
 *.orig
+*.tmp
+*.temp
 
-# Cache files
-.cache/
-.parcel-cache/
+# Local development only
+scripts/clean-local.sh
+scripts/dev-*
+.local/
+local/
+docker-compose.override.yml
+.docker/
 
-# Environment specific
-.env.local
-.env.development
-.env.test
-.env.production
+# Resume-as-Code specific exclusions
+original-pdf-not-ai/
+screenshots/
+
+# Keep essential files for container builds
+!package.json
+!package-lock.json
+!yarn.lock
+!babel.config.js
+!jest.config.js
+!playwright.config*.js
+!Makefile
+!resume-data.json
+!template.html
+!src/
+!assets/images/
+!scripts/build.js
+!scripts/server.js
+!scripts/dev-server.js
+!scripts/utils/

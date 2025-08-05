@@ -19,7 +19,8 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
-coverage
+coverage/*
+!coverage/.gitkeep
 *.lcov
 
 # nyc test coverage
@@ -156,13 +157,16 @@ Thumbs.db
 *.orig
 
 # Test results
-test-results/
+test-results/*
+!test-results/.gitkeep
 /test-reports/
 /playwright-report/
 playwright/.cache/
 
-# Jest
+# Jest and coverage
 jest_*.json
+coverage/*
+!coverage/.gitkeep
 
 # IDE files
 .vscode/
@@ -171,7 +175,8 @@ jest_*.json
 *.sublime-workspace
 
 # Resume-as-Code specific
-dist/
+dist/*
+!dist/.gitkeep
 *.pdf
 
 # Build artifacts
