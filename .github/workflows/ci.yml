@@ -183,10 +183,13 @@ jobs:
         include:
           - browser: chromium
             image: ${{ needs.check-images.outputs.image-chromium }}
+            project: desktop-chrome
           - browser: firefox
             image: ${{ needs.check-images.outputs.image-firefox }}
+            project: desktop-firefox
           - browser: webkit
             image: ${{ needs.check-images.outputs.image-webkit }}
+            project: desktop-webkit
     container:
       image: ${{ matrix.image }}
       credentials:
@@ -210,7 +213,8 @@ jobs:
           echo "✅ Using browser-specific Docker image"
           echo "Browser: ${{ matrix.browser }}"
           echo "Image: ${{ matrix.image }}"
-          npx playwright test --project=${{ matrix.browser }} --workers=1
+          echo "Project: ${{ matrix.project }}"
+          npx playwright test --project=${{ matrix.project }} --workers=1
           echo "::endgroup::"
         env:
           PWTEST_SKIP_TEST_OUTPUT: true
