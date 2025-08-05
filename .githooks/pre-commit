@@ -143,13 +143,14 @@ if [[ -n "$TODO_FILES" ]]; then
     echo -e "${YELLOW}   Consider addressing these before committing${NC}"
 fi
 
-# Check for large files (>10MB)
-LARGE_FILES=$(git diff --cached --name-only | xargs ls -la 2>/dev/null | awk '$5 > 10485760 {print $9}' || true)
-if [[ -n "$LARGE_FILES" ]]; then
-    echo -e "${RED}❌ Large files (>10MB) found:${NC}"
-    echo "$LARGE_FILES"
-    echo -e "${RED}   Consider using Git LFS for large files${NC}"
-    VALIDATION_FAILED=1
+# Run Git LFS compliance check
+echo "🔍 Running Git LFS compliance check..."
+if [[ -f ".githooks/pre-commit-lfs" ]]; then
+    if ! .githooks/pre-commit-lfs; then
+        VALIDATION_FAILED=1
+    fi
+else
+    echo -e "${YELLOW}⚠️  Git LFS pre-commit hook not found, skipping LFS check${NC}"
 fi
 
 # Final result

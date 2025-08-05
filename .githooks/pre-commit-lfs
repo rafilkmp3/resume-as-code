@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Pre-commit hook to enforce Git LFS usage for binary files
+# This hook checks that all binary files are tracked by Git LFS
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}🔍 Checking Git LFS compliance...${NC}"
+
+# Get list of staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Extensions that should be in LFS (from .gitattributes)
+lfs_extensions=(
+    "png" "jpg" "jpeg" "gif" "webp" "svg" "ico"
+    "mp4" "mov" "avi" "webm"
+    "pdf" "docx" "pptx" "xlsx"
+    "zip" "tar.gz" "rar"
+    "ttf" "otf" "woff" "woff2"
+)
+
+# Function to check if file extension should be in LFS
+should_be_lfs() {
+    local file="$1"
+    local ext="${file##*.}"
+    ext=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
+    
+    for lfs_ext in "${lfs_extensions[@]}"; do
+        if [[ "$ext" == "$lfs_ext" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Function to check if file is actually tracked by LFS
+is_lfs_tracked() {
+    local file="$1"
+    git check-attr filter "$file" | grep -q "filter: lfs"
+}
+
+# Function to check if file content is in LFS
+is_lfs_pointer() {
+    local file="$1"
+    if [[ ! -f "$file" ]]; then
+        return 1
+    fi
+    
+    # Check if file starts with "version https://git-lfs.github.com/spec"
+    head -n 1 "$file" 2>/dev/null | grep -q "^version https://git-lfs.github.com/spec"
+}
+
+violations_found=false
+
+for file in $staged_files; do
+    if should_be_lfs "$file"; then
+        if ! is_lfs_tracked "$file"; then
+            echo -e "${RED}❌ Error: $file should be tracked by Git LFS but isn't${NC}"
+            echo -e "${YELLOW}   Run: git lfs track \"*.$file\"${NC}"
+            violations_found=true
+        elif [[ -f "$file" ]] && ! is_lfs_pointer "$file"; then
+            echo -e "${RED}❌ Error: $file is tracked by LFS but content is not a pointer${NC}"
+            echo -e "${YELLOW}   The file may have been committed directly to git instead of LFS${NC}"
+            echo -e "${YELLOW}   Try: git rm --cached \"$file\" && git add \"$file\"${NC}"
+            violations_found=true
+        else
+            echo -e "${GREEN}✅ $file is properly tracked by Git LFS${NC}"
+        fi
+    fi
+done
+
+# Check for large files that might need LFS
+echo -e "${BLUE}🔍 Checking for large files...${NC}"
+for file in $staged_files; do
+    if [[ -f "$file" ]]; then
+        size=$(wc -c < "$file" 2>/dev/null || echo 0)
+        # 1MB = 1048576 bytes
+        if [[ $size -gt 1048576 ]] && ! should_be_lfs "$file" && ! is_lfs_tracked "$file"; then
+            echo -e "${YELLOW}⚠️  Warning: $file is large ($(($size / 1048576))MB) but not tracked by LFS${NC}"
+            echo -e "${YELLOW}   Consider adding it to LFS: git lfs track \"$file\"${NC}"
+        fi
+    fi
+done
+
+if $violations_found; then
+    echo -e "${RED}💥 Commit blocked due to Git LFS violations${NC}"
+    echo -e "${YELLOW}📚 To fix these issues:${NC}"
+    echo -e "${YELLOW}   1. Make sure Git LFS is installed: git lfs install${NC}"
+    echo -e "${YELLOW}   2. Track the file extensions: git lfs track \"*.png\" (etc.)${NC}"
+    echo -e "${YELLOW}   3. Add and commit the .gitattributes file${NC}"
+    echo -e "${YELLOW}   4. Re-add the binary files: git add <file>${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}🎉 All binary files are properly managed by Git LFS!${NC}"
+exit 0
