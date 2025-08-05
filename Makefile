@@ -304,14 +304,14 @@ monitor: docker-check
 	@echo "$(CYAN)Mode: Non-blocking monitoring$(NC)"
 	@echo "$(CYAN)Purpose: Visual regression detection and layout improvement$(NC)"
 	@echo ""
-	@for browser in chromium firefox webkit; do \
-		echo "$(BLUE)🎭 Testing $$browser...$(NC)"; \
-		docker run --rm resume-as-code:$$browser \
+	@for project in desktop-chrome iphone-15-pro-max ipad-pro; do \
+		echo "$(BLUE)🎭 Testing $$project...$(NC)"; \
+		docker-compose run --rm ci \
 			npx playwright test tests/visual-analysis.spec.js \
-			--project=$$browser \
+			--project=$$project \
 			--workers=1 \
 			--reporter=line \
-			|| echo "$(YELLOW)⚠️ Visual differences detected in $$browser (non-blocking)$(NC)"; \
+			|| echo "$(YELLOW)⚠️ Visual differences detected in $$project (non-blocking)$(NC)"; \
 		echo ""; \
 	done
 	@echo "$(GREEN)📊 Visual monitoring completed!$(NC)"
