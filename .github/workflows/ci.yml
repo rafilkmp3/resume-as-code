@@ -25,6 +25,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+      COMPOSE_BAKE: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,6 +100,7 @@ jobs:
       CI: true
       NODE_ENV: test
       FORCE_COLOR: 3
+      COMPOSE_BAKE: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

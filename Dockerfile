@@ -141,18 +141,23 @@ CMD ["make", "dev"]
 # CI/Test stage
 FROM development AS ci
 
-# Set CI environment
+# Set CI environment and Playwright browser path BEFORE installing browsers
 ENV CI=true \
-    NODE_ENV=test
+    NODE_ENV=test \
+    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
 
-# Install Playwright browsers as root first (needs system access)
+# Create browsers directory and set permissions
+RUN mkdir -p /opt/playwright
+
+# Install Playwright browsers as root directly into /opt/playwright
 RUN npx playwright install --with-deps chromium firefox webkit
 
-# Create test user and change ownership
-RUN addgroup -g 1001 -S testuser && \
-    adduser -S testuser -u 1001 && \
+# Create test user and fix permissions after browser installation
+RUN groupadd -g 1001 testuser && \
+    useradd -u 1001 -g testuser -m testuser && \
     chown -R testuser:testuser /app && \
-    chown -R testuser:testuser /home/testuser || true
+    chown -R testuser:testuser /home/testuser && \
+    chown -R testuser:testuser /opt/playwright
 
 USER testuser
 
