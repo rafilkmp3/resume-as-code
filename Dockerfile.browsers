@@ -85,10 +85,7 @@ RUN npx playwright install chromium && \
     npx playwright install-deps chromium
 
 # Set permissions for browser directories
-RUN chmod -R 755 /ms-playwright || true && \
-    chown -R testuser:testuser /ms-playwright || true && \
-    chmod -R 755 /opt/playwright || true && \
-    chown -R testuser:testuser /opt/playwright || true
+RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
 
@@ -106,10 +103,7 @@ RUN npx playwright install firefox && \
     npx playwright install-deps firefox
 
 # Set permissions for browser directories
-RUN chmod -R 755 /ms-playwright || true && \
-    chown -R testuser:testuser /ms-playwright || true && \
-    chmod -R 755 /opt/playwright || true && \
-    chown -R testuser:testuser /opt/playwright || true
+RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
 
@@ -127,10 +121,7 @@ RUN npx playwright install webkit && \
     npx playwright install-deps webkit
 
 # Set permissions for browser directories
-RUN chmod -R 755 /ms-playwright || true && \
-    chown -R testuser:testuser /ms-playwright || true && \
-    chmod -R 755 /opt/playwright || true && \
-    chown -R testuser:testuser /opt/playwright || true
+RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
 
