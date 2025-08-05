@@ -15,8 +15,119 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  packages: write
 
 jobs:
+  # Build browser images
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+      COMPOSE_BAKE: 'true'
+    outputs:
+      image-base: ${{ steps.meta-base.outputs.tags }}
+      image-chromium: ${{ steps.meta-chromium.outputs.tags }}
+      image-firefox: ${{ steps.meta-firefox.outputs.tags }}
+      image-webkit: ${{ steps.meta-webkit.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata for base image
+        id: meta-base
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-base
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            
+      - name: Extract metadata for chromium image
+        id: meta-chromium
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            
+      - name: Extract metadata for firefox image
+        id: meta-firefox
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            
+      - name: Extract metadata for webkit image
+        id: meta-webkit
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            
+      - name: Build and push base image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.base
+          push: true
+          tags: ${{ steps.meta-base.outputs.tags }}
+          labels: ${{ steps.meta-base.outputs.labels }}
+          cache-from: type=gha,scope=base-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=base-${{ github.ref_name }}
+          
+      - name: Build and push chromium image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.chromium
+          push: true
+          tags: ${{ steps.meta-chromium.outputs.tags }}
+          labels: ${{ steps.meta-chromium.outputs.labels }}
+          cache-from: type=gha,scope=chromium-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=chromium-${{ github.ref_name }}
+          
+      - name: Build and push firefox image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.firefox
+          push: true
+          tags: ${{ steps.meta-firefox.outputs.tags }}
+          labels: ${{ steps.meta-firefox.outputs.labels }}
+          cache-from: type=gha,scope=firefox-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=firefox-${{ github.ref_name }}
+          
+      - name: Build and push webkit image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.webkit
+          push: true
+          tags: ${{ steps.meta-webkit.outputs.tags }}
+          labels: ${{ steps.meta-webkit.outputs.labels }}
+          cache-from: type=gha,scope=webkit-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=webkit-${{ github.ref_name }}
+
   # Build first - needed for all tests
   build:
     name: Build Resume
@@ -86,7 +197,63 @@ jobs:
           retention-days: ${{ github.event_name == 'pull_request' && '7' || '30' }}
           compression-level: 6
 
-  # Tests that actually exist and work
+  # Browser-specific e2e tests
+  test-e2e:
+    name: E2E Tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, build-images]
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            image-output: image-chromium
+          - browser: firefox
+            image-output: image-firefox
+          - browser: webkit
+            image-output: image-webkit
+    container:
+      image: ${{ needs.build-images.outputs[matrix.image-output] }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      CI: true
+      NODE_ENV: test
+      FORCE_COLOR: 3
+      PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.sha }}-Linux-X64
+          path: dist/
+
+      - name: Run E2E tests
+        run: |
+          echo "::group::🎭 Running ${{ matrix.browser }} E2E tests"
+          echo "✅ Using browser-specific Docker image"
+          echo "Browser: ${{ matrix.browser }}"
+          echo "Image: ${{ needs.build-images.outputs[matrix.image-output] }}"
+          npx playwright test --project=${{ matrix.browser }} --workers=1
+          echo "::endgroup::"
+        env:
+          PWTEST_SKIP_TEST_OUTPUT: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.browser }}-results-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: ${{ github.event_name == 'pull_request' && '7' || '30' }}
+          include-hidden-files: true
+
+  # Unit and security tests
   test:
     name: Test (${{ matrix.test-type }})
     runs-on: ubuntu-latest
@@ -186,7 +353,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build, test]
+    needs: [build, test, test-e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:

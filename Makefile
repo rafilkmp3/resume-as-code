@@ -1,4 +1,4 @@
-.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal build-images build-base build-chromium build-firefox build-webkit monitor
 
 # Colors for output
 RED=\033[0;31m
@@ -35,9 +35,15 @@ help:
 	@echo ""
 	@echo "$(GREEN)🐳 Docker:$(NC)"
 	@echo "  $(CYAN)make docker-check$(NC)   - Check if Docker is running"
+	@echo "  $(CYAN)make build-images$(NC)   - Build all browser-specific images"
+	@echo "  $(CYAN)make build-base$(NC)     - Build base image only"
+	@echo "  $(CYAN)make build-chromium$(NC) - Build Chromium image only"
+	@echo "  $(CYAN)make build-firefox$(NC)  - Build Firefox image only"
+	@echo "  $(CYAN)make build-webkit$(NC)   - Build WebKit image only"
 	@echo ""
 	@echo "$(GREEN)🛠️  Utilities:$(NC)"
 	@echo "  $(CYAN)make status$(NC)         - Show project status and health check"
+	@echo "  $(PURPLE)make monitor$(NC)        - Run visual monitoring (non-blocking)"
 	@echo "  $(RED)make clean$(NC)         - Clean all generated files"
 
 # Install dependencies (deprecated - Docker handles this)
@@ -263,4 +269,51 @@ status:
 		echo "  $(YELLOW)⚠️  No test results available$(NC)"; \
 	fi
 	@echo "$(CYAN)================================$(NC)"
+
+# Build all browser-specific Docker images
+build-images: docker-check build-base build-chromium build-firefox build-webkit
+	@echo "$(GREEN)🎉 All browser images built successfully!$(NC)"
+
+# Build base image with common dependencies
+build-base: docker-check
+	@echo "$(CYAN)🏗️ Building base image...$(NC)"
+	@docker build -f Dockerfile.base -t resume-as-code:base .
+	@echo "$(GREEN)✅ Base image built successfully!$(NC)"
+
+# Build Chromium-specific image
+build-chromium: docker-check
+	@echo "$(CYAN)🏗️ Building Chromium image...$(NC)"
+	@docker build -f Dockerfile.chromium -t resume-as-code:chromium .
+	@echo "$(GREEN)✅ Chromium image built successfully!$(NC)"
+
+# Build Firefox-specific image  
+build-firefox: docker-check
+	@echo "$(CYAN)🏗️ Building Firefox image...$(NC)"
+	@docker build -f Dockerfile.firefox -t resume-as-code:firefox .
+	@echo "$(GREEN)✅ Firefox image built successfully!$(NC)"
+
+# Build WebKit-specific image
+build-webkit: docker-check
+	@echo "$(CYAN)🏗️ Building WebKit image...$(NC)"
+	@docker build -f Dockerfile.webkit -t resume-as-code:webkit .
+	@echo "$(GREEN)✅ WebKit image built successfully!$(NC)"
+
+# Run visual monitoring tests (non-blocking)
+monitor: docker-check
+	@echo "$(PURPLE)📸 Running visual monitoring...$(NC)"
+	@echo "$(CYAN)Mode: Non-blocking monitoring$(NC)"
+	@echo "$(CYAN)Purpose: Visual regression detection and layout improvement$(NC)"
+	@echo ""
+	@for browser in chromium firefox webkit; do \
+		echo "$(BLUE)🎭 Testing $$browser...$(NC)"; \
+		docker run --rm resume-as-code:$$browser \
+			npx playwright test tests/visual-analysis.spec.js \
+			--project=$$browser \
+			--workers=1 \
+			--reporter=line \
+			|| echo "$(YELLOW)⚠️ Visual differences detected in $$browser (non-blocking)$(NC)"; \
+		echo ""; \
+	done
+	@echo "$(GREEN)📊 Visual monitoring completed!$(NC)"
+	@echo "$(CYAN)Check test-results/ for detailed screenshots and reports$(NC)"
 
