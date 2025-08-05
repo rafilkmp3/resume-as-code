@@ -104,6 +104,7 @@ async function generatePDF(resumeData) {
   try {
     if (fs.existsSync('./dist/index.html')) {
       console.log('📄 Generating PDF from HTML...');
+      console.log('⏱️  PDF generation timeout: 60 seconds');
       
       const browser = await puppeteer.launch({
         headless: 'new',
@@ -151,7 +152,7 @@ async function generatePDF(resumeData) {
         title: `${resumeData.basics.name} - Resume`,
         author: resumeData.basics.name,
         subject: resumeData.basics.label,
-        keywords: resumeData.basics.keywords.join(', '),
+        keywords: (resumeData.basics.keywords || []).join(', '),
         creator: 'Resume-as-Code System',
         producer: 'Puppeteer PDF Generator'
       });
@@ -169,11 +170,29 @@ async function generatePDF(resumeData) {
 async function build() {
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
   await generateHTML(resumeData, './template.html');
-  await generatePDF(resumeData);
+  
+  // Generate PDF with timeout to prevent CI hanging
+  try {
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('PDF generation timeout (60s)')), 60000)
+    );
+    
+    await Promise.race([generatePDF(resumeData), timeout]);
+  } catch (error) {
+    console.error('⚠️  PDF generation failed or timed out:', error.message);
+    console.log('✅ HTML generation completed - continuing without PDF');
+  }
+  
   console.log('🎉 Resume build complete!');
   console.log('📁 Files generated in ./dist/');
   console.log('🌐 HTML: ./dist/index.html');
-  console.log('📄 PDF: ./dist/resume.pdf');
+  
+  // Only mention PDF if it exists
+  if (fs.existsSync('./dist/resume.pdf')) {
+    console.log('📄 PDF: ./dist/resume.pdf');
+  } else {
+    console.log('📄 PDF: Not generated (HTML-only build)');
+  }
 }
 
 build().catch(console.error);
