@@ -8,7 +8,7 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? '100%' : undefined,
-  reporter: 'dot',
+  reporter: process.env.CI ? 'list' : 'dot',
   use: {
     headless: true, // Force headless mode for CI compatibility
     trace: 'on-first-retry',
