@@ -1,4 +1,4 @@
-.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal
 
 # Colors for output
 RED=\033[0;31m
@@ -26,6 +26,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)🧪 Testing & Quality:$(NC)"
 	@echo "  $(BLUE)make test$(NC)          - Run all tests"
+	@echo "  $(BLUE)make test-fast$(NC)     - Run fast smoke tests (recommended)"
 	@echo "  $(BLUE)make test-unit$(NC)     - Run unit tests with coverage"
 	@echo "  $(BLUE)make test-e2e$(NC)      - Run end-to-end tests"
 	@echo "  $(BLUE)make test-visual$(NC)   - Run visual regression tests"
@@ -89,9 +90,22 @@ serve: docker-check
 test: docker-check test-unit test-e2e test-visual test-accessibility test-performance
 	@echo "$(GREEN)🎉 All tests completed!$(NC)"
 
+# Run fast smoke tests (recommended for development)
+test-fast: docker-check
+	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
+	@docker-compose run --rm ci make test-fast-internal
+
 # Internal test runner (runs inside Docker container)
 test-internal: test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
 	@echo "$(GREEN)✅ All internal tests completed$(NC)"
+
+test-fast-internal:
+	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
+	@if [ -f "playwright.config.js" ] || [ -f "playwright.config.ts" ]; then \
+		npx playwright test tests/fast-smoke.spec.js --reporter=line; \
+	else \
+		echo "$(YELLOW)⚠️  Playwright not configured, skipping fast tests$(NC)"; \
+	fi
 
 # Run unit tests
 test-unit: docker-check
@@ -163,6 +177,7 @@ clean: docker-check
 	@echo "$(RED)🐳 Cleaning Docker containers and generated files...$(NC)"
 	@docker-compose down --volumes --remove-orphans 2>/dev/null || true
 	@docker system prune -f 2>/dev/null || true
+	@docker container prune -f 2>/dev/null || true
 	@rm -rf dist/ coverage/ test-results/ playwright-report/ .nyc_output/
 	@echo "$(GREEN)✅ Cleanup completed$(NC)"
 

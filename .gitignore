@@ -169,3 +169,32 @@ jest_*.json
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Resume-as-Code specific
+dist/
+*.pdf
+
+# Build artifacts
+build/
+out/
+temp/
+
+# Security and environment
+*.pem
+*.key
+secrets/
+.secrets/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Performance monitoring
+lighthouse-reports/
+*.lighthouse.json
+
+# AWS and deployment
+.aws/
+.terraform/
+*.tfstate
+*.tfstate.backup

@@ -67,7 +67,8 @@
       "Bash(npm show:*)",
       "Bash(gh run watch:*)",
       "Bash(npx playwright test:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(gh auth:*)"
     ],
     "deny": []
   }

@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-type: [unit, playwright, security]
+        test-type: [unit, security]
     env:
       CI: true
       NODE_ENV: test

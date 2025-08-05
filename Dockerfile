@@ -129,8 +129,8 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Install Playwright browsers (without --with-deps since we already have system deps)
-RUN npx playwright install chromium
+# Install Playwright browsers with system dependencies
+RUN npx playwright install --with-deps chromium firefox webkit
 
 # Expose ports
 EXPOSE 3000 3001
@@ -145,15 +145,16 @@ FROM development AS ci
 ENV CI=true \
     NODE_ENV=test
 
-# Create test user
+# Install Playwright browsers as root first (needs system access)
+RUN npx playwright install --with-deps chromium firefox webkit
+
+# Create test user and change ownership
 RUN addgroup -g 1001 -S testuser && \
     adduser -S testuser -u 1001 && \
-    chown -R testuser:testuser /app
+    chown -R testuser:testuser /app && \
+    chown -R testuser:testuser /home/testuser || true
 
 USER testuser
-
-# Install Playwright browsers as testuser
-RUN npx playwright install chromium
 
 # Default CI command - run all tests
 CMD ["make", "test"]

@@ -7,13 +7,22 @@
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://rafilkmp3.github.io/resume-as-code/)
 [![PDF Download](https://img.shields.io/badge/PDF-Download%20Resume-red?style=for-the-badge&logo=adobe)](https://rafilkmp3.github.io/resume-as-code/resume.pdf)
-[![Comprehensive CI](https://github.com/rafilkmp3/resume-as-code/workflows/Comprehensive%20CI/CD%20Workflow/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Release Please](https://github.com/rafilkmp3/resume-as-code/workflows/Release%20Please/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![CI/CD Pipeline](https://github.com/rafilkmp3/resume-as-code/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
 
-[![Visual Regression](https://img.shields.io/badge/Visual%20Regression-Baseline%20Protected-success?style=flat-square&logo=playwright)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-success?style=flat-square&logo=web-accessibility)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Performance](https://img.shields.io/badge/Performance-Core%20Web%20Vitals-success?style=flat-square&logo=lighthouse)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Cross-Device](https://img.shields.io/badge/Cross%20Device-Desktop%20%7C%20Tablet%20%7C%20Mobile-success?style=flat-square&logo=responsive)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Node.js](https://img.shields.io/badge/Node.js-22-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Stage-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E%20Testing-green?style=flat-square&logo=playwright)](https://playwright.dev/)
+[![Jest](https://img.shields.io/badge/Jest-Unit%20Testing-red?style=flat-square&logo=jest)](https://jestjs.io/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI/CD-blue?style=flat-square&logo=github-actions)](https://github.com/features/actions)
+[![Lighthouse](https://img.shields.io/badge/Lighthouse-Performance-orange?style=flat-square&logo=lighthouse)](https://developers.google.com/web/tools/lighthouse)
+[![WCAG](https://img.shields.io/badge/WCAG-2.1%20AA-success?style=flat-square&logo=web-accessibility-initiative)](https://www.w3.org/WAI/WCAG21/quickref/)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+
+[![Build Status](https://img.shields.io/github/actions/workflow/status/rafilkmp3/resume-as-code/ci.yml?branch=main&style=flat-square&logo=github-actions&label=Build)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Code Size](https://img.shields.io/github/languages/code-size/rafilkmp3/resume-as-code?style=flat-square&logo=github)](https://github.com/rafilkmp3/resume-as-code)
+[![Last Commit](https://img.shields.io/github/last-commit/rafilkmp3/resume-as-code?style=flat-square&logo=github)](https://github.com/rafilkmp3/resume-as-code/commits/main)
+[![Issues](https://img.shields.io/github/issues/rafilkmp3/resume-as-code?style=flat-square&logo=github)](https://github.com/rafilkmp3/resume-as-code/issues)
+[![Stars](https://img.shields.io/github/stars/rafilkmp3/resume-as-code?style=flat-square&logo=github)](https://github.com/rafilkmp3/resume-as-code/stargazers)
 
 *Enterprise-grade resume generation system showcasing Platform Engineering excellence through infrastructure-as-code principles, comprehensive testing, and automated quality assurance.*
 
@@ -167,40 +176,61 @@ make help           # Show all available commands
 
 ## 🧪 Comprehensive Testing Suite
 
-### **Unit Testing**
+> **Current Status**: Playwright tests temporarily disabled in CI while fixing browser installation issues. Unit tests and security audits remain active.
+
+### **✅ Active Testing**
+#### **Unit Testing** 
 - **Framework**: Jest with jsdom environment
 - **Coverage**: DOM manipulation, theme utilities, and core functions  
 - **Mocking**: Complete browser API simulation
 - **Reports**: HTML coverage reports with line-by-line analysis
+- **Status**: ✅ **Active in CI**
 
-### **Visual Regression Testing**
+#### **Security Testing**
+- **Framework**: npm audit with high-severity filtering
+- **Coverage**: Dependency vulnerability scanning
+- **Automation**: Continuous security monitoring in CI
+- **Status**: ✅ **Active in CI**
+
+### **🔄 Testing Under Development**
+#### **End-to-End Testing (Playwright)**
+- **Framework**: Playwright with multi-browser support
+- **Coverage**: Full user journey testing across devices
+- **Browsers**: Chromium (primary), Firefox, WebKit (being fixed)
+- **Workers**: Utilizes 100% of available CPU cores for parallel execution
+- **Status**: 🔄 **Temporarily disabled in CI - Browser installation being fixed**
+
+#### **Visual Regression Testing**
 - **Baseline Screenshots**: Automated capture for all viewports and themes
 - **Cross-Theme**: Light and dark mode consistency validation
 - **Device Coverage**: Desktop (1920x1080), iPhone 15 Pro Max, iPad Pro
-- **Print Testing**: PDF export layout validation
+- **Print Testing**: PDF export layout validation (baseline quality being improved)
+- **Status**: 🔄 **Under optimization**
 
-### **Accessibility Testing**
+#### **Accessibility Testing**
 - **Standards**: WCAG 2.1 AA compliance verification
 - **Coverage**: Keyboard navigation, screen readers, color contrast
-- **Automation**: Continuous accessibility monitoring in CI
+- **Tools**: Playwright accessibility testing
+- **Status**: 🔄 **Temporarily disabled with Playwright**
 
-### **Performance Testing**  
+#### **Performance Testing**  
 - **Core Web Vitals**: LCP, FID, CLS monitoring
 - **Bundle Analysis**: CSS/JS optimization validation
 - **Image Optimization**: Lazy loading and format verification
 - **Network Efficiency**: Resource usage optimization
+- **Status**: 🔄 **Temporarily disabled with Playwright**
 
-### **Cross-Device Testing**
+### **Cross-Device Testing Matrix**
 - **Desktop**: Chrome 1920x1080 (Primary development target)
 - **Mobile**: iPhone 15 Pro Max 393x852 (Latest iOS)
 - **Tablet**: iPad Pro 1024x1365 (Professional presentation)
 - **Responsive**: Breakpoint validation and layout consistency
 
 ### **Integration Testing**
-- **Build Pipeline**: HTML/PDF generation validation
-- **Asset Management**: File copying and organization
-- **Deployment**: GitHub Pages integration testing
-- **Docker**: Container build and runtime validation
+- **Build Pipeline**: HTML/PDF generation validation ✅
+- **Asset Management**: File copying and organization ✅
+- **Deployment**: GitHub Pages integration testing ✅
+- **Docker**: Container build and runtime validation ✅
 
 ## 🚀 Architecture Highlights
 

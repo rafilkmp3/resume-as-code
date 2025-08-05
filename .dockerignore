@@ -53,3 +53,44 @@ CHANGELOG.md
 # Temporary files
 *.tmp
 *.temp
+
+# Additional security (critical for Docker builds)
+*.pem
+*.key
+.secrets/
+secrets/
+.aws/
+
+# Additional test artifacts
+playwright/.cache/
+lighthouse-reports/
+*.lighthouse.json
+
+# Local development overrides
+docker-compose.override.yml
+.docker/
+
+# Additional IDE files
+*.swp
+*.swo
+*~
+.claude/
+
+# Performance and profiling
+*.perf
+*.cpuprofile
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Cache files
+.cache/
+.parcel-cache/
+
+# Environment specific
+.env.local
+.env.development
+.env.test
+.env.production
