@@ -59,7 +59,7 @@ buildResume();
 watchFiles();
 
 // Start server
-createSimpleServer(PORT, './dist', true).start();
+createSimpleServer(PORT, './src', true).start();
 
 // Graceful shutdown
 process.on('SIGINT', () => {
