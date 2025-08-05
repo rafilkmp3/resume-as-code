@@ -216,23 +216,23 @@ jobs:
           echo "  ✓ Testing Playwright installation..."
           docker run --rm $IMAGE_TAG npx playwright --version
           
-          # Test 4: Browser-specific validation
-          echo "  ✓ Testing ${{ matrix.browser }} browser installation..."
+          # Test 4: Browser-specific validation  
+          echo "  ✓ Testing ${{ matrix.browser }} browser availability..."
           case "${{ matrix.browser }}" in
             chromium)
               docker run --rm $IMAGE_TAG sh -c "ls -la /ms-playwright/chromium-* | head -2 || echo 'Checking browser paths...'"
               docker run --rm $IMAGE_TAG sh -c "which chromium || echo 'System chromium available'"
-              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -3 || echo 'Playwright tests discoverable'"
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
               ;;
             firefox)
               docker run --rm $IMAGE_TAG sh -c "ls -la /ms-playwright/firefox-* | head -2 || echo 'Checking browser paths...'"
-              docker run --rm $IMAGE_TAG sh -c "which firefox-esr || echo 'System firefox available'"
-              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -3 || echo 'Playwright tests discoverable'"
+              docker run --rm $IMAGE_TAG sh -c "which firefox-esr || echo 'System firefox available'"  
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
               ;;
             webkit)
               docker run --rm $IMAGE_TAG sh -c "ls -la /ms-playwright/webkit-* | head -2 || echo 'Checking browser paths...'"
               docker run --rm $IMAGE_TAG sh -c "echo 'WebKit browser (Playwright-bundled) available'"
-              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -3 || echo 'Playwright tests discoverable'"
+              docker run --rm $IMAGE_TAG sh -c "npx playwright test --list | head -5 || true"
               ;;
           esac
           
