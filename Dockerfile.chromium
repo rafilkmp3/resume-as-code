@@ -44,18 +44,22 @@ WORKDIR /app
 COPY package*.json Makefile ./
 RUN npm ci && npm cache clean --force
 
-# Install only Chromium browser for Playwright
-RUN npx playwright install chromium
-
 # Copy source code
 COPY . .
+
+# Install only Chromium browser for Playwright (as root first)
+RUN npx playwright install chromium && \
+    npx playwright install-deps chromium
 
 # Create test user and set permissions
 RUN groupadd -g 1001 testuser && \
     useradd -u 1001 -g testuser -m testuser && \
     chown -R testuser:testuser /app && \
     chown -R testuser:testuser /home/testuser && \
-    chown -R testuser:testuser /opt/playwright
+    chmod -R 755 /ms-playwright || true && \
+    chown -R testuser:testuser /ms-playwright || true && \
+    chmod -R 755 /opt/playwright || true && \
+    chown -R testuser:testuser /opt/playwright || true
 
 USER testuser
 
