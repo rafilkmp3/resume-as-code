@@ -13,6 +13,7 @@ module.exports = defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
+    // Desktop browsers
     {
       name: 'desktop-chrome',
       use: { 
@@ -34,6 +35,29 @@ module.exports = defineConfig({
         viewport: { width: 1280, height: 720 }
       },
     },
+    // Mobile browsers - Chrome/Chromium
+    {
+      name: 'mobile-chrome',
+      use: { 
+        ...devices['Pixel 5'],
+      },
+    },
+    // Mobile browsers - Firefox
+    {
+      name: 'mobile-firefox',
+      use: { 
+        ...devices['Pixel 5'],
+        channel: 'firefox',
+      },
+    },
+    // Mobile browsers - WebKit/Safari
+    {
+      name: 'mobile-webkit',
+      use: { 
+        ...devices['iPhone 13'],
+      },
+    },
+    // Legacy projects (keeping for compatibility)
     {
       name: 'iphone-15-pro-max',
       use: { ...devices['iPhone 15 Pro Max'] },

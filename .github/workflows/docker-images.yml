@@ -7,6 +7,7 @@ on:
       - 'Dockerfile.browsers'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.js'
       - '.github/workflows/docker-images.yml'
   pull_request:
     branches: [ main ]
@@ -14,6 +15,7 @@ on:
       - 'Dockerfile.browsers'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.js'
       - '.github/workflows/docker-images.yml'
   workflow_dispatch:
     inputs:
