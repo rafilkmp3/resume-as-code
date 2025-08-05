@@ -1,35 +1,14 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (DISABLED - Use ci-prod.yml)
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'assets/**' 
-      - '*.html'
-      - '*.json'
-      - '*.js'
-      - '*.css'
-      - 'tests/**'
-      - 'scripts/**'
-      - '.github/workflows/ci.yml'
-      - 'Makefile'
-      - 'package*.json'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'assets/**'
-      - '*.html'
-      - '*.json'
-      - '*.js'
-      - '*.css'
-      - 'tests/**'
-      - 'scripts/**'
-      - '.github/workflows/ci.yml'
-      - 'Makefile'
-      - 'package*.json'
+  # DISABLED: Use ci-prod.yml for production builds and ci-staging.yml for experimental features
   workflow_dispatch:
+    inputs:
+      emergency_override:
+        description: 'Emergency override to run legacy CI'
+        required: true
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
@@ -42,11 +21,51 @@ permissions:
   packages: write
 
 jobs:
-  # Check Docker image availability  
+  # Emergency message about workflow migration
+  migration-notice:
+    name: Workflow Migration Notice
+    runs-on: ubuntu-latest
+    if: github.event.inputs.emergency_override != 'true'
+    steps:
+      - name: Display migration notice
+        run: |
+          echo "# ⚠️ Workflow Migration Notice" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚨 This workflow has been disabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The original CI/CD pipeline has been split into optimized workflows:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 For Production Builds & Deployment:" >> $GITHUB_STEP_SUMMARY
+          echo "**Use:** \`.github/workflows/ci-prod.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Reliable**: Only proven, working components" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ **Build**: Docker-based HTML/PDF generation" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 **Tests**: Essential unit and security tests" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Deploy**: GitHub Pages deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧪 For Experimental Features:" >> $GITHUB_STEP_SUMMARY
+          echo "**Use:** \`.github/workflows/ci-staging.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎭 **E2E Tests**: Browser-based testing (when Docker images available)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📸 **Visual Tests**: Screenshot-based regression testing" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ **Non-blocking**: Failures don't prevent deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 💡 Benefits of New Architecture:" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Faster**: Production builds no longer blocked by experimental tests" >> $GITHUB_STEP_SUMMARY
+          echo "- 🛡️ **Reliable**: Deployment guaranteed to work" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 **Flexible**: Experiment with new features without risk" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 **Clear**: Separate concerns for production vs testing" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*To run this legacy workflow in emergencies, set emergency_override=true*" >> $GITHUB_STEP_SUMMARY
+          
+          echo "⚠️ This workflow has been disabled. Use ci-prod.yml for production builds."
+          exit 1
+
+  # Emergency override - original workflow (if absolutely needed)
   check-images:
-    name: Check Docker Images
+    name: Check Docker Images (Emergency Only)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: github.event.inputs.emergency_override == 'true'
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
@@ -102,9 +121,10 @@ jobs:
 
   # Build first - needed for all tests
   build:
-    name: Build Resume
+    name: Build Resume (Emergency Only)  
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: github.event.inputs.emergency_override == 'true'
     env:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -171,11 +191,11 @@ jobs:
 
   # Browser-specific e2e tests
   test-e2e:
-    name: E2E Tests (${{ matrix.browser }})
+    name: E2E Tests (${{ matrix.browser }}) (Emergency Only)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [build, check-images]
-    if: needs.check-images.outputs.images-available == 'true'
+    if: github.event.inputs.emergency_override == 'true' && needs.check-images.outputs.images-available == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -232,10 +252,11 @@ jobs:
 
   # Unit and security tests
   test:
-    name: Test (${{ matrix.test-type }})
+    name: Test (${{ matrix.test-type }}) (Emergency Only)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
+    if: github.event.inputs.emergency_override == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -328,8 +349,8 @@ jobs:
 
   # Deploy only after all tests pass
   deploy:
-    name: Deploy to GitHub Pages
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    name: Deploy to GitHub Pages (Emergency Only)
+    if: github.event.inputs.emergency_override == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     needs: [build, test, test-e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 10

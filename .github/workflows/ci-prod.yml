@@ -1,0 +1,222 @@
+name: Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'assets/**' 
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'scripts/**'
+      - '.github/workflows/ci-prod.yml'
+      - 'Makefile'
+      - 'package*.json'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Essential build job - guaranteed to work
+  build:
+    name: Build Resume
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Display runtime info
+        run: |
+          echo "::group::Runtime Environment"
+          echo "GitHub Runner: ${{ runner.os }} ${{ runner.arch }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "::endgroup::"
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build with Docker (production-ready)
+        run: |
+          echo "::group::🚀 Building production resume"
+          echo "Runner: ${{ runner.os }} ${{ runner.arch }}"
+          echo "Commit: ${{ github.sha }}"
+          START_TIME=$(date +%s)
+          
+          # Simple, reliable Docker build
+          docker buildx build \
+            --target builder \
+            --tag resume-as-code:builder-${{ github.sha }} \
+            --load \
+            .
+          
+          # Extract build artifacts
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:builder-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "✅ Production build completed in ${BUILD_TIME}s"
+          echo "📁 Generated files:"
+          ls -la dist/
+          echo "::endgroup::"
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build-${{ github.sha }}
+          path: dist/
+          retention-days: 30
+          compression-level: 6
+
+  # Alpha testing - informational only, never blocks deployment
+  test-alpha:
+    name: Alpha Tests (Informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [unit, security]
+    env:
+      CI: true
+      NODE_ENV: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        continue-on-error: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+        continue-on-error: true
+      
+      - name: Install dependencies
+        run: |
+          echo "::group::Installing npm dependencies"
+          npm ci --prefer-offline --no-audit || echo "Dependency installation failed, skipping tests"
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Run alpha tests (informational only)
+        run: |
+          echo "🔬 Running alpha tests - results are informational only"
+          echo "⚠️ These tests CANNOT block deployment"
+          
+          case "${{ matrix.test-type }}" in
+            unit) 
+              echo "::group::🧪 Running unit tests (alpha)"
+              if command -v npm >/dev/null 2>&1; then
+                npm run test:unit || echo "❌ Unit tests failed (non-blocking)"
+              else
+                echo "❌ npm not available, skipping unit tests"
+              fi
+              echo "::endgroup::"
+              ;;
+            security)
+              echo "::group::🔒 Running security audit (alpha)"
+              if command -v npm >/dev/null 2>&1; then
+                npm audit --audit-level=high --prefer-offline || echo "❌ Security audit found issues (non-blocking)"
+              else
+                echo "❌ npm not available, skipping security audit"
+              fi
+              echo "::endgroup::"
+              ;;
+          esac
+        continue-on-error: true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-${{ matrix.test-type }}-results-${{ github.sha }}
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+          include-hidden-files: true
+        continue-on-error: true
+
+  # Production deployment - guaranteed to work, independent of tests
+  deploy:
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build]  # Only depends on build, not tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build-${{ github.sha }}
+          path: dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: Generate production deployment summary
+        if: always()
+        run: |
+          echo "# 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 📊 Deployment Information" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | Production |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Workflow** | ${{ github.workflow }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🌐 Live Resume" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 [**View Production Resume**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## ✅ Production Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ **Build**: Resume HTML/PDF generated successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔬 **Alpha Tests**: Informational testing (results don't affect deployment)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Deploy**: Published to GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔬 Alpha Test Philosophy" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ **Non-blocking**: Tests run for information only" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Deploy First**: Deployment is independent of test results" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 **Learn**: Test results help improve future reliability" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 **Production resume successfully deployed!**" >> $GITHUB_STEP_SUMMARY

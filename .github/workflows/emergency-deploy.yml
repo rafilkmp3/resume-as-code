@@ -1,0 +1,175 @@
+name: Emergency Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Emergency deployment reason'
+        required: true
+        type: string
+      skip_confirmation:
+        description: 'Skip safety confirmation (DANGER)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: emergency-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Safety confirmation
+  safety-check:
+    name: Emergency Safety Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    if: github.event.inputs.skip_confirmation != 'true'
+    steps:
+      - name: Emergency deployment warning
+        run: |
+          echo "# 🚨 EMERGENCY DEPLOYMENT WARNING" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚠️ This is an emergency deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason:** ${{ github.event.inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Time:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔥 Emergency Characteristics" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚡ **No tests**: Zero testing, maximum speed" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Direct deploy**: Build → Deploy immediately" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ **High risk**: Use only when production is broken" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏥 **Emergency only**: Not for regular deployments" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Safety Confirmed" >> $GITHUB_STEP_SUMMARY
+          echo "Emergency deployment authorized. Proceeding with build and deploy." >> $GITHUB_STEP_SUMMARY
+          
+          echo "🚨 EMERGENCY DEPLOYMENT AUTHORIZED"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "This deployment skips ALL testing for maximum speed"
+
+  # Emergency build - fastest possible
+  emergency-build:
+    name: Emergency Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [safety-check]
+    if: always() && (needs.safety-check.result == 'success' || github.event.inputs.skip_confirmation == 'true')
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Emergency build info
+        run: |
+          echo "::group::🚨 Emergency Build Information"
+          echo "Mode: EMERGENCY - No testing, maximum speed"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Time: $(date -u)"
+          echo "::endgroup::"
+        
+      - name: Fast Docker build
+        run: |
+          echo "::group::⚡ Emergency Docker build (no cache, maximum speed)"
+          START_TIME=$(date +%s)
+          
+          # Fastest possible build - no caching, no optimization
+          docker build \
+            --target builder \
+            --tag emergency-resume:${{ github.sha }} \
+            --no-cache \
+            .
+          
+          # Extract artifacts
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" emergency-resume:${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "⚡ Emergency build completed in ${BUILD_TIME}s"
+          echo "📁 Files generated:"
+          ls -la dist/
+          echo "::endgroup::"
+        
+      - name: Upload emergency artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: emergency-build-${{ github.sha }}
+          path: dist/
+          retention-days: 90
+          compression-level: 1  # Fastest compression
+
+  # Emergency deployment - direct to production
+  emergency-deploy:
+    name: Emergency Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [emergency-build]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download emergency build
+        uses: actions/download-artifact@v4
+        with:
+          name: emergency-build-${{ github.sha }}
+          path: dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Emergency deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: Emergency deployment summary
+        run: |
+          echo "# 🚨 EMERGENCY DEPLOYMENT COMPLETE" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🚀 Emergency Deployment Information" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Type** | 🚨 EMERGENCY |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Reason** | ${{ github.event.inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Time** | $(date -u) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🌐 Emergency Resume Live" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚨 [**EMERGENCY DEPLOYMENT LIVE**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## ⚡ Emergency Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚨 **Emergency**: Authorized deployment bypassing all safety checks" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚡ **Build**: Fastest possible Docker build (no cache, no optimization)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚫 **No Tests**: Zero testing for maximum deployment speed" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **Deploy**: Direct to production GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## ⚠️ Post-Emergency Actions" >> $GITHUB_STEP_SUMMARY
+          echo "1. 🔍 **Verify**: Check that the emergency deployment resolved the issue" >> $GITHUB_STEP_SUMMARY
+          echo "2. 🧪 **Test**: Run staging pipeline to validate changes" >> $GITHUB_STEP_SUMMARY
+          echo "3. 📋 **Document**: Record what necessitated emergency deployment" >> $GITHUB_STEP_SUMMARY
+          echo "4. 🔄 **Follow-up**: Use normal production pipeline for subsequent changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚨 **EMERGENCY DEPLOYMENT SUCCESSFUL - Monitor for issues**" >> $GITHUB_STEP_SUMMARY
