@@ -57,18 +57,6 @@ module.exports = defineConfig({
         ...devices['iPhone 13'],
       },
     },
-    // Legacy projects (keeping for compatibility)
-    {
-      name: 'iphone-15-pro-max',
-      use: { ...devices['iPhone 15 Pro Max'] },
-    },
-    {
-      name: 'ipad-pro',
-      use: { 
-        ...devices['iPad Pro'],
-        viewport: { width: 1024, height: 1366 }
-      },
-    },
   ],
   webServer: {
     command: process.env.CI ? 'PORT=3001 node server.js' : 'npm run serve:test',
