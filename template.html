@@ -23,14 +23,25 @@
     <meta property="twitter:description" content="{{basics.summary}}">
     <meta property="twitter:image" content="{{basics.image}}">
 
-    <!-- Google Analytics -->
+    <!-- Enhanced Google Analytics 4 with Event Tracking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1L4XD6LG6Z"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      gtag('config', 'G-1L4XD6LG6Z');
+      
+      // Enhanced GA4 configuration
+      gtag('config', 'G-1L4XD6LG6Z', {
+        send_page_view: true,
+        anonymize_ip: true,
+        allow_google_signals: true,
+        custom_map: {
+          'custom_parameter_1': 'resume_section',
+          'custom_parameter_2': 'user_action'
+        }
+      });
+      
+      // Enhanced event tracking will be loaded after DOM is ready
     </script>
 
     <script type="application/ld+json">
@@ -560,34 +571,46 @@
         .main-content {
             display: grid;
             grid-template-columns: 3fr 1fr;
-            gap: 2rem;
-            padding: 2rem;
+            gap: 3rem; /* Increased gap for better separation */
+            padding: 3rem 2rem; /* Increased padding for better breathing room */
             margin: 0 auto;
-            max-width: 100%;
+            max-width: 1400px; /* Set max width for better readability on large screens */
+            min-height: calc(100vh - 400px); /* Ensure good content height */
         }
         
         .left-column {
-            padding-right: 1rem;
+            padding-right: 2rem; /* Increased right padding for better separation */
+            min-width: 0; /* Prevent grid overflow */
         }
         
         .right-column {
             background: var(--bg-accent);
-            padding: 1.5rem;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
+            padding: 2rem 1.5rem; /* Increased top/bottom padding */
+            border-radius: 12px; /* Slightly more rounded corners */
+            transition: all 0.3s ease;
+            position: sticky; /* Make sidebar sticky for better UX */
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Subtle shadow for depth */
         }
         
         .section {
-            margin-bottom: 2.5rem;
+            margin-bottom: 3rem; /* Increased spacing for better visual separation */
+            position: relative;
+            scroll-margin-top: 2rem; /* Better scroll positioning for navigation */
         }
         
         .section h2 {
             color: var(--color-text-accent);
-            font-size: 1.75rem;
+            font-size: 1.9rem; /* Slightly larger for better hierarchy */
             font-weight: 800;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem; /* Increased margin for better spacing */
             padding-bottom: 1rem;
             padding-left: 1.5rem;
+            letter-spacing: -0.02em; /* Improved typography */
+            line-height: 1.2;
+            position: relative;
             border-left: 5px solid var(--brand-600);
             border-bottom: 3px solid var(--color-interactive-default);
             position: relative;
@@ -618,16 +641,16 @@
         }
         
         .work-item {
-            margin-bottom: 2.5rem;
+            margin-bottom: 3rem; /* Increased margin for better spacing */
             border-left: 4px solid var(--color-interactive-default);
-            padding: 1.75rem;
-            padding-left: 2rem;
+            padding: 2rem; /* Increased padding for better content spacing */
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 0 16px 16px 0;
+            border-radius: 0 20px 20px 0; /* More rounded corners */
             background: var(--color-surface-raised);
             border: 1px solid var(--color-border-subtle);
             transform: translateZ(0);
             will-change: transform;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle initial shadow */
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -652,11 +675,10 @@
         
         .work-item:hover {
             background: var(--color-surface-accent);
-            border-left-width: 4px;
+            border-left-width: 5px; /* Slightly thicker border on hover */
             border-left-color: var(--color-interactive-hover);
-            padding-left: 1.7rem;
-            box-shadow: var(--shadow-default);
-            transform: translateX(6px) translateZ(0) scale(1.005);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12); /* Enhanced shadow */
+            transform: translateX(8px) translateY(-2px) scale(1.01); /* Improved hover animation */
             border-color: var(--color-border-default);
         }
         
@@ -797,6 +819,126 @@
             }
         }
         
+        /* Experience section improvements */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .experience-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .experience-counter {
+            font-size: 0.875rem;
+            color: var(--color-text-subtle);
+            font-weight: 500;
+            background: var(--color-surface-accent);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--color-border-subtle);
+        }
+        
+        /* Load more functionality */
+        .work-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .work-item.hidden {
+            display: none;
+        }
+        
+        .work-item.fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .load-more-container {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0 1rem;
+        }
+        
+        .load-more-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--color-accent-primary);
+            color: white;
+            border: none;
+            border-radius: 3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+            min-height: 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .load-more-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .load-more-btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .load-more-btn:hover {
+            background: var(--color-accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.4);
+        }
+        
+        .load-more-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+        }
+        
+        .btn-icon {
+            font-size: 1.1rem;
+            filter: grayscale(1) brightness(10);
+        }
+        
+        .btn-text {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        
+        .btn-count {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
+        .load-more-container.hidden {
+            display: none;
+        }
+        
         .work-summary {
             color: var(--color-text-default);
             font-style: italic;
@@ -853,20 +995,22 @@
         
         .skill-tag {
             background: var(--color-surface-accent);
-            padding: 0.4rem 1rem;
-            border-radius: 24px;
-            font-size: 0.85rem;
+            padding: 0.6rem 1.2rem; /* Increased padding for better touch targets */
+            border-radius: 28px; /* Slightly more rounded */
+            font-size: 0.9rem; /* Larger text for readability */
             color: var(--color-text-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--color-border-subtle);
-            font-weight: 500;
-            cursor: default;
+            border: 2px solid var(--color-border-subtle); /* Thicker border */
+            font-weight: 600; /* Bolder font */
+            cursor: pointer; /* Changed to pointer for better UX */
             position: relative;
             overflow: hidden;
-            margin: 0.25rem 0.4rem 0.25rem 0;
+            margin: 0.3rem 0.5rem 0.3rem 0; /* Better spacing */
             display: inline-flex;
             align-items: center;
-            min-height: 2rem;
+            justify-content: center;
+            min-height: 2.75rem; /* 44px minimum for accessibility */
+            text-decoration: none; /* For link accessibility */
             line-height: 1.3;
             white-space: nowrap;
             text-align: center;
@@ -952,8 +1096,8 @@
         .links {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
+            gap: 1.2rem; /* Increased gap for better separation */
+            margin-top: 1.8rem; /* Better top margin */
             align-items: center;
             justify-content: flex-start;
         }
@@ -1479,8 +1623,19 @@
         @media print {
             /* CLEAN SIMPLE PRINT LAYOUT FOR PROFESSIONAL PDF */
             
+            /* Force light theme for optimal print quality */
+            :root {
+                --color-background-base: #ffffff !important;
+                --color-surface-raised: #ffffff !important;
+                --color-text-primary: #000000 !important;
+                --color-text-secondary: #333333 !important;
+                --color-text-accent: #2196f3 !important;
+                --color-border-subtle: #e0e0e0 !important;
+                --color-accent-primary: #2196f3 !important;
+            }
+            
             /* Hide interactive elements but NOT content sections */
-            .controls, .parallax-bg { display: none !important; }
+            .controls, .parallax-bg, .dark-toggle { display: none !important; }
             
             /* Show content sections that were hidden by fade-in animations */
             .fade-in-section {
@@ -2126,17 +2281,52 @@
             .header { 
                 flex-direction: column; 
                 text-align: center; 
-                padding: 2rem 1rem;
+                padding: 1.8rem 1.5rem; /* Slightly reduced padding */
+                gap: 1.2rem; /* More controlled gap */
+            }
+            
+            .profile-photo {
+                width: 100px; /* Consistent sizing progression */
+                height: 100px;
+                margin-bottom: 0.8rem;
+            }
+            
+            .header-content {
+                text-align: center;
             }
             
             .header h1 {
-                font-size: 2.2rem;
-                line-height: 1.2;
+                font-size: 2rem; /* Slightly smaller for better balance */
+                line-height: 1.1;
+                margin-bottom: 0.4rem;
             }
             
             .header h2, .subtitle {
-                font-size: 1.2rem;
+                font-size: 1.1rem; /* Better scaling */
+                line-height: 1.2;
+                margin-bottom: 1rem;
+            }
+            
+            .contact-info {
+                margin: 1rem 0 0.8rem 0;
+                gap: 0.8rem;
+                justify-content: center;
+            }
+            
+            .contact-item {
+                font-size: 0.85rem;
                 line-height: 1.3;
+            }
+            
+            .links {
+                margin-top: 1rem;
+                gap: 1rem;
+                justify-content: center;
+            }
+            
+            .link-item {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
             }
             
             .main-content { 
@@ -2203,32 +2393,111 @@
             }
         }
         
-        /* Mobile portrait - Enhanced 2024 Standards */
+        /* Mobile portrait - Enhanced 2024 Standards with profile photo on top */
         @media (max-width: 480px) {
             .header {
-                padding: 2rem 1rem; /* Increased for better breathing room */
+                flex-direction: column; /* Stack elements vertically */
+                text-align: center; /* Center all content */
+                padding: 1.5rem 1rem 2rem 1rem; /* More bottom padding for better balance */
+                gap: 0; /* Remove gap, we'll control spacing manually */
+                min-height: auto;
+                align-items: center; /* Center everything horizontally */
+            }
+            
+            .profile-photo {
+                width: 100px; /* Slightly larger for prominence at top */
+                height: 100px;
+                margin-bottom: 1.5rem; /* Good spacing below photo */
+                order: -1; /* Move to top regardless of HTML order */
+                flex-shrink: 0;
+                border: 4px solid rgba(255,255,255,0.4); /* More prominent border */
+                box-shadow: 0 8px 24px rgba(0,0,0,0.3); /* Enhanced shadow */
+            }
+            
+            .header-content {
+                flex: 1;
+                text-align: center;
+                width: 100%; /* Full width for better content distribution */
+                max-width: 300px; /* Constrain width for better readability */
             }
             
             .header h1 {
-                font-size: 1.8rem;
-                line-height: 1.2;
+                font-size: 1.8rem; /* Larger for better prominence */
+                line-height: 1.1;
+                margin-bottom: 0.5rem; /* Better spacing */
+                font-weight: 800; /* Bolder for mobile */
+                letter-spacing: -0.02em; /* Better typography */
             }
             
             .header h2, .subtitle {
-                font-size: 1rem;
+                font-size: 1rem; /* Larger subtitle for readability */
                 line-height: 1.3;
+                margin-bottom: 1.2rem; /* More generous margin */
+                opacity: 0.95; /* Slightly more prominent */
+            }
+            
+            .contact-info {
+                margin: 1rem 0 0.8rem 0; /* Better margins */
+                gap: 0.8rem; /* More generous gaps */
+                justify-content: center;
+                flex-direction: column; /* Stack vertically for better mobile UX */
+                align-items: center;
+            }
+            
+            .contact-item {
+                font-size: 0.9rem; /* Larger contact text */
+                margin: 0.3rem 0;
+                line-height: 1.4;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem; /* Better icon-text spacing */
+                padding: 0.2rem 0.5rem; /* Subtle padding for better touch targets */
+                border-radius: 0.5rem;
+                background: rgba(255,255,255,0.1); /* Subtle background for definition */
+                backdrop-filter: blur(5px);
+                min-width: 200px; /* Consistent width */
+            }
+            
+            .links {
+                margin-top: 1.2rem; /* Better top margin */
+                gap: 1rem; /* More generous gaps */
+                justify-content: center;
+                flex-wrap: wrap;
+                max-width: 100%;
+            }
+            
+            .link-item {
+                padding: 0.8rem 1.2rem; /* Larger touch targets */
+                font-size: 0.85rem; /* Better readability */
+                min-height: 44px; /* Accessibility standard */
+                border-radius: 2rem;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                border: 2px solid rgba(255,255,255,0.4); /* More prominent border */
+            }
+            
+            .link-item:hover, .link-item:active {
+                transform: translateY(-2px) scale(1.02);
+                background: rgba(255,255,255,0.3);
+                border-color: rgba(255,255,255,0.6);
             }
             
             .main-content {
                 padding: 0 1rem;
-                gap: 2rem;
+                gap: 1.5rem; /* Reduced gap for mobile */
                 width: 100%;
                 overflow-x: hidden;
             }
             
+            .section {
+                margin-bottom: 1.5rem; /* More controlled section spacing */
+            }
+            
             .section h2 {
-                font-size: 1.3rem;
-                margin-bottom: 1rem;
+                font-size: 1.25rem; /* Slightly smaller */
+                margin-bottom: 0.8rem; /* Reduced margin */
+                line-height: 1.2;
             }
             
             .work-title {
@@ -2260,6 +2529,40 @@
                 padding: 1.5rem;
                 margin-bottom: 1.5rem;
                 border-radius: 0 12px 12px 0;
+            }
+            
+            /* Enhanced project cards on mobile */
+            .section:has(.work-item:first-child .work-title) h2 {
+                position: sticky;
+                top: 0;
+                background: var(--color-background-base);
+                z-index: 5;
+                padding: 0.5rem 0;
+                border-bottom: 2px solid var(--color-accent-primary);
+                margin: 0 -1rem 1rem;
+                padding: 0.75rem 1rem;
+                font-size: 1.4rem;
+                font-weight: 700;
+            }
+            
+            /* Project-specific mobile improvements */
+            .work-item:has(.skill-tag) {
+                background: linear-gradient(135deg, 
+                    var(--color-surface-raised) 0%, 
+                    var(--color-surface-accent) 100%);
+                box-shadow: 0 4px 12px var(--shadow-color);
+                border-left: 4px solid var(--color-accent-primary);
+            }
+            
+            .work-item .skill-tag {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.8rem;
+                margin: 0.2rem 0.2rem 0.2rem 0;
+                border-radius: 1rem;
+                background: var(--color-accent-primary);
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             
             .controls {
@@ -2445,46 +2748,64 @@
                     <div class="profile-summary">{{basics.summary}}</div>
                 </section>
                 
-                <section class="section fade-in-section">
-                    <h2>Experience</h2>
-                    {{#each work}}
-                    <div class="work-item">
-                        <div class="work-header">
-                            <div>
-                                <div class="work-title">{{position}}</div>
-                                <div class="company">{{name}}</div>
-                            </div>
-                            <div class="work-date" data-start="{{startDate}}" data-end="{{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
-                                <div class="date-container" role="button" tabindex="0" aria-label="View duration details for {{startDate}} to {{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
-                                    <span class="date-range">
-                                        <span class="date-start">{{startDate}}</span>
-                                        <span class="date-separator"> — </span>
-                                        <span class="date-end">{{#if endDate}}{{endDate}}{{else}}Present{{/if}}</span>
-                                    </span>
-                                    <span class="duration-badge" aria-hidden="true"></span>
+                <section class="section fade-in-section" id="experience-section">
+                    <div class="section-header">
+                        <h2>Experience</h2>
+                        <div class="experience-controls">
+                            <span class="experience-counter">
+                                Showing <span id="shown-count">3</span> of <span id="total-count">{{work.length}}</span> positions
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div id="work-container">
+                        {{#each work}}
+                        <div class="work-item" data-index="{{@index}}">
+                            <div class="work-header">
+                                <div>
+                                    <div class="work-title">{{position}}</div>
+                                    <div class="company">{{name}}</div>
                                 </div>
-                                <div class="duration-details" aria-hidden="true">
-                                    <div class="duration-breakdown">
-                                        <div class="duration-item">
-                                            <span>Duration</span>
-                                            <span class="duration-value duration-total"></span>
-                                        </div>
-                                        <div class="duration-item">
-                                            <span>Experience</span>
-                                            <span class="duration-value duration-years"></span>
+                                <div class="work-date" data-start="{{startDate}}" data-end="{{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
+                                    <div class="date-container" role="button" tabindex="0" aria-label="View duration details for {{startDate}} to {{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
+                                        <span class="date-range">
+                                            <span class="date-start">{{startDate}}</span>
+                                            <span class="date-separator"> — </span>
+                                            <span class="date-end">{{#if endDate}}{{endDate}}{{else}}Present{{/if}}</span>
+                                        </span>
+                                        <span class="duration-badge" aria-hidden="true"></span>
+                                    </div>
+                                    <div class="duration-details" aria-hidden="true">
+                                        <div class="duration-breakdown">
+                                            <div class="duration-item">
+                                                <span>Duration</span>
+                                                <span class="duration-value duration-total"></span>
+                                            </div>
+                                            <div class="duration-item">
+                                                <span>Experience</span>
+                                                <span class="duration-value duration-years"></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="work-summary">{{summary}}</div>
+                            <ul class="highlights">
+                                {{#each highlights}}
+                                <li tabindex="0" role="button" aria-label="Achievement: {{this}}">{{this}}</li>
+                                {{/each}}
+                            </ul>
                         </div>
-                        <div class="work-summary">{{summary}}</div>
-                        <ul class="highlights">
-                            {{#each highlights}}
-                            <li tabindex="0" role="button" aria-label="Achievement: {{this}}">{{this}}</li>
-                            {{/each}}
-                        </ul>
+                        {{/each}}
                     </div>
-                    {{/each}}
+                    
+                    <div class="load-more-container" id="load-more-container">
+                        <button class="load-more-btn" id="load-more-btn">
+                            <span class="btn-icon">📋</span>
+                            <span class="btn-text">Load Earlier Experience</span>
+                            <span class="btn-count">+<span id="remaining-count"></span> more positions</span>
+                        </button>
+                    </div>
                 </section>
                 
                 {{#if projects}}
@@ -3015,6 +3336,202 @@
         
         // Initialize date components
         document.addEventListener('DOMContentLoaded', initializeDateComponents);
+        
+        // Enhanced Experience Pagination System
+        function initializeExperiencePagination() {
+            const workItems = document.querySelectorAll('.work-item');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const loadMoreContainer = document.getElementById('load-more-container');
+            const shownCountElement = document.getElementById('shown-count');
+            const totalCountElement = document.getElementById('total-count');
+            const remainingCountElement = document.getElementById('remaining-count');
+            
+            const INITIAL_SHOW = 3;
+            let currentlyShown = INITIAL_SHOW;
+            const totalItems = workItems.length;
+            
+            if (totalItems <= INITIAL_SHOW) {
+                // If we have 3 or fewer items, hide the load more button
+                if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+                return;
+            }
+            
+            // Initially hide items beyond the first 3
+            workItems.forEach((item, index) => {
+                if (index >= INITIAL_SHOW) {
+                    item.style.display = 'none';
+                    item.classList.add('hidden');
+                }
+            });
+            
+            // Update counters
+            function updateCounters() {
+                const remaining = totalItems - currentlyShown;
+                if (shownCountElement) shownCountElement.textContent = Math.min(currentlyShown, totalItems);
+                if (totalCountElement) totalCountElement.textContent = totalItems;
+                if (remainingCountElement) remainingCountElement.textContent = Math.max(remaining, 0);
+                
+                // Hide load more button if all items are shown
+                if (remaining <= 0 && loadMoreContainer) {
+                    loadMoreContainer.classList.add('hidden');
+                }
+            }
+            
+            updateCounters();
+            
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', () => {
+                    // Show next batch of items (show all remaining)
+                    workItems.forEach((item, index) => {
+                        if (index >= currentlyShown) {
+                            item.style.display = 'block';
+                            item.classList.remove('hidden');
+                            item.classList.add('fade-in');
+                            
+                            // Stagger the animation
+                            setTimeout(() => {
+                                item.classList.remove('fade-in');
+                            }, (index - currentlyShown) * 100);
+                        }
+                    });
+                    
+                    currentlyShown = totalItems;
+                    updateCounters();
+                    
+                    // Smooth scroll to show the newly revealed items
+                    setTimeout(() => {
+                        const firstNewItem = workItems[INITIAL_SHOW];
+                        if (firstNewItem) {
+                            firstNewItem.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }, 300);
+                });
+            }
+        }
+        
+        // Initialize pagination after DOM loads
+        document.addEventListener('DOMContentLoaded', initializeExperiencePagination);
+    </script>
+
+    <!-- Enhanced Analytics Event Tracking -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track theme toggle
+        const themeToggle = document.querySelector('.dark-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            gtag('event', 'theme_change', {
+              event_category: 'UI Interaction',
+              event_label: newTheme,
+              custom_parameter_2: 'theme_toggle'
+            });
+          });
+        }
+        
+        // Track skill tag clicks
+        document.querySelectorAll('.skill-tag').forEach(function(tag) {
+          tag.addEventListener('click', function() {
+            const skillName = this.textContent.trim();
+            gtag('event', 'skill_click', {
+              event_category: 'Resume Interaction',
+              event_label: skillName,
+              custom_parameter_1: 'skills_section',
+              custom_parameter_2: 'skill_tag_click'
+            });
+          });
+        });
+        
+        // Track work experience expand/collapse
+        document.querySelectorAll('.work-date').forEach(function(dateElement) {
+          dateElement.addEventListener('click', function() {
+            const companyName = this.closest('.work-item')?.querySelector('.work-title')?.textContent?.trim() || 'Unknown';
+            gtag('event', 'work_experience_expand', {
+              event_category: 'Resume Interaction',
+              event_label: companyName,
+              custom_parameter_1: 'experience_section',
+              custom_parameter_2: 'date_expand'
+            });
+          });
+        });
+        
+        // Track load more experience button
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if (loadMoreBtn) {
+          loadMoreBtn.addEventListener('click', function() {
+            gtag('event', 'load_more_experience', {
+              event_category: 'Resume Interaction',
+              event_label: 'Load More Button',
+              custom_parameter_1: 'experience_section',
+              custom_parameter_2: 'load_more_click'
+            });
+          });
+        }
+        
+        // Track external link clicks
+        document.querySelectorAll('.link-item, .skill-tag[href], a[href^="http"]').forEach(function(link) {
+          link.addEventListener('click', function() {
+            const url = this.href;
+            const linkText = this.textContent.trim();
+            
+            gtag('event', 'external_link_click', {
+              event_category: 'Outbound Link',
+              event_label: linkText,
+              link_url: url,
+              custom_parameter_2: 'external_link'
+            });
+          });
+        });
+        
+        // Track contact link clicks
+        document.querySelectorAll('a[href^="tel:"], a[href^="mailto:"]').forEach(function(link) {
+          link.addEventListener('click', function() {
+            const type = this.href.startsWith('tel:') ? 'phone' : 'email';
+            
+            gtag('event', 'contact_click', {
+              event_category: 'Contact',
+              event_label: type,
+              contact_method: type,
+              custom_parameter_2: 'contact_interaction'
+            });
+          });
+        });
+        
+        // Track print attempts
+        window.addEventListener('beforeprint', function() {
+          gtag('event', 'resume_print', {
+            event_category: 'User Action',
+            event_label: 'Print Resume',
+            custom_parameter_2: 'print_action'
+          });
+        });
+        
+        // Track scroll depth for engagement
+        let maxScrollDepth = 0;
+        let scrollTimer;
+        
+        window.addEventListener('scroll', function() {
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function() {
+            const scrollDepth = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+            
+            if (scrollDepth > maxScrollDepth && scrollDepth >= 25 && scrollDepth % 25 === 0) {
+              maxScrollDepth = scrollDepth;
+              gtag('event', 'scroll_depth', {
+                event_category: 'Engagement',
+                event_label: scrollDepth + '%',
+                scroll_depth: scrollDepth,
+                custom_parameter_2: 'scroll_tracking'
+              });
+            }
+          }, 300);
+        });
+      });
     </script>
 </body>
 </html>

@@ -72,7 +72,9 @@
       "Bash(git lfs:*)",
       "Bash(.githooks/pre-commit-lfs:*)",
       "Bash(git rev-parse:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(time npm run build)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

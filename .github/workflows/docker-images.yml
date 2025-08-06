@@ -4,18 +4,18 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Dockerfile.browsers'
+      - 'docker/Dockerfile.browsers'
       - 'package.json'
       - 'package-lock.json'
-      - 'playwright.config.js'
+      - 'config/playwright.config*.js'
       - '.github/workflows/docker-images.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'Dockerfile.browsers'
+      - 'docker/Dockerfile.browsers'
       - 'package.json'
       - 'package-lock.json'
-      - 'playwright.config.js'
+      - 'config/playwright.config*.js'
       - '.github/workflows/docker-images.yml'
   workflow_dispatch:
     inputs:

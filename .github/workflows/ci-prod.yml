@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'assets/**' 
+      - 'config/**'
       - '*.html'
       - '*.json'
       - '*.js'

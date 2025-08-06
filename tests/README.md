@@ -94,9 +94,13 @@ docker-compose run --rm ci make test-internal
 
 ## 🔧 Configuration Files
 
-- **`playwright.config.js`**: Playwright test configuration
-- **`jest.config.js`**: Jest unit test configuration
+Testing configurations are centralized in the `/config` directory:
+- **`../config/playwright.config.js`**: Playwright E2E test configuration
+- **`../config/playwright.config.docker.js`**: Docker-specific Playwright configuration
+- **`../config/jest.config.js`**: Jest unit test configuration
 - **`unit/setup.js`**: Test environment setup and mocking
+
+All test commands automatically reference the centralized configurations through updated Makefile and package.json scripts.
 
 ## 🎨 Visual Testing
 

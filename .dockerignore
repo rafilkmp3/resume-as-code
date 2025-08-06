@@ -107,9 +107,7 @@ secrets/
 .eslintcache
 .stylelintcache
 
-# Docker files (avoid recursive Docker builds)
-Dockerfile*
-docker-compose*.yml
+# Docker files (avoid recursive Docker builds - except our docker/ directory)
 .dockerignore
 
 # CI/CD configuration (not needed for build)
@@ -150,15 +148,13 @@ docker-compose.override.yml
 
 # Resume-as-Code specific exclusions
 original-pdf-not-ai/
-screenshots/
+docs/screenshots/
 
 # Keep essential files for container builds
 !package.json
 !package-lock.json
 !yarn.lock
-!babel.config.js
-!jest.config.js
-!playwright.config*.js
+!config/
 !Makefile
 !resume-data.json
 !template.html
@@ -168,3 +164,4 @@ screenshots/
 !scripts/server.js
 !scripts/dev-server.js
 !scripts/utils/
+!docker/

@@ -165,6 +165,32 @@
   "certificates": [],
   "projects": [
     {
+      "name": "Self-Service Terraform Platform with Atlantis Integration",
+      "url": "https://www.runatlantis.io/",
+      "description": "Enterprise-grade GitOps platform enabling teams to self-apply Terraform through GitHub PR interface using Atlantis",
+      "highlights": [
+        "Built self-service Terraform deployment system using Atlantis enabling 50+ developers to independently manage infrastructure",
+        "Integrated Atlantis with GitHub PR workflows for automated Terraform plan/apply via PR comments",
+        "Implemented GitOps workflows with Terragrunt and Atlantis allowing teams to apply infrastructure changes seamlessly",
+        "Created secure multi-environment promotion pipelines with Atlantis server reducing deployment time from days to minutes",
+        "Established governance controls with policy-as-code using Sentinel and OPA integrated with Atlantis workflows"
+      ],
+      "keywords": ["Terraform", "Atlantis", "Terragrunt", "GitOps", "GitHub Actions", "OPA", "Sentinel", "Self-Service", "Infrastructure as Code"]
+    },
+    {
+      "name": "Multi-Cloud DNS & Hybrid Network Architecture",
+      "url": "",
+      "description": "Designed and implemented hybrid multi-cloud networking with intelligent DNS routing",
+      "highlights": [
+        "Architected multi-cloud DNS strategy using AWS Route53 with health checks and failover routing",
+        "Built hybrid connectivity between AWS, on-premises data centers, and edge locations",
+        "Implemented intelligent traffic routing reducing latency by 35% across 3 geographic regions",
+        "Designed disaster recovery with automated DNS failover achieving 99.99% uptime SLA",
+        "Created network segmentation with VPC peering and Transit Gateway for secure multi-cloud communication"
+      ],
+      "keywords": ["AWS Route53", "Multi-Cloud", "Hybrid Network", "DNS", "VPC", "Transit Gateway", "On-Premises", "HA/DR"]
+    },
+    {
       "name": "Resume-as-Code Platform",
       "url": "https://github.com/rafilkmp3/resume-as-code",
       "description": "Full-stack resume generation system demonstrating Platform Engineering principles",

@@ -8,17 +8,21 @@
     "serve:test": "PORT=3001 node scripts/server.js",
     "dev": "node scripts/dev-server.js",
     "test": "make test",
-    "test:unit": "jest tests/unit/ --coverage",
-    "test:e2e": "playwright test",
+    "test:unit": "jest tests/unit/ --coverage --config=config/jest.config.js",
+    "test:e2e": "playwright test --config=config/playwright.config.js",
     "version:patch": "npm version patch && git push --follow-tags",
     "version:minor": "npm version minor && git push --follow-tags",
     "version:major": "npm version major && git push --follow-tags",
     "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
   },
   "dependencies": {
+    "@google-analytics/data": "^5.2.0",
     "handlebars": "^4.7.8",
     "puppeteer": "^24.15.0",
     "qrcode": "^1.5.4"
+  },
+  "jest": {
+    "preset": "./config/jest.config.js"
   },
   "keywords": [
     "resume",

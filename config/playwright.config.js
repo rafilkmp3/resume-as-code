@@ -64,7 +64,7 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: process.env.CI ? 'PORT=3001 node scripts/server.js' : 'npm run serve:test',
+    command: process.env.CI ? 'PORT=3001 node ../scripts/server.js' : 'npm run serve:test',
     url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

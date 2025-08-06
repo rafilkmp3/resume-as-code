@@ -91,6 +91,57 @@
 </tr>
 </table>
 
+## 📱 Visual Preview
+
+<div align="center">
+<table>
+<tr>
+<td width="33%" align="center">
+<h4>🖥️ Desktop View</h4>
+<img src="docs/screenshots/desktop-full-page.png" alt="Desktop Full Page" width="300"/>
+<br><em>Professional desktop layout</em>
+</td>
+<td width="33%" align="center">
+<h4>📱 Mobile View</h4>
+<img src="docs/screenshots/mobile-full-page.png" alt="Mobile Full Page" width="200"/>
+<br><em>Responsive mobile design</em>
+</td>
+<td width="33%" align="center">
+<h4>🌙 Dark Mode</h4>
+<img src="docs/screenshots/mobile-dark-mode.png" alt="Mobile Dark Mode" width="200"/>
+<br><em>Automatic dark theme</em>
+</td>
+</tr>
+</table>
+
+<details>
+<summary><strong>📊 More Device Views (Click to expand)</strong></summary>
+
+<br>
+
+<div align="center">
+<table>
+<tr>
+<td width="50%" align="center">
+<h4>📟 Tablet View</h4>
+<img src="docs/screenshots/tablet-full-page.png" alt="Tablet Full Page" width="400"/>
+<br><em>Optimized tablet experience</em>
+</td>
+<td width="50%" align="center">
+<h4>🖱️ Interactive Elements</h4>
+<img src="docs/screenshots/desktop-date-hover.png" alt="Desktop Date Hover" width="400"/>
+<br><em>Hover states and animations</em>
+</td>
+</tr>
+</table>
+</div>
+
+</details>
+
+</div>
+
+---
+
 ## 🛠️ Quick Start
 
 ### Prerequisites
@@ -252,28 +303,47 @@ make help           # Show all available commands
 
 ### **🏗️ Infrastructure as Code**
 ```
-📦 Project Structure
+📦 Project Structure (Recently Reorganized for Professional Standards)
 ├── 🎯 assets/                    # Organized asset management
-│   └── images/
-│       └── profile.jpeg          # Compressed profile image
+│   └── images/profile.jpeg       # Compressed profile image (85KB optimized)
+├── ⚙️ config/                    # Centralized configuration directory
+│   ├── babel.config.js          # JavaScript transpilation
+│   ├── jest.config.js           # Unit testing configuration
+│   ├── playwright.config.js     # End-to-end testing
+│   └── playwright.config.docker.js # Docker-specific testing
+├── 📁 docs/                      # Documentation and visual assets
+│   ├── screenshots/             # Visual preview gallery
+│   │   ├── desktop-full-page.png
+│   │   ├── mobile-dark-mode.png
+│   │   ├── mobile-full-page.png
+│   │   └── tablet-full-page.png
+│   └── README.md                # Documentation guide
+├── 🐳 docker/                    # Containerization suite
+│   ├── Dockerfile               # Multi-stage production build
+│   ├── Dockerfile.browsers      # Browser-specific testing images
+│   ├── docker-compose.yml       # Service orchestration
+│   └── [Fast/Base variants]     # Specialized build configurations
+├── 🔧 scripts/                   # Build and automation scripts
+│   ├── build.js                 # Resume generation engine
+│   ├── server.js               # Production server
+│   ├── dev-server.js           # Hot-reload development
+│   └── utils/                  # Shared utilities
 ├── 🧪 tests/                     # Comprehensive test suite
-│   ├── unit/                     # Jest unit tests with mocking
-│   ├── integration/              # Build & deployment tests
-│   ├── accessibility.spec.js    # WCAG 2.1 AA compliance
-│   ├── performance.spec.js      # Core Web Vitals monitoring
-│   ├── visual-regression.spec.js # Baseline screenshot testing
-│   └── dark-mode.spec.js        # Theme functionality validation
-├── 🔄 .github/workflows/         # Multi-stage CI/CD pipeline
-│   ├── comprehensive-ci.yml     # All-in-one testing workflow
-│   ├── ci.yml                   # Legacy compatibility workflow
-│   └── deploy.yml               # GitHub Pages deployment
+│   ├── unit/                    # Jest unit tests with mocking
+│   ├── integration/             # Build & deployment tests
+│   ├── e2e/                     # End-to-end user journeys
+│   ├── accessibility.spec.js   # WCAG 2.1 AA compliance
+│   ├── performance.spec.js     # Core Web Vitals monitoring
+│   └── visual-regression.spec.js # Baseline screenshot testing
 ├── 📦 dist/                      # Generated artifacts
 │   ├── index.html               # Responsive web resume
 │   ├── resume.pdf               # Print-ready PDF export
 │   └── assets/                  # Optimized assets
-├── 🐳 Docker files               # Containerization support
 ├── 📋 Makefile                   # Developer experience automation
-└── ⚙️ Configuration files        # Jest, Babel, Playwright configs
+└── 🏠 Root files                 # Core project configuration
+    ├── package.json             # Dependencies and scripts
+    ├── resume-data.json         # Resume content data
+    └── template.html            # HTML template engine
 ```
 
 ### **🔧 Core Technologies**

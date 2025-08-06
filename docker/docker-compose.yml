@@ -2,14 +2,14 @@ services:
   # Development service
   dev:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: development
     ports:
       - "3000:3000"
       - "3001:3001"
     volumes:
-      - .:/app
+      - ..:/app
       - /app/node_modules
       - /app/dist
     environment:
@@ -22,8 +22,8 @@ services:
   # Production service
   production:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: production
     ports:
       - "3000:3000"
@@ -42,14 +42,14 @@ services:
   # CI/Testing service
   ci:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: ci
     environment:
       - CI=true
       - NODE_ENV=test
     volumes:
-      - .:/app
+      - ..:/app
       - /app/node_modules
       - test-results:/app/test-results
       - coverage:/app/coverage
@@ -60,8 +60,8 @@ services:
   # Build service (for CI/CD pipeline)
   builder:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: builder
     volumes:
       - build-output:/app/dist
