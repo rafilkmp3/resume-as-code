@@ -186,7 +186,10 @@ jobs:
           load: true
           tags: test-${{ matrix.browser }}:local
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+          cache-from: |
+            type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+            type=gha,scope=${{ matrix.browser }}-main
+          cache-to: type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
       - name: Run smoke tests
         if: matrix.should-build == 'true'
@@ -244,7 +247,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+          cache-from: |
+            type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
+            type=gha,scope=${{ matrix.browser }}-main
           cache-to: type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
       - name: Image summary
