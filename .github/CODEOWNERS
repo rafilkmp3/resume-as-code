@@ -1,0 +1,13 @@
+# These are the CODEOWNERS.
+# This file specifies the individuals or teams that are responsible for code in a repository.
+# When someone opens a pull request that modifies code owned by a CODEOWNER,
+# the CODEOWNER is automatically requested as a reviewer.
+
+# Default CODEOWNER for the entire repository
+* @rafilkmp3
+
+# Example: Assign a specific team to a directory
+# /docs/ @your-team/documentation-team
+
+# Example: Assign a specific user to a file type
+# *.js @js-devs
