@@ -164,6 +164,20 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
   
+  // Disable JavaScript pagination and show all content for PDF
+  await page.evaluate(() => {
+    // Show all items immediately
+    document.querySelectorAll('.work-item, .project-item').forEach(item => {
+      item.style.display = 'block';
+      item.classList.remove('hidden');
+    });
+    
+    // Hide pagination controls
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
+      el.style.display = 'none';
+    });
+  });
+  
   // Set screen media type for full visual experience
   await page.emulateMediaType('screen');
   
@@ -212,6 +226,20 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
   
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Disable JavaScript pagination and show all content for PDF
+  await page.evaluate(() => {
+    // Show all items immediately
+    document.querySelectorAll('.work-item, .project-item').forEach(item => {
+      item.style.display = 'block';
+      item.classList.remove('hidden');
+    });
+    
+    // Hide pagination controls
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
+      el.style.display = 'none';
+    });
+  });
   
   // Inject CSS optimizations for physical printing
   await page.addStyleTag({
@@ -284,6 +312,24 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
   
+  // Disable JavaScript pagination during PDF generation
+  await page.evaluate(() => {
+    // Disable all pagination JavaScript
+    window.initializeExperiencePagination = () => {};
+    window.initializeProjectsPagination = () => {};
+    
+    // Show all items immediately
+    document.querySelectorAll('.work-item, .project-item').forEach(item => {
+      item.style.display = 'block';
+      item.classList.remove('hidden');
+    });
+    
+    // Hide all pagination controls
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
+      el.style.display = 'none';
+    });
+  });
+
   // Inject CSS for ATS optimization - clean, simple, text-focused
   await page.addStyleTag({
     content: `
@@ -294,10 +340,10 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         }
         body {
           font-family: 'Times New Roman', serif !important;
-          font-size: 12pt !important;
-          line-height: 1.4 !important;
+          font-size: 11pt !important;
+          line-height: 1.3 !important;
           margin: 0 !important;
-          padding: 20pt !important;
+          padding: 15pt !important;
         }
         .header {
           background: white !important;
@@ -368,16 +414,36 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           background: transparent !important;
         }
         
-        /* Simple, clean layout */
+        /* Simple, clean layout with better page breaks */
         .main-content {
           display: block !important;
           column-count: 1 !important;
+          page-break-inside: auto !important;
         }
         .left-column, .right-column {
           width: 100% !important;
           float: none !important;
           column-count: 1 !important;
+          display: block !important;
         }
+        
+        /* Better page break control */
+        .fade-in-section {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          margin-bottom: 8pt !important;
+        }
+        
+        .work-item, .project-item {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          margin-bottom: 6pt !important;
+        }
+        
+        /* Hide pagination elements in ATS */
+        .experience-counter, .experience-controls,
+        .load-more-container, .load-more-btn,
+        .section-controls { display: none !important; }
       }
     `
   });
