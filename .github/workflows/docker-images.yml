@@ -215,20 +215,8 @@ jobs:
           
           # Test 5: Run embedded Hello World test to verify browser functionality
           echo "  🎭 Running embedded Hello World test..."
-          case "${{ matrix.browser }}" in
-            chromium)
-              PROJECT="desktop-chrome"
-              ;;
-            firefox)
-              PROJECT="desktop-firefox"
-              ;;
-            webkit)
-              PROJECT="desktop-webkit"
-              ;;
-          esac
-          
-          echo "    Testing with project: $PROJECT"
-          docker run --rm $IMAGE_TAG npx playwright test tests/hello-world/hello-world.spec.js --project=$PROJECT --reporter=line
+          echo "    Testing ${{ matrix.browser }} browser functionality"
+          docker run --rm $IMAGE_TAG npx playwright test tests/hello-world/hello-world.spec.js --reporter=line
           
           echo "✅ All smoke tests and Hello World test passed for ${{ matrix.browser }}"
 

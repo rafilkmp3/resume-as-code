@@ -90,7 +90,7 @@ RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/
 USER testuser
 
 # Default command runs the embedded hello world test
-CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-chrome"]
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js"]
 
 # ===== FIREFOX STAGE =====
 FROM base AS firefox
@@ -108,7 +108,7 @@ RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/
 USER testuser
 
 # Default command runs the embedded hello world test
-CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-firefox"]
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js"]
 
 # ===== WEBKIT STAGE =====
 FROM base AS webkit
@@ -126,4 +126,4 @@ RUN chmod -R 755 /opt/playwright || true &&     chown -R testuser:testuser /opt/
 USER testuser
 
 # Default command runs the embedded hello world test
-CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=desktop-webkit"]
+CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js"]
