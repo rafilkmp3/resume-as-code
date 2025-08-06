@@ -152,7 +152,7 @@ jobs:
         if: matrix.should-build == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
         
       - name: Log in to Container Registry
         if: matrix.should-build == 'true'
@@ -243,7 +243,7 @@ jobs:
           context: .
           file: ./${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
