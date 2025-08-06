@@ -12,10 +12,6 @@ updates:
       time: "09:00"
       timezone: "America/Sao_Paulo"
     open-pull-requests-limit: 5
-    reviewers:
-      - "rafilkmp3"
-    assignees:
-      - "rafilkmp3"
     commit-message:
       prefix: "deps"
       prefix-development: "deps-dev"
@@ -66,10 +62,6 @@ updates:
       time: "09:00"
       timezone: "America/Sao_Paulo"
     open-pull-requests-limit: 5
-    reviewers:
-      - "rafilkmp3"
-    assignees:
-      - "rafilkmp3"
     commit-message:
       prefix: "deps-docker"
       include: "scope"
@@ -86,10 +78,6 @@ updates:
       time: "09:00"
       timezone: "America/Sao_Paulo"
     open-pull-requests-limit: 3
-    reviewers:
-      - "rafilkmp3"
-    assignees:
-      - "rafilkmp3"
     commit-message:
       prefix: "ci"
       include: "scope"
