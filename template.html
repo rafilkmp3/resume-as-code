@@ -568,6 +568,88 @@
             color: var(--slate-50) !important;
         }
         
+        /* PDF Download Group - Industry Standard UI/UX */
+        .pdf-download-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 4px 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .pdf-download-label {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .pdf-options {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .pdf-link {
+            color: inherit !important;
+            text-decoration: none !important;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .pdf-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pdf-link:active {
+            transform: translateY(0);
+        }
+        
+        .pdf-separator {
+            opacity: 0.4;
+            font-size: 0.8rem;
+        }
+        
+        /* Dark theme support */
+        [data-theme="dark"] .pdf-download-group {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .pdf-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .pdf-download-group {
+                margin-top: 0.25rem;
+            }
+            
+            .pdf-options {
+                flex-direction: column;
+                gap: 0.1rem;
+                align-items: flex-start;
+            }
+            
+            .pdf-separator {
+                display: none;
+            }
+            
+            .pdf-link {
+                font-size: 0.8rem;
+                padding: 1px 4px;
+            }
+        }
+        
         .main-content {
             display: grid;
             grid-template-columns: 3fr 1fr;
@@ -2706,7 +2788,18 @@
                     <div class="contact-item">📍 {{basics.location.city}}, {{basics.location.region}}</div>
                     <div class="contact-item">📞 <a href="tel:{{basics.phone}}" style="color: inherit; text-decoration: none;">{{basics.phone}}</a></div>
                     <div class="contact-item">✉️ <a href="mailto:{{basics.email}}" style="color: inherit; text-decoration: none;">{{basics.email}}</a></div>
-                    <div class="contact-item no-print">📄 <a href="./resume.pdf" id="pdfDownloadLink" style="color: inherit; text-decoration: none;" download="Rafael_Sathler_Resume.pdf" title="Download Resume PDF">Download PDF</a></div>
+                    <div class="contact-item no-print">
+                        <div class="pdf-download-group">
+                            📄 <span class="pdf-download-label">Resume:</span>
+                            <div class="pdf-options">
+                                <a href="./resume.pdf" class="pdf-link" download="Rafael_Sathler_Resume.pdf" title="Screen-optimized PDF - best for online sharing">Screen</a>
+                                <span class="pdf-separator">|</span>
+                                <a href="./resume-print.pdf" class="pdf-link" download="Rafael_Sathler_Resume_Print.pdf" title="Print-optimized PDF - best for physical printing">Print</a>
+                                <span class="pdf-separator">|</span>
+                                <a href="./resume-ats.pdf" class="pdf-link" download="Rafael_Sathler_Resume_ATS.pdf" title="ATS-optimized PDF - best for job applications">ATS</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="links">
                     {{#each basics.profiles}}
@@ -3050,48 +3143,43 @@
             window.print = printResume;
         }
         
-        // Enhanced PDF Download with Mobile Sharing
+        // Enhanced PDF Download with Mobile Sharing for all versions
         function enhancePDFDownload() {
-            const pdfDownloadLink = document.getElementById('pdfDownloadLink');
-            if (!pdfDownloadLink) return;
+            const pdfLinks = document.querySelectorAll('.pdf-link');
+            if (!pdfLinks.length) return;
             
-            // Check if device supports native sharing
-            if (navigator.share) {
-                // Mobile sharing capabilities
-                pdfDownloadLink.addEventListener('click', async (e) => {
-                    // On mobile devices, offer sharing option
-                    if (window.innerWidth <= 768) {
+            pdfLinks.forEach(link => {
+                // Check if device supports native sharing
+                if (navigator.share && window.innerWidth <= 768) {
+                    link.addEventListener('click', async (e) => {
                         e.preventDefault();
                         
                         try {
-                            // Try to share the PDF if the device supports it
-                            const pdfUrl = `${window.location.origin}${window.location.pathname.replace('/index.html', '')}/resume.pdf`;
+                            const pdfUrl = `${window.location.origin}${window.location.pathname.replace('/index.html', '')}${link.getAttribute('href')}`;
+                            const pdfType = link.textContent;
                             
                             await navigator.share({
-                                title: 'Rafael Sathler - Resume',
-                                text: 'Check out Rafael\'s resume',
+                                title: `Rafael Sathler - Resume (${pdfType})`,
+                                text: `Check out Rafael's ${pdfType.toLowerCase()}-optimized resume`,
                                 url: pdfUrl
                             });
                         } catch (error) {
                             // If sharing fails, fall back to regular download
                             console.log('Share failed, falling back to download');
-                            window.open('./resume.pdf', '_blank');
+                            window.open(link.getAttribute('href'), '_blank');
                         }
-                    }
-                    // On desktop, let the normal download behavior work
-                });
-            }
-            
-            // Add visual feedback for mobile
-            if (window.innerWidth <= 768 && navigator.share) {
-                pdfDownloadLink.addEventListener('touchstart', () => {
-                    pdfDownloadLink.style.transform = 'scale(0.95)';
-                });
-                
-                pdfDownloadLink.addEventListener('touchend', () => {
-                    pdfDownloadLink.style.transform = 'scale(1)';
-                });
-            }
+                    });
+                    
+                    // Add visual feedback for mobile
+                    link.addEventListener('touchstart', () => {
+                        link.style.transform = 'scale(0.95)';
+                    });
+                    
+                    link.addEventListener('touchend', () => {
+                        link.style.transform = 'scale(1)';
+                    });
+                }
+            });
         }
         
         // Initialize PDF download enhancement
