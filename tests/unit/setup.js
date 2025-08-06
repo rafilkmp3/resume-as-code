@@ -94,5 +94,22 @@ global.cancelAnimationFrame = jest.fn((id) => clearTimeout(id));
 // Mock URL.createObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-object-url');
 
+// Mock performance API
+global.performance = global.performance || {
+  now: () => Date.now()
+};
+
+// Mock window.print
+global.print = jest.fn();
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+global.localStorage = localStorageMock;
+
 // Setup global test timeout
 jest.setTimeout(10000);

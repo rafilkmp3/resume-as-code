@@ -1,11 +1,14 @@
 module.exports = {
+  // Root directory
+  rootDir: '..',
+  
   // Test environment
   testEnvironment: 'jsdom',
   
   // Test files
   testMatch: [
-    '**/tests/unit/**/*.test.js',
-    '**/tests/unit/**/*.spec.js'
+    '<rootDir>/tests/unit/**/*.test.js',
+    '<rootDir>/tests/unit/**/*.spec.js'
   ],
   
   // Setup files
