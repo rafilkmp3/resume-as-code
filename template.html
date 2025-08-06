@@ -32,10 +32,9 @@
       
       // App version and environment detection
       const appVersion = '1.2.1'; // Auto-updated from package.json during build
-      const isProduction = window.location.hostname === 'rafilkmp3.github.io';
-      const environment = isProduction ? 'production' : 
-                         window.location.hostname.includes('github.io') ? 'preview' : 'development';
-      const branchName = isProduction ? 'main' : 'preview'; // Will be enhanced for PR environments
+      const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
+      const environment = isGitHubPages ? 'production' : 'development';
+      const branchName = isGitHubPages ? 'main' : 'development';
       
       // Enhanced GA4 configuration
       gtag('config', 'G-1L4XD6LG6Z', {
