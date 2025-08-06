@@ -1355,6 +1355,14 @@
             display: none;
         }
 
+        /* Hide all load more buttons from print/PDF */
+        .load-more-container, 
+        .load-more-btn,
+        #load-more-btn,
+        #load-more-projects-btn {
+            display: none !important;
+        }
+
         /* =============================================== */
         /* AMAZING WEB ANIMATIONS & EFFECTS              */
         /* =============================================== */
@@ -1781,7 +1789,19 @@
             }
             
             /* Hide interactive elements but NOT content sections */
-            .controls, .parallax-bg, .dark-toggle { display: none !important; }
+            .controls, .parallax-bg, .dark-toggle,
+            .load-more-container, .load-more-btn,
+            #load-more-btn, #load-more-projects-btn { display: none !important; }
+            
+            /* Show ALL content in print - no pagination */
+            .work-item.hidden, 
+            .project-item.hidden,
+            .work-item,
+            .project-item { 
+                display: block !important; 
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
             
             /* Show content sections that were hidden by fade-in animations */
             .fade-in-section {
