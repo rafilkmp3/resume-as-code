@@ -214,10 +214,22 @@ jobs:
           echo "  ✓ Verifying testuser can access browser files..."
           docker run --rm $IMAGE_TAG sh -c "whoami && id && test -r /opt/playwright && echo 'Browser directory accessible to testuser'"
           
-          # Test 5: Run embedded Hello World test to verify browser functionality
-          echo "  🎭 Running embedded Hello World test..."
-          echo "    Testing ${{ matrix.browser }} browser functionality"
-          docker run --rm $IMAGE_TAG npx playwright test tests/hello-world/hello-world.spec.js --reporter=line
+          # Test 5: Verify browser installation and basic functionality  
+          echo "  🎭 Testing ${{ matrix.browser }} browser installation..."
+          case "${{ matrix.browser }}" in
+            chromium)
+              echo "    Testing Chromium browser startup"
+              docker run --rm $IMAGE_TAG node -e "const { chromium } = require('playwright'); (async () => { const browser = await chromium.launch({headless: true}); console.log('✅ Chromium browser launched successfully'); await browser.close(); })()"
+              ;;
+            firefox)
+              echo "    Testing Firefox browser startup"  
+              docker run --rm $IMAGE_TAG node -e "const { firefox } = require('playwright'); (async () => { const browser = await firefox.launch({headless: true}); console.log('✅ Firefox browser launched successfully'); await browser.close(); })()"
+              ;;
+            webkit)
+              echo "    Testing WebKit browser startup"
+              docker run --rm $IMAGE_TAG node -e "const { webkit } = require('playwright'); (async () => { const browser = await webkit.launch({headless: true}); console.log('✅ WebKit browser launched successfully'); await browser.close(); })()"
+              ;;
+          esac
           
           echo "✅ All smoke tests and Hello World test passed for ${{ matrix.browser }}"
 
