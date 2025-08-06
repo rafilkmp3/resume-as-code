@@ -861,15 +861,18 @@
             font-size: 0.75rem;
             font-weight: 600;
             opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.2s ease;
+            transition: opacity 0.2s ease;
             white-space: nowrap;
+            position: absolute;
+            top: 0;
+            left: 100%;
+            margin-left: 0.5rem;
+            z-index: 10;
         }
         
         .work-date:hover .duration-badge,
         .work-date.expanded .duration-badge {
             opacity: 1;
-            transform: scale(1);
         }
         
         .duration-details {
