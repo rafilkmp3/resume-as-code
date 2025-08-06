@@ -64,6 +64,7 @@ jobs:
           # Simple, reliable Docker build
           docker buildx build \
             --target builder \
+            --file docker/Dockerfile \
             --tag resume-as-code:builder-${{ github.sha }} \
             --load \
             .
