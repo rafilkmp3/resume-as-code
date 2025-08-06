@@ -152,7 +152,7 @@ jobs:
         if: matrix.should-build == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
         
       - name: Log in to Container Registry
         if: matrix.should-build == 'true'
@@ -174,7 +174,7 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
             
-      - name: Build and test image (AMD64)
+      - name: Build AMD64 image for testing
         if: matrix.should-build == 'true'
         uses: docker/build-push-action@v5
         with:
@@ -198,7 +198,7 @@ jobs:
       - name: Run smoke tests
         if: matrix.should-build == 'true'
         run: |
-          echo "🧪 Running smoke tests for ${{ matrix.browser }} (AMD64)"
+          echo "🧪 Running smoke tests for ${{ matrix.browser }} (AMD64 - Multi-arch will be built during push)"
           
           # Use local test tag for smoke tests
           IMAGE_TAG="test-${{ matrix.browser }}:local"
@@ -247,7 +247,7 @@ jobs:
           context: .
           file: ./${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
