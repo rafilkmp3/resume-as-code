@@ -80,13 +80,13 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             CHANGED_FILES=$(git diff --name-only HEAD~1)
           else
-            CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || echo "Dockerfile.browsers")
+            CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || echo "docker/Dockerfile.browsers")
           fi
           
           echo "Changed files: $CHANGED_FILES"
           
           # Check for changes in unified Dockerfile or shared dependencies
-          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile\.browsers|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
+          if echo "$CHANGED_FILES" | grep -qE "(docker/Dockerfile\.browsers|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
             BASE_CHANGED=true
             CHROMIUM_CHANGED=true
             FIREFOX_CHANGED=true
@@ -122,15 +122,15 @@ jobs:
       matrix:
         include:
           - browser: chromium
-            dockerfile: Dockerfile.browsers
+            dockerfile: docker/Dockerfile.browsers
             target: chromium
             should-build: ${{ needs.detect-changes.outputs.chromium-changed }}
           - browser: firefox
-            dockerfile: Dockerfile.browsers
+            dockerfile: docker/Dockerfile.browsers
             target: firefox
             should-build: ${{ needs.detect-changes.outputs.firefox-changed }}
           - browser: webkit
-            dockerfile: Dockerfile.browsers
+            dockerfile: docker/Dockerfile.browsers
             target: webkit
             should-build: ${{ needs.detect-changes.outputs.webkit-changed }}
     env:
