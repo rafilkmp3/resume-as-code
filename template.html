@@ -2693,6 +2693,7 @@
         <span id="themeIcon">🌙</span>
     </button>
     
+    
     <div class="container">
         <header class="header">
             {{#if basics.image}}
@@ -2705,6 +2706,7 @@
                     <div class="contact-item">📍 {{basics.location.city}}, {{basics.location.region}}</div>
                     <div class="contact-item">📞 <a href="tel:{{basics.phone}}" style="color: inherit; text-decoration: none;">{{basics.phone}}</a></div>
                     <div class="contact-item">✉️ <a href="mailto:{{basics.email}}" style="color: inherit; text-decoration: none;">{{basics.email}}</a></div>
+                    <div class="contact-item no-print">📄 <a href="./resume.pdf" id="pdfDownloadLink" style="color: inherit; text-decoration: none;" download="Rafael_Sathler_Resume.pdf" title="Download Resume PDF">Download PDF</a></div>
                 </div>
                 <div class="links">
                     {{#each basics.profiles}}
@@ -3047,6 +3049,53 @@
             window.originalPrint = window.print;
             window.print = printResume;
         }
+        
+        // Enhanced PDF Download with Mobile Sharing
+        function enhancePDFDownload() {
+            const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+            if (!pdfDownloadLink) return;
+            
+            // Check if device supports native sharing
+            if (navigator.share) {
+                // Mobile sharing capabilities
+                pdfDownloadLink.addEventListener('click', async (e) => {
+                    // On mobile devices, offer sharing option
+                    if (window.innerWidth <= 768) {
+                        e.preventDefault();
+                        
+                        try {
+                            // Try to share the PDF if the device supports it
+                            const pdfUrl = `${window.location.origin}${window.location.pathname.replace('/index.html', '')}/resume.pdf`;
+                            
+                            await navigator.share({
+                                title: 'Rafael Sathler - Resume',
+                                text: 'Check out Rafael\'s resume',
+                                url: pdfUrl
+                            });
+                        } catch (error) {
+                            // If sharing fails, fall back to regular download
+                            console.log('Share failed, falling back to download');
+                            window.open('./resume.pdf', '_blank');
+                        }
+                    }
+                    // On desktop, let the normal download behavior work
+                });
+            }
+            
+            // Add visual feedback for mobile
+            if (window.innerWidth <= 768 && navigator.share) {
+                pdfDownloadLink.addEventListener('touchstart', () => {
+                    pdfDownloadLink.style.transform = 'scale(0.95)';
+                });
+                
+                pdfDownloadLink.addEventListener('touchend', () => {
+                    pdfDownloadLink.style.transform = 'scale(1)';
+                });
+            }
+        }
+        
+        // Initialize PDF download enhancement
+        enhancePDFDownload();
         
         
         // ATS-Friendly Version Generator
