@@ -30,6 +30,13 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       
+      // App version and environment detection
+      const appVersion = '1.2.1'; // Auto-updated from package.json during build
+      const isProduction = window.location.hostname === 'rafilkmp3.github.io';
+      const environment = isProduction ? 'production' : 
+                         window.location.hostname.includes('github.io') ? 'preview' : 'development';
+      const branchName = isProduction ? 'main' : 'preview'; // Will be enhanced for PR environments
+      
       // Enhanced GA4 configuration
       gtag('config', 'G-1L4XD6LG6Z', {
         send_page_view: true,
@@ -37,11 +44,26 @@
         allow_google_signals: true,
         custom_map: {
           'custom_parameter_1': 'resume_section',
-          'custom_parameter_2': 'user_action'
-        }
+          'custom_parameter_2': 'user_action',
+          'custom_parameter_3': 'app_version',
+          'custom_parameter_4': 'environment'
+        },
+        // Global parameters for all events
+        app_version: appVersion,
+        environment: environment,
+        branch: branchName
       });
       
       // Enhanced event tracking will be loaded after DOM is ready
+      
+      // Update footer with dynamic version info
+      document.addEventListener('DOMContentLoaded', function() {
+        const versionElement = document.getElementById('app-version');
+        const environmentElement = document.getElementById('app-environment');
+        
+        if (versionElement) versionElement.textContent = appVersion;
+        if (environmentElement) environmentElement.textContent = environment;
+      });
     </script>
 
     <script type="application/ld+json">
@@ -1247,11 +1269,11 @@
 
         .footer {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem;
             background: linear-gradient(135deg, var(--color-interactive-default), var(--color-interactive-hover));
             color: white;
             font-size: clamp(0.8rem, 2vw, 1rem);
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             border-radius: 12px;
             font-weight: 500;
             opacity: 0.95;
@@ -1284,6 +1306,48 @@
         
         .footer:hover::before {
             left: 100%;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-main {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .footer-version {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .app-info {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .build-info {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        @media (min-width: 768px) {
+            .footer-content {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .footer-version {
+                text-align: right;
+                align-items: flex-end;
+            }
         }
         
         /* Hide QR code section in screen mode */
@@ -2906,29 +2970,39 @@
                 {{#if projects}}
                 <section class="section fade-in-section">
                     <h2>Key Projects</h2>
-                    {{#each projects}}
-                    <div class="work-item">
-                        <div class="work-header">
-                            <div>
-                                <div class="work-title">{{name}}</div>
-                                {{#if url}}<div class="company"><a href="{{url}}" target="_blank" style="color: inherit;">{{url}}</a></div>{{/if}}
+                    <div class="projects-container">
+                        {{#each projects}}
+                        <div class="work-item project-item" data-project-index="{{@index}}">
+                            <div class="work-header">
+                                <div>
+                                    <div class="work-title">{{name}}</div>
+                                    {{#if url}}<div class="company"><a href="{{url}}" target="_blank" style="color: inherit;">{{url}}</a></div>{{/if}}
+                                </div>
                             </div>
+                            <div class="work-summary">{{description}}</div>
+                            <ul class="highlights">
+                                {{#each highlights}}
+                                <li tabindex="0" role="button" aria-label="Achievement: {{this}}">{{this}}</li>
+                                {{/each}}
+                            </ul>
+                            {{#if keywords}}
+                            <div style="margin-top: 0.5rem;">
+                                {{#each keywords}}
+                                <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">{{this}}</span>
+                                {{/each}}
+                            </div>
+                            {{/if}}
                         </div>
-                        <div class="work-summary">{{description}}</div>
-                        <ul class="highlights">
-                            {{#each highlights}}
-                            <li tabindex="0" role="button" aria-label="Achievement: {{this}}">{{this}}</li>
-                            {{/each}}
-                        </ul>
-                        {{#if keywords}}
-                        <div style="margin-top: 0.5rem;">
-                            {{#each keywords}}
-                            <span class="skill-tag" style="margin-right: 0.3rem; margin-bottom: 0.3rem; display: inline-block;">{{this}}</span>
-                            {{/each}}
-                        </div>
-                        {{/if}}
+                        {{/each}}
                     </div>
-                    {{/each}}
+                    
+                    <div class="load-more-container" id="load-more-projects-container">
+                        <button class="load-more-btn" id="load-more-projects-btn">
+                            <span class="btn-icon">💼</span>
+                            <span class="btn-text">Load More Projects</span>
+                            <span class="btn-count">+<span id="projects-remaining-count"></span> more projects</span>
+                        </button>
+                    </div>
                 </section>
                 {{/if}}
                 
@@ -3017,7 +3091,13 @@
         </div>
         
         <footer class="footer">
-            Developed with ❤️ in Rio de Janeiro
+            <div class="footer-content">
+                <div class="footer-main">Developed with ❤️ in Rio de Janeiro</div>
+                <div class="footer-version">
+                    <span class="app-info">v<span id="app-version">1.2.1</span> • <span id="app-environment">production</span></span>
+                    <span class="build-info no-print">Built with <strong>Resume-as-Code</strong></span>
+                </div>
+            </div>
         </footer>
     </div>
     
@@ -3608,6 +3688,124 @@
         
         // Initialize pagination after DOM loads
         document.addEventListener('DOMContentLoaded', initializeExperiencePagination);
+        
+        // Dynamic Projects Pagination System
+        function initializeProjectsPagination() {
+            const projectItems = document.querySelectorAll('.project-item');
+            const loadMoreBtn = document.getElementById('load-more-projects-btn');
+            const loadMoreContainer = document.getElementById('load-more-projects-container');
+            const remainingCountElement = document.getElementById('projects-remaining-count');
+            
+            // Dynamic initial show count based on screen size
+            function getInitialShowCount() {
+                if (window.innerWidth >= 1200) return 1; // Desktop: show 1 project
+                if (window.innerWidth >= 768) return 2;  // Tablet: show 2 projects
+                return 1; // Mobile: show 1 project
+            }
+            
+            let currentlyShown = getInitialShowCount();
+            const totalItems = projectItems.length;
+            
+            // If we don't have enough items to paginate, hide the load more button
+            if (totalItems <= currentlyShown) {
+                if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+                return;
+            }
+            
+            // Initially hide items beyond the initial show count
+            projectItems.forEach((item, index) => {
+                if (index >= currentlyShown) {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update button text
+            function updateLoadMoreButton() {
+                const remaining = totalItems - currentlyShown;
+                if (remainingCountElement) remainingCountElement.textContent = Math.max(remaining, 0);
+                
+                // Hide load more button if all items are shown
+                if (remaining <= 0 && loadMoreContainer) {
+                    loadMoreContainer.classList.add('hidden');
+                }
+            }
+            
+            updateLoadMoreButton();
+            
+            // Load more button click handler
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function() {
+                    const loadCount = window.innerWidth >= 1200 ? 2 : 1; // Load 2 on desktop, 1 on mobile/tablet
+                    let itemsShown = 0;
+                    
+                    // Show next batch of items
+                    projectItems.forEach((item, index) => {
+                        if (index >= currentlyShown && index < currentlyShown + loadCount && itemsShown < loadCount) {
+                            item.style.display = 'block';
+                            // Add fade-in animation
+                            item.style.opacity = '0';
+                            item.style.transform = 'translateY(20px)';
+                            
+                            setTimeout(() => {
+                                item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                                item.style.opacity = '1';
+                                item.style.transform = 'translateY(0)';
+                            }, 100);
+                            
+                            itemsShown++;
+                        }
+                    });
+                    
+                    currentlyShown += itemsShown;
+                    updateLoadMoreButton();
+                    
+                    // Analytics tracking with app version
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'load_more_projects', {
+                            event_category: 'Resume Interaction',
+                            event_label: 'Projects Load More',
+                            custom_parameter_1: 'projects_section',
+                            custom_parameter_2: 'load_more_click',
+                            custom_parameter_3: appVersion,
+                            custom_parameter_4: environment,
+                            items_loaded: itemsShown,
+                            total_items: totalItems
+                        });
+                    }
+                });
+            }
+            
+            // Handle window resize to adjust pagination
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    const newInitialCount = getInitialShowCount();
+                    
+                    // If the new initial count would show more items than currently shown,
+                    // and we have items hidden, show more items
+                    if (newInitialCount > currentlyShown && currentlyShown < totalItems) {
+                        const itemsToShow = Math.min(newInitialCount, totalItems);
+                        
+                        projectItems.forEach((item, index) => {
+                            if (index < itemsToShow) {
+                                item.style.display = 'block';
+                            }
+                        });
+                        
+                        currentlyShown = itemsToShow;
+                        updateLoadMoreButton();
+                        
+                        // Show/hide load more button based on remaining items
+                        if (loadMoreContainer) {
+                            loadMoreContainer.style.display = currentlyShown < totalItems ? 'flex' : 'none';
+                        }
+                    }
+                }, 250);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', initializeProjectsPagination);
     </script>
 
     <!-- Enhanced Analytics Event Tracking -->

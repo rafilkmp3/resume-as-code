@@ -74,7 +74,11 @@
       "Bash(git rev-parse:*)",
       "Bash(npm audit:*)",
       "Bash(time npm run build)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

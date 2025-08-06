@@ -63,6 +63,24 @@ async function generateHTML(resumeData, templatePath) {
     console.log('✅ QR code integrated successfully!');
   }
   
+  // Update app version and environment from package.json and CI environment
+  const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+  const appVersion = packageJson.version;
+  const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main';
+  const environment = isProduction ? 'production' : 'preview';
+  
+  // Replace version placeholders in HTML
+  html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
+  html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/, 
+    `const branchName = '${buildBranch}';`);
+  html = html.replace(/<span id="app-version">[\d.]+<\/span>/, 
+    `<span id="app-version">${appVersion}</span>`);
+  html = html.replace(/<span id="app-environment">[^<]*<\/span>/, 
+    `<span id="app-environment">${environment}</span>`);
+    
+  console.log(`🔖 App version: ${appVersion} (${environment} on ${buildBranch})`);
+  
   fs.writeFileSync('./dist/index.html', html);
   
   console.log('✅ HTML generated successfully!');
