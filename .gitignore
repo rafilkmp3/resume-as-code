@@ -203,3 +203,6 @@ lighthouse-reports/
 .terraform/
 *.tfstate
 *.tfstate.backup
+# Debug files
+dist/resume-ats-debug*.png
+dist/resume-ats-test*.png
