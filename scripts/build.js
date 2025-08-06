@@ -67,8 +67,8 @@ async function generateHTML(resumeData, templatePath) {
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   const appVersion = packageJson.version;
   const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main';
-  const environment = isProduction ? 'production' : 'preview';
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main' || process.env.GITHUB_ACTIONS;
+  const environment = isProduction && buildBranch === 'main' ? 'production' : 'preview';
   
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
