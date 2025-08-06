@@ -10,7 +10,7 @@
 [![CI/CD Pipeline](https://github.com/rafilkmp3/resume-as-code/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
 
 [![Node.js](https://img.shields.io/badge/Node.js-22-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Multi--Stage-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Arch%20%28AMD64%2FARM64%29-blue?style=flat-square&logo=docker)](https://www.docker.com/)
 [![Playwright](https://img.shields.io/badge/Playwright-E2E%20Testing-green?style=flat-square&logo=playwright)](https://playwright.dev/)
 [![Jest](https://img.shields.io/badge/Jest-Unit%20Testing-red?style=flat-square&logo=jest)](https://jestjs.io/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI/CD-blue?style=flat-square&logo=github-actions)](https://github.com/features/actions)
@@ -147,7 +147,7 @@
 ### Prerequisites
 - Node.js 18+ 
 - npm 8+
-- Docker (optional)
+- Docker (optional, supports both AMD64 and ARM64)
 
 ### Installation & Setup
 
@@ -172,17 +172,35 @@ make dev
 - **Port 3000**: Development server (manual testing, preview)
 - **Port 3001**: Automated testing server (CI/CD, test automation)
 
-### Docker Development (Recommended)
+### Docker Development (Multi-Architecture Support)
 
+#### **🚀 Quick Docker Commands**
 ```bash
-# One-command development environment
+# One-command development environment (auto-detects architecture)
 make docker-dev
 
-# Production environment
+# Production environment (optimized for your platform)
 make docker-prod
 
-# Build Docker images
+# Build Docker images (multi-architecture ready)
 make docker-build
+```
+
+#### **🏗️ Multi-Architecture Support**
+This project supports both **linux/amd64** and **linux/arm64** architectures:
+
+- **🍎 Mac Apple Silicon (M1/M2/M3)**: Uses native ARM64 images for optimal performance
+- **💻 GitHub Actions**: Uses AMD64 images for CI/CD compatibility  
+- **🐳 Docker Hub/GHCR**: Multi-architecture manifests automatically select the right image
+
+```bash
+# Check your architecture
+docker version --format '{{.Server.Arch}}'
+
+# Pull multi-arch images (automatically selects correct architecture)
+docker pull ghcr.io/rafilkmp3/resume-as-code-chromium:main
+docker pull ghcr.io/rafilkmp3/resume-as-code-firefox:main
+docker pull ghcr.io/rafilkmp3/resume-as-code-webkit:main
 ```
 
 ## 📋 Comprehensive Make Commands
@@ -229,11 +247,12 @@ make docker-clean    # Clean containers and images
 - **Dedicated Image Pipeline**: `.github/workflows/docker-images.yml`
   - Triggers only on Dockerfile changes
   - Smart change detection for selective rebuilding
+  - **Multi-architecture builds** (linux/amd64, linux/arm64)
   - Comprehensive smoke tests before publishing
-- **Browser-Specific Images**: Optimized containers (300-500MB each)
-  - `ghcr.io/rafilkmp3/resume-as-code-chromium:main`
-  - `ghcr.io/rafilkmp3/resume-as-code-firefox:main`
-  - `ghcr.io/rafilkmp3/resume-as-code-webkit:main`
+- **Browser-Specific Images**: Multi-arch optimized containers (300-500MB each)
+  - `ghcr.io/rafilkmp3/resume-as-code-chromium:main` (AMD64 + ARM64)
+  - `ghcr.io/rafilkmp3/resume-as-code-firefox:main` (AMD64 + ARM64)
+  - `ghcr.io/rafilkmp3/resume-as-code-webkit:main` (AMD64 + ARM64)
 
 ### 🛠️ Utilities
 ```bash
