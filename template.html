@@ -3633,19 +3633,39 @@
         
         // Enhanced Experience Pagination System
         function initializeExperiencePagination() {
-            const workItems = document.querySelectorAll('.work-item');
+            const workItems = document.querySelectorAll('.work-item:not(.project-item)'); // Exclude project items
             const loadMoreBtn = document.getElementById('load-more-btn');
             const loadMoreContainer = document.getElementById('load-more-container');
             const shownCountElement = document.getElementById('shown-count');
             const totalCountElement = document.getElementById('total-count');
             const remainingCountElement = document.getElementById('remaining-count');
             
+            // Failsafe: Ensure all work items are visible if pagination fails
+            if (!workItems || workItems.length === 0) {
+                console.warn('No work items found for experience pagination');
+                return;
+            }
+            
             const INITIAL_SHOW = 3;
             let currentlyShown = INITIAL_SHOW;
             const totalItems = workItems.length;
             
+            // Ensure initial items are always visible
+            workItems.forEach((item, index) => {
+                if (index < INITIAL_SHOW) {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.classList.remove('hidden');
+                }
+            });
+            
             if (totalItems <= INITIAL_SHOW) {
-                // If we have 3 or fewer items, hide the load more button
+                // If we have 3 or fewer items, show all and hide the load more button
+                workItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.classList.remove('hidden');
+                });
                 if (loadMoreContainer) loadMoreContainer.style.display = 'none';
                 return;
             }
@@ -3657,6 +3677,12 @@
                     item.classList.add('hidden');
                 }
             });
+            
+            // Show load more container if we have hidden items
+            if (loadMoreContainer && totalItems > INITIAL_SHOW) {
+                loadMoreContainer.style.display = 'block';
+                loadMoreContainer.classList.remove('hidden');
+            }
             
             // Update counters
             function updateCounters() {
@@ -3716,9 +3742,15 @@
             const loadMoreContainer = document.getElementById('load-more-projects-container');
             const remainingCountElement = document.getElementById('projects-remaining-count');
             
+            // Failsafe: Ensure all projects are visible if pagination fails
+            if (!projectItems || projectItems.length === 0) {
+                console.warn('No project items found for pagination');
+                return;
+            }
+            
             // Dynamic initial show count based on screen size
             function getInitialShowCount() {
-                if (window.innerWidth >= 1200) return 1; // Desktop: show 1 project
+                if (window.innerWidth >= 1200) return 2; // Desktop: show 2 projects initially
                 if (window.innerWidth >= 768) return 2;  // Tablet: show 2 projects
                 return 1; // Mobile: show 1 project
             }
@@ -3726,8 +3758,20 @@
             let currentlyShown = getInitialShowCount();
             const totalItems = projectItems.length;
             
-            // If we don't have enough items to paginate, hide the load more button
+            // Ensure initial items are always visible
+            projectItems.forEach((item, index) => {
+                if (index < currentlyShown) {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                }
+            });
+            
+            // If we don't have enough items to paginate, hide the load more button and show all items
             if (totalItems <= currentlyShown) {
+                projectItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                });
                 if (loadMoreContainer) loadMoreContainer.style.display = 'none';
                 return;
             }
@@ -3738,6 +3782,12 @@
                     item.style.display = 'none';
                 }
             });
+            
+            // Show load more container if we have hidden items
+            if (loadMoreContainer && totalItems > currentlyShown) {
+                loadMoreContainer.style.display = 'block';
+                loadMoreContainer.classList.remove('hidden');
+            }
             
             // Update button text
             function updateLoadMoreButton() {
