@@ -2991,6 +2991,63 @@
             applyTheme(getSystemTheme());
         });
         
+        // Theme Manager for Print Integration
+        window.ThemeManager = {
+            getCurrentTheme: function() {
+                return body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            },
+            
+            setTheme: function(theme) {
+                applyTheme(theme);
+            },
+            
+            switchToLightForPrint: function() {
+                const currentTheme = this.getCurrentTheme();
+                if (currentTheme === 'dark') {
+                    // Switch to light theme for print
+                    this.setTheme('light');
+                    return 'dark'; // Return original theme for restoration
+                }
+                return null; // No change needed
+            },
+            
+            restoreThemeAfterPrint: function(originalTheme) {
+                if (originalTheme) {
+                    this.setTheme(originalTheme);
+                }
+            }
+        };
+        
+        // Enhanced print functionality with automatic light mode switching
+        function printResume() {
+            const originalTheme = window.ThemeManager.switchToLightForPrint();
+            
+            // Small delay to ensure theme change is rendered
+            setTimeout(() => {
+                window.print();
+                
+                // Restore theme after print dialog closes (when focus returns)
+                const restoreTheme = () => {
+                    window.ThemeManager.restoreThemeAfterPrint(originalTheme);
+                    window.removeEventListener('focus', restoreTheme);
+                };
+                
+                // Wait for print dialog to close
+                window.addEventListener('focus', restoreTheme);
+                
+                // Fallback: restore after a reasonable timeout
+                setTimeout(() => {
+                    window.ThemeManager.restoreThemeAfterPrint(originalTheme);
+                }, 3000);
+            }, 100);
+        }
+        
+        // Override default print if needed
+        if (typeof window.originalPrint === 'undefined') {
+            window.originalPrint = window.print;
+            window.print = printResume;
+        }
+        
         
         // ATS-Friendly Version Generator
         function generateATS() {
