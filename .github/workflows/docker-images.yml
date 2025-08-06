@@ -43,6 +43,7 @@ jobs:
     name: Detect Changed Images
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: github.actor != 'dependabot[bot]'
     outputs:
       chromium-changed: ${{ steps.changes.outputs.chromium }}
       firefox-changed: ${{ steps.changes.outputs.firefox }}
