@@ -79,7 +79,8 @@
       "Bash(npx jest:*)",
       "Bash(git rm:*)",
       "Bash(git reset:*)",
-      "WebFetch(domain:rafilkmp3.github.io)"
+      "WebFetch(domain:rafilkmp3.github.io)",
+      "Bash(jq:*)"
     ],
     "deny": []
   }

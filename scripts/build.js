@@ -314,19 +314,31 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   
   // Disable JavaScript pagination during PDF generation
   await page.evaluate(() => {
-    // Disable all pagination JavaScript
+    // Disable all pagination JavaScript completely
     window.initializeExperiencePagination = () => {};
     window.initializeProjectsPagination = () => {};
     
-    // Show all items immediately
-    document.querySelectorAll('.work-item, .project-item').forEach(item => {
-      item.style.display = 'block';
+    // Force show ALL items and remove any hidden classes
+    document.querySelectorAll('.work-item, .project-item, .fade-in-section').forEach(item => {
+      item.style.display = 'block !important';
+      item.style.visibility = 'visible !important';
       item.classList.remove('hidden');
+      item.classList.remove('fade-in');
+      item.setAttribute('style', 'display: block !important; visibility: visible !important;');
     });
     
-    // Hide all pagination controls
-    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
-      el.style.display = 'none';
+    // Hide all pagination controls completely
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .load-more-projects-btn, .projects-counter').forEach(el => {
+      el.style.display = 'none !important';
+      el.style.visibility = 'hidden !important';
+    });
+    
+    // Remove any height restrictions that might be causing spacing issues
+    document.querySelectorAll('*').forEach(el => {
+      const computed = window.getComputedStyle(el);
+      if (computed.minHeight !== 'auto' && computed.minHeight !== '0px') {
+        el.style.minHeight = 'auto';
+      }
     });
   });
 
@@ -341,9 +353,9 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         body {
           font-family: 'Times New Roman', serif !important;
           font-size: 11pt !important;
-          line-height: 1.3 !important;
+          line-height: 1.2 !important;
           margin: 0 !important;
-          padding: 15pt !important;
+          padding: 10pt !important;
         }
         .header {
           background: white !important;
@@ -375,17 +387,19 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           margin: 0 10pt !important;
         }
         .section-title {
-          font-size: 14pt !important;
+          font-size: 13pt !important;
           font-weight: bold !important;
-          margin: 15pt 0 8pt 0 !important;
+          margin: 8pt 0 4pt 0 !important;
           border-bottom: 1px solid #000 !important;
           padding-bottom: 2pt !important;
           text-transform: uppercase !important;
           color: #000 !important;
         }
         .experience-item, .project-item, .education-item {
-          margin: 10pt 0 !important;
-          page-break-inside: avoid !important;
+          margin: 4pt 0 !important;
+          page-break-inside: auto !important;
+          page-break-before: auto !important;
+          page-break-after: auto !important;
         }
         .experience-title, .project-name, .education-degree {
           font-weight: bold !important;
@@ -406,7 +420,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         /* Hide visual elements for ATS */
         .profile-photo, .parallax-bg, .dark-toggle, .controls, .links,
         .fade-in-section::before, .gradient-text, .print-only,
-        .print-qr-section { display: none !important; }
+        .print-qr-section, .pdf-download-group { display: none !important; }
         
         /* Ensure all text is black and readable */
         p, span, div, li, td, th, h2, h3, h4, h5, h6 {
@@ -427,23 +441,39 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           display: block !important;
         }
         
-        /* Better page break control */
-        .fade-in-section {
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-          margin-bottom: 8pt !important;
+        /* Remove all page break controls - let content flow naturally */
+        .fade-in-section, .work-item, .project-item, .education-item {
+          page-break-inside: auto !important;
+          break-inside: auto !important;
+          page-break-before: auto !important;
+          page-break-after: auto !important;
+          margin-bottom: 3pt !important;
         }
         
-        .work-item, .project-item {
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-          margin-bottom: 6pt !important;
+        /* Only minimal spacing and flow control */
+        .section-title {
+          margin: 8pt 0 4pt 0 !important;
+          page-break-after: auto !important;
+          break-after: auto !important;
         }
         
         /* Hide pagination elements in ATS */
         .experience-counter, .experience-controls,
         .load-more-container, .load-more-btn,
-        .section-controls { display: none !important; }
+        .section-controls, .load-more-projects-btn,
+        .projects-counter { display: none !important; }
+        
+        /* Force show all content items */
+        .work-item, .project-item, .fade-in-section {
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+        
+        .work-item.hidden, .project-item.hidden {
+          display: block !important;
+          visibility: visible !important;
+        }
       }
     `
   });
@@ -456,7 +486,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
     printBackground: false, // Disable backgrounds for ATS
     preferCSSPageSize: true,
     displayHeaderFooter: false,
-    margin: { top: '20mm', bottom: '20mm', left: '20mm', right: '20mm' },
+    margin: { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' },
     scale: 1.0,
     tagged: true,
     title: `${resumeData.basics.name} - Resume (ATS-Optimized)`,
