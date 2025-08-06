@@ -18,7 +18,7 @@
   "dependencies": {
     "@google-analytics/data": "^5.2.0",
     "handlebars": "^4.7.8",
-    "puppeteer": "^24.15.0",
+    "puppeteer": "^24.16.0",
     "qrcode": "^1.5.4"
   },
   "jest": {
