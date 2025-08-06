@@ -10,12 +10,12 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "America/Sao_Paulo"
     open-pull-requests-limit: 5
     reviewers:
-      - "rafaelbsathler"
+      - "rafilkmp3"
     assignees:
-      - "rafaelbsathler"
+      - "rafilkmp3"
     commit-message:
       prefix: "deps"
       prefix-development: "deps-dev"
@@ -57,6 +57,26 @@ updates:
       - dependency-name: "puppeteer"
         update-types: ["version-update:semver-major"]
 
+  # Enable version updates for Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "rafilkmp3"
+    assignees:
+      - "rafilkmp3"
+    commit-message:
+      prefix: "deps-docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -64,12 +84,12 @@ updates:
       interval: "monthly"
       day: "monday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "America/Sao_Paulo"
     open-pull-requests-limit: 3
     reviewers:
-      - "rafaelbsathler"
+      - "rafilkmp3"
     assignees:
-      - "rafaelbsathler"
+      - "rafilkmp3"
     commit-message:
       prefix: "ci"
       include: "scope"
