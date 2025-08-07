@@ -1271,43 +1271,12 @@
 
         .footer {
             text-align: center;
-            padding: 1.5rem 1rem;
-            background: linear-gradient(135deg, var(--color-interactive-default), var(--color-interactive-hover));
-            color: white;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            margin-top: 1.5rem;
-            border-radius: 12px;
-            font-weight: 500;
-            opacity: 0.95;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-shadow: 
-                0 1px 3px rgba(0, 0, 0, 0.4),
-                0 1px 1px rgba(0, 0, 0, 0.6);
-            -webkit-text-stroke: 0.2px rgba(0, 0, 0, 0.2);
-        }
-        
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-        
-        .footer:hover {
-            opacity: 1;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .footer:hover::before {
-            left: 100%;
+            padding: 2rem 1rem 1.5rem;
+            background: var(--color-surface-raised);
+            border-top: 1px solid var(--color-border-subtle);
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            margin-top: 3rem;
         }
 
         .footer-content {
@@ -3056,7 +3025,28 @@
                                 <div class="work-title">{{studyType}} in {{area}}</div>
                                 <div class="company">{{institution}}</div>
                             </div>
-                            <div class="work-date">{{startDate}} — {{endDate}}</div>
+                            <div class="work-date" data-start="{{startDate}}" data-end="{{endDate}}">
+                                <div class="date-container" role="button" tabindex="0" aria-label="View duration details for {{startDate}} to {{endDate}}">
+                                    <div class="date-range">
+                                        <span class="start-date">{{startDate}}</span>
+                                        <span class="date-separator">—</span>
+                                        <span class="end-date">{{endDate}}</span>
+                                    </div>
+                                    <span class="duration-badge" aria-hidden="true"></span>
+                                </div>
+                                <div class="duration-details" aria-hidden="true">
+                                    <div class="duration-breakdown">
+                                        <div class="duration-item">
+                                            <span>Duration</span>
+                                            <span class="duration-total"></span>
+                                        </div>
+                                        <div class="duration-item">
+                                            <span>Period</span>
+                                            <span class="duration-period"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {{/each}}
