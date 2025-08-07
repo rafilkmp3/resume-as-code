@@ -219,10 +219,10 @@
     {
       "name": "☁️ Cloud Platforms & IaC",
       "level": "Expert",
-      "keywords": ["AWS (Expert)", "Google Cloud Platform (GCP)", "Terraform", "Ansible", "Helm"],
+      "keywords": ["AWS", "GCP", "Terraform", "Ansible", "Helm"],
       "links": {
-        "AWS (Expert)": "https://aws.amazon.com/",
-        "Google Cloud Platform (GCP)": "https://cloud.google.com/",
+        "AWS": "https://aws.amazon.com/",
+        "GCP": "https://cloud.google.com/",
         "Terraform": "https://www.terraform.io/",
         "Ansible": "https://www.ansible.com/",
         "Helm": "https://helm.sh/"

@@ -12,8 +12,13 @@
     <meta name="generator" content="Resume-as-Code">
     <meta name="build-commit" content="dev-local">
     <meta name="build-timestamp" content="2025-01-08T00:00:00.000Z">
-    <meta name="app-version" content="1.3.0">
+    <meta name="app-version" content="1.4.0">
     <meta name="keywords" content="resume, cv, {{basics.name}}, {{basics.label}}, platform engineer, devops, cloud architect, aws, gcp, kubernetes">
+    
+    <!-- Cache busting headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -37,7 +42,7 @@
       gtag('js', new Date());
       
       // App version and environment detection
-      const appVersion = '1.3.0'; // Auto-updated from package.json during build
+      const appVersion = '1.4.0'; // Auto-updated from package.json during build
       const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
       const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
@@ -1212,33 +1217,39 @@
         .skill-keywords {
             display: flex;
             flex-wrap: wrap;
-            gap: 0;
+            gap: 0.5rem; /* Add proper spacing between tags */
             justify-content: flex-start;
             align-items: flex-start;
             line-height: 1;
+            /* Ensure no overflow issues */
+            overflow: visible;
+            margin-bottom: 1rem;
         }
         
         .skill-tag {
             background: var(--color-surface-accent);
-            padding: 0.6rem 1.2rem; /* Increased padding for better touch targets */
-            border-radius: 28px; /* Slightly more rounded */
-            font-size: var(--font-size-sm); /* Larger text for readability */
+            padding: 0.5rem 1rem; /* More compact padding */
+            border-radius: 20px; /* Modern rounded corners */
+            font-size: var(--font-size-sm);
             color: var(--color-text-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid var(--color-border-subtle); /* Thicker border */
-            font-weight: 600; /* Bolder font */
-            cursor: pointer; /* Changed to pointer for better UX */
+            border: 1px solid var(--color-border-subtle); /* Thinner, cleaner border */
+            font-weight: var(--font-weight-medium); /* Consistent weight from typography system */
+            cursor: pointer;
             position: relative;
             overflow: hidden;
-            margin: 0.3rem 0.5rem 0.3rem 0; /* Better spacing */
+            margin: 0; /* Remove individual margins - handled by parent gap */
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 2.75rem; /* 44px minimum for accessibility */
-            text-decoration: none; /* For link accessibility */
-            line-height: 1.3;
+            min-height: 2rem; /* More compact while maintaining accessibility */
+            text-decoration: none;
+            line-height: 1.2;
             white-space: nowrap;
             text-align: center;
+            /* Apply subtle liquid glass effect */
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
         
         .skill-tag::before {
@@ -1259,8 +1270,11 @@
         .skill-tag:hover {
             background: var(--color-interactive-default);
             color: white;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: var(--shadow-default);
+            transform: translateY(-1px) scale(1.02); /* Subtle hover effect */
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2); /* Liquid glass shadow */
             border-color: var(--color-interactive-default);
         }
         
@@ -2489,7 +2503,7 @@
             .skill-tag {
                 font-size: var(--font-size-base);
                 padding: 0.5rem 1.3rem;
-                margin: 0.35rem 0.6rem 0.35rem 0;
+                margin: 0;
                 min-height: 2.5rem;
             }
             
@@ -2508,7 +2522,7 @@
             .skill-tag {
                 font-size: var(--font-size-sm);
                 padding: 0.45rem 1.2rem;
-                margin: 0.3rem 0.5rem 0.3rem 0;
+                margin: 0;
                 min-height: 2.2rem;
             }
             
@@ -2523,7 +2537,7 @@
             .skill-tag {
                 font-size: var(--font-size-sm);
                 padding: 0.4rem 1.1rem;
-                margin: 0.25rem 0.4rem 0.25rem 0;
+                margin: 0;
                 min-height: 2rem;
             }
         }
