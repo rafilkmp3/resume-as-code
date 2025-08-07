@@ -104,7 +104,16 @@ jobs:
       - name: Inject version into documentation
         run: |
           echo "🔄 Injecting current version into documentation placeholders..."
-          node scripts/inject-version.js
+          if [ -f "scripts/inject-version.js" ]; then
+            node scripts/inject-version.js || {
+              echo "⚠️  Version injection failed, but continuing with build"
+              echo "💡 This is non-critical - build will proceed without version placeholders"
+              exit 0
+            }
+          else
+            echo "⚠️  Version injection script not found, skipping"
+            echo "💡 Build will continue without version placeholder injection"
+          fi
         
       - name: Display runtime info
         run: |
