@@ -166,29 +166,78 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
   
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
-    // Show all items immediately
-    document.querySelectorAll('.work-item, .project-item').forEach(item => {
+    // Force light mode for PDF
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    
+    // Show all items immediately - all sections
+    document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item').forEach(item => {
       item.style.display = 'block';
+      item.style.visibility = 'visible';
       item.classList.remove('hidden');
     });
     
-    // Hide pagination controls
-    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
-      el.style.display = 'none';
+    // Hide all pagination and interactive controls
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
+      el.style.display = 'none !important';
     });
   });
   
   // Set screen media type for full visual experience
   await page.emulateMediaType('screen');
   
-  // Inject CSS to optimize for screen viewing
+  // Inject CSS to optimize for screen viewing with proper light mode and better spacing
   await page.addStyleTag({
     content: `
-      @media print {
-        body { background: white !important; }
-        .parallax-bg { display: none !important; }
-        .fade-in-section { opacity: 1 !important; transform: none !important; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+      /* Force light mode styles for PDF */
+      :root {
+        --color-background: #ffffff !important;
+        --color-text: #000000 !important;
+        --color-text-muted: #666666 !important;
+        --color-surface: #ffffff !important;
+        --color-border: #e5e7eb !important;
+      }
+      
+      [data-theme="light"] {
+        --color-background: #ffffff !important;
+        --color-text: #000000 !important;
+      }
+      
+      body { 
+        background: white !important; 
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .parallax-bg { display: none !important; }
+      .fade-in-section { opacity: 1 !important; transform: none !important; }
+      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+      
+      /* Reduce excessive spacing in main content */
+      .main-content {
+        padding: 1rem !important;
+        gap: 1rem !important;
+        min-height: auto !important;
+      }
+      
+      .section {
+        margin-bottom: 1rem !important;
+        page-break-inside: avoid;
+      }
+      
+      .container {
+        min-height: auto !important;
+        padding: 0 !important;
+      }
+      
+      /* Make sections more compact */
+      .left-column, .right-column {
+        gap: 1rem !important;
+      }
+      
+      .work-item, .project-item {
+        margin-bottom: 1rem !important;
       }
     `
   });
@@ -229,15 +278,21 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
   
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
-    // Show all items immediately
-    document.querySelectorAll('.work-item, .project-item').forEach(item => {
+    // Force light mode for PDF
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    
+    // Show all items immediately - all sections
+    document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item').forEach(item => {
       item.style.display = 'block';
+      item.style.visibility = 'visible';
       item.classList.remove('hidden');
     });
     
-    // Hide pagination controls
-    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls').forEach(el => {
-      el.style.display = 'none';
+    // Hide all pagination and interactive controls
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
+      el.style.display = 'none !important';
     });
   });
   
@@ -314,12 +369,19 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   
   // Disable JavaScript pagination during PDF generation
   await page.evaluate(() => {
+    // Force light mode for PDF
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    
     // Disable all pagination JavaScript completely
     window.initializeExperiencePagination = () => {};
     window.initializeProjectsPagination = () => {};
+    window.initializeEducationPagination = () => {};
+    window.initializeSkillsPagination = () => {};
     
     // Force show ALL items and remove any hidden classes
-    document.querySelectorAll('.work-item, .project-item, .fade-in-section').forEach(item => {
+    document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item, .fade-in-section').forEach(item => {
       item.style.display = 'block !important';
       item.style.visibility = 'visible !important';
       item.classList.remove('hidden');
@@ -328,7 +390,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
     });
     
     // Hide all pagination controls completely
-    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .load-more-projects-btn, .projects-counter').forEach(el => {
+    document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
       el.style.display = 'none !important';
       el.style.visibility = 'hidden !important';
     });
@@ -342,20 +404,22 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
     });
   });
 
-  // Inject CSS for ATS optimization - clean, simple, text-focused
+  // Inject CSS for ATS optimization - clean, simple, text-focused with better spacing
   await page.addStyleTag({
     content: `
       @media print {
         * { 
           background: white !important;
           color: #000 !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
         body {
           font-family: 'Times New Roman', serif !important;
-          font-size: 11pt !important;
-          line-height: 1.2 !important;
-          margin: 0 !important;
-          padding: 10pt !important;
+          font-size: 10pt !important;
+          line-height: 1.15 !important;
+          margin: 8pt !important;
+          padding: 0 !important;
         }
         .header {
           background: white !important;
@@ -387,19 +451,19 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           margin: 0 10pt !important;
         }
         .section-title {
-          font-size: 13pt !important;
+          font-size: 12pt !important;
           font-weight: bold !important;
-          margin: 8pt 0 4pt 0 !important;
+          margin: 4pt 0 2pt 0 !important;
           border-bottom: 1px solid #000 !important;
-          padding-bottom: 2pt !important;
+          padding-bottom: 1pt !important;
           text-transform: uppercase !important;
           color: #000 !important;
         }
         .experience-item, .project-item, .education-item {
-          margin: 4pt 0 !important;
-          page-break-inside: auto !important;
-          page-break-before: auto !important;
-          page-break-after: auto !important;
+          margin: 2pt 0 !important;
+          page-break-inside: avoid !important;
+          page-break-before: avoid !important;
+          page-break-after: avoid !important;
         }
         .experience-title, .project-name, .education-degree {
           font-weight: bold !important;

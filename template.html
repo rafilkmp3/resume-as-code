@@ -1779,28 +1779,45 @@
         @media print {
             /* CLEAN SIMPLE PRINT LAYOUT FOR PROFESSIONAL PDF */
             
-            /* Force light theme for optimal print quality */
-            :root {
+            /* Force light theme for optimal print quality - override all dark mode completely */
+            :root, [data-theme="dark"], [data-theme="light"] {
                 --color-background-base: #ffffff !important;
                 --color-surface-raised: #ffffff !important;
                 --color-text-primary: #000000 !important;
                 --color-text-secondary: #333333 !important;
                 --color-text-accent: #2196f3 !important;
                 --color-border-subtle: #e0e0e0 !important;
+                --color-background: #ffffff !important;
+                --color-text: #000000 !important;
+                --color-text-strong: #000000 !important;
+                --color-text-muted: #666666 !important;
+                --color-surface: #ffffff !important;
+                --color-surface-accent: #f9f9f9 !important;
+                --color-border: #cccccc !important;
+                --color-interactive-default: #0066cc !important;
+                --color-interactive-hover: #0052a3 !important;
+                --color-accent-primary: #667eea !important;
+                --color-accent-secondary: #764ba2 !important;
                 --color-accent-primary: #2196f3 !important;
             }
             
             /* Hide interactive elements but NOT content sections */
             .controls, .parallax-bg, .dark-toggle,
             .load-more-container, .load-more-btn,
-            #load-more-btn, #load-more-projects-btn,
-            .experience-counter, .experience-controls { display: none !important; }
+            #load-more-btn, #load-more-projects-btn, #load-more-education-btn, #load-more-skills-btn,
+            .experience-counter, .experience-controls, .skills-counter, .education-counter,
+            .no-print { display: none !important; }
             
             /* Show ALL content in print - no pagination */
             .work-item.hidden, 
             .project-item.hidden,
+            .education-item.hidden,
+            .skill-category-item.hidden,
             .work-item,
-            .project-item { 
+            .project-item,
+            .education-item,
+            .skill-category-item,
+            .skill-category { 
                 display: block !important; 
                 opacity: 1 !important;
                 visibility: visible !important;
@@ -2934,7 +2951,7 @@
                     <div class="section-header">
                         <h2>Experience</h2>
                         <div class="experience-controls">
-                            <span class="experience-counter">
+                            <span class="experience-counter no-print">
                                 Showing <span id="shown-count">3</span> of <span id="total-count">{{work.length}}</span> positions
                             </span>
                         </div>
@@ -3031,8 +3048,9 @@
                 
                 <section class="section fade-in-section">
                     <h2>Education</h2>
+                    <div class="education-counter no-print">Showing <span id="education-visible-count">1</span> of {{education.length}} entries</div>
                     {{#each education}}
-                    <div class="work-item">
+                    <div class="education-item" data-education-index="{{@index}}">
                         <div class="work-header">
                             <div>
                                 <div class="work-title">{{studyType}} in {{area}}</div>
@@ -3042,14 +3060,21 @@
                         </div>
                     </div>
                     {{/each}}
+                    <div id="load-more-education-container" class="load-more-container no-print" style="display: none;">
+                        <button id="load-more-education-btn" class="load-more-btn">
+                            <span class="load-more-text">Load Earlier Education</span>
+                            <span class="load-more-icon">+</span>
+                        </button>
+                    </div>
                 </section>
             </div>
             
             <div class="right-column">
                 <section class="section fade-in-section">
                     <h2>Skills</h2>
+                    <div class="skills-counter no-print">Showing <span id="skills-visible-count">4</span> of {{skills.length}} categories</div>
                     {{#each skills}}
-                    <div class="skill-category">
+                    <div class="skill-category skill-category-item" data-skill-index="{{@index}}">
                         <div class="skill-name">
                             {{name}}
                             
@@ -3065,6 +3090,12 @@
                         </div>
                     </div>
                     {{/each}}
+                    <div id="load-more-skills-container" class="load-more-container no-print" style="display: none;">
+                        <button id="load-more-skills-btn" class="load-more-btn">
+                            <span class="load-more-text">Show More Skills</span>
+                            <span class="load-more-icon">+</span>
+                        </button>
+                    </div>
                 </section>
 
                 {{#if basics.nationality}}
@@ -3879,6 +3910,258 @@
         }
         
         document.addEventListener('DOMContentLoaded', initializeProjectsPagination);
+        
+        // Education Pagination System
+        function initializeEducationPagination() {
+            const educationItems = document.querySelectorAll('.education-item');
+            const loadMoreBtn = document.getElementById('load-more-education-btn');
+            const loadMoreContainer = document.getElementById('load-more-education-container');
+            const visibleCountSpan = document.getElementById('education-visible-count');
+
+            // Desktop: 1, Tablet: 1, Mobile: 1 (education is typically short)
+            const itemsToShow = {
+                desktop: 1,
+                tablet: 1,
+                mobile: 1
+            };
+            
+            let currentlyShown = itemsToShow.desktop;
+
+            function getItemsToShow() {
+                const width = window.innerWidth;
+                if (width <= 768) return itemsToShow.mobile;
+                if (width <= 1024) return itemsToShow.tablet;
+                return itemsToShow.desktop;
+            }
+
+            function updatePagination() {
+                currentlyShown = Math.min(getItemsToShow(), educationItems.length);
+                
+                // Failsafe: Ensure all education items are visible if pagination fails
+                if (!educationItems || educationItems.length === 0) {
+                    console.warn('No education items found for pagination');
+                    return;
+                }
+                
+                // Show initial items
+                educationItems.forEach((item, index) => {
+                    if (index < currentlyShown) {
+                        item.style.display = 'block';
+                        item.style.visibility = 'visible';
+                        item.classList.remove('hidden');
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                // Update counter
+                if (visibleCountSpan) {
+                    visibleCountSpan.textContent = currentlyShown;
+                }
+                
+                // Show/hide load more button
+                if (loadMoreContainer && loadMoreBtn) {
+                    if (currentlyShown < educationItems.length) {
+                        loadMoreContainer.style.display = 'block';
+                        loadMoreContainer.classList.remove('hidden');
+                    } else {
+                        loadMoreContainer.style.display = 'none';
+                        loadMoreContainer.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Load more functionality
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const itemsPerLoad = getItemsToShow();
+                    const newShown = Math.min(currentlyShown + itemsPerLoad, educationItems.length);
+                    
+                    // Show additional items with animation
+                    for (let i = currentlyShown; i < newShown; i++) {
+                        if (educationItems[i]) {
+                            educationItems[i].style.display = 'block';
+                            educationItems[i].style.visibility = 'visible';
+                            educationItems[i].classList.remove('hidden');
+                            educationItems[i].classList.add('fade-in');
+                        }
+                    }
+                    
+                    currentlyShown = newShown;
+                    
+                    // Update counter
+                    if (visibleCountSpan) {
+                        visibleCountSpan.textContent = currentlyShown;
+                    }
+                    
+                    // Hide load more if all shown
+                    if (currentlyShown >= educationItems.length && loadMoreContainer) {
+                        loadMoreContainer.style.display = 'none';
+                        loadMoreContainer.classList.add('hidden');
+                    }
+                    
+                    // Analytics tracking
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'load_more_education', {
+                            'event_category': 'engagement',
+                            'event_label': 'education_pagination',
+                            'value': currentlyShown
+                        });
+                    }
+                });
+            }
+
+            // Initial setup
+            if (educationItems.length > 0) {
+                updatePagination();
+                
+                // Handle responsive changes
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(updatePagination, 300);
+                });
+            } else {
+                // Fallback: hide controls if no education items
+                if (loadMoreContainer) {
+                    loadMoreContainer.style.display = 'none';
+                }
+                if (visibleCountSpan) {
+                    visibleCountSpan.textContent = '0';
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initializeEducationPagination);
+        
+        // Skills Pagination System
+        function initializeSkillsPagination() {
+            const skillItems = document.querySelectorAll('.skill-category-item');
+            const loadMoreBtn = document.getElementById('load-more-skills-btn');
+            const loadMoreContainer = document.getElementById('load-more-skills-container');
+            const visibleCountSpan = document.getElementById('skills-visible-count');
+
+            // Desktop: 4, Tablet: 3, Mobile: 2 (skills can be numerous)
+            const itemsToShow = {
+                desktop: 4,
+                tablet: 3,
+                mobile: 2
+            };
+            
+            let currentlyShown = itemsToShow.desktop;
+
+            function getItemsToShow() {
+                const width = window.innerWidth;
+                if (width <= 768) return itemsToShow.mobile;
+                if (width <= 1024) return itemsToShow.tablet;
+                return itemsToShow.desktop;
+            }
+
+            function updatePagination() {
+                currentlyShown = Math.min(getItemsToShow(), skillItems.length);
+                
+                // Failsafe: Ensure all skill items are visible if pagination fails
+                if (!skillItems || skillItems.length === 0) {
+                    console.warn('No skill items found for pagination');
+                    return;
+                }
+                
+                // Show initial items
+                skillItems.forEach((item, index) => {
+                    if (index < currentlyShown) {
+                        item.style.display = 'block';
+                        item.style.visibility = 'visible';
+                        item.classList.remove('hidden');
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                // Update counter
+                if (visibleCountSpan) {
+                    visibleCountSpan.textContent = currentlyShown;
+                }
+                
+                // Show/hide load more button
+                if (loadMoreContainer && loadMoreBtn) {
+                    if (currentlyShown < skillItems.length) {
+                        loadMoreContainer.style.display = 'block';
+                        loadMoreContainer.classList.remove('hidden');
+                    } else {
+                        loadMoreContainer.style.display = 'none';
+                        loadMoreContainer.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Load more functionality
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const itemsPerLoad = getItemsToShow();
+                    const newShown = Math.min(currentlyShown + itemsPerLoad, skillItems.length);
+                    
+                    // Show additional items with animation
+                    for (let i = currentlyShown; i < newShown; i++) {
+                        if (skillItems[i]) {
+                            skillItems[i].style.display = 'block';
+                            skillItems[i].style.visibility = 'visible';
+                            skillItems[i].classList.remove('hidden');
+                            skillItems[i].classList.add('fade-in');
+                        }
+                    }
+                    
+                    currentlyShown = newShown;
+                    
+                    // Update counter
+                    if (visibleCountSpan) {
+                        visibleCountSpan.textContent = currentlyShown;
+                    }
+                    
+                    // Hide load more if all shown
+                    if (currentlyShown >= skillItems.length && loadMoreContainer) {
+                        loadMoreContainer.style.display = 'none';
+                        loadMoreContainer.classList.add('hidden');
+                    }
+                    
+                    // Analytics tracking
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'load_more_skills', {
+                            'event_category': 'engagement',
+                            'event_label': 'skills_pagination',
+                            'value': currentlyShown
+                        });
+                    }
+                });
+            }
+
+            // Initial setup
+            if (skillItems.length > 0) {
+                updatePagination();
+                
+                // Handle responsive changes
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(updatePagination, 300);
+                });
+            } else {
+                // Fallback: hide controls if no skill items
+                if (loadMoreContainer) {
+                    loadMoreContainer.style.display = 'none';
+                }
+                if (visibleCountSpan) {
+                    visibleCountSpan.textContent = '0';
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initializeSkillsPagination);
     </script>
 
     <!-- Enhanced Analytics Event Tracking -->
