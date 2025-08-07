@@ -1,0 +1,42 @@
+# Fallback Dockerfile for when golden-base is not available
+FROM node:22-slim AS builder
+
+# Accept build arguments
+ARG GITHUB_SHA=dev-local
+ARG GITHUB_REF_NAME=main
+ARG NODE_ENV=production
+
+# Set environment
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    DEBIAN_FRONTEND=noninteractive \
+    GITHUB_SHA=${GITHUB_SHA} \
+    GITHUB_REF_NAME=${GITHUB_REF_NAME} \
+    NODE_ENV=${NODE_ENV}
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chromium \
+        fonts-liberation \
+        libatk-bridge2.0-0 \
+        libdrm2 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libgbm1 \
+        libxss1 \
+        libasound2 \
+        make \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json Makefile ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code and build
+COPY . .
+RUN npm run build

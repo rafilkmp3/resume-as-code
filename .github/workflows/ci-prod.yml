@@ -103,20 +103,40 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
+      - name: Check and build golden-base if needed
+        run: |
+          echo "::group::🔍 Smart golden-base management"
+          # Check if golden-base exists, build if needed
+          make check-and-build-golden-base || echo "Golden-base check completed"
+          echo "::endgroup::"
+          
       - name: Build with Docker (optimized)
         run: |
           echo "::group::🚀 Fast production build"
           START_TIME=$(date +%s)
           
-          # Optimized build using golden-base
-          docker buildx build \
-            --target production \
-            --file docker/Dockerfile \
-            --build-arg GITHUB_SHA=${{ github.sha }} \
-            --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
-            --tag resume-build:${{ github.sha }} \
-            --load \
-            .
+          # Optimized build using golden-base (fallback to self-contained)
+          if docker manifest inspect ghcr.io/rafilkmp3/resume-as-code:production >/dev/null 2>&1; then
+            echo "✅ Using golden-base optimization"
+            docker buildx build \
+              --target production \
+              --file docker/Dockerfile \
+              --build-arg GITHUB_SHA=${{ github.sha }} \
+              --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
+              --tag resume-build:${{ github.sha }} \
+              --load \
+              .
+          else
+            echo "⚠️ Golden-base not available, using fallback build"
+            docker buildx build \
+              --target builder \
+              --file docker/Dockerfile.fallback \
+              --build-arg GITHUB_SHA=${{ github.sha }} \
+              --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
+              --tag resume-build:${{ github.sha }} \
+              --load \
+              .
+          fi
           
           # Extract artifacts
           mkdir -p dist

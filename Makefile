@@ -21,6 +21,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)🏗️  Build & Development:$(NC)"
 	@echo "  $(GREEN)make build$(NC)         - Build HTML and PDF resume"
+	@echo "  $(GREEN)make check-and-build-golden-base$(NC) - Smart golden-base management"
 	@echo "  $(PURPLE)make dev$(NC)           - Development server with hot reload"
 	@echo "  $(PURPLE)make serve$(NC)         - Serve built resume"
 	@echo ""
@@ -277,6 +278,34 @@ status:
 		echo "  $(YELLOW)⚠️  No test results available$(NC)"; \
 	fi
 	@echo "$(CYAN)================================$(NC)"
+
+# Smart build system - only build and push if images don't exist or deps changed
+check-and-build-golden-base: docker-check
+	@echo "$(CYAN)🔍 Checking if golden-base images need building...$(NC)"
+	@if ! docker manifest inspect ghcr.io/rafilkmp3/resume-as-code:production >/dev/null 2>&1; then \
+		echo "$(YELLOW)⚠️  Production image not found in registry, building...$(NC)"; \
+		$(MAKE) build-and-push-production; \
+	else \
+		echo "$(GREEN)✅ Production image exists in registry$(NC)"; \
+	fi
+
+# Build and push production images to GHCR
+build-and-push-production: docker-check
+	@echo "$(CYAN)🏗️ Building and pushing production images...$(NC)"
+	@echo "$(BLUE)📦 Building golden-base with production stage...$(NC)"
+	@docker build -f docker/Dockerfile.browsers --target production-builder \
+		--build-arg GITHUB_SHA=$$(git rev-parse HEAD) \
+		--build-arg GITHUB_REF_NAME=main \
+		--build-arg NODE_ENV=production \
+		-t ghcr.io/rafilkmp3/resume-as-code:production-builder .
+	@docker build -f docker/Dockerfile.browsers --target production \
+		--build-arg GITHUB_SHA=$$(git rev-parse HEAD) \
+		--build-arg GITHUB_REF_NAME=main \
+		-t ghcr.io/rafilkmp3/resume-as-code:production .
+	@echo "$(BLUE)📤 Pushing to GitHub Container Registry...$(NC)"
+	@docker push ghcr.io/rafilkmp3/resume-as-code:production-builder
+	@docker push ghcr.io/rafilkmp3/resume-as-code:production
+	@echo "$(GREEN)✅ Production images pushed successfully!$(NC)"
 
 # Build all browser-specific Docker images
 build-images: docker-check build-base build-chromium build-firefox build-webkit
