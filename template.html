@@ -3679,6 +3679,17 @@
                 console.warn('No work items found for experience pagination');
                 return;
             }
+
+            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
+            try {
+                // First ensure ALL content is visible as failsafe
+                workItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                    item.classList.remove('hidden');
+                });
+            }
             
             const INITIAL_SHOW = 3;
             let currentlyShown = INITIAL_SHOW;
@@ -3767,7 +3778,19 @@
         }
         
         // Initialize pagination after DOM loads
-        document.addEventListener('DOMContentLoaded', initializeExperiencePagination);
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initializeExperiencePagination();
+            } catch (error) {
+                console.error('Critical error in experience pagination, showing all content:', error);
+                // Emergency override: show all experience items
+                document.querySelectorAll('.work-item:not(.project-item)').forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                });
+            }
+        });
         
         // Dynamic Projects Pagination System
         function initializeProjectsPagination() {
@@ -3781,6 +3804,16 @@
                 console.warn('No project items found for pagination');
                 return;
             }
+
+            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
+            try {
+                // First ensure ALL content is visible as failsafe
+                projectItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                    item.classList.remove('hidden');
+                });
             
             // Dynamic initial show count based on screen size
             function getInitialShowCount() {
@@ -3907,9 +3940,32 @@
                     }
                 }, 250);
             });
+            
+            } catch (error) {
+                console.error('Projects pagination failed, ensuring all content is visible:', error);
+                // Emergency failsafe: show all content if pagination breaks
+                projectItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                    item.classList.remove('hidden');
+                });
+            }
         }
         
-        document.addEventListener('DOMContentLoaded', initializeProjectsPagination);
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initializeProjectsPagination();
+            } catch (error) {
+                console.error('Critical error in projects pagination, showing all content:', error);
+                // Emergency override: show all projects
+                document.querySelectorAll('.project-item').forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                });
+            }
+        });
         
         // Education Pagination System
         function initializeEducationPagination() {
@@ -3917,6 +3973,16 @@
             const loadMoreBtn = document.getElementById('load-more-education-btn');
             const loadMoreContainer = document.getElementById('load-more-education-container');
             const visibleCountSpan = document.getElementById('education-visible-count');
+
+            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
+            try {
+                // First ensure ALL content is visible as failsafe
+                educationItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                    item.classList.remove('hidden');
+                });
 
             // Desktop: 1, Tablet: 1, Mobile: 1 (education is typically short)
             const itemsToShow = {
@@ -4033,9 +4099,32 @@
                     visibleCountSpan.textContent = '0';
                 }
             }
+            
+            } catch (error) {
+                console.error('Education pagination failed, ensuring all content is visible:', error);
+                // Emergency failsafe: show all content if pagination breaks
+                educationItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                    item.classList.remove('hidden');
+                });
+            }
         }
         
-        document.addEventListener('DOMContentLoaded', initializeEducationPagination);
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initializeEducationPagination();
+            } catch (error) {
+                console.error('Critical error in education pagination, showing all content:', error);
+                // Emergency override: show all education items
+                document.querySelectorAll('.education-item').forEach(item => {
+                    item.style.display = 'block';
+                    item.style.visibility = 'visible';
+                    item.style.opacity = '1';
+                });
+            }
+        });
         
         // Skills Pagination System
         function initializeSkillsPagination() {

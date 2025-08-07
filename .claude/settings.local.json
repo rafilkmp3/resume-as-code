@@ -80,7 +80,8 @@
       "Bash(git rm:*)",
       "Bash(git reset:*)",
       "WebFetch(domain:rafilkmp3.github.io)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "Bash(open:*)"
     ],
     "deny": []
   }
