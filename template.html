@@ -2553,16 +2553,16 @@
             .header {
                 flex-direction: column; /* Stack elements vertically */
                 text-align: center; /* Center all content */
-                padding: 1.5rem 1rem 2rem 1rem; /* More bottom padding for better balance */
+                padding: 2rem 1.2rem 2.5rem 1.2rem; /* More generous padding */
                 gap: 0; /* Remove gap, we'll control spacing manually */
                 min-height: auto;
                 align-items: center; /* Center everything horizontally */
             }
             
             .profile-photo {
-                width: 100px; /* Slightly larger for prominence at top */
-                height: 100px;
-                margin-bottom: 1.5rem; /* Good spacing below photo */
+                width: 110px; /* Slightly larger for better presence */
+                height: 110px;
+                margin-bottom: 1.8rem; /* More space below photo */
                 order: -1; /* Move to top regardless of HTML order */
                 flex-shrink: 0;
                 border: 4px solid rgba(255,255,255,0.4); /* More prominent border */
@@ -2573,21 +2573,22 @@
                 flex: 1;
                 text-align: center;
                 width: 100%; /* Full width for better content distribution */
-                max-width: 300px; /* Constrain width for better readability */
+                max-width: 320px; /* More generous width for readability */
             }
             
             .header h1 {
-                font-size: 1.8rem; /* Larger for better prominence */
+                font-size: 2rem; /* Larger for better prominence on narrow screens */
                 line-height: 1.1;
-                margin-bottom: 0.5rem; /* Better spacing */
+                margin-bottom: 0.8rem; /* More generous spacing */
                 font-weight: 800; /* Bolder for mobile */
                 letter-spacing: -0.02em; /* Better typography */
+                word-break: break-word; /* Handle long names gracefully */
             }
             
             .header h2, .subtitle {
-                font-size: 1rem; /* Larger subtitle for readability */
-                line-height: 1.3;
-                margin-bottom: 1.2rem; /* More generous margin */
+                font-size: 1.1rem; /* Larger subtitle for better readability */
+                line-height: 1.4; /* Better line height */
+                margin-bottom: 1.5rem; /* More generous margin */
                 opacity: 0.95; /* Slightly more prominent */
             }
             
@@ -2630,6 +2631,28 @@
                 backdrop-filter: blur(10px);
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                 border: 2px solid rgba(255,255,255,0.4); /* More prominent border */
+            }
+            
+            /* Better PDF download layout on narrow screens */
+            .pdf-download-group {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: center;
+                padding: 0.8rem;
+                margin-top: 0.5rem;
+            }
+            
+            .pdf-options {
+                flex-direction: row;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .pdf-link {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                min-width: auto;
             }
             
             .link-item:hover, .link-item:active {
@@ -3670,27 +3693,20 @@
                 return;
             }
 
-            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
-            try {
-                // First ensure ALL content is visible as failsafe
-                workItems.forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                    item.classList.remove('hidden');
-                });
-            }
-            
+            // Proper pagination setup - show initial items, hide the rest
             const INITIAL_SHOW = 3;
             let currentlyShown = INITIAL_SHOW;
             const totalItems = workItems.length;
             
-            // Ensure initial items are always visible
+            // Properly set initial visibility: show first 3, hide the rest
             workItems.forEach((item, index) => {
                 if (index < INITIAL_SHOW) {
                     item.style.display = 'block';
                     item.style.visibility = 'visible';
                     item.classList.remove('hidden');
+                } else {
+                    item.style.display = 'none';
+                    item.classList.add('hidden');
                 }
             });
             
@@ -3767,19 +3783,12 @@
             }
         }
         
+        // Make functions globally accessible
+        window.initializeExperiencePagination = initializeExperiencePagination;
+        
         // Initialize pagination after DOM loads
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                initializeExperiencePagination();
-            } catch (error) {
-                console.error('Critical error in experience pagination, showing all content:', error);
-                // Emergency override: show all experience items
-                document.querySelectorAll('.work-item:not(.project-item)').forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                });
-            }
+            initializeExperiencePagination();
         });
         
         // Dynamic Projects Pagination System
@@ -3795,15 +3804,7 @@
                 return;
             }
 
-            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
-            try {
-                // First ensure ALL content is visible as failsafe
-                projectItems.forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                    item.classList.remove('hidden');
-                });
+            // Proper pagination setup - only show initial items
             
             // Dynamic initial show count based on screen size
             function getInitialShowCount() {
@@ -3943,18 +3944,11 @@
             }
         }
         
+        // Make function globally accessible
+        window.initializeProjectsPagination = initializeProjectsPagination;
+        
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                initializeProjectsPagination();
-            } catch (error) {
-                console.error('Critical error in projects pagination, showing all content:', error);
-                // Emergency override: show all projects
-                document.querySelectorAll('.project-item').forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                });
-            }
+            initializeProjectsPagination();
         });
         
         // Education Pagination System
@@ -3964,15 +3958,10 @@
             const loadMoreContainer = document.getElementById('load-more-education-container');
             const visibleCountSpan = document.getElementById('education-visible-count');
 
-            // EMERGENCY: Ensure all content is visible immediately on mobile to prevent blank screen
-            try {
-                // First ensure ALL content is visible as failsafe
-                educationItems.forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                    item.classList.remove('hidden');
-                });
+            if (!educationItems || educationItems.length === 0) {
+                console.warn('No education items found for pagination');
+                return;
+            }
 
             // Desktop: 1, Tablet: 1, Mobile: 1 (education is typically short)
             const itemsToShow = {
@@ -4102,18 +4091,11 @@
             }
         }
         
+        // Make function globally accessible
+        window.initializeEducationPagination = initializeEducationPagination;
+        
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                initializeEducationPagination();
-            } catch (error) {
-                console.error('Critical error in education pagination, showing all content:', error);
-                // Emergency override: show all education items
-                document.querySelectorAll('.education-item').forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                });
-            }
+            initializeEducationPagination();
         });
         
         // Skills Pagination System
@@ -4239,6 +4221,9 @@
                 }
             }
         }
+        
+        // Make function globally accessible
+        window.initializeSkillsPagination = initializeSkillsPagination;
         
         document.addEventListener('DOMContentLoaded', initializeSkillsPagination);
     </script>
