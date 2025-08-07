@@ -77,16 +77,23 @@ jobs:
           echo "Time: $(date -u)"
           echo "::endgroup::"
         
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
       - name: Fast Docker build
         run: |
           echo "::group::⚡ Emergency Docker build (no cache, maximum speed)"
           START_TIME=$(date +%s)
           
-          # Fastest possible build - no caching, no optimization
-          docker build \
+          # Fastest possible build with architectural consistency - no caching, no optimization
+          docker buildx build \
             --target builder \
+            --platform linux/amd64 \
             --tag emergency-resume:${{ github.sha }} \
             --no-cache \
+            --load \
             .
           
           # Extract artifacts

@@ -96,6 +96,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
+      - name: Setup Node.js (for version injection)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Inject version into documentation
+        run: |
+          echo "🔄 Injecting current version into documentation placeholders..."
+          node scripts/inject-version.js
+        
       - name: Display runtime info
         run: |
           echo "::group::Runtime Environment"
@@ -111,6 +121,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          platforms: linux/amd64
           driver-opts: |
             image=moby/buildkit:latest
         
@@ -140,6 +151,7 @@ jobs:
             docker buildx build \
               --file docker/Dockerfile.fallback \
               --target builder \
+              --platform linux/amd64 \
               --build-arg GITHUB_SHA=${{ github.sha }} \
               --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
               --cache-from type=local,src=/tmp/.buildx-cache \

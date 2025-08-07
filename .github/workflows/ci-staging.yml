@@ -110,15 +110,21 @@ jobs:
             echo "📝 Will build staging artifacts"
           fi
         
+      - name: Set up Docker Buildx
+        if: steps.check-artifacts.outputs.available != 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
       - name: Build staging artifacts
         if: steps.check-artifacts.outputs.available != 'true'
         run: |
           echo "::group::🚀 Building staging artifacts"
           
-          # Use make build as fallback
+          # Use buildx for consistent architecture
           if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-            echo "Using Docker build"
-            docker build --target builder -t staging-builder .
+            echo "Using Docker buildx"
+            docker buildx build --target builder --platform linux/amd64 -t staging-builder --load .
             mkdir -p dist
             docker run --rm -v "$PWD/dist:/tmp/dist" staging-builder sh -c "cp -r /app/dist/* /tmp/dist/" || {
               echo "Docker build failed, trying make build"
