@@ -3694,7 +3694,8 @@
             }
 
             // Proper pagination setup - show initial items, hide the rest
-            const INITIAL_SHOW = 3;
+            {
+                const INITIAL_SHOW = 3;
             let currentlyShown = INITIAL_SHOW;
             const totalItems = workItems.length;
             
@@ -3781,6 +3782,7 @@
                     }, 300);
                 });
             }
+            }
         }
         
         // Make functions globally accessible
@@ -3805,8 +3807,8 @@
             }
 
             // Proper pagination setup - only show initial items
-            
-            // Dynamic initial show count based on screen size
+            {
+                // Dynamic initial show count based on screen size
             function getInitialShowCount() {
                 if (window.innerWidth >= 1200) return 2; // Desktop: show 2 projects initially
                 if (window.innerWidth >= 768) return 2;  // Tablet: show 2 projects
@@ -3932,15 +3934,6 @@
                 }, 250);
             });
             
-            } catch (error) {
-                console.error('Projects pagination failed, ensuring all content is visible:', error);
-                // Emergency failsafe: show all content if pagination breaks
-                projectItems.forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                    item.classList.remove('hidden');
-                });
             }
         }
         
@@ -4079,16 +4072,6 @@
                 }
             }
             
-            } catch (error) {
-                console.error('Education pagination failed, ensuring all content is visible:', error);
-                // Emergency failsafe: show all content if pagination breaks
-                educationItems.forEach(item => {
-                    item.style.display = 'block';
-                    item.style.visibility = 'visible';
-                    item.style.opacity = '1';
-                    item.classList.remove('hidden');
-                });
-            }
         }
         
         // Make function globally accessible
