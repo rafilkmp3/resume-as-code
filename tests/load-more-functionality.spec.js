@@ -17,15 +17,16 @@ test.describe('Load More Functionality Tests', () => {
         
         // Count initial visible work items (excluding project items)
         const workItems = page.locator('.work-item:not(.project-item)');
-        const initialCount = await workItems.count();
-        console.log(`Initial experience items visible: ${initialCount}`);
+        const totalCount = await workItems.count();
+        const initialVisibleCount = await page.locator('.work-item:not(.project-item):visible').count();
+        console.log(`Initial experience items: ${initialVisibleCount} visible of ${totalCount} total`);
         
         // Check if Load More button exists for Experience
         const loadMoreBtn = page.locator('#load-more-btn');
         const loadMoreContainer = page.locator('#load-more-container');
         
-        // Check if we have more than 3 items (should show Load More button)
-        if (initialCount > 3) {
+        // Check if we have more than the initially visible items (should show Load More button)
+        if (totalCount > initialVisibleCount) {
             console.log('Should show Load More button for Experience');
             await expect(loadMoreContainer).toBeVisible();
             await expect(loadMoreBtn).toBeVisible();
@@ -35,9 +36,9 @@ test.describe('Load More Functionality Tests', () => {
             await page.waitForTimeout(1000); // Wait for animation
             
             // Verify more items are now visible
-            const newCount = await page.locator('.work-item:not(.project-item):visible').count();
-            expect(newCount).toBeGreaterThan(initialCount);
-            console.log(`After Load More: ${newCount} items visible`);
+            const newVisibleCount = await page.locator('.work-item:not(.project-item):visible').count();
+            expect(newVisibleCount).toBeGreaterThan(initialVisibleCount);
+            console.log(`After Load More: ${newVisibleCount} items visible (was ${initialVisibleCount})`);
         } else {
             console.log('No Load More button needed - all experience items fit initially');
         }
