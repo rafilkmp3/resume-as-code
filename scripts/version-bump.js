@@ -291,6 +291,15 @@ Co-Authored-By: Claude <noreply@anthropic.com>`;
     process.exit(1);
   }
   
+  // Pull latest tags to avoid conflicts
+  try {
+    console.log('🔄 Pulling latest tags from remote...');
+    execSync('git fetch origin --tags');
+    console.log('✅ Tags synchronized with remote');
+  } catch (error) {
+    console.error('⚠️  Failed to fetch tags, continuing anyway:', error.message);
+  }
+
   // Create tag
   if (createTag(newVersionString, analysis)) {
     console.log('🎉 Version bump complete!');

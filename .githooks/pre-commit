@@ -143,6 +143,16 @@ if [[ -n "$TODO_FILES" ]]; then
     echo -e "${YELLOW}   Consider addressing these before committing${NC}"
 fi
 
+# Run version consistency check
+echo "🔍 Running version consistency check..."
+if [[ -f ".githooks/pre-commit-version" ]]; then
+    if ! .githooks/pre-commit-version; then
+        VALIDATION_FAILED=1
+    fi
+else
+    echo -e "${YELLOW}⚠️  Version consistency hook not found, skipping version check${NC}"
+fi
+
 # Run Git LFS compliance check
 echo "🔍 Running Git LFS compliance check..."
 if [[ -f ".githooks/pre-commit-lfs" ]]; then
