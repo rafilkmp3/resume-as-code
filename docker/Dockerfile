@@ -1,10 +1,18 @@
 # Multi-stage Dockerfile for Resume-as-Code CI/CD
 FROM node:22-slim AS builder
 
-# Set environment for Puppeteer and install dependencies in one layer
+# Accept build arguments from GitHub Actions
+ARG GITHUB_SHA=dev-local
+ARG GITHUB_REF_NAME=main
+ARG NODE_ENV=production
+
+# Set environment for Puppeteer and build arguments
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    GITHUB_SHA=${GITHUB_SHA} \
+    GITHUB_REF_NAME=${GITHUB_REF_NAME} \
+    NODE_ENV=${NODE_ENV}
 
 # Install system dependencies and create app directory in one layer
 RUN apt-get update \
