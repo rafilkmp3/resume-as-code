@@ -351,9 +351,47 @@
             --shadow: var(--shadow-default);
         }
         
+        /* Typography Scale - Modern fluid typography system */
+        :root {
+            /* Base typography settings */
+            --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Monaco, Menlo, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            
+            /* Fluid typography scale - adjusts automatically based on viewport */
+            --font-size-xs:   clamp(0.75rem, 0.7rem + 0.2vw, 0.8rem);   /* 12px → 12.8px */
+            --font-size-sm:   clamp(0.8rem, 0.75rem + 0.25vw, 0.9rem);  /* 12.8px → 14.4px */
+            --font-size-base: clamp(0.9rem, 0.85rem + 0.3vw, 1rem);     /* 14.4px → 16px */
+            --font-size-md:   clamp(1rem, 0.9rem + 0.4vw, 1.125rem);    /* 16px → 18px */
+            --font-size-lg:   clamp(1.125rem, 1rem + 0.5vw, 1.25rem);   /* 18px → 20px */
+            --font-size-xl:   clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);   /* 20px → 24px */
+            --font-size-2xl:  clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);  /* 24px → 30px */
+            --font-size-3xl:  clamp(1.875rem, 1.6rem + 1vw, 2.25rem);   /* 30px → 36px */
+            --font-size-4xl:  clamp(2.25rem, 1.9rem + 1.2vw, 3rem);     /* 36px → 48px */
+            
+            /* Line heights */
+            --line-height-tight: 1.25;
+            --line-height-normal: 1.5;
+            --line-height-relaxed: 1.6;
+            --line-height-loose: 1.8;
+            
+            /* Font weights */
+            --font-weight-light: 300;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            
+            /* Letter spacing */
+            --letter-spacing-tight: -0.025em;
+            --letter-spacing-normal: 0;
+            --letter-spacing-wide: 0.025em;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-relaxed);
+            font-weight: var(--font-weight-normal);
             color: var(--color-text-default);
             background: var(--color-background-base);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -375,6 +413,44 @@
             }
         }
         
+        /* Apple Liquid Glass Design System */
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-morphism-dark {
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Subtle animation for glass elements */
+        .glass-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                0 6px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
         .parallax-bg {
             position: fixed;
             top: 0;
@@ -390,24 +466,17 @@
             will-change: transform;
         }
         
-        /* Dark mode toggle - positioned to avoid blocking mobile UI */
+        /* Dark mode toggle - positioned to avoid blocking mobile UI with liquid glass */
         .dark-toggle {
             position: fixed;
             bottom: 1.5rem;
             right: 1rem;
-            background: var(--color-surface-raised);
-            border: 2px solid var(--color-border-default);
             color: var(--color-text-default);
             padding: 0.8rem;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: var(--font-size-md);
             z-index: 1000;
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
@@ -415,14 +484,24 @@
             width: 3.5rem;
             height: 3.5rem;
             opacity: 0.9;
+            /* Apply liquid glass effect */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
         
         .dark-toggle:hover {
             opacity: 1;
-            transform: scale(1.05);
+            transform: scale(1.05) translateY(-1px);
             box-shadow: 
-                0 8px 25px -5px rgba(0, 0, 0, 0.3),
-                0 4px 6px -2px rgba(0, 0, 0, 0.1);
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                0 6px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
         
         .dark-toggle:active {
@@ -446,7 +525,7 @@
                 width: 3rem;
                 height: 3rem;
                 padding: 0.6rem;
-                font-size: 1rem;
+                font-size: var(--font-size-base);
                 opacity: 0.8;
             }
         }
@@ -574,8 +653,10 @@
         }
         
         .header-content h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            line-height: var(--line-height-tight);
+            letter-spacing: var(--letter-spacing-tight);
             margin-bottom: 0.5rem;
             text-shadow: 
                 0 2px 4px rgba(0, 0, 0, 0.3),
@@ -584,7 +665,9 @@
         }
         
         .header-content .subtitle {
-            font-size: 1.2rem;
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-medium);
+            line-height: var(--line-height-normal);
             opacity: 0.9;
             margin-bottom: 1rem;
             text-shadow: 
@@ -597,7 +680,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            font-size: 0.9rem;
+            font-size: var(--font-size-sm);
             align-items: center;
             justify-content: flex-start;
         }
@@ -645,7 +728,7 @@
             text-decoration: none !important;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 0.85rem;
+            font-size: var(--font-size-sm);
             font-weight: 500;
             transition: all 0.2s ease;
             position: relative;
@@ -663,7 +746,7 @@
         
         .pdf-separator {
             opacity: 0.4;
-            font-size: 0.8rem;
+            font-size: var(--font-size-xs);
         }
         
         /* Dark theme support */
@@ -693,7 +776,7 @@
             }
             
             .pdf-link {
-                font-size: 0.8rem;
+                font-size: var(--font-size-xs);
                 padding: 1px 4px;
             }
         }
@@ -733,13 +816,13 @@
         
         .section h2 {
             color: var(--color-text-accent);
-            font-size: 1.9rem; /* Slightly larger for better hierarchy */
-            font-weight: 800;
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            line-height: var(--line-height-tight);
+            letter-spacing: var(--letter-spacing-tight);
             margin-bottom: 2.5rem; /* Increased margin for better spacing */
             padding-bottom: 1rem;
             padding-left: 1.5rem;
-            letter-spacing: -0.02em; /* Improved typography */
-            line-height: 1.2;
             position: relative;
             border-left: 5px solid var(--brand-600);
             border-bottom: 3px solid var(--color-interactive-default);
@@ -765,7 +848,7 @@
         }
         
         .profile-summary {
-            font-size: 1rem;
+            font-size: var(--font-size-base);
             line-height: 1.7;
             text-align: justify;
         }
@@ -780,10 +863,15 @@
             border: 1px solid var(--color-border-subtle);
             transform: translateZ(0);
             will-change: transform;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle initial shadow */
+            /* Apply subtle liquid glass effect */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         
         .work-item::before {
@@ -821,7 +909,7 @@
         
         .work-title {
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: var(--font-size-xl);
             color: var(--color-text-strong);
             letter-spacing: -0.02em;
             line-height: 1.3;
@@ -885,7 +973,7 @@
             color: white;
             padding: 0.125rem 0.5rem;
             border-radius: 1rem;
-            font-size: 0.75rem;
+            font-size: var(--font-size-xs);
             font-weight: 600;
             opacity: 0;
             transition: opacity 0.2s ease;
@@ -919,7 +1007,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
-            font-size: 0.75rem;
+            font-size: var(--font-size-xs);
             color: var(--color-text-subtle);
         }
         
@@ -969,7 +1057,7 @@
         }
         
         .experience-counter {
-            font-size: 0.8rem;
+            font-size: var(--font-size-xs);
             color: var(--color-text-secondary);
             font-weight: 500;
             background: var(--color-surface-accent);
@@ -1019,7 +1107,7 @@
             color: white;
             border: none;
             border-radius: 3rem;
-            font-size: 1rem;
+            font-size: var(--font-size-base);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1057,12 +1145,12 @@
         }
         
         .btn-icon {
-            font-size: 1.1rem;
+            font-size: var(--font-size-md);
             filter: grayscale(1) brightness(10);
         }
         
         .btn-text {
-            font-size: 1rem;
+            font-size: var(--font-size-base);
             font-weight: 700;
         }
         
@@ -1099,7 +1187,7 @@
             position: absolute;
             left: 0;
             color: var(--gradient-start);
-            font-size: 0.8rem;
+            font-size: var(--font-size-xs);
         }
         
         .skill-category {
@@ -1134,7 +1222,7 @@
             background: var(--color-surface-accent);
             padding: 0.6rem 1.2rem; /* Increased padding for better touch targets */
             border-radius: 28px; /* Slightly more rounded */
-            font-size: 0.9rem; /* Larger text for readability */
+            font-size: var(--font-size-sm); /* Larger text for readability */
             color: var(--color-text-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid var(--color-border-subtle); /* Thicker border */
@@ -1215,7 +1303,7 @@
         
         .personal-info h3 {
             color: var(--color-text-accent);
-            font-size: 1rem;
+            font-size: var(--font-size-base);
             margin-bottom: 0.5rem;
             font-weight: 600;
         }
@@ -1227,7 +1315,7 @@
         
         .personal-info li {
             padding: 0.2rem 0;
-            font-size: 0.9rem;
+            font-size: var(--font-size-sm);
         }
         
         .links {
@@ -1245,7 +1333,7 @@
             padding: 0.6rem 1.2rem;
             border-radius: 25px;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: var(--font-size-sm);
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
@@ -1292,12 +1380,12 @@
         
         .cert-issuer {
             color: #28a745;
-            font-size: 0.9rem;
+            font-size: var(--font-size-sm);
         }
         
         .cert-date {
             color: var(--text-muted);
-            font-size: 0.8rem;
+            font-size: var(--font-size-xs);
         }
 
         .footer {
@@ -1318,19 +1406,19 @@
 
         .footer-main {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: var(--font-size-base);
         }
 
         .footer-version {
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
-            font-size: 0.75rem;
+            font-size: var(--font-size-xs);
             opacity: 0.9;
         }
 
         .app-info {
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-family-mono);
             font-weight: 500;
             color: rgba(255, 255, 255, 0.95);
         }
@@ -1528,8 +1616,11 @@
         
         .work-item:hover,
         .work-item:focus-within {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
             outline: none;
         }
         
@@ -2396,7 +2487,7 @@
             }
             
             .skill-tag {
-                font-size: 1rem;
+                font-size: var(--font-size-base);
                 padding: 0.5rem 1.3rem;
                 margin: 0.35rem 0.6rem 0.35rem 0;
                 min-height: 2.5rem;
@@ -2415,7 +2506,7 @@
         /* Large desktop */
         @media (min-width: 1400px) and (max-width: 1919px) {
             .skill-tag {
-                font-size: 0.9rem;
+                font-size: var(--font-size-sm);
                 padding: 0.45rem 1.2rem;
                 margin: 0.3rem 0.5rem 0.3rem 0;
                 min-height: 2.2rem;
@@ -2430,7 +2521,7 @@
         /* Standard desktop */
         @media (min-width: 1024px) and (max-width: 1399px) {
             .skill-tag {
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
                 padding: 0.4rem 1.1rem;
                 margin: 0.25rem 0.4rem 0.25rem 0;
                 min-height: 2rem;
@@ -2446,7 +2537,7 @@
             .left-column { padding-right: 0; }
             
             .skill-tag {
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
                 padding: 0.6rem 1rem;
                 margin: 0.25rem 0.3rem 0.25rem 0;
                 min-height: 2.75rem; /* 44px minimum touch target */
@@ -2462,7 +2553,7 @@
             
             .control-btn {
                 padding: 0.7rem 1rem;
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
             }
         }
         
@@ -2486,14 +2577,15 @@
             }
             
             .header h1 {
-                font-size: 2rem; /* Slightly smaller for better balance */
-                line-height: 1.1;
+                font-size: var(--font-size-3xl); /* Fluid scaling for mobile */
+                line-height: var(--line-height-tight);
+                letter-spacing: var(--letter-spacing-tight);
                 margin-bottom: 0.4rem;
             }
             
             .header h2, .subtitle {
-                font-size: 1.1rem; /* Better scaling */
-                line-height: 1.2;
+                font-size: var(--font-size-xl); /* Better scaling */
+                line-height: var(--line-height-normal);
                 margin-bottom: 1rem;
             }
             
@@ -2504,7 +2596,7 @@
             }
             
             .contact-item {
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
                 line-height: 1.3;
             }
             
@@ -2516,7 +2608,7 @@
             
             .link-item {
                 padding: 0.7rem 1.2rem;
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
             }
             
             .main-content { 
@@ -2538,7 +2630,7 @@
             }
             
             .work-summary, .profile-summary {
-                font-size: 1rem;
+                font-size: var(--font-size-base);
                 line-height: 1.5;
             }
             
@@ -2548,7 +2640,7 @@
             }
             
             .skill-tag {
-                font-size: 0.9rem;
+                font-size: var(--font-size-sm);
                 padding: 0.6rem 1.1rem;
                 margin: 0.25rem 0.3rem 0.25rem 0;
                 min-height: 2.75rem; /* Better touch target */
@@ -2572,7 +2664,7 @@
             
             .control-btn {
                 padding: 0.6rem 0.8rem;
-                font-size: 0.8rem;
+                font-size: var(--font-size-xs);
                 min-width: 60px;
             }
             
@@ -2612,17 +2704,17 @@
             }
             
             .header h1 {
-                font-size: 2rem; /* Larger for better prominence on narrow screens */
-                line-height: 1.1;
+                font-size: var(--font-size-3xl); /* Fluid scaling for narrow screens */
+                line-height: var(--line-height-tight);
                 margin-bottom: 0.8rem; /* More generous spacing */
-                font-weight: 800; /* Bolder for mobile */
-                letter-spacing: -0.02em; /* Better typography */
+                font-weight: var(--font-weight-bold); /* Consistent weight */
+                letter-spacing: var(--letter-spacing-tight); /* Better typography */
                 word-break: break-word; /* Handle long names gracefully */
             }
             
             .header h2, .subtitle {
-                font-size: 1.1rem; /* Larger subtitle for better readability */
-                line-height: 1.4; /* Better line height */
+                font-size: var(--font-size-lg); /* Better subtitle scaling */
+                line-height: var(--line-height-normal); /* Better line height */
                 margin-bottom: 1.5rem; /* More generous margin */
                 opacity: 0.95; /* Slightly more prominent */
             }
@@ -2636,7 +2728,7 @@
             }
             
             .contact-item {
-                font-size: 0.9rem; /* Larger contact text */
+                font-size: var(--font-size-sm); /* Larger contact text */
                 margin: 0.3rem 0;
                 line-height: 1.4;
                 display: flex;
@@ -2660,7 +2752,7 @@
             
             .link-item {
                 padding: 0.8rem 1.2rem; /* Larger touch targets */
-                font-size: 0.85rem; /* Better readability */
+                font-size: var(--font-size-sm); /* Better readability */
                 min-height: 44px; /* Accessibility standard */
                 border-radius: 2rem;
                 backdrop-filter: blur(10px);
@@ -2686,7 +2778,7 @@
             
             .pdf-link {
                 padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
+                font-size: var(--font-size-xs);
                 min-width: auto;
             }
             
@@ -2708,13 +2800,13 @@
             }
             
             .section h2 {
-                font-size: 1.25rem; /* Slightly smaller */
+                font-size: var(--font-size-xl); /* Slightly smaller */
                 margin-bottom: 0.8rem; /* Reduced margin */
                 line-height: 1.2;
             }
             
             .work-title {
-                font-size: 1.1rem;
+                font-size: var(--font-size-md);
                 font-weight: 600;
             }
             
@@ -2728,7 +2820,7 @@
             }
             
             .skill-tag {
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
                 padding: 0.7rem 1.1rem;
                 margin: 0.3rem 0.3rem 0.3rem 0;
                 min-height: 2.75rem; /* 44px minimum touch target */
@@ -2768,7 +2860,7 @@
             }
             
             .work-item .skill-tag {
-                font-size: 0.75rem;
+                font-size: var(--font-size-xs);
                 padding: 0.5rem 0.8rem;
                 margin: 0.2rem 0.2rem 0.2rem 0;
                 border-radius: 1rem;
@@ -2812,7 +2904,7 @@
             }
             
             .header-content .subtitle {
-                font-size: 1rem;
+                font-size: var(--font-size-base);
             }
             
             /* Enhanced Touch Targets - 2024 WCAG Standards */
@@ -2824,7 +2916,7 @@
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.85rem;
+                font-size: var(--font-size-sm);
             }
             
             /* Better spacing for social media buttons */
@@ -2837,7 +2929,7 @@
             
             /* Improved contact info layout */
             .contact-info {
-                font-size: 0.9rem;
+                font-size: var(--font-size-sm);
                 line-height: 1.4;
                 margin: 1rem 0;
             }
@@ -2859,7 +2951,7 @@
             }
             
             .skill-tag {
-                font-size: 1.1rem;
+                font-size: var(--font-size-md);
                 padding: 0.6rem 1.5rem;
                 margin: 0.4rem 0.7rem 0.4rem 0;
                 min-height: 3rem;
