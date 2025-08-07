@@ -59,9 +59,16 @@
       document.addEventListener('DOMContentLoaded', function() {
         const versionElement = document.getElementById('app-version');
         const environmentElement = document.getElementById('app-environment');
+        const versionLinkElement = document.getElementById('version-link');
         
         if (versionElement) versionElement.textContent = appVersion;
         if (environmentElement) environmentElement.textContent = environment;
+        
+        // Update version link URL dynamically
+        if (versionLinkElement && appVersion) {
+          const cleanVersion = appVersion.replace(/[^0-9.]/g, ''); // Remove non-numeric chars except dots
+          versionLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/releases/tag/v${cleanVersion}`;
+        }
       });
     </script>
 
@@ -884,8 +891,8 @@
         }
         
         .work-date.expanded .duration-details {
-            max-height: 4rem;
-            padding: 0.75rem;
+            max-height: 3rem;
+            padding: 0.5rem 0.75rem;
         }
         
         .duration-breakdown {
@@ -1303,6 +1310,17 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.95);
         }
+        
+        .version-link, .resume-code-link {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .version-link:hover, .resume-code-link:hover {
+            color: var(--brand-400);
+            text-decoration: underline;
+        }
 
         .build-info {
             font-size: 0.7rem;
@@ -1326,13 +1344,6 @@
             display: none;
         }
 
-        /* Hide all load more buttons from print/PDF */
-        .load-more-container, 
-        .load-more-btn,
-        #load-more-btn,
-        #load-more-projects-btn {
-            display: none !important;
-        }
 
         /* =============================================== */
         /* AMAZING WEB ANIMATIONS & EFFECTS              */
@@ -3161,8 +3172,16 @@
             <div class="footer-content">
                 <div class="footer-main">Developed with ❤️ in Rio de Janeiro</div>
                 <div class="footer-version">
-                    <span class="app-info">v<span id="app-version">1.2.1</span> • <span id="app-environment">production</span></span>
-                    <span class="build-info no-print">Built with <strong>Resume-as-Code</strong></span>
+                    <span class="app-info">
+                        <a href="https://github.com/rafilkmp3/resume-as-code/releases/tag/v1.3.0" 
+                           id="version-link" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="version-link no-print">
+                            v<span id="app-version">1.3.0</span>
+                        </a> • <span id="app-environment">production</span>
+                    </span>
+                    <span class="build-info no-print">Built with <strong><a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" rel="noopener noreferrer" class="resume-code-link">Resume-as-Code</a></strong></span>
                 </div>
             </div>
         </footer>
