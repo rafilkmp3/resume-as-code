@@ -27,11 +27,59 @@ permissions:
   id-token: write
 
 jobs:
+  # Semantic versioning job - runs first to potentially create new version
+  version-check:
+    name: Check for Version Bump
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version-bumped: ${{ steps.version.outputs.bumped }}
+      new-version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for version analysis
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+      - name: Run semantic version check
+        id: version
+        run: |
+          echo "🔍 Checking if version bump is needed..."
+          
+          # Run version bump in dry-run mode first to see what would happen
+          if npm run version:auto 2>/dev/null; then
+            echo "bumped=true" >> $GITHUB_OUTPUT
+            # Get the new version from package.json
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "✅ Version bumped to: $NEW_VERSION"
+            
+            # Push the version bump and tag
+            git push origin main
+            git push origin --tags
+            
+          else
+            echo "bumped=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  No version bump needed"
+          fi
+
   # Essential build job - guaranteed to work
   build:
     name: Build Resume
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: version-check
     env:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1

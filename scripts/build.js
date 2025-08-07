@@ -63,23 +63,39 @@ async function generateHTML(resumeData, templatePath) {
     console.log('✅ QR code integrated successfully!');
   }
   
-  // Update app version and environment from package.json and CI environment
+  // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   const appVersion = packageJson.version;
   const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
   const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main' || process.env.GITHUB_ACTIONS;
   const environment = isProduction && buildBranch === 'main' ? 'production' : 'preview';
+  const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
+  const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
+  const buildTimestamp = new Date().toISOString();
   
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
   html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/, 
     `const branchName = '${buildBranch}';`);
+  html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
+  html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/, 
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/, 
     `<span id="app-environment">${environment}</span>`);
+  html = html.replace(/<span id="app-commit">[^<]*<\/span>/, 
+    `<span id="app-commit">${commitShort}</span>`);
+  
+  // Update meta tags with build information
+  html = html.replace(/(<meta name="build-commit" content=")[^"]*(")/,
+    `$1${commitShort}$2`);
+  html = html.replace(/(<meta name="build-timestamp" content=")[^"]*(")/,
+    `$1${buildTimestamp}$2`);
+  html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
+    `$1${appVersion}$2`);
     
   console.log(`🔖 App version: ${appVersion} (${environment} on ${buildBranch})`);
+  console.log(`📝 Build info: ${commitShort} at ${buildTimestamp}`);
   
   fs.writeFileSync('./dist/index.html', html);
   

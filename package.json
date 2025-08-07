@@ -13,6 +13,7 @@
     "version:patch": "npm version patch && git push --follow-tags",
     "version:minor": "npm version minor && git push --follow-tags",
     "version:major": "npm version major && git push --follow-tags",
+    "version:auto": "node scripts/version-bump.js",
     "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
   },
   "dependencies": {
