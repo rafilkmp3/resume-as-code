@@ -14,6 +14,8 @@
     "version:minor": "npm version minor && git push --follow-tags",
     "version:major": "npm version major && git push --follow-tags",
     "version:auto": "node scripts/version-bump.js",
+    "version:update-refs": "node scripts/update-version-refs.js",
+    "version:inject": "node scripts/inject-version.js", 
     "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
   },
   "dependencies": {
@@ -47,8 +49,10 @@
     "@babel/preset-env": "^7.26.0",
     "@playwright/test": "^1.54.2",
     "babel-jest": "^30.0.5",
+    "chokidar": "^3.5.3",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "livereload": "^0.9.3"
   }
 }

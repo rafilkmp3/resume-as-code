@@ -24,8 +24,9 @@ async function generateQRCode(url, options) {
 }
 
 // Generate HTML from template and data
-async function generateHTML(resumeData, templatePath) {
-  console.log('📝 Generating HTML from template...');
+async function generateHTML(resumeData, templatePath, options = {}) {
+  const isDraft = options.mode === 'draft' || process.env.BUILD_MODE === 'draft';
+  console.log(`📝 Generating HTML from template... ${isDraft ? '(draft mode)' : ''}`);
   
   const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = Handlebars.compile(templateSource);
@@ -40,18 +41,25 @@ async function generateHTML(resumeData, templatePath) {
       return a === b;
   });
 
-  // Copy assets directory to dist
+  // Always copy assets (fast operation)
   copyAssets(resumeData);
   
-  // Generate QR code
-  const qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
-    width: 200,
-    margin: 1,
-    color: {
-      dark: '#000000',
-      light: '#FFFFFF'
-    }
-  });
+  // Skip QR code generation in draft mode (expensive operation)
+  let qrCodeDataURL = null;
+  if (!isDraft) {
+    qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
+      width: 200,
+      margin: 1,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+  } else {
+    console.log('⚡ Draft mode: Skipping QR code generation');
+    // Use placeholder for draft mode
+    qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+RFJBRlQgTU9ERTwvdGV4dD48L3N2Zz4=';
+  }
   
   // Replace the placeholder QR code with the real one
   let html = template(resumeData);
@@ -581,21 +589,39 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   console.log('✅ ATS-Optimized PDF completed');
 }
 
-// Run the build
-async function build() {
-  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
-  await generateHTML(resumeData, './template.html');
+// Main build function with mode support
+async function build(options = {}) {
+  const mode = options.mode || process.env.BUILD_MODE || 'production';
+  const isDraft = mode === 'draft';
+  const isProduction = mode === 'production';
   
-  // Generate PDF with timeout to prevent CI hanging
-  try {
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('PDF generation timeout (60s)')), 60000)
-    );
-    
-    await Promise.race([generatePDF(resumeData), timeout]);
-  } catch (error) {
-    console.error('⚠️  PDF generation failed or timed out:', error.message);
-    console.log('✅ HTML generation completed - continuing without PDF');
+  console.log(`🏗️  Starting ${isDraft ? 'DRAFT' : 'PRODUCTION'} build...`);
+  
+  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
+  
+  // Always run core build steps
+  await generateHTML(resumeData, './template.html', { mode });
+  
+  // Skip expensive operations in draft mode
+  if (isDraft) {
+    console.log('⚡ Draft mode: Skipping PDF generation and QR code creation');
+    console.log('🎉 Draft build complete! (HTML only)');
+    console.log('🌐 Preview: ./dist/index.html');
+    return;
+  }
+  
+  // Production mode: Generate PDFs with timeout
+  if (isProduction) {
+    try {
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PDF generation timeout (60s)')), 60000)
+      );
+      
+      await Promise.race([generatePDF(resumeData), timeout]);
+    } catch (error) {
+      console.error('⚠️  PDF generation failed or timed out:', error.message);
+      console.log('✅ HTML generation completed - continuing without PDF');
+    }
   }
   
   console.log('🎉 Resume build complete!');
@@ -624,4 +650,18 @@ async function build() {
   }
 }
 
-build().catch(console.error);
+// Allow script to be called directly (for CLI usage) or imported as module
+if (require.main === module) {
+  build().catch(error => {
+    console.error('❌ Build failed:', error);
+    process.exit(1);
+  });
+}
+
+// Export for use as module
+module.exports = {
+  build,
+  generateHTML,
+  generatePDF,
+  copyAssets
+};

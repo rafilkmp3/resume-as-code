@@ -606,10 +606,10 @@
         .header {
             background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, #8b5cf6 100%);
             color: white;
-            padding: 2rem;
+            padding: 1.5rem; /* Reduced from 2rem for more compact desktop layout */
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem; /* Reduced from 2rem for tighter spacing */
             position: relative;
             overflow: hidden;
         }
@@ -704,55 +704,14 @@
             color: var(--slate-50) !important;
         }
         
-        /* PDF Download Group - Industry Standard UI/UX */
-        .pdf-download-group {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            padding: 4px 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* PDF buttons now use standard link-item class for consistency */
+        .pdf-button {
+            font-size: var(--font-size-xs) !important; /* Smaller text for inline buttons */
+            padding: 0.4rem 0.8rem !important; /* More compact padding for inline use */
+            margin: 0 0.25rem; /* Small margin between buttons */
         }
         
-        .pdf-download-label {
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        
-        .pdf-options {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .pdf-link {
-            color: inherit !important;
-            text-decoration: none !important;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        
-        .pdf-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .pdf-link:active {
-            transform: translateY(0);
-        }
-        
-        .pdf-separator {
-            opacity: 0.4;
-            font-size: var(--font-size-xs);
-        }
+        /* Simplified PDF buttons using link-item class - removed complex styling */
         
         /* Dark theme support */
         [data-theme="dark"] .pdf-download-group {
@@ -808,8 +767,8 @@
             transition: all 0.3s ease;
             position: sticky; /* Make sidebar sticky for better UX */
             top: 2rem;
-            max-height: calc(100vh - 4rem);
-            overflow-y: auto; /* Allow scrolling if content overflows */
+            max-height: none; /* Remove height restriction to eliminate scrollbar */
+            overflow-y: visible; /* No scrolling - content should fit naturally */
             box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Subtle shadow for depth */
         }
         
@@ -929,13 +888,11 @@
             color: var(--color-text-subtle);
             font-size: 0.875rem;
             font-weight: 500;
-            position: relative;
-            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
             border-radius: 0.5rem;
             background: var(--color-bg-subtle);
             border: 1px solid var(--color-border-subtle);
-            overflow: hidden;
-            user-select: none;
+            /* Simplified design - no interactive popups */
             /* Prevent phone number detection on mobile */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -974,51 +931,21 @@
         }
         
         .duration-badge {
-            background: var(--color-accent-primary);
-            color: white;
-            padding: 0.125rem 0.5rem;
-            border-radius: 1rem;
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
-            position: absolute;
-            top: 0;
-            left: 100%;
-            margin-left: 0.5rem;
-            z-index: 10;
+            display: none; /* Hide complex badge overlay */
         }
         
-        .work-date:hover .duration-badge,
-        .work-date.expanded .duration-badge {
-            opacity: 1;
-        }
+        /* Removed complex hover states */
         
         .duration-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, padding 0.3s ease;
-            background: var(--color-bg-elevated);
-            border-top: 1px solid var(--color-border-subtle);
-        }
-        
-        .work-date.expanded .duration-details {
-            max-height: 3rem;
-            padding: 0.5rem 0.75rem;
+            display: none; /* Hide complex popup details */
         }
         
         .duration-breakdown {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            font-size: var(--font-size-xs);
-            color: var(--color-text-subtle);
+            display: none; /* Hide complex breakdown */
         }
         
         .duration-item {
-            display: flex;
-            justify-content: space-between;
+            display: none; /* Hide individual duration items */
             align-items: center;
         }
         
@@ -1098,9 +1025,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 2.5rem 0 1rem;
+            margin: 2.5rem -2rem 1rem 0; /* Extend into right padding area */
             text-align: center;
-            width: 100%;
+            width: calc(100% + 2rem); /* Compensate for left column padding */
         }
         
         .load-more-btn {
@@ -1196,13 +1123,14 @@
         }
         
         .skill-category {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem; /* Tighter spacing between categories */
         }
         
         .skill-name {
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: var(--text-primary);
+            font-size: var(--font-size-base); /* Consistent with section titles */
         }
         
         .skill-level {
@@ -1217,37 +1145,35 @@
         .skill-keywords {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem; /* Add proper spacing between tags */
+            gap: 0.375rem; /* Tighter spacing for better density */
             justify-content: flex-start;
             align-items: flex-start;
             line-height: 1;
-            /* Ensure no overflow issues */
             overflow: visible;
             margin-bottom: 1rem;
         }
         
         .skill-tag {
             background: var(--color-surface-accent);
-            padding: 0.5rem 1rem; /* More compact padding */
-            border-radius: 20px; /* Modern rounded corners */
-            font-size: var(--font-size-sm);
+            padding: 0.25rem 0.6rem; /* Even more compact */
+            border-radius: 12px; /* Smaller radius */
+            font-size: 0.75rem; /* Explicit smaller size (12px) */
             color: var(--color-text-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--color-border-subtle); /* Thinner, cleaner border */
-            font-weight: var(--font-weight-medium); /* Consistent weight from typography system */
+            border: 1px solid var(--color-border-subtle);
+            font-weight: 500; /* Slightly lighter weight */
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            margin: 0; /* Remove individual margins - handled by parent gap */
+            margin: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 2rem; /* More compact while maintaining accessibility */
+            min-height: 1.5rem; /* More compact height */
             text-decoration: none;
-            line-height: 1.2;
+            line-height: 1.1; /* Tighter line height */
             white-space: nowrap;
             text-align: center;
-            /* Apply subtle liquid glass effect */
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         }
@@ -2501,10 +2427,10 @@
             }
             
             .skill-tag {
-                font-size: var(--font-size-base);
-                padding: 0.5rem 1.3rem;
+                font-size: 0.75rem; /* Keep consistent small size */
+                padding: 0.25rem 0.6rem; /* Consistent compact padding */
                 margin: 0;
-                min-height: 2.5rem;
+                min-height: 1.5rem; /* Consistent compact height */
             }
             
             .header {
@@ -2520,10 +2446,10 @@
         /* Large desktop */
         @media (min-width: 1400px) and (max-width: 1919px) {
             .skill-tag {
-                font-size: var(--font-size-sm);
-                padding: 0.45rem 1.2rem;
+                font-size: 0.75rem; /* Consistent small size */
+                padding: 0.25rem 0.6rem; /* Consistent compact padding */
                 margin: 0;
-                min-height: 2.2rem;
+                min-height: 1.5rem; /* Consistent compact height */
             }
             
             .profile-photo {
@@ -2535,10 +2461,10 @@
         /* Standard desktop */
         @media (min-width: 1024px) and (max-width: 1399px) {
             .skill-tag {
-                font-size: var(--font-size-sm);
-                padding: 0.4rem 1.1rem;
+                font-size: 0.75rem; /* Consistent small size */
+                padding: 0.25rem 0.6rem; /* Consistent compact padding */
                 margin: 0;
-                min-height: 2rem;
+                min-height: 1.5rem; /* Consistent compact height */
             }
         }
         
@@ -2694,20 +2620,21 @@
             .header {
                 flex-direction: column; /* Stack elements vertically */
                 text-align: center; /* Center all content */
-                padding: 2rem 1.2rem 2.5rem 1.2rem; /* More generous padding */
+                padding: 1.5rem 1rem 1.5rem 1rem; /* Compact padding for better screen usage */
                 gap: 0; /* Remove gap, we'll control spacing manually */
                 min-height: auto;
                 align-items: center; /* Center everything horizontally */
+                margin-bottom: 1.5rem; /* Consistent spacing with other sections */
             }
             
             .profile-photo {
-                width: 110px; /* Slightly larger for better presence */
-                height: 110px;
-                margin-bottom: 1.8rem; /* More space below photo */
+                width: 100px; /* Optimal size for mobile screen real estate */
+                height: 100px;
+                margin-bottom: 1.5rem; /* Better spacing below photo */
                 order: -1; /* Move to top regardless of HTML order */
                 flex-shrink: 0;
-                border: 4px solid rgba(255,255,255,0.4); /* More prominent border */
-                box-shadow: 0 8px 24px rgba(0,0,0,0.3); /* Enhanced shadow */
+                border: 3px solid rgba(255,255,255,0.4); /* Slightly thinner border */
+                box-shadow: 0 6px 20px rgba(0,0,0,0.25); /* Reduced shadow */
             }
             
             .header-content {
@@ -2729,13 +2656,13 @@
             .header h2, .subtitle {
                 font-size: var(--font-size-lg); /* Better subtitle scaling */
                 line-height: var(--line-height-normal); /* Better line height */
-                margin-bottom: 1.5rem; /* More generous margin */
+                margin-bottom: 1rem; /* Compact margin for better mobile layout */
                 opacity: 0.95; /* Slightly more prominent */
             }
             
             .contact-info {
-                margin: 1rem 0 0.8rem 0; /* Better margins */
-                gap: 0.8rem; /* More generous gaps */
+                margin: 0.8rem 0 0.6rem 0; /* More compact margins */
+                gap: 0.5rem; /* Reduced gap for tighter layout */
                 justify-content: center;
                 flex-direction: column; /* Stack vertically for better mobile UX */
                 align-items: center;
@@ -2743,29 +2670,29 @@
             
             .contact-item {
                 font-size: var(--font-size-sm); /* Larger contact text */
-                margin: 0.3rem 0;
-                line-height: 1.4;
+                margin: 0.2rem 0; /* Reduced margin for compact layout */
+                line-height: 1.3; /* Tighter line height */
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 0.5rem; /* Better icon-text spacing */
-                padding: 0.2rem 0.5rem; /* Subtle padding for better touch targets */
-                border-radius: 0.5rem;
-                background: rgba(255,255,255,0.1); /* Subtle background for definition */
-                backdrop-filter: blur(5px);
+                gap: 0.4rem; /* Slightly reduced icon-text spacing */
+                padding: 0.15rem 0.4rem; /* Reduced padding for compactness */
+                border-radius: 0.4rem;
+                background: rgba(255,255,255,0.08); /* More subtle background */
+                backdrop-filter: blur(3px);
                 min-width: 200px; /* Consistent width */
             }
             
             .links {
-                margin-top: 1.2rem; /* Better top margin */
-                gap: 1rem; /* More generous gaps */
+                margin-top: 0.8rem; /* Reduced top margin for compact layout */
+                gap: 0.6rem; /* Reduced gap for tighter button layout */
                 justify-content: center;
                 flex-wrap: wrap;
                 max-width: 100%;
             }
             
             .link-item {
-                padding: 0.8rem 1.2rem; /* Larger touch targets */
+                padding: 0.6rem 1rem; /* Reduced padding for compactness */
                 font-size: var(--font-size-sm); /* Better readability */
                 min-height: 44px; /* Accessibility standard */
                 border-radius: 2rem;
@@ -2935,10 +2862,10 @@
             
             /* Better spacing for social media buttons */
             .links {
-                gap: 0.5rem;
+                gap: 0.4rem; /* Tighter gap for compact layout */
                 justify-content: center;
                 flex-wrap: wrap;
-                padding: 1rem 0;
+                padding: 0.6rem 0; /* Reduced padding for better screen usage */
             }
             
             /* Improved contact info layout */
@@ -3026,16 +2953,10 @@
                     <div class="contact-item">📞 <a href="tel:{{basics.phone}}" style="color: inherit; text-decoration: none;">{{basics.phone}}</a></div>
                     <div class="contact-item">✉️ <a href="mailto:{{basics.email}}" style="color: inherit; text-decoration: none;">{{basics.email}}</a></div>
                     <div class="contact-item no-print">
-                        <div class="pdf-download-group">
-                            📄 <span class="pdf-download-label">Resume:</span>
-                            <div class="pdf-options">
-                                <a href="./resume.pdf" class="pdf-link" download="Rafael_Sathler_Resume.pdf" title="Screen-optimized PDF - best for online sharing">Screen</a>
-                                <span class="pdf-separator">|</span>
-                                <a href="./resume-print.pdf" class="pdf-link" download="Rafael_Sathler_Resume_Print.pdf" title="Print-optimized PDF - best for physical printing">Print</a>
-                                <span class="pdf-separator">|</span>
-                                <a href="./resume-ats.pdf" class="pdf-link" download="Rafael_Sathler_Resume_ATS.pdf" title="ATS-optimized PDF - best for job applications">ATS</a>
-                            </div>
-                        </div>
+                        📄 Resume:
+                        <a href="./resume.pdf" class="link-item pdf-button" download="Rafael_Sathler_Resume.pdf" title="Screen-optimized PDF - best for online sharing">Screen</a>
+                        <a href="./resume-print.pdf" class="link-item pdf-button" download="Rafael_Sathler_Resume_Print.pdf" title="Print-optimized PDF - best for physical printing">Print</a>
+                        <a href="./resume-ats.pdf" class="link-item pdf-button" download="Rafael_Sathler_Resume_ATS.pdf" title="ATS-optimized PDF - best for job applications">ATS</a>
                     </div>
                 </div>
                 <div class="links">
@@ -3098,27 +3019,12 @@
                                     <div class="work-title">{{position}}</div>
                                     <div class="company">{{name}}</div>
                                 </div>
-                                <div class="work-date" data-start="{{startDate}}" data-end="{{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
-                                    <div class="date-container" role="button" tabindex="0" aria-label="View duration details for {{startDate}} to {{#if endDate}}{{endDate}}{{else}}Present{{/if}}">
-                                        <span class="date-range">
-                                            <span class="date-start">{{startDate}}</span>
-                                            <span class="date-separator">—</span>
-                                            <span class="date-end">{{#if endDate}}{{endDate}}{{else}}Present{{/if}}</span>
-                                        </span>
-                                        <span class="duration-badge" aria-hidden="true"></span>
-                                    </div>
-                                    <div class="duration-details" aria-hidden="true">
-                                        <div class="duration-breakdown">
-                                            <div class="duration-item">
-                                                <span>Duration</span>
-                                                <span class="duration-value duration-total"></span>
-                                            </div>
-                                            <div class="duration-item">
-                                                <span>Experience</span>
-                                                <span class="duration-value duration-years"></span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="work-date">
+                                    <span class="date-range">
+                                        <span class="date-start">{{startDate}}</span>
+                                        <span class="date-separator">—</span>
+                                        <span class="date-end">{{#if endDate}}{{endDate}}{{else}}Present{{/if}}</span>
+                                    </span>
                                 </div>
                             </div>
                             <div class="work-summary">{{summary}}</div>
@@ -3189,26 +3095,11 @@
                                 <div class="work-title">{{studyType}} in {{area}}</div>
                                 <div class="company">{{institution}}</div>
                             </div>
-                            <div class="work-date" data-start="{{startDate}}" data-end="{{endDate}}">
-                                <div class="date-container" role="button" tabindex="0" aria-label="View duration details for {{startDate}} to {{endDate}}">
-                                    <div class="date-range">
-                                        <span class="start-date">{{startDate}}</span>
-                                        <span class="date-separator">—</span>
-                                        <span class="end-date">{{endDate}}</span>
-                                    </div>
-                                    <span class="duration-badge" aria-hidden="true"></span>
-                                </div>
-                                <div class="duration-details" aria-hidden="true">
-                                    <div class="duration-breakdown">
-                                        <div class="duration-item">
-                                            <span>Duration</span>
-                                            <span class="duration-total"></span>
-                                        </div>
-                                        <div class="duration-item">
-                                            <span>Period</span>
-                                            <span class="duration-period"></span>
-                                        </div>
-                                    </div>
+                            <div class="work-date">
+                                <div class="date-range">
+                                    <span class="start-date">{{startDate}}</span>
+                                    <span class="date-separator">—</span>
+                                    <span class="end-date">{{endDate}}</span>
                                 </div>
                             </div>
                         </div>
@@ -3226,7 +3117,7 @@
             <div class="right-column">
                 <section class="section fade-in-section">
                     <h2>Skills</h2>
-                    <div class="skills-counter no-print">Showing <span id="skills-visible-count">4</span> of {{skills.length}} categories</div>
+                    <div class="skills-counter no-print" id="skills-counter">Showing <span id="skills-visible-count">{{skills.length}}</span> of {{skills.length}} categories</div>
                     {{#each skills}}
                     <div class="skill-category skill-category-item" data-skill-index="{{@index}}">
                         <div class="skill-name">
@@ -3832,8 +3723,7 @@
             });
         }
         
-        // Initialize date components
-        document.addEventListener('DOMContentLoaded', initializeDateComponents);
+        // Simplified date display - no complex duration calculations needed
         
         // Enhanced Experience Pagination System
         function initializeExperiencePagination() {
@@ -4245,11 +4135,11 @@
             const loadMoreContainer = document.getElementById('load-more-skills-container');
             const visibleCountSpan = document.getElementById('skills-visible-count');
 
-            // Desktop: 4, Tablet: 3, Mobile: 2 (skills can be numerous)
+            // Desktop: Show all, Tablet: 6, Mobile: 3 (better utilization of vertical space)
             const itemsToShow = {
-                desktop: 4,
-                tablet: 3,
-                mobile: 2
+                desktop: 999, // Show all skills on desktop - no need to paginate
+                tablet: 6,    // More skills on tablet
+                mobile: 3     // Slightly more on mobile
             };
             
             let currentlyShown = itemsToShow.desktop;
@@ -4282,9 +4172,19 @@
                     }
                 });
                 
-                // Update counter
+                // Update counter and hide/show it based on pagination need
+                const skillsCounter = document.getElementById('skills-counter');
                 if (visibleCountSpan) {
                     visibleCountSpan.textContent = currentlyShown;
+                }
+                
+                // Hide counter when all skills are visible (no pagination needed)
+                if (skillsCounter) {
+                    if (currentlyShown >= skillItems.length) {
+                        skillsCounter.style.display = 'none';
+                    } else {
+                        skillsCounter.style.display = 'block';
+                    }
                 }
                 
                 // Show/hide load more button
@@ -4319,9 +4219,19 @@
                     
                     currentlyShown = newShown;
                     
-                    // Update counter
+                    // Update counter and hide/show based on pagination need
+                    const skillsCounter = document.getElementById('skills-counter');
                     if (visibleCountSpan) {
                         visibleCountSpan.textContent = currentlyShown;
+                    }
+                    
+                    // Hide counter when all skills are visible
+                    if (skillsCounter) {
+                        if (currentlyShown >= skillItems.length) {
+                            skillsCounter.style.display = 'none';
+                        } else {
+                            skillsCounter.style.display = 'block';
+                        }
                     }
                     
                     // Hide load more if all shown

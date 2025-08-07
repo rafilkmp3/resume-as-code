@@ -1,76 +1,115 @@
 const fs = require('fs');
-const { exec } = require('child_process');
+const path = require('path');
+const chokidar = require('chokidar');
+const livereload = require('livereload');
+const { build } = require('./build');
 const createSimpleServer = require('./utils/server-utils');
 
 const PORT = 3000;
-const WATCH_FILES = ['template.html', 'resume-data.json'];
+const LIVERELOAD_PORT = 35729;
+const WATCH_FILES = ['template.html', 'resume-data.json', 'assets/**/*'];
 
 let isBuilding = false;
 
-// Build function
-function buildResume() {
+// Build function using direct module call (10x faster than exec)
+async function buildResume() {
     if (isBuilding) return;
     
     isBuilding = true;
     console.log('🔄 Building resume...');
     
-    exec('node scripts/build.js', (error, stdout, stderr) => {
+    try {
+        // Use draft mode for development - skips expensive PDF generation
+        await build({ mode: 'draft' });
+        console.log('✅ Resume built successfully (draft mode)');
+    } catch (error) {
+        console.error('❌ Build failed:', error.message);
+    } finally {
         isBuilding = false;
-        
-        if (error) {
-            console.error('❌ Build failed:', error.message);
-            return;
-        }
-        
-        if (stderr) {
-            console.error('⚠️  Build warnings:', stderr);
-        }
-        
-        console.log('✅ Resume built successfully');
-        if (stdout) console.log(stdout);
-    });
+    }
 }
 
-// File watcher
+// Professional file watcher with chokidar
 function watchFiles() {
     console.log('👀 Watching files for changes...');
+    console.log(`🔥 LiveReload server: http://localhost:${LIVERELOAD_PORT}`);
     
-    WATCH_FILES.forEach(file => {
-        if (fs.existsSync(file)) {
-            fs.watchFile(file, { interval: 1000 }, (curr, prev) => {
-                if (curr.mtime !== prev.mtime) {
-                    console.log(`📝 ${file} changed`);
-                    buildResume();
-                }
-            });
-            console.log(`   - ${file}`);
-        }
+    // Create livereload server
+    const liveReloadServer = livereload.createServer({ port: LIVERELOAD_PORT });
+    liveReloadServer.watch(path.resolve('./dist'));
+    
+    // Watch source files with chokidar
+    const watcher = chokidar.watch(WATCH_FILES, {
+        ignored: /node_modules|\.git|dist/,
+        ignoreInitial: true,
+        persistent: true
     });
+    
+    watcher
+        .on('change', async (filePath) => {
+            const relativePath = path.relative('.', filePath);
+            console.log(`📝 ${relativePath} changed`);
+            await buildResume();
+            // LiveReload will auto-refresh the browser after build
+        })
+        .on('add', async (filePath) => {
+            const relativePath = path.relative('.', filePath);
+            console.log(`➕ ${relativePath} added`);
+            await buildResume();
+        })
+        .on('unlink', async (filePath) => {
+            const relativePath = path.relative('.', filePath);
+            console.log(`➖ ${relativePath} removed`);
+            await buildResume();
+        });
+        
+    // Display watched patterns
+    WATCH_FILES.forEach(pattern => {
+        console.log(`   - ${pattern}`);
+    });
+    
+    return { watcher, liveReloadServer };
 }
 
 // Initialize
 console.log('🏗️  Resume-as-Code Development Server');
 console.log('=====================================');
+console.log(`⚡ Draft Mode: Lightning-fast builds (HTML only)`);
+console.log(`🔥 Hot Reload: Browser auto-refresh on changes`);
 
-// Initial build
-buildResume();
+let watchers = null;
 
-// Start file watching
-watchFiles();
-
-// Start server
-createSimpleServer(PORT, './src', true).start();
+// Initialize everything
+(async () => {
+    // Initial build
+    await buildResume();
+    
+    // Start file watching with hot reload
+    watchers = watchFiles();
+    
+    // Start server
+    const server = createSimpleServer(PORT, './dist', false); // No cache for dev
+    server.start();
+    
+    console.log('=====================================');
+    console.log(`🌐 Resume: http://localhost:${PORT}`);
+    console.log(`🔥 LiveReload: Add to HTML or use browser extension`);
+    console.log('🛑 Press Ctrl+C to stop');
+    console.log('=====================================');
+})();
 
 // Graceful shutdown
 process.on('SIGINT', () => {
     console.log('\n👋 Shutting down development server...');
     
-    // Cleanup file watchers
-    WATCH_FILES.forEach(file => {
-        if (fs.existsSync(file)) {
-            fs.unwatchFile(file);
+    if (watchers) {
+        console.log('🧹 Closing file watchers...');
+        watchers.watcher.close();
+        if (watchers.liveReloadServer) {
+            watchers.liveReloadServer.close();
         }
-    });
+    }
     
+    console.log('✅ Clean shutdown completed');
     process.exit(0);
 });

@@ -1,4 +1,36 @@
-# Optimized Dockerfile using pre-built golden-base
+# Builder stage - standalone build for local development
+FROM node:22-slim AS builder
+
+WORKDIR /app
+
+# Install system dependencies needed for Puppeteer
+RUN apt-get update && apt-get install -y \
+    chromium \
+    fonts-liberation \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Set Puppeteer to use system chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code and build
+COPY . .
+RUN npm run build
+
+# Production stage - optimized using pre-built golden-base
 FROM ghcr.io/rafilkmp3/resume-as-code:production AS production
 
 # Accept build arguments for version tracking
@@ -56,8 +88,8 @@ RUN npx playwright install --with-deps chromium firefox webkit
 # Expose ports
 EXPOSE 3000 3001
 
-# Development command
-CMD ["make", "dev"]
+# Development command - use npm script directly to avoid Docker-in-Docker issues
+CMD ["npm", "run", "dev"]
 
 # CI/Test stage
 FROM development AS ci

@@ -78,13 +78,22 @@ build-internal:
 	@npm run build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 
-# Development server with hot reload
+# Development server with hot reload (draft mode for speed)
 dev: docker-check
 	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
+	@echo "$(CYAN)⚡ Draft Mode: Lightning-fast builds (HTML only)$(NC)"
+	@echo "$(CYAN)🔥 Hot Reload: Browser auto-refresh on changes$(NC)"
 	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"
-	@echo "$(CYAN)📄 PDF: http://localhost:$(DEV_PORT)/resume.pdf$(NC)"
+	@echo "$(YELLOW)📄 Note: PDF generation skipped in dev mode$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@docker-compose -f docker/docker-compose.yml up dev
+	@docker run --rm \
+		-p $(DEV_PORT):$(DEV_PORT) \
+		-p $(TEST_PORT):$(TEST_PORT) \
+		-v "$(PWD):/app" \
+		-e BUILD_MODE=draft \
+		-e NODE_ENV=development \
+		$(DOCKER_IMAGE):builder \
+		npm run dev
 
 # Serve built resume
 serve: docker-check
