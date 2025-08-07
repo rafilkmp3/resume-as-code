@@ -969,13 +969,14 @@
         }
         
         .experience-counter {
-            font-size: 0.875rem;
-            color: var(--color-text-subtle);
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
             font-weight: 500;
             background: var(--color-surface-accent);
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            border: 1px solid var(--color-border-subtle);
+            padding: 0.4rem 1rem;
+            border-radius: 16px;
+            border: 1px solid var(--color-border-default);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         /* Load more functionality */
@@ -1003,7 +1004,10 @@
         .load-more-container {
             display: flex;
             justify-content: center;
-            margin: 3rem 0 1rem;
+            align-items: center;
+            margin: 2.5rem 0 1rem;
+            text-align: center;
+            width: 100%;
         }
         
         .load-more-btn {
@@ -2974,9 +2978,9 @@
                     <div class="section-header">
                         <h2>Experience</h2>
                         <div class="experience-controls">
-                            <span class="experience-counter no-print">
+                            <div class="experience-counter no-print">
                                 Showing <span id="shown-count">3</span> of <span id="total-count">{{work.length}}</span> positions
-                            </span>
+                            </div>
                         </div>
                     </div>
                     
