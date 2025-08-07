@@ -111,6 +111,7 @@ jobs:
           # Optimized build using golden-base
           docker buildx build \
             --target production \
+            --file docker/Dockerfile \
             --build-arg GITHUB_SHA=${{ github.sha }} \
             --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
             --tag resume-build:${{ github.sha }} \
