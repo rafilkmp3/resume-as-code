@@ -121,9 +121,9 @@ jobs:
         run: |
           echo "::group::🚀 Building staging artifacts"
 
-          # Use buildx for consistent architecture
+          # Use buildx for consistent architecture with new unified Dockerfile
           if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-            echo "Using Docker buildx"
+            echo "Using unified Dockerfile with builder target"
             docker buildx build --target builder --platform linux/amd64 -t staging-builder --load .
             mkdir -p dist
             docker run --rm -v "$PWD/dist:/tmp/dist" staging-builder sh -c "cp -r /app/dist/* /tmp/dist/" || {

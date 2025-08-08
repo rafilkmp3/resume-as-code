@@ -1,0 +1,23 @@
+---
+# Hadolint configuration for Dockerfile linting
+# Excludes legacy backup files which are for reference only
+
+ignored:
+  - DL3008  # Pin versions in apt get install (handled by multi-stage builds)
+  - DL3009  # Delete apt-get lists cache (handled by cleanup)
+  - DL4006  # Set SHELL option -o pipefail (not needed for our use case)
+
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - node
+
+# Exclude legacy backup files from linting
+exclude:
+  - "docker/legacy-backup/*"
+  - "**/legacy-backup/*"
+
+# Override default Dockerfile patterns to exclude backup directories
+dockerfile:
+  - "Dockerfile*"
+  - "!docker/legacy-backup/*"

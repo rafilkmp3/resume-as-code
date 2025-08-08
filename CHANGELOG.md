@@ -1,4 +1,4 @@
-# Changelog
+\n## [1.6.0] - 2025-08-08\n\n### ✨ Added\n- feat: add defensive error handling to version injection step\n- feat: implement system-wide Docker architecture consistency\n- feat: comprehensive versioning system with CI optimization\n\n### 🐛 Fixed\n- fix: add missing version injection scripts for production pipeline\n\n### 🔧 Changed\n- chore: stage all remaining changes for clean state\n\n# Changelog
 
 All notable changes to this project will be documented in this file.
 

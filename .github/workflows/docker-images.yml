@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docker/Dockerfile.browsers'
+      - 'Dockerfile'
       - 'package.json'
       - 'package-lock.json'
       - 'config/playwright.config*.js'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'docker/Dockerfile.browsers'
+      - 'Dockerfile'
       - 'package.json'
       - 'package-lock.json'
       - 'config/playwright.config*.js'
@@ -87,7 +87,7 @@ jobs:
           echo "Changed files: $CHANGED_FILES"
 
           # Check for changes in unified Dockerfile or shared dependencies
-          if echo "$CHANGED_FILES" | grep -qE "(docker/Dockerfile\.browsers|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
+          if echo "$CHANGED_FILES" | grep -qE "(Dockerfile|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
             BASE_CHANGED=true
             CHROMIUM_CHANGED=true
             FIREFOX_CHANGED=true
@@ -115,7 +115,7 @@ jobs:
   build-images:
     name: Build & Test (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     needs: detect-changes
     if: needs.detect-changes.outputs.any-changed == 'true'
     strategy:
@@ -123,15 +123,15 @@ jobs:
       matrix:
         include:
           - browser: chromium
-            dockerfile: docker/Dockerfile.browsers
+            dockerfile: Dockerfile
             target: chromium
             should-build: ${{ needs.detect-changes.outputs.chromium-changed }}
           - browser: firefox
-            dockerfile: docker/Dockerfile.browsers
+            dockerfile: Dockerfile
             target: firefox
             should-build: ${{ needs.detect-changes.outputs.firefox-changed }}
           - browser: webkit
-            dockerfile: docker/Dockerfile.browsers
+            dockerfile: Dockerfile
             target: webkit
             should-build: ${{ needs.detect-changes.outputs.webkit-changed }}
     env:

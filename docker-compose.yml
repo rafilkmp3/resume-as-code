@@ -1,0 +1,154 @@
+# =============================================================================
+# 🐳 Docker Compose - Resume as Code
+# =============================================================================
+# Unified service orchestration using the consolidated Dockerfile
+# All services now use a single Dockerfile with different targets
+# =============================================================================
+
+services:
+  # Development service - Hot reload environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - '3000:3000' # Main dev server
+      - '3001:3001' # Test server
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped
+    profiles:
+      - dev
+      - development
+
+  # Production service - Optimized production runtime
+  production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - prod
+      - production
+
+  # Builder service - For CI/CD pipeline builds
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        - GITHUB_SHA=${GITHUB_SHA:-dev-local}
+        - GITHUB_REF_NAME=${GITHUB_REF_NAME:-main}
+        - NODE_ENV=${NODE_ENV:-production}
+    volumes:
+      - build-output:/app/dist
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+    profiles:
+      - build
+      - ci
+
+  # CI testing service - Complete testing environment
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ci
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - test-results:/app/test-results
+      - coverage:/app/coverage
+    profiles:
+      - ci
+      - test
+
+  # Browser-specific testing services
+  test-chromium:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: chromium
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    volumes:
+      - test-results:/app/test-results
+    profiles:
+      - browser-tests
+      - chromium
+
+  test-firefox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: firefox
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    volumes:
+      - test-results:/app/test-results
+    profiles:
+      - browser-tests
+      - firefox
+
+  test-webkit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: webkit
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    volumes:
+      - test-results:/app/test-results
+    profiles:
+      - browser-tests
+      - webkit
+
+# Named volumes for data persistence
+volumes:
+  test-results:
+    name: resume-test-results
+  coverage:
+    name: resume-coverage
+  build-output:
+    name: resume-build-output
+# =============================================================================
+# Usage Examples:
+# =============================================================================
+# Development:     docker-compose --profile dev up
+# Production:      docker-compose --profile prod up
+# CI Testing:      docker-compose --profile ci up
+# Browser Tests:   docker-compose --profile browser-tests up
+# Build Only:      docker-compose --profile build up builder
+# =============================================================================

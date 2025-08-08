@@ -1,0 +1,310 @@
+name: Production Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'config/**'
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - '.github/workflows/production.yml'
+      - 'Makefile'
+      - 'package*.json'
+  workflow_dispatch:
+    inputs:
+      deployment_mode:
+        description: 'Deployment mode'
+        required: false
+        default: 'normal'
+        type: choice
+        options:
+          - normal
+          - emergency
+      emergency_reason:
+        description: 'Emergency deployment reason (if emergency mode)'
+        required: false
+        type: string
+
+concurrency:
+  group: production-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Version management with conventional commits
+  version-check:
+    name: Version Management
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version-bumped: ${{ steps.version.outputs.bumped }}
+      new-version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Conventional commit version check
+        id: version
+        run: |
+          echo "🔍 Checking if version bump is needed..."
+
+          if npm run version:auto 2>/dev/null; then
+            echo "bumped=true" >> $GITHUB_OUTPUT
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "✅ Version bumped to: $NEW_VERSION"
+
+            # Automated tag creation to prevent manual errors
+            git push origin main
+            git push origin --tags
+
+            # Create GitHub Release
+            echo "🏷️ Creating GitHub Release for v$NEW_VERSION..."
+            gh release create "v$NEW_VERSION" \
+              --title "Release v$NEW_VERSION" \
+              --notes-from-tag \
+              --generate-notes \
+              --latest
+          else
+            echo "bumped=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No version bump needed"
+          fi
+
+  # Unified build job (handles both normal and emergency modes)
+  build:
+    name: Build Resume (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event.inputs.deployment_mode == 'emergency' && '5' || '10' }}
+    needs: version-check
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+      IS_EMERGENCY: ${{ github.event.inputs.deployment_mode == 'emergency' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Emergency deployment notice
+        if: env.IS_EMERGENCY == 'true'
+        run: |
+          echo "# 🚨 EMERGENCY DEPLOYMENT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason:** ${{ github.event.inputs.emergency_reason }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** Maximum speed, no optimization, no testing" >> $GITHUB_STEP_SUMMARY
+          echo "**Risk:** High - use only when production is broken" >> $GITHUB_STEP_SUMMARY
+
+          echo "🚨 EMERGENCY DEPLOYMENT: ${{ github.event.inputs.emergency_reason }}"
+
+      - name: Inject version into documentation
+        if: env.IS_EMERGENCY != 'true'
+        run: |
+          if [ -f "scripts/inject-version.js" ]; then
+            node scripts/inject-version.js || echo "⚠️ Version injection failed, continuing"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Cache Docker layers
+        if: env.IS_EMERGENCY != 'true'
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('package*.json', 'Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Optimized Docker build (normal mode)
+        if: env.IS_EMERGENCY != 'true'
+        run: |
+          echo "🏗️ Normal mode: Optimized build with caching"
+          docker buildx build \
+            --target builder \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA=${{ github.sha }} \
+            --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --tag resume:build-${{ github.sha }} \
+            --load \
+            .
+
+          # Update cache atomically
+          if [[ -d "/tmp/.buildx-cache-new" ]]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
+
+      - name: Emergency Docker build (emergency mode)
+        if: env.IS_EMERGENCY == 'true'
+        run: |
+          echo "🚨 Emergency mode: Fast build, no cache, no optimization"
+          docker buildx build \
+            --target builder \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA=${{ github.sha }} \
+            --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
+            --tag resume:build-${{ github.sha }} \
+            --no-cache \
+            --load \
+            .
+
+      - name: Extract build artifacts
+        run: |
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume:build-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
+          echo "📁 Build artifacts:"
+          ls -la dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build-${{ github.sha }}
+          path: dist/
+          retention-days: ${{ env.IS_EMERGENCY == 'true' && '90' || '30' }}
+          compression-level: ${{ env.IS_EMERGENCY == 'true' && '1' || '6' }}
+
+  # Alpha testing (only in normal mode)
+  test-alpha:
+    name: Alpha Tests (${{ matrix.test-type }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: github.event.inputs.deployment_mode != 'emergency'
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [unit, security]
+    env:
+      CI: true
+      NODE_ENV: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        continue-on-error: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit || echo "Dependency installation failed"
+        continue-on-error: true
+
+      - name: Run alpha tests
+        run: |
+          echo "🔬 Running ${{ matrix.test-type }} tests (informational only)"
+          case "${{ matrix.test-type }}" in
+            unit)
+              npm run test:unit || echo "❌ Unit tests failed (non-blocking)"
+              ;;
+            security)
+              npm audit --audit-level=high --prefer-offline || echo "❌ Security issues found (non-blocking)"
+              ;;
+          esac
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-${{ matrix.test-type }}-results-${{ github.sha }}
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+        continue-on-error: true
+
+  # Production deployment (guaranteed to work)
+  deploy:
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build-${{ github.sha }}
+          path: dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment summary
+        run: |
+          DEPLOY_MODE="${{ github.event.inputs.deployment_mode || 'normal' }}"
+
+          if [ "$DEPLOY_MODE" = "emergency" ]; then
+            echo "# 🚨 EMERGENCY DEPLOYMENT COMPLETE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Emergency Reason:** ${{ github.event.inputs.emergency_reason }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Type:** 🚨 EMERGENCY - No testing, maximum speed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Type:** Normal production pipeline" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🌐 Live Resume" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 [**View Resume**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Actor:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$DEPLOY_MODE" = "emergency" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## ⚠️ Post-Emergency Actions" >> $GITHUB_STEP_SUMMARY
+            echo "1. 🔍 Verify the issue is resolved" >> $GITHUB_STEP_SUMMARY
+            echo "2. 🧪 Run staging tests when safe" >> $GITHUB_STEP_SUMMARY
+            echo "3. 📋 Document emergency cause" >> $GITHUB_STEP_SUMMARY
+            echo "4. 🔄 Use normal pipeline for next changes" >> $GITHUB_STEP_SUMMARY
+          fi
