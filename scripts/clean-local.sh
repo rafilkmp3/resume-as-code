@@ -21,7 +21,7 @@ echo -e "${CYAN}==============================================${NC}"
 safe_remove() {
     local path="$1"
     local description="$2"
-    
+
     if [ -e "$path" ]; then
         echo -e "${YELLOW}🗑️  Removing: $description${NC}"
         rm -rf "$path"
@@ -34,18 +34,18 @@ safe_remove() {
 # Function to stop and remove Docker containers
 docker_cleanup() {
     echo -e "${CYAN}🐳 Docker Cleanup${NC}"
-    
+
     # Stop and remove containers (non-blocking)
     if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
         echo -e "${YELLOW}🛑 Stopping Docker containers...${NC}"
         docker-compose down --volumes --remove-orphans 2>/dev/null || true
-        
+
         echo -e "${YELLOW}🧹 Pruning Docker containers...${NC}"
         docker container prune -f 2>/dev/null || true
-        
+
         echo -e "${YELLOW}🧹 Pruning Docker system...${NC}"
         docker system prune -f 2>/dev/null || true
-        
+
         echo -e "${GREEN}   ✅ Docker cleanup completed${NC}"
     else
         echo -e "${YELLOW}   ⚠️  Docker not available - skipping Docker cleanup${NC}"

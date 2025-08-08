@@ -49,7 +49,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## ✅ Safety Confirmed" >> $GITHUB_STEP_SUMMARY
           echo "Emergency deployment authorized. Proceeding with build and deploy." >> $GITHUB_STEP_SUMMARY
-          
+
           echo "🚨 EMERGENCY DEPLOYMENT AUTHORIZED"
           echo "Reason: ${{ github.event.inputs.reason }}"
           echo "This deployment skips ALL testing for maximum speed"
@@ -66,7 +66,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Emergency build info
         run: |
           echo "::group::🚨 Emergency Build Information"
@@ -76,7 +76,7 @@ jobs:
           echo "Commit: ${{ github.sha }}"
           echo "Time: $(date -u)"
           echo "::endgroup::"
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -86,7 +86,7 @@ jobs:
         run: |
           echo "::group::⚡ Emergency Docker build (no cache, maximum speed)"
           START_TIME=$(date +%s)
-          
+
           # Fastest possible build with architectural consistency - no caching, no optimization
           docker buildx build \
             --target builder \
@@ -95,25 +95,25 @@ jobs:
             --no-cache \
             --load \
             .
-          
+
           # Extract artifacts
           mkdir -p dist
           docker run --rm -v "$PWD/dist:/tmp/dist" emergency-resume:${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
-          
+
           END_TIME=$(date +%s)
           BUILD_TIME=$((END_TIME - START_TIME))
           echo "⚡ Emergency build completed in ${BUILD_TIME}s"
           echo "📁 Files generated:"
           ls -la dist/
           echo "::endgroup::"
-        
+
       - name: Upload emergency artifacts
         uses: actions/upload-artifact@v4
         with:
           name: emergency-build-${{ github.sha }}
           path: dist/
           retention-days: 90
-          compression-level: 1  # Fastest compression
+          compression-level: 1 # Fastest compression
 
   # Emergency deployment - direct to production
   emergency-deploy:
@@ -142,12 +142,12 @@ jobs:
       - name: Emergency deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
+
       - name: Emergency deployment summary
         run: |
           echo "# 🚨 EMERGENCY DEPLOYMENT COMPLETE" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 🚀 Emergency Deployment Information" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -159,20 +159,20 @@ jobs:
           echo "| **Time** | $(date -u) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 🌐 Emergency Resume Live" >> $GITHUB_STEP_SUMMARY
           echo "### 🚨 [**EMERGENCY DEPLOYMENT LIVE**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## ⚡ Emergency Pipeline Status" >> $GITHUB_STEP_SUMMARY
           echo "- 🚨 **Emergency**: Authorized deployment bypassing all safety checks" >> $GITHUB_STEP_SUMMARY
           echo "- ⚡ **Build**: Fastest possible Docker build (no cache, no optimization)" >> $GITHUB_STEP_SUMMARY
           echo "- 🚫 **No Tests**: Zero testing for maximum deployment speed" >> $GITHUB_STEP_SUMMARY
           echo "- 🚀 **Deploy**: Direct to production GitHub Pages" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## ⚠️ Post-Emergency Actions" >> $GITHUB_STEP_SUMMARY
           echo "1. 🔍 **Verify**: Check that the emergency deployment resolved the issue" >> $GITHUB_STEP_SUMMARY
           echo "2. 🧪 **Test**: Run staging pipeline to validate changes" >> $GITHUB_STEP_SUMMARY

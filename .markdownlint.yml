@@ -1,0 +1,35 @@
+---
+# Markdownlint configuration for resume-as-code documentation
+
+# Extend default configuration
+extends: default
+
+# Rule overrides for project-specific needs
+rules:
+  # Allow longer lines for GitHub URLs and technical content
+  MD013:
+    line_length: 120
+    tables: false
+    code_blocks: false
+    headers: false
+
+  # Allow HTML in markdown (for enhanced formatting)
+  MD033: false
+
+  # Allow trailing spaces (sometimes needed for line breaks)
+  MD009:
+    br_spaces: 2
+
+  # Allow multiple consecutive blank lines in some contexts
+  MD012:
+    maximum: 2
+
+  # Allow duplicate headers (common in structured docs)
+  MD024:
+    siblings_only: true
+
+  # Allow emphasis markers (useful for highlighting)
+  MD036: false
+
+  # First line can be any header level (not just H1)
+  MD041: false

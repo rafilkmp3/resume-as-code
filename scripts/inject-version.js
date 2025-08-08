@@ -19,9 +19,9 @@ console.log(`🔄 Injecting version ${version} into documentation...`);
 const placeholders = {
   '{{VERSION}}': version,
   '{{MAJOR}}': major,
-  '{{MINOR}}': minor, 
+  '{{MINOR}}': minor,
   '{{PATCH}}': patch,
-  '{{MAJOR}}.{{MINOR}}': `${major}.${minor}`
+  '{{MAJOR}}.{{MINOR}}': `${major}.${minor}`,
 };
 
 // Files to process
@@ -32,7 +32,7 @@ const filesToProcess = [
   'docs/CI-CD.md',
   'docs/ARCHITECTURE.md',
   'docs/VERSIONING.md',
-  'README.md'
+  'README.md',
 ];
 
 let processedFiles = 0;
@@ -45,10 +45,13 @@ filesToProcess.forEach(filePath => {
       let content = fs.readFileSync(filePath, 'utf8');
       const originalContent = content;
       let fileReplacements = 0;
-      
+
       // Replace all placeholders
       Object.entries(placeholders).forEach(([placeholder, value]) => {
-        const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        const regex = new RegExp(
+          placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          'g'
+        );
         const matches = (content.match(regex) || []).length;
         if (matches > 0) {
           content = content.replace(regex, value);
@@ -56,13 +59,15 @@ filesToProcess.forEach(filePath => {
           console.log(`   ${placeholder} → ${value} (${matches} times)`);
         }
       });
-      
+
       // Write updated content if changes were made
       if (content !== originalContent) {
         fs.writeFileSync(filePath, content);
         processedFiles++;
         totalReplacements += fileReplacements;
-        console.log(`✅ Processed ${filePath} (${fileReplacements} replacements)`);
+        console.log(
+          `✅ Processed ${filePath} (${fileReplacements} replacements)`
+        );
       } else {
         console.log(`⏭️  No placeholders found in ${filePath}`);
       }
@@ -84,7 +89,9 @@ console.log(`   Total replacements: ${totalReplacements}`);
 if (processedFiles > 0) {
   console.log('');
   console.log('✅ Version injection completed successfully!');
-  console.log('💡 Documentation now shows current version in all examples and references.');
+  console.log(
+    '💡 Documentation now shows current version in all examples and references.'
+  );
 } else {
   console.log('');
   console.log('ℹ️  No files needed version injection.');

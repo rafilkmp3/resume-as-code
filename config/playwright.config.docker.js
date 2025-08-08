@@ -17,23 +17,23 @@ module.exports = defineConfig({
     // Desktop browsers
     {
       name: 'desktop-chrome',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: 'desktop-firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: 'desktop-webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
       },
     },
     // Mobile browsers - Chrome/Chromium
@@ -50,7 +50,8 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 393, height: 851 }, // Pixel 5 viewport
-        userAgent: 'Mozilla/5.0 (Android 11; Mobile; rv:89.0) Gecko/89.0 Firefox/89.0',
+        userAgent:
+          'Mozilla/5.0 (Android 11; Mobile; rv:89.0) Gecko/89.0 Firefox/89.0',
         hasTouch: true,
       },
     },

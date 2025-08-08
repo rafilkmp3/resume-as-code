@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 validate_json() {
     local file="$1"
     echo "🔍 Validating JSON: $file"
-    
+
     if node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8')); console.log('✅ Valid JSON')"; then
         echo -e "${GREEN}✅ $file is valid JSON${NC}"
         return 0
@@ -29,7 +29,7 @@ validate_json() {
 validate_yaml() {
     local file="$1"
     echo "🔍 Validating YAML: $file"
-    
+
     # Try to validate with yamllint if available
     if command -v yamllint >/dev/null 2>&1; then
         if yamllint -d "{extends: default, rules: {line-length: disable, trailing-spaces: disable, truthy: disable, document-start: disable, empty-lines: disable, brackets: disable}}" "$file" >/dev/null 2>&1; then

@@ -56,15 +56,15 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
-  
+
   observe() {
     return null;
   }
-  
+
   disconnect() {
     return null;
   }
-  
+
   unobserve() {
     return null;
   }
@@ -73,30 +73,30 @@ global.IntersectionObserver = class IntersectionObserver {
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
   constructor() {}
-  
+
   observe() {
     return null;
   }
-  
+
   disconnect() {
     return null;
   }
-  
+
   unobserve() {
     return null;
   }
 };
 
 // Mock requestAnimationFrame
-global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
-global.cancelAnimationFrame = jest.fn((id) => clearTimeout(id));
+global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 16));
+global.cancelAnimationFrame = jest.fn(id => clearTimeout(id));
 
 // Mock URL.createObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-object-url');
 
 // Mock performance API
 global.performance = global.performance || {
-  now: () => Date.now()
+  now: () => Date.now(),
 };
 
 // Mock window.print

@@ -112,7 +112,7 @@
     },
     {
       "name": "MeuPatrocínio",
-      "position": "Senior DevOps Engineer", 
+      "position": "Senior DevOps Engineer",
       "url": "",
       "startDate": "2016-12",
       "endDate": "2018-08",
@@ -128,7 +128,7 @@
       "name": "Funcional Health Tech | Fidelize",
       "position": "Infrastructure Engineer",
       "url": "",
-      "startDate": "2015-04", 
+      "startDate": "2015-04",
       "endDate": "2016-03",
       "summary": "Managed pharmaceutical industry infrastructure with focus on compliance and reliability.",
       "highlights": [
@@ -139,7 +139,7 @@
       ]
     },
     {
-      "name": "Acol Consultoria & Sistemas", 
+      "name": "Acol Consultoria & Sistemas",
       "position": "Support Specialist",
       "url": "",
       "startDate": "2014-08",
@@ -148,7 +148,7 @@
       "highlights": [
         "Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery",
         "Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings",
-        "Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies", 
+        "Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies",
         "System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications"
       ]
     }
@@ -175,7 +175,17 @@
         "Created secure multi-environment promotion pipelines with Atlantis server reducing deployment time from days to minutes",
         "Established governance controls with policy-as-code using Sentinel and OPA integrated with Atlantis workflows"
       ],
-      "keywords": ["Terraform", "Atlantis", "Terragrunt", "GitOps", "GitHub Actions", "OPA", "Sentinel", "Self-Service", "Infrastructure as Code"]
+      "keywords": [
+        "Terraform",
+        "Atlantis",
+        "Terragrunt",
+        "GitOps",
+        "GitHub Actions",
+        "OPA",
+        "Sentinel",
+        "Self-Service",
+        "Infrastructure as Code"
+      ]
     },
     {
       "name": "Multi-Cloud DNS & Hybrid Network Architecture",
@@ -188,7 +198,16 @@
         "Designed disaster recovery with automated DNS failover achieving 99.99% uptime SLA",
         "Created network segmentation with VPC peering and Transit Gateway for secure multi-cloud communication"
       ],
-      "keywords": ["AWS Route53", "Multi-Cloud", "Hybrid Network", "DNS", "VPC", "Transit Gateway", "On-Premises", "HA/DR"]
+      "keywords": [
+        "AWS Route53",
+        "Multi-Cloud",
+        "Hybrid Network",
+        "DNS",
+        "VPC",
+        "Transit Gateway",
+        "On-Premises",
+        "HA/DR"
+      ]
     },
     {
       "name": "Resume-as-Code Platform",
@@ -200,7 +219,15 @@
         "Created ATS-friendly export functionality for job application compatibility",
         "Deployed with GitHub Pages integration and Make-based build system"
       ],
-      "keywords": ["Node.js", "Handlebars", "Puppeteer", "HTML/CSS", "JavaScript", "CI/CD", "GitHub Pages"]
+      "keywords": [
+        "Node.js",
+        "Handlebars",
+        "Puppeteer",
+        "HTML/CSS",
+        "JavaScript",
+        "CI/CD",
+        "GitHub Pages"
+      ]
     },
     {
       "name": "Infrastructure Automation Toolkit",
@@ -212,7 +239,15 @@
         "Built cost optimization scripts identifying $200K+ in potential savings",
         "Implemented security scanning and compliance automation for infrastructure-as-code"
       ],
-      "keywords": ["Terraform", "AWS", "GCP", "Python", "Bash", "Monitoring", "Security"]
+      "keywords": [
+        "Terraform",
+        "AWS",
+        "GCP",
+        "Python",
+        "Bash",
+        "Monitoring",
+        "Security"
+      ]
     }
   ],
   "skills": [
@@ -229,9 +264,18 @@
       }
     },
     {
-      "name": "🐳 Container Orchestration", 
+      "name": "🐳 Container Orchestration",
       "level": "Expert",
-      "keywords": ["Kubernetes", "Docker", "Helm", "Kustomize", "Istio", "ArgoCD", "Google Kubernetes Engine", "Amazon EKS"],
+      "keywords": [
+        "Kubernetes",
+        "Docker",
+        "Helm",
+        "Kustomize",
+        "Istio",
+        "ArgoCD",
+        "Google Kubernetes Engine",
+        "Amazon EKS"
+      ],
       "links": {
         "Kubernetes": "https://kubernetes.io/",
         "Docker": "https://www.docker.com/",
@@ -246,7 +290,13 @@
     {
       "name": "🔄 CI/CD & DevOps",
       "level": "Expert",
-      "keywords": ["GitHub Actions", "GitLab CI", "Jenkins", "Atlantis", "Bazel"],
+      "keywords": [
+        "GitHub Actions",
+        "GitLab CI",
+        "Jenkins",
+        "Atlantis",
+        "Bazel"
+      ],
       "links": {
         "GitHub Actions": "https://github.com/features/actions",
         "GitLab CI": "https://docs.gitlab.com/ee/ci/",
@@ -258,7 +308,17 @@
     {
       "name": "📊 Observability & Monitoring",
       "level": "Expert",
-      "keywords": ["Prometheus", "Grafana", "ELK", "Loki", "Mimir", "Datadog", "Chronosphere", "New Relic", "SignOz"],
+      "keywords": [
+        "Prometheus",
+        "Grafana",
+        "ELK",
+        "Loki",
+        "Mimir",
+        "Datadog",
+        "Chronosphere",
+        "New Relic",
+        "SignOz"
+      ],
       "links": {
         "Prometheus": "https://prometheus.io/",
         "Grafana": "https://grafana.com/",
@@ -288,7 +348,15 @@
     {
       "name": "📈 Big Data & Databases",
       "level": "Advanced",
-      "keywords": ["Apache Kafka", "Hadoop", "Apache Spark", "PostgreSQL", "Redis", "Elasticsearch", "BigQuery"],
+      "keywords": [
+        "Apache Kafka",
+        "Hadoop",
+        "Apache Spark",
+        "PostgreSQL",
+        "Redis",
+        "Elasticsearch",
+        "BigQuery"
+      ],
       "links": {
         "Apache Kafka": "https://kafka.apache.org/",
         "Hadoop": "https://hadoop.apache.org/",
@@ -302,7 +370,14 @@
     {
       "name": "🔒 Security & Compliance",
       "level": "Advanced",
-      "keywords": ["RBAC", "SAML/SSO", "Vault", "Security Scanning", "Compliance Auditing", "Infrastructure Security"],
+      "keywords": [
+        "RBAC",
+        "SAML/SSO",
+        "Vault",
+        "Security Scanning",
+        "Compliance Auditing",
+        "Infrastructure Security"
+      ],
       "links": {
         "RBAC": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
         "SAML/SSO": "https://auth0.com/intro-to-iam/what-is-saml",
@@ -315,7 +390,13 @@
     {
       "name": "🤝 Soft Skills",
       "level": "Expert",
-      "keywords": ["Effective in cross-functional teams", "Clear technical writing", "Leadership", "Mentoring", "Problem solving"]
+      "keywords": [
+        "Effective in cross-functional teams",
+        "Clear technical writing",
+        "Leadership",
+        "Mentoring",
+        "Problem solving"
+      ]
     }
   ]
 }

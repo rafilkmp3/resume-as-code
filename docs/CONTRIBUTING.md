@@ -1,6 +1,6 @@
 # 🤝 Contributing Guide
 
-## Welcome Contributors!
+## Welcome Contributors
 
 While this is primarily a personal portfolio project, contributions and suggestions are welcome! This guide will help you set up a development environment and understand the project structure.
 
@@ -60,6 +60,7 @@ make dev
 ### Making Changes
 
 #### 1. **Create a Feature Branch**
+
 ```bash
 git checkout -b feature/your-feature-name
 # or
@@ -67,6 +68,7 @@ git checkout -b fix/issue-description
 ```
 
 #### 2. **Development Commands**
+
 ```bash
 # Start development server with hot reload
 make dev
@@ -82,6 +84,7 @@ make test-performance      # Core Web Vitals
 ```
 
 #### 3. **Docker Development** (Recommended)
+
 ```bash
 # Use Docker for consistent environment
 make docker-dev            # Development server
@@ -92,6 +95,7 @@ make build-images          # Build container images
 ### Code Quality Standards
 
 #### Pre-commit Validation
+
 The project includes comprehensive pre-commit hooks that validate:
 
 - ✅ **JSON/YAML syntax validation**
@@ -100,6 +104,7 @@ The project includes comprehensive pre-commit hooks that validate:
 - 🧪 **Basic smoke tests**
 
 #### Testing Requirements
+
 All contributions must maintain high testing standards:
 
 ```bash
@@ -111,6 +116,7 @@ make test-visual          # Visual regression testing
 ```
 
 #### Code Style
+
 - **JavaScript**: Follow existing patterns and use meaningful variable names
 - **HTML/CSS**: Maintain responsive design and accessibility standards
 - **Documentation**: Update README and docs for any feature changes
@@ -120,6 +126,7 @@ make test-visual          # Visual regression testing
 ### Test Types
 
 #### 1. **Unit Tests** (Jest)
+
 - **Location**: `tests/unit/`
 - **Purpose**: Core functionality validation
 - **Requirements**: Maintain >80% code coverage
@@ -133,6 +140,7 @@ npx jest tests/unit/theme-utils.test.js
 ```
 
 #### 2. **End-to-End Tests** (Playwright)
+
 - **Location**: `tests/e2e/`
 - **Browsers**: Chromium, Firefox, WebKit
 - **Devices**: Desktop, tablet, mobile
@@ -146,6 +154,7 @@ npx playwright test --project=desktop-chrome
 ```
 
 #### 3. **Visual Regression Tests**
+
 - **Purpose**: Prevent UI regressions
 - **Baseline**: Reference screenshots for comparison
 - **Coverage**: Multiple themes and devices
@@ -156,6 +165,7 @@ npx playwright test --update-snapshots
 ```
 
 #### 4. **Accessibility Tests**
+
 - **Standards**: WCAG 2.1 AA compliance
 - **Coverage**: Keyboard navigation, screen readers, color contrast
 - **Tools**: Playwright accessibility testing
@@ -163,14 +173,16 @@ npx playwright test --update-snapshots
 ### Docker Testing
 
 #### Browser-Specific Testing
+
 ```bash
 # Test with specific browser images
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:main
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-firefox:main
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-webkit:main
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.5.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-firefox:1.5.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-webkit:1.5.0
 ```
 
 #### Multi-Architecture Validation
+
 ```bash
 # Test on different architectures (if available)
 docker run --platform linux/amd64 --rm <image>
@@ -181,13 +193,15 @@ docker run --platform linux/arm64 --rm <image>
 
 ### 🐛 Bug Fixes
 
-#### Process:
+#### Process
+
 1. **Create Issue**: Describe the bug with reproduction steps
 2. **Fix Branch**: `fix/issue-description`
 3. **Tests Required**: Unit tests for the fix + regression tests
 4. **Documentation**: Update if behavior changes
 
-#### Example:
+#### Example
+
 ```bash
 git checkout -b fix/mobile-header-alignment
 # Make your changes
@@ -197,13 +211,15 @@ git commit -m "fix: correct mobile header alignment on iOS Safari"
 
 ### ✨ New Features
 
-#### Process:
+#### Process
+
 1. **Discussion**: Open issue to discuss the feature first
 2. **Feature Branch**: `feature/feature-name`
 3. **Comprehensive Tests**: Unit + E2E + Visual tests
 4. **Documentation**: README and code documentation updates
 
-#### Example:
+#### Example
+
 ```bash
 git checkout -b feature/print-friendly-mode
 # Implement feature with tests
@@ -213,7 +229,8 @@ git commit -m "feat: add print-friendly mode toggle"
 
 ### 📚 Documentation
 
-#### Areas for Improvement:
+#### Areas for Improvement
+
 - Code comments and inline documentation
 - README enhancements
 - API documentation
@@ -221,7 +238,8 @@ git commit -m "feat: add print-friendly mode toggle"
 
 ### 🎨 Design & UX
 
-#### Guidelines:
+#### Guidelines
+
 - **Mobile-First**: Ensure responsive design
 - **Accessibility**: Maintain WCAG 2.1 AA compliance
 - **Performance**: No impact on Core Web Vitals
@@ -242,42 +260,50 @@ git commit -m "feat: add print-friendly mode toggle"
 
 ```markdown
 ## 📝 Description
+
 Brief description of the change and which issue it fixes.
 
 ## 🧪 Testing
+
 - [ ] Unit tests added/updated
-- [ ] E2E tests cover new functionality  
+- [ ] E2E tests cover new functionality
 - [ ] Visual regression tests updated
 - [ ] Manual testing completed
 
-## 📱 Device Testing  
+## 📱 Device Testing
+
 - [ ] Desktop (Chrome, Firefox, Safari)
 - [ ] Mobile (iOS Safari, Android Chrome)
 - [ ] Tablet (iPad, Android tablets)
 
 ## ♿ Accessibility
+
 - [ ] Keyboard navigation works
 - [ ] Screen reader compatibility maintained
 - [ ] Color contrast meets WCAG 2.1 AA
 - [ ] Focus management implemented
 
 ## 📊 Performance Impact
+
 - [ ] Bundle size impact assessed
 - [ ] Core Web Vitals not affected
 - [ ] Image optimization verified
 
 ## 🔗 Related Issues
+
 Fixes #(issue number)
 ```
 
 ### 3. **Review Process**
 
-#### Automated Checks:
+#### Automated Checks
+
 - ✅ **CI Pipeline**: All GitHub Actions must pass
-- ✅ **Docker Builds**: Multi-arch images build successfully  
+- ✅ **Docker Builds**: Multi-arch images build successfully
 - ✅ **Quality Gates**: Test coverage and performance maintained
 
-#### Manual Review:
+#### Manual Review
+
 - **Code Quality**: Readability, maintainability, performance
 - **Design Consistency**: UI/UX alignment with project standards
 - **Security**: No vulnerabilities or sensitive data exposure
@@ -304,26 +330,30 @@ make build-images  # Build all browser images
 
 ### Testing Multi-Architecture Support
 
-#### AMD64 Testing (GitHub Actions simulation):
+#### AMD64 Testing (GitHub Actions simulation)
+
 ```bash
 docker run --platform linux/amd64 --rm \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:main
+  ghcr.io/rafilkmp3/resume-as-code-chromium:1.5.0
 ```
 
-#### ARM64 Testing (Mac Apple Silicon):
+#### ARM64 Testing (Mac Apple Silicon)
+
 ```bash
 docker run --platform linux/arm64 --rm \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:main
+  ghcr.io/rafilkmp3/resume-as-code-chromium:1.5.0
 ```
 
 ### Contributing to Docker Infrastructure
 
-#### Dockerfile Changes:
+#### Dockerfile Changes
+
 - **Location**: `docker/` directory
 - **Testing**: Verify both architectures build successfully
 - **Documentation**: Update [DOCKER.md](DOCKER.md) for significant changes
 
-#### CI/CD Pipeline Changes:
+#### CI/CD Pipeline Changes
+
 - **Files**: `.github/workflows/*.yml`
 - **Testing**: Use `workflow_dispatch` for testing
 - **Documentation**: Update [CI-CD.md](CI-CD.md) for workflow changes
@@ -332,7 +362,8 @@ docker run --platform linux/arm64 --rm \
 
 ### Development Environment
 
-#### Port Conflicts:
+#### Port Conflicts
+
 ```bash
 # Check what's using ports 3000/3001
 lsof -ti:3000
@@ -342,7 +373,8 @@ lsof -ti:3001
 npx kill-port 3000 3001
 ```
 
-#### Docker Issues:
+#### Docker Issues
+
 ```bash
 # Clear Docker cache
 make docker-clean
@@ -352,7 +384,8 @@ docker system prune -a
 make build-images
 ```
 
-#### Permission Issues:
+#### Permission Issues
+
 ```bash
 # Fix npm permissions
 sudo chown -R $(whoami) ~/.npm
@@ -364,20 +397,23 @@ newgrp docker
 
 ### Testing Issues
 
-#### Playwright Browser Installation:
+#### Playwright Browser Installation
+
 ```bash
 # Reinstall browsers
 npx playwright install
 npx playwright install-deps
 ```
 
-#### Visual Test Failures:
+#### Visual Test Failures
+
 ```bash
 # Update baselines (only if UI changes are correct)
 npx playwright test --update-snapshots
 ```
 
-#### E2E Test Flakiness:
+#### E2E Test Flakiness
+
 - Check for timing issues in tests
 - Ensure proper wait conditions
 - Verify test isolation
@@ -394,20 +430,25 @@ npx playwright test --update-snapshots
 ### Common Questions
 
 #### Q: How do I add a new test?
+
 A: Follow existing patterns in `tests/` directory. Unit tests go in `tests/unit/`, E2E tests in `tests/e2e/`.
 
 #### Q: How do I update the resume content?
+
 A: Edit `resume-data.json` for content changes, or `template.html` for layout changes.
 
 #### Q: How do I test Docker changes locally?
+
 A: Use `make build-images` to build locally, then test with `docker run` commands.
 
 #### Q: My PR failed CI, what should I do?
+
 A: Check the GitHub Actions logs, fix the issues, and push updates to your branch.
 
 ## 🏆 Recognition
 
 Contributors will be recognized in:
+
 - **README.md**: Contributor acknowledgments
 - **Git History**: Proper commit attribution
 - **GitHub**: Contributor graph and statistics
@@ -427,7 +468,7 @@ If you experience any issues with community interactions, please contact [rafael
 
 ---
 
-## 🎉 Thank You!
+## 🎉 Thank You
 
 Thank you for contributing to this project! Every contribution, no matter how small, helps make this portfolio project better and showcases the power of collaborative development.
 
@@ -435,4 +476,4 @@ Thank you for contributing to this project! Every contribution, no matter how sm
 
 ---
 
-*Built with ❤️ by the open source community*
+_Built with ❤️ by the open source community_

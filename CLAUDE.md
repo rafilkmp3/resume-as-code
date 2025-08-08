@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Development Commands
 
 ### Build & Development
+
 - `make build` - Build HTML and PDF resume using Docker
 - `make dev` - Start development server with hot reload on port 3000
 - `make serve` - Serve built resume on port 3000
@@ -12,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Direct development server (inside Docker containers)
 
 ### Testing
+
 - `make test` - Run complete test suite (unit + E2E + visual + accessibility + performance)
 - `make test-fast` - Run fast smoke tests (recommended for development)
 - `make test-unit` - Run Jest unit tests with coverage
@@ -22,11 +24,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:e2e` - Playwright tests directly
 
 ### Docker Operations
+
 - `make docker-check` - Verify Docker is running (required for all operations)
 - `make build-images` - Build all browser-specific test images
 - `make status` - Comprehensive project health check
 
 ### Utilities
+
 - `make clean` - Clean local environment to match GitHub Actions runner (CI/CD parity)
 - `make clean-docker` - Clean Docker containers and images only (legacy)
 - `make help` - Show all available commands
@@ -36,6 +40,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a **resume generation system** built with infrastructure-as-code principles:
 
 ### Core Technology Stack
+
 - **Template Engine**: Handlebars.js for dynamic HTML generation from JSON data
 - **PDF Generation**: Puppeteer for high-quality PDF export
 - **Build System**: Node.js scripts with Docker containerization
@@ -44,6 +49,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Development**: Hot-reload dev server with file watching
 
 ### Project Structure
+
 ```
 ├── scripts/
 │   ├── build.js           # Main build script (HTML + PDF generation)
@@ -65,6 +71,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 ```
 
 ### Key Build Process
+
 1. **Data-Driven**: Resume content stored in `resume-data.json`
 2. **Template System**: `template.html` uses Handlebars for dynamic content
 3. **Asset Management**: Automatic copying of assets to dist/ directory
@@ -73,6 +80,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 6. **Responsive Design**: Mobile-first with dark/light mode support
 
 ### Docker-First Development
+
 - **All commands use Docker** - no local Node.js installation required
 - **Browser-specific images** for E2E testing (Chromium, Firefox, WebKit)
 - **Development containers** with hot reload and file watching
@@ -81,19 +89,22 @@ This is a **resume generation system** built with infrastructure-as-code princip
 ## CRITICAL Platform Engineering Rules
 
 ### 🚨 ALWAYS Use Docker for Automation
+
 - **NEVER use local binaries** (npm, node, playwright, jest) for tests or CI/CD validation
 - **ALWAYS use Makefile commands** as the entrypoint - they handle Docker orchestration
 - **All testing and automation must be containerized** to ensure environment parity
 - Local development MAY use direct commands, but validation MUST use Docker
 
 ### 🏗️ Architecture Considerations (ARM vs AMD64)
+
 - **Local Mac M1**: Runs ARM64 architecture
-- **GitHub Free Runners**: Use AMD64 architecture  
+- **GitHub Free Runners**: Use AMD64 architecture
 - **Multi-platform builds**: Docker images support both architectures
 - **Browser binaries**: May behave differently between ARM and AMD64
 - **Testing**: Always validate changes using GitHub Actions before considering complete
 
 ### 🔄 CI/CD Validation Workflow
+
 1. **Clean local environment** using `make clean` to match fresh GitHub Actions runner
 2. **Make changes locally** using Docker commands (`make build`, `make test-fast`)
 3. **Push to GitHub** to trigger AMD64 CI pipeline
@@ -102,6 +113,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 6. **Use `gh cli` for all CI/CD operations** - ensures authentication and proper API access
 
 ### 🧹 Environment Parity (Industry Standard)
+
 - **Always clean before major changes**: `make clean` removes all artifacts that could cause CI/local differences
 - **Mirrors GitHub Actions runners**: Comprehensive cleanup including system files, caches, and build artifacts
 - **Cross-platform considerations**: Removes macOS `.DS_Store`, Windows `Thumbs.db`, etc.
@@ -109,12 +121,14 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Git cleanup**: Removes untracked files and optimizes repository state
 
 ### 🛠️ Required Tools for Platform Engineering
+
 - **Docker Desktop**: Must be running for all operations
 - **GitHub CLI (`gh`)**: Must be authenticated for CI/CD validation
 - **Make**: All commands go through Makefile entrypoints
 - **Git**: For version control and triggering CI/CD
 
 ### Testing Strategy
+
 - **Unit Tests**: Jest with jsdom for DOM manipulation and utilities
 - **E2E Tests**: Playwright across multiple browsers and devices
 - **Visual Regression**: Screenshot-based testing with baselines
@@ -123,12 +137,14 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Cross-Device**: Desktop (1280x720), iPhone 15 Pro Max, iPad Pro
 
 ### Development Workflow
+
 1. **File Watching**: `make dev` watches `template.html` and `resume-data.json`
 2. **Auto-Rebuild**: Changes trigger automatic rebuild via `scripts/build.js`
 3. **Hot Reload**: Development server serves updated content immediately
 4. **Port Strategy**: Port 3000 for dev, Port 3001 for testing
 
 ### Important Implementation Details
+
 - **Handlebars Helpers**: Custom helpers for JSON stringification and equality comparison
 - **Asset Copying**: Recursive copying from assets/ to dist/assets/
 - **PDF Optimization**: Print media emulation with professional metadata
@@ -138,6 +154,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 ### 🚀 Optimized Three-Tier CI/CD Architecture
 
 #### Production Pipeline (`ci-prod.yml`) - **ROCK SOLID**
+
 - **Triggers**: Main branch changes to `src/`, `assets/`, `*.html`, `*.json`, `*.js`, `*.css`, `scripts/`
 - **Philosophy**: **Deployment NEVER blocked by tests** - guaranteed success
 - **Build**: 2-3 minutes using Docker with PDF generation (60s timeout)
@@ -145,7 +162,8 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Deploy**: Automatic to GitHub Pages (production)
 - **Status**: ✅ **Every commit to main deploys automatically**
 
-#### Staging Pipeline (`ci-staging.yml`) - **EXPERIMENTAL**  
+#### Staging Pipeline (`ci-staging.yml`) - **EXPERIMENTAL**
+
 - **Triggers**: Manual dispatch or test-related file changes
 - **Purpose**: E2E tests, visual regression, experimental features
 - **Docker Images**: Smart availability checking - skips if images missing
@@ -153,19 +171,21 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Status**: ⚠️ **All failures are non-blocking** - safe for experimentation
 
 #### Emergency Pipeline (`emergency-deploy.yml`) - **CRITICAL**
-- **Triggers**: Manual dispatch only (GitHub UI)  
+
+- **Triggers**: Manual dispatch only (GitHub UI)
 - **Speed**: Zero testing - direct build → deploy in ~5 minutes
 - **Use Case**: Production emergencies only when site is broken
 - **Safety**: Confirmation step (can be overridden with `skip_confirmation`)
 - **Status**: 🚨 **For emergencies only** - bypasses all safety checks
 
 #### 🔧 CI/CD Validation Commands (Platform Engineering)
+
 ```bash
 # Monitor production builds in real-time
 gh run list --workflow="Production CI/CD Pipeline" --limit=5
 gh run watch <run-id>
 
-# Trigger staging tests manually  
+# Trigger staging tests manually
 gh workflow run "Staging CI/CD Pipeline" --ref main
 
 # Emergency deployment (use with caution)
@@ -178,12 +198,14 @@ make test   # Run all tests
 ```
 
 #### 🛡️ Critical Fixes Implemented
+
 - **PDF Generation Timeout**: 60s timeout prevents CI from hanging indefinitely
 - **Missing Keywords Handling**: Graceful fallback for undefined `resume-data.json` fields
 - **Alpha Test Philosophy**: Tests provide insights but **never block deployment**
 - **Build Error Recovery**: Continue with HTML-only build if PDF generation fails
 
 ### Common Troubleshooting
+
 - **Port Conflicts**: Use `make status` to check port availability
 - **Docker Issues**: Run `make docker-check` to verify Docker daemon
 - **Build Failures**: Check if `resume-data.json` and `template.html` exist
@@ -193,6 +215,7 @@ make test   # Run all tests
 - **CI Pipeline Validation**: Use `gh run watch` to monitor running workflows in real-time
 
 ### Platform Engineering Commands
+
 ```bash
 # Environment parity workflow (ALWAYS start with this)
 make clean                              # Clean local to match GitHub Actions runner
@@ -205,7 +228,7 @@ make test-fast                          # Quick validation before push
 # CI/CD validation workflow
 git push                                # Trigger CI pipeline
 gh run list --limit 5                  # Check recent workflow runs
-gh run view <run-id>                    # View specific run details  
+gh run view <run-id>                    # View specific run details
 gh run watch                            # Monitor current workflows
 gh workflow list                        # List all available workflows
 
@@ -220,6 +243,7 @@ git status                              # Check repository state
 ```
 
 ### Industry Standard Best Practices Applied
+
 - **Clean Slate Principle**: `make clean` ensures local environment matches fresh CI runners
 - **Fail Fast**: `make test-fast` provides quick feedback before pushing to CI
 - **Environment Parity**: Identical setup between local and CI eliminates "works on my machine" issues

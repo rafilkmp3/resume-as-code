@@ -56,7 +56,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*To run this legacy workflow in emergencies, set emergency_override=true*" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "⚠️ This workflow has been disabled. Use ci-prod.yml for production builds."
           exit 1
 
@@ -81,19 +81,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Check image availability
         id: check
         run: |
           echo "🔍 Checking Docker image availability..."
-          
+
           # Define expected images
           IMAGES=(
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}"
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox:${{ github.ref_name }}"
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit:${{ github.ref_name }}"
           )
-          
+
           # Check each image
           AVAILABLE=true
           for image in "${IMAGES[@]}"; do
@@ -105,13 +105,13 @@ jobs:
               AVAILABLE=false
             fi
           done
-          
+
           # Set outputs
           echo "available=$AVAILABLE" >> $GITHUB_OUTPUT
-          echo "chromium=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}" >> $GITHUB_OUTPUT  
+          echo "chromium=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "firefox=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox:${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "webkit=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit:${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          
+
           if [ "$AVAILABLE" = "true" ]; then
             echo "✅ All Docker images are available"
           else
@@ -121,7 +121,7 @@ jobs:
 
   # Build first - needed for all tests
   build:
-    name: Build Resume (Emergency Only)  
+    name: Build Resume (Emergency Only)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event.inputs.emergency_override == 'true'
@@ -132,7 +132,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Display runtime info
         run: |
           echo "::group::Runtime Environment"
@@ -148,10 +148,10 @@ jobs:
           echo "Memory: $(free -h | awk '/^Mem:/ {print $2}')"
           echo "Disk: $(df -h / | awk 'NR==2 {print $4}')"
           echo "::endgroup::"
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Build with Docker (with caching)
         run: |
           echo "::group::🚀 Building with Docker layer caching"
@@ -159,7 +159,7 @@ jobs:
           echo "Commit: ${{ github.sha }}"
           echo "Ref: ${{ github.ref_name }}"
           START_TIME=$(date +%s)
-          
+
           docker buildx create --use --driver docker-container --name builder-${{ github.run_id }} || true
           docker buildx build \
             --target builder \
@@ -171,7 +171,7 @@ jobs:
             .
           mkdir -p dist
           docker run --rm -v "$PWD/dist:/tmp/dist" resume-as-code:builder-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
-          
+
           END_TIME=$(date +%s)
           BUILD_TIME=$((END_TIME - START_TIME))
           echo "✅ Build completed with caching in ${BUILD_TIME}s"
@@ -180,7 +180,7 @@ jobs:
           echo "::endgroup::"
         env:
           DOCKER_BUILDKIT: 1
-        
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -275,7 +275,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-      
+
       - name: Cache Playwright browsers
         if: matrix.test-type == 'playwright'
         uses: actions/cache@v4
@@ -285,13 +285,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-playwright-
             ${{ runner.os }}-playwright-
-      
+
       - name: Install dependencies
         run: |
           echo "::group::Installing npm dependencies"
           npm ci --prefer-offline --no-audit
           echo "::endgroup::"
-          
+
           if [ "${{ matrix.test-type }}" = "playwright" ]; then
             echo "::group::Installing Playwright browsers"
             npx playwright install --with-deps chromium
@@ -310,7 +310,7 @@ jobs:
       - name: Run tests
         run: |
           case "${{ matrix.test-type }}" in
-            unit) 
+            unit)
               echo "::group::🧪 Running unit tests"
               npm run test:unit
               echo "::endgroup::"
@@ -334,7 +334,7 @@ jobs:
           CI_COMMIT_SHA: ${{ github.sha }}
           CI_COMMIT_REF_NAME: ${{ github.ref_name }}
           CI_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -375,13 +375,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
+
       - name: Generate job summary
         if: always()
         run: |
           echo "# 🚀 Resume CI/CD Pipeline - Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 📊 Pipeline Information" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -392,7 +392,7 @@ jobs:
           echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 🌐 Live Resume" >> $GITHUB_STEP_SUMMARY
           echo "Your resume has been successfully deployed and is available at:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -400,7 +400,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## ✅ Pipeline Status" >> $GITHUB_STEP_SUMMARY
           echo "- 🏗️ **Build**: Resume HTML/PDF generated successfully" >> $GITHUB_STEP_SUMMARY
           echo "- 🧪 **Tests**: Unit and security tests passed" >> $GITHUB_STEP_SUMMARY

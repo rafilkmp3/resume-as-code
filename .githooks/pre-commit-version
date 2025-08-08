@@ -53,18 +53,18 @@ fi
 if [[ "$CURRENT_VERSION" != "$NEW_VERSION" ]]; then
     # Check if this is an automated version bump commit
     COMMIT_MSG=$(git log --format=%B -n 1 HEAD 2>/dev/null || echo "")
-    
+
     if [[ "$COMMIT_MSG" =~ ^chore\(release\): ]]; then
         echo -e "${GREEN}✅ Automated version bump detected, allowing version change${NC}"
         exit 0
     fi
-    
+
     # Check if we're in a CI environment
     if [[ -n "$CI" || -n "$GITHUB_ACTIONS" ]]; then
         echo -e "${GREEN}✅ CI environment detected, allowing version change${NC}"
         exit 0
     fi
-    
+
     echo -e "${RED}❌ Manual version change detected!${NC}"
     echo -e "${RED}   Current: $CURRENT_VERSION${NC}"
     echo -e "${RED}   New:     $NEW_VERSION${NC}"
@@ -81,7 +81,7 @@ if [[ "$CURRENT_VERSION" != "$NEW_VERSION" ]]; then
     echo -e "${BLUE}   feat: add new feature     → minor version bump${NC}"
     echo -e "${BLUE}   fix: resolve bug         → patch version bump${NC}"
     echo -e "${BLUE}   feat!: breaking change   → major version bump${NC}"
-    
+
     exit 1
 fi
 

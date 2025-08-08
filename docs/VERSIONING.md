@@ -18,7 +18,7 @@ The project uses **Semantic Versioning (SemVer 2.0.0)** with automated version b
 
 ```bash
 feat: add new feature        → MINOR version bump
-fix: resolve bug            → PATCH version bump  
+fix: resolve bug            → PATCH version bump
 feat!: breaking change      → MAJOR version bump
 docs: update docs           → PATCH version bump
 chore: maintenance          → PATCH version bump
@@ -41,9 +41,10 @@ graph LR
 ### 3. Release Artifacts
 
 Each release automatically creates:
+
 - **Git Tag**: `v1.5.0`
 - **GitHub Release**: With auto-generated changelog
-- **Versioned PDF**: `resume-rafael-sathler-v1.5.0.pdf`
+- **Versioned PDF**: `resume-rafael-sathler-v1.5.0pdf`
 - **Deployment**: Live site with version footer
 
 ## 📋 Version Enforcement
@@ -71,11 +72,13 @@ git commit -m "feat: add awesome feature"
 ## 🎯 Version Visibility
 
 ### Live Site Display
+
 - **Footer**: Shows current version `v1.5.0` with link to GitHub release
 - **Meta tags**: `<meta name="app-version" content="1.5.0">`
 - **Build info**: Commit hash and timestamp visible
 
 ### Deployment Tracking
+
 - **GitHub Pages**: Updates automatically with new versions
 - **PDF artifacts**: Attached to each GitHub release
 - **Changelog**: Auto-generated from conventional commits
@@ -85,12 +88,14 @@ git commit -m "feat: add awesome feature"
 ### Quick Rollback Options
 
 #### Option 1: Emergency Deploy Previous Version
+
 ```bash
 # Deploy specific version immediately
-gh workflow run emergency-deploy.yml -f version=v1.4.0
+gh workflow run emergency-deploy.yml -f version=v1.5.0
 ```
 
 #### Option 2: Revert and Release
+
 ```bash
 # Revert problematic commits
 git revert abc123
@@ -99,9 +104,10 @@ git commit -m "fix: revert problematic changes"
 ```
 
 #### Option 3: Manual Release Deploy
+
 ```bash
 # Create release from specific tag
-gh release create v1.4.1 --notes "Emergency hotfix release"
+gh release create v1.5.0 --notes "Emergency hotfix release"
 # Triggers automatic deployment
 ```
 
@@ -116,9 +122,9 @@ gh release create v1.4.1 --notes "Emergency hotfix release"
 
 ### Current Version Information
 
-- **Live site**: https://rafilkmp3.github.io/resume-as-code/
-- **Releases**: https://github.com/rafilkmp3/resume-as-code/releases
-- **Tags**: https://github.com/rafilkmp3/resume-as-code/tags
+- **Live site**: <https://rafilkmp3.github.io/resume-as-code/>
+- **Releases**: <https://github.com/rafilkmp3/resume-as-code/releases>
+- **Tags**: <https://github.com/rafilkmp3/resume-as-code/tags>
 - **Changelog**: [CHANGELOG.md](../CHANGELOG.md)
 
 ### Version Branches
@@ -130,6 +136,7 @@ gh release create v1.4.1 --notes "Emergency hotfix release"
 ## ⚙️ Developer Workflow
 
 ### Local Development
+
 ```bash
 # Setup hooks (one time)
 ./scripts/setup-hooks.sh
@@ -142,15 +149,17 @@ git push origin main
 ```
 
 ### Manual Version Operations (CI Only)
+
 ```bash
 # These commands should only run in CI
 npm run version:auto     # Analyze and bump version
 npm run version:patch    # Force patch version
-npm run version:minor    # Force minor version  
+npm run version:minor    # Force minor version
 npm run version:major    # Force major version
 ```
 
 ### Local Testing
+
 ```bash
 # Test build locally
 make build
@@ -178,11 +187,13 @@ GITHUB_SHA=abc123 GITHUB_REF_NAME=main make build
 ## 📈 Performance Optimizations
 
 ### Docker Caching
+
 - **Layer caching**: Reduces build time by 80%
 - **Content-based cache keys**: Skip rebuilds when content unchanged
 - **Multi-stage builds**: Optimized for CI/CD performance
 
 ### Build Efficiency
+
 - **Cache hit rate**: >90% for non-content changes
 - **Build time**: ~30s (cached) vs ~3min (cold)
 - **Artifact reuse**: Prevents redundant operations
@@ -190,12 +201,14 @@ GITHUB_SHA=abc123 GITHUB_REF_NAME=main make build
 ## 🛡️ Security & Compliance
 
 ### Version Security
+
 - **No manual edits**: Prevents version confusion
 - **Immutable tags**: Cannot be overwritten once pushed
 - **Audit trail**: Complete history of all version changes
 - **Signed commits**: GitHub Actions automatically signs releases
 
 ### Release Validation
+
 - **Pre-commit checks**: Validate before any changes
 - **CI testing**: All releases pass automated tests
 - **Rollback capability**: Quick recovery from issues
@@ -205,6 +218,7 @@ GITHUB_SHA=abc123 GITHUB_REF_NAME=main make build
 ### Common Issues
 
 #### "Version bump failed"
+
 ```bash
 # Check if working directory is clean
 git status
@@ -213,6 +227,7 @@ npm run version:auto
 ```
 
 #### "Tag already exists"
+
 ```bash
 # Pull latest tags
 git fetch origin --tags
@@ -221,6 +236,7 @@ git tag --list | grep v1.5.0
 ```
 
 #### "Release creation failed"
+
 ```bash
 # Check GitHub token permissions
 gh auth status
@@ -231,13 +247,15 @@ gh release create v1.5.0 --generate-notes
 ### Emergency Procedures
 
 #### Complete System Reset
+
 ```bash
 # Emergency: Reset to known good state
-git checkout v1.4.0
+git checkout v1.5.0
 gh workflow run emergency-deploy.yml
 ```
 
 #### Manual Release Creation
+
 ```bash
 # Create release manually if CI fails
 gh release create v1.5.0 \
@@ -248,7 +266,7 @@ gh release create v1.5.0 \
 
 ## 📞 Support
 
-- **Issues**: Report at https://github.com/rafilkmp3/resume-as-code/issues
+- **Issues**: Report at <https://github.com/rafilkmp3/resume-as-code/issues>
 - **Documentation**: Check [docs/](../) directory
 - **CI Logs**: Available in GitHub Actions tab
 - **Emergency Contact**: Immediate rollback via emergency-deploy workflow

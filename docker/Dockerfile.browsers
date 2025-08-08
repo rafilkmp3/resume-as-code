@@ -49,7 +49,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Hello World Browser Test', () => {
   test('should load a simple page and verify browser functionality', async ({ page, browserName }) => {
     console.log(`🧪 Running Hello World test for ${browserName}`);
-    
+
     // Create a simple HTML page
     await page.setContent(`
       <!DOCTYPE html>
@@ -72,11 +72,11 @@ test.describe('Hello World Browser Test', () => {
 
     // Verify page loaded
     await expect(page.locator('#greeting')).toHaveText(`Hello World from ${browserName}!`);
-    
+
     // Test basic interactivity
     await page.click('#test-btn');
     await expect(page.locator('#status')).toHaveText('Button clicked successfully!');
-    
+
     console.log(`✅ Hello World test passed for ${browserName}`);
   });
 });

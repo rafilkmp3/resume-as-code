@@ -29,10 +29,12 @@ tests/
 ## 🎯 Test Categories
 
 ### **✅ Active Tests (Running in CI)**
+
 - **Unit Tests**: Core functionality validation with Jest
 - **Security Tests**: Dependency vulnerability scanning
 
 ### **🔄 Development Tests (Local Only)**
+
 - **End-to-End Tests**: Full user journey validation
 - **Visual Regression**: Screenshot comparison testing
 - **Accessibility Tests**: WCAG 2.1 AA compliance verification
@@ -41,11 +43,13 @@ tests/
 ## 🚀 Running Tests
 
 ### **All Tests**
+
 ```bash
 make test                    # Run complete test suite
 ```
 
 ### **Individual Test Categories**
+
 ```bash
 make test-unit              # Jest unit tests with coverage
 make test-e2e               # Playwright E2E tests
@@ -55,6 +59,7 @@ make test-performance       # Core Web Vitals tests
 ```
 
 ### **Docker-based Testing**
+
 ```bash
 # Run tests in Docker (matches CI environment)
 docker-compose run --rm ci make test-internal
@@ -63,30 +68,35 @@ docker-compose run --rm ci make test-internal
 ## 📊 Test Coverage
 
 ### **Unit Tests (Jest)**
+
 - **Framework**: Jest 30.0.5 with jsdom environment
 - **Coverage**: DOM manipulation, theme utilities, localStorage
 - **Mocking**: Complete browser API simulation
 - **Reports**: HTML coverage reports with line-by-line analysis
 
 ### **E2E Tests (Playwright)**
+
 - **Browsers**: Chromium (primary), Firefox, WebKit
 - **Devices**: Desktop, iPhone 15 Pro Max, iPad Pro
 - **Workers**: Utilizes 100% of available CPU cores
 - **Retries**: 2 retries in CI for flaky test resilience
 
 ### **Visual Regression Testing**
+
 - **Baseline Management**: Automated screenshot capture and comparison
 - **Theme Coverage**: Light and dark mode validation
 - **Device Matrix**: 3 viewports × 2 themes = 6 baseline configurations
 - **Print Testing**: PDF export layout validation
 
 ### **Accessibility Testing**
+
 - **Standards**: WCAG 2.1 AA compliance
 - **Coverage**: Keyboard navigation, screen readers, color contrast
 - **Tools**: Playwright accessibility testing APIs
 - **Automation**: Continuous monitoring in development
 
 ### **Performance Testing**
+
 - **Core Web Vitals**: LCP, FID, CLS measurement
 - **Bundle Analysis**: CSS/JS optimization validation
 - **Image Optimization**: Lazy loading verification
@@ -95,6 +105,7 @@ docker-compose run --rm ci make test-internal
 ## 🔧 Configuration Files
 
 Testing configurations are centralized in the `/config` directory:
+
 - **`../config/playwright.config.js`**: Playwright E2E test configuration
 - **`../config/playwright.config.docker.js`**: Docker-specific Playwright configuration
 - **`../config/jest.config.js`**: Jest unit test configuration
@@ -105,7 +116,9 @@ All test commands automatically reference the centralized configurations through
 ## 🎨 Visual Testing
 
 ### **Screenshot Baselines**
+
 Visual regression tests maintain baseline screenshots in:
+
 ```
 tests/visual-regression.spec.js-snapshots/
 ├── desktop-light-baseline-desktop-chrome-darwin.png
@@ -117,6 +130,7 @@ tests/visual-regression.spec.js-snapshots/
 ```
 
 ### **Updating Baselines**
+
 ```bash
 # Update all visual baselines
 npx playwright test --update-snapshots
@@ -128,11 +142,13 @@ npx playwright test visual-regression.spec.js --update-snapshots
 ## 📱 Mobile Testing
 
 Comprehensive mobile testing across:
+
 - **iPhone 15 Pro Max**: 393×852 viewport
 - **iPad Pro**: 1024×1366 viewport
 - **Desktop**: 1920×1080 viewport
 
 Tests validate:
+
 - Touch target sizes (44px minimum)
 - Text readability and contrast
 - Layout responsiveness
@@ -142,6 +158,7 @@ Tests validate:
 ## 🚀 Performance Benchmarks
 
 Performance tests validate:
+
 - **Load Time**: < 3 seconds target
 - **Theme Toggle**: < 300ms response time
 - **Visual Consistency**: 98%+ screenshot match
@@ -151,11 +168,13 @@ Performance tests validate:
 ## 🐛 Debugging
 
 ### **Test Reports**
+
 - **Playwright HTML Report**: `playwright-report/index.html`
 - **Jest Coverage Report**: `coverage/lcov-report/index.html`
 - **Test Results**: `test-results/` directory
 
 ### **Debug Commands**
+
 ```bash
 # Run Playwright tests with UI mode
 npx playwright test --ui
@@ -170,6 +189,7 @@ npx playwright test --trace on
 ## 🔄 CI/CD Integration
 
 Tests are integrated into the CI/CD pipeline:
+
 1. **Unit Tests**: Always run on every commit
 2. **Security Tests**: Always run on every commit
 3. **E2E Tests**: Currently disabled while fixing browser installation
@@ -184,4 +204,4 @@ Tests are integrated into the CI/CD pipeline:
 
 ---
 
-*Tests are designed to ensure enterprise-grade quality and reliability across all platforms and devices.*
+_Tests are designed to ensure enterprise-grade quality and reliability across all platforms and devices._

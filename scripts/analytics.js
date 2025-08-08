@@ -6,7 +6,7 @@ class AnalyticsService {
   constructor() {
     this.propertyId = 'properties/434237022'; // Your GA4 property ID for G-1L4XD6LG6Z
     this.analyticsDataClient = null;
-    
+
     // Initialize client if credentials are available
     this.initializeClient();
   }
@@ -15,19 +15,28 @@ class AnalyticsService {
     try {
       // Try to initialize the client with service account credentials
       // This would require setting up a service account and downloading the JSON key
-      const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || './credentials/ga-service-account.json';
-      
+      const credentialsPath =
+        process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+        './credentials/ga-service-account.json';
+
       if (fs.existsSync(credentialsPath)) {
         this.analyticsDataClient = new BetaAnalyticsDataClient({
-          keyFilename: credentialsPath
+          keyFilename: credentialsPath,
         });
         console.log('✅ Google Analytics Data API client initialized');
       } else {
-        console.log('⚠️  Google Analytics service account credentials not found. Some analytics features will be limited.');
-        console.log('   To enable full analytics features, set up a service account and set GOOGLE_APPLICATION_CREDENTIALS environment variable.');
+        console.log(
+          '⚠️  Google Analytics service account credentials not found. Some analytics features will be limited.'
+        );
+        console.log(
+          '   To enable full analytics features, set up a service account and set GOOGLE_APPLICATION_CREDENTIALS environment variable.'
+        );
       }
     } catch (error) {
-      console.error('❌ Failed to initialize Google Analytics client:', error.message);
+      console.error(
+        '❌ Failed to initialize Google Analytics client:',
+        error.message
+      );
     }
   }
 
@@ -40,21 +49,21 @@ class AnalyticsService {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      
+
       // Enhanced GA4 configuration
       gtag('config', '${gaId}', {
         // Enhanced measurement settings
         send_page_view: true,
         anonymize_ip: true,
         allow_google_signals: true,
-        
+
         // Custom parameters
         custom_map: {
           'custom_parameter_1': 'resume_section',
           'custom_parameter_2': 'user_action'
         }
       });
-      
+
       // Enhanced event tracking for resume interactions
       document.addEventListener('DOMContentLoaded', function() {
         // Track theme toggle
@@ -63,7 +72,7 @@ class AnalyticsService {
           themeToggle.addEventListener('click', function() {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
+
             gtag('event', 'theme_change', {
               event_category: 'UI Interaction',
               event_label: newTheme,
@@ -71,7 +80,7 @@ class AnalyticsService {
             });
           });
         }
-        
+
         // Track skill tag clicks
         document.querySelectorAll('.skill-tag').forEach(function(tag) {
           tag.addEventListener('click', function() {
@@ -84,7 +93,7 @@ class AnalyticsService {
             });
           });
         });
-        
+
         // Track work experience expand/collapse
         document.querySelectorAll('.work-date').forEach(function(dateElement) {
           dateElement.addEventListener('click', function() {
@@ -97,7 +106,7 @@ class AnalyticsService {
             });
           });
         });
-        
+
         // Track load more experience button
         const loadMoreBtn = document.getElementById('load-more-btn');
         if (loadMoreBtn) {
@@ -110,13 +119,13 @@ class AnalyticsService {
             });
           });
         }
-        
+
         // Track external link clicks
         document.querySelectorAll('.link-item, .skill-tag[href], a[href^="http"]').forEach(function(link) {
           link.addEventListener('click', function() {
             const url = this.href;
             const linkText = this.textContent.trim();
-            
+
             gtag('event', 'external_link_click', {
               event_category: 'Outbound Link',
               event_label: linkText,
@@ -125,13 +134,13 @@ class AnalyticsService {
             });
           });
         });
-        
+
         // Track contact link clicks
         document.querySelectorAll('a[href^="tel:"], a[href^="mailto:"]').forEach(function(link) {
           link.addEventListener('click', function() {
             const type = this.href.startsWith('tel:') ? 'phone' : 'email';
             const value = this.href.replace(/^(tel:|mailto:)/, '');
-            
+
             gtag('event', 'contact_click', {
               event_category: 'Contact',
               event_label: type,
@@ -140,7 +149,7 @@ class AnalyticsService {
             });
           });
         });
-        
+
         // Track print attempts
         window.addEventListener('beforeprint', function() {
           gtag('event', 'resume_print', {
@@ -149,16 +158,16 @@ class AnalyticsService {
             custom_parameter_2: 'print_action'
           });
         });
-        
+
         // Track scroll depth for engagement
         let maxScrollDepth = 0;
         let scrollTimer;
-        
+
         window.addEventListener('scroll', function() {
           clearTimeout(scrollTimer);
           scrollTimer = setTimeout(function() {
             const scrollDepth = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
-            
+
             if (scrollDepth > maxScrollDepth && scrollDepth >= 25 && scrollDepth % 25 === 0) {
               maxScrollDepth = scrollDepth;
               gtag('event', 'scroll_depth', {
@@ -170,11 +179,11 @@ class AnalyticsService {
             }
           }, 300);
         });
-        
+
         // Track time on page
         let timeOnPageInterval;
         let timeOnPage = 0;
-        
+
         timeOnPageInterval = setInterval(function() {
           timeOnPage += 30;
           if (timeOnPage % 60 === 0) { // Every minute
@@ -186,7 +195,7 @@ class AnalyticsService {
             });
           }
         }, 30000); // Check every 30 seconds
-        
+
         // Clean up on page unload
         window.addEventListener('beforeunload', function() {
           clearInterval(timeOnPageInterval);
@@ -231,18 +240,19 @@ class AnalyticsService {
 
       return {
         success: true,
-        data: response.rows?.map(row => ({
-          date: row.dimensionValues[0].value,
-          pageViews: row.metricValues[0].value,
-          sessions: row.metricValues[1].value,
-          engagementRate: row.metricValues[2].value,
-        })) || []
+        data:
+          response.rows?.map(row => ({
+            date: row.dimensionValues[0].value,
+            pageViews: row.metricValues[0].value,
+            sessions: row.metricValues[1].value,
+            engagementRate: row.metricValues[2].value,
+          })) || [],
       };
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -284,16 +294,17 @@ class AnalyticsService {
 
       return {
         success: true,
-        data: response.rows?.map(row => ({
-          eventName: row.dimensionValues[0].value,
-          count: row.metricValues[0].value,
-        })) || []
+        data:
+          response.rows?.map(row => ({
+            eventName: row.dimensionValues[0].value,
+            count: row.metricValues[0].value,
+          })) || [],
       };
     } catch (error) {
       console.error('Error fetching events data:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -301,28 +312,28 @@ class AnalyticsService {
   // Generate analytics report
   async generateReport() {
     console.log('📊 Generating Google Analytics Report...');
-    
+
     const pageViews = await this.getPageViews();
     const events = await this.getTopEvents();
-    
+
     const report = {
       generatedAt: new Date().toISOString(),
       summary: {
         analyticsEnabled: true,
         trackingId: 'G-1L4XD6LG6Z',
-        dataApiEnabled: !!this.analyticsDataClient
+        dataApiEnabled: !!this.analyticsDataClient,
       },
       data: {
         pageViews: pageViews?.data || [],
-        topEvents: events?.data || []
-      }
+        topEvents: events?.data || [],
+      },
     };
-    
+
     // Save report
     const reportPath = './analytics-report.json';
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
     console.log(`📊 Analytics report saved to ${reportPath}`);
-    
+
     return report;
   }
 }
@@ -332,9 +343,9 @@ module.exports = AnalyticsService;
 // CLI usage
 if (require.main === module) {
   const analytics = new AnalyticsService();
-  
+
   const command = process.argv[2];
-  
+
   switch (command) {
     case 'report':
       analytics.generateReport();

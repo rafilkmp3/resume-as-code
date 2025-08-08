@@ -1,0 +1,51 @@
+# Prettier ignore patterns for resume-as-code
+
+# Build artifacts
+dist/
+coverage/
+.cache/
+test-screenshots/
+
+# Dependencies
+node_modules/
+
+# Lock files (auto-generated)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+*.min.js
+*.min.css
+
+# Git
+.git/
+
+# Docker
+.dockerignore
+Dockerfile*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Binary files
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot

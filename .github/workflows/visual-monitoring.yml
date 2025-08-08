@@ -3,17 +3,17 @@ name: Visual Monitoring
 on:
   # Run after successful deploy to main
   workflow_run:
-    workflows: ["CI/CD Pipeline"]
+    workflows: ['CI/CD Pipeline']
     types:
       - completed
     branches: [main]
-  
+
   # Manual trigger for testing
   workflow_dispatch:
-  
+
   # Scheduled runs for proactive monitoring
   schedule:
-    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM UTC
+    - cron: '0 6 * * 1' # Weekly on Monday at 6 AM UTC
 
 concurrency:
   group: visual-monitoring-${{ github.ref }}
@@ -61,7 +61,7 @@ jobs:
           echo "Browser: ${{ matrix.browser }}"
           echo "Image: ${{ matrix.image }}"
           echo "Mode: Non-blocking monitoring"
-          
+
           # Run visual tests with relaxed thresholds for monitoring
           npx playwright test tests/visual-analysis.spec.js \
             --project=${{ matrix.browser }} \
@@ -69,7 +69,7 @@ jobs:
             --reporter=html,json \
             --output-dir=test-results-${{ matrix.browser }} \
             || echo "⚠️ Visual differences detected (non-blocking)"
-          
+
           echo "::endgroup::"
         continue-on-error: true
 
@@ -77,39 +77,39 @@ jobs:
         if: always()
         run: |
           echo "::group::📊 Generating visual comparison report"
-          
+
           # Create summary report
           cat > visual-summary-${{ matrix.browser }}.md << 'EOF'
           # Visual Monitoring Report - ${{ matrix.browser }}
-          
+
           **Run Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Workflow:** ${{ github.workflow }}
           **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
           **Browser:** ${{ matrix.browser }}
           **Mode:** Non-blocking monitoring
-          
+
           ## Screenshots Generated
-          
+
           EOF
-          
+
           # List generated screenshots
           find test-results-${{ matrix.browser }} -name "*.png" | head -10 | while read file; do
             basename_file=$(basename "$file")
             echo "- $basename_file" >> visual-summary-${{ matrix.browser }}.md
           done
-          
+
           # Add monitoring insights
           cat >> visual-summary-${{ matrix.browser }}.md << 'EOF'
-          
+
           ## Monitoring Status
-          
+
           ✅ Visual monitoring completed successfully
           📸 Screenshots captured for layout analysis
           🔍 Ready for manual review and improvement identification
-          
+
           This is a **non-blocking** monitoring run - no action required unless significant visual regressions are identified.
           EOF
-          
+
           echo "::endgroup::"
         continue-on-error: true
 
@@ -129,14 +129,14 @@ jobs:
         if: always()
         run: |
           echo "::group::💾 Archiving baseline screenshots"
-          
+
           # Create timestamped directory for historical comparison
           TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
           mkdir -p "screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}"
-          
+
           # Copy screenshots to baseline archive
           find test-results-${{ matrix.browser }} -name "*.png" -exec cp {} "screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/" \; || true
-          
+
           echo "📁 Baseline screenshots archived to screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/"
           echo "::endgroup::"
         continue-on-error: true
@@ -156,19 +156,19 @@ jobs:
       - name: Create comprehensive monitoring report
         run: |
           echo "::group::📋 Creating comprehensive monitoring report"
-          
+
           cat > MONITORING_REPORT.md << 'EOF'
           # 🔍 Visual Monitoring Report
-          
+
           **Workflow:** ${{ github.workflow }}
           **Trigger:** ${{ github.event_name }}
           **Run ID:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
+
           ## Browser Coverage
-          
+
           EOF
-          
+
           # Add browser-specific summaries
           for browser in chromium firefox webkit; do
             if [ -f "visual-summary-$browser.md" ]; then
@@ -183,20 +183,20 @@ jobs:
               echo "" >> MONITORING_REPORT.md
             fi
           done
-          
+
           cat >> MONITORING_REPORT.md << 'EOF'
-          
+
           ## Next Steps
-          
+
           1. 📸 **Review Screenshots**: Check uploaded artifacts for visual changes
           2. 🎨 **Layout Analysis**: Compare with previous baselines for improvements
           3. 🔄 **Iterative Enhancement**: Use insights for continuous UI improvements
-          
+
           ---
-          
+
           *This is an automated non-blocking monitoring report. No immediate action required unless significant regressions are detected.*
           EOF
-          
+
           echo "::endgroup::"
 
       - name: Upload comprehensive monitoring report
@@ -213,7 +213,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Browser | Status | Artifacts |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|-----------|" >> $GITHUB_STEP_SUMMARY
-          
+
           for browser in chromium firefox webkit; do
             if [ -f "visual-summary-$browser.md" ]; then
               echo "| $browser | ✅ Completed | [View Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
@@ -221,7 +221,7 @@ jobs:
               echo "| $browser | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
             fi
           done
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** Non-blocking monitoring" >> $GITHUB_STEP_SUMMARY
           echo "**Purpose:** Visual regression detection and layout improvement identification" >> $GITHUB_STEP_SUMMARY

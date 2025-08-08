@@ -2,14 +2,14 @@ name: Staging CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'tests/**'
       - 'Dockerfile*'
       - 'playwright.config*.js'
       - '.github/workflows/ci-staging.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       run_e2e:
@@ -49,18 +49,18 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Check image availability
         id: check
         run: |
           echo "🔍 Checking Docker image availability..."
-          
+
           IMAGES=(
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-chromium:${{ github.ref_name }}"
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-firefox:${{ github.ref_name }}"
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-webkit:${{ github.ref_name }}"
           )
-          
+
           AVAILABLE=true
           for image in "${IMAGES[@]}"; do
             echo "  Checking: $image"
@@ -71,9 +71,9 @@ jobs:
               AVAILABLE=false
             fi
           done
-          
+
           echo "available=$AVAILABLE" >> $GITHUB_OUTPUT
-          
+
           if [ "$AVAILABLE" = "true" ]; then
             echo "✅ All Docker images are available"
           else
@@ -91,15 +91,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Check for existing production build
         id: check-artifacts
         run: |
           echo "🔍 Looking for production build artifacts..."
-          
+
           # Try to download from recent production builds
           AVAILABLE=false
-          
+
           # For PRs or manual runs, we need to build
           if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "available=false" >> $GITHUB_OUTPUT
@@ -109,7 +109,7 @@ jobs:
             echo "available=false" >> $GITHUB_OUTPUT
             echo "📝 Will build staging artifacts"
           fi
-        
+
       - name: Set up Docker Buildx
         if: steps.check-artifacts.outputs.available != 'true'
         uses: docker/setup-buildx-action@v3
@@ -120,7 +120,7 @@ jobs:
         if: steps.check-artifacts.outputs.available != 'true'
         run: |
           echo "::group::🚀 Building staging artifacts"
-          
+
           # Use buildx for consistent architecture
           if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
             echo "Using Docker buildx"
@@ -134,12 +134,12 @@ jobs:
             echo "Docker not available, using make build"
             make build || npm run build
           fi
-          
+
           echo "📁 Staging build completed:"
           ls -la dist/
           echo "::endgroup::"
         continue-on-error: true
-        
+
       - name: Upload staging build artifacts
         if: steps.check-artifacts.outputs.available != 'true'
         uses: actions/upload-artifact@v4
@@ -160,7 +160,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium]  # Start with just Chromium to reduce complexity
+        browser: [chromium] # Start with just Chromium to reduce complexity
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
@@ -182,7 +182,7 @@ jobs:
           echo "::group::🎭 Running experimental ${{ matrix.browser }} E2E tests"
           echo "Browser: ${{ matrix.browser }}"
           echo "Mode: Experimental - failures won't block deployment"
-          
+
           # Run with relaxed settings
           npx playwright test \
             --project=desktop-chrome \
@@ -233,7 +233,7 @@ jobs:
         run: |
           echo "::group::📸 Running experimental visual tests"
           echo "Mode: Experimental - for insights, not blocking"
-          
+
           # Run visual tests with relaxed thresholds
           npx playwright test tests/visual-regression.spec.js \
             --project=desktop-chrome \
@@ -258,14 +258,20 @@ jobs:
   staging-summary:
     name: Staging Summary
     runs-on: ubuntu-latest
-    needs: [check-images, prepare-build, test-e2e-experimental, test-visual-experimental]
+    needs:
+      [
+        check-images,
+        prepare-build,
+        test-e2e-experimental,
+        test-visual-experimental,
+      ]
     if: always()
     steps:
       - name: Generate staging summary
         run: |
           echo "# 🧪 Staging Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 📊 Pipeline Information" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -275,18 +281,18 @@ jobs:
           echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 🧪 Experimental Test Results" >> $GITHUB_STEP_SUMMARY
           echo "| Test Type | Status | Impact |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          
+
           # Docker Images
           if [ "${{ needs.check-images.outputs.images-available }}" = "true" ]; then
             echo "| Docker Images | ✅ Available | Tests can run |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Docker Images | ❌ Missing | Tests skipped |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # E2E Tests
           if [ "${{ needs.test-e2e-experimental.result }}" = "success" ]; then
             echo "| E2E Tests | ✅ Passed | Good to go |" >> $GITHUB_STEP_SUMMARY
@@ -295,7 +301,7 @@ jobs:
           else
             echo "| E2E Tests | ⏭️ Skipped | Not triggered |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Visual Tests
           if [ "${{ needs.test-visual-experimental.result }}" = "success" ]; then
             echo "| Visual Tests | ✅ Passed | Good to go |" >> $GITHUB_STEP_SUMMARY
@@ -304,7 +310,7 @@ jobs:
           else
             echo "| Visual Tests | ⏭️ Skipped | Not triggered |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 💡 Staging Notes" >> $GITHUB_STEP_SUMMARY
           echo "- 🧪 **Purpose**: Test experimental features without blocking production" >> $GITHUB_STEP_SUMMARY

@@ -2,10 +2,10 @@ name: Production CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'src/**'
-      - 'assets/**' 
+      - 'assets/**'
       - 'config/**'
       - '*.html'
       - '*.json'
@@ -40,24 +40,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history for version analysis
+          fetch-depth: 0 # Fetch full history for version analysis
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+
       - name: Run semantic version check
         id: version
         run: |
           echo "🔍 Checking if version bump is needed..."
-          
+
           # Run version bump in dry-run mode first to see what would happen
           if npm run version:auto 2>/dev/null; then
             echo "bumped=true" >> $GITHUB_OUTPUT
@@ -65,11 +65,11 @@ jobs:
             NEW_VERSION=$(node -p "require('./package.json').version")
             echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
             echo "✅ Version bumped to: $NEW_VERSION"
-            
+
             # Push the version bump and tag
             git push origin main
             git push origin --tags
-            
+
             # Create GitHub Release with proper changelog
             echo "🏷️ Creating GitHub Release for v$NEW_VERSION..."
             gh release create "v$NEW_VERSION" \
@@ -77,7 +77,7 @@ jobs:
               --notes-from-tag \
               --generate-notes \
               --latest
-            
+
           else
             echo "bumped=false" >> $GITHUB_OUTPUT
             echo "ℹ️  No version bump needed"
@@ -95,12 +95,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js (for version injection)
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          
+
       - name: Inject version into documentation
         run: |
           echo "🔄 Injecting current version into documentation placeholders..."
@@ -114,7 +114,7 @@ jobs:
             echo "⚠️  Version injection script not found, skipping"
             echo "💡 Build will continue without version placeholder injection"
           fi
-        
+
       - name: Display runtime info
         run: |
           echo "::group::Runtime Environment"
@@ -126,14 +126,14 @@ jobs:
           echo "Workflow: ${{ github.workflow }}"
           echo "Actor: ${{ github.actor }}"
           echo "::endgroup::"
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64
           driver-opts: |
             image=moby/buildkit:latest
-        
+
       - name: Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -141,16 +141,16 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ hashFiles('package*.json', 'docker/Dockerfile*') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-          
+
       - name: Optimized Docker Build
         run: |
           echo "::group::🚀 Optimized Docker build with advanced caching"
           START_TIME=$(date +%s)
-          
+
           # Calculate cache hash to avoid unnecessary rebuilds
           CACHE_KEY=$(echo "${{ hashFiles('package*.json', 'template.html', 'resume-data.json', 'scripts/**', 'assets/**') }}" | head -c 12)
           echo "📋 Content cache key: $CACHE_KEY"
-          
+
           # Check if we can skip build entirely
           if docker manifest inspect "resume-cache:$CACHE_KEY" >/dev/null 2>&1; then
             echo "🎯 Cache hit! Using pre-built image"
@@ -169,23 +169,23 @@ jobs:
               --tag "resume-cache:$CACHE_KEY" \
               --load \
               .
-            
+
             # Update cache (atomic operation)
             if [[ -d "/tmp/.buildx-cache-new" ]]; then
               rm -rf /tmp/.buildx-cache
               mv /tmp/.buildx-cache-new /tmp/.buildx-cache
             fi
           fi
-          
+
           # Extract artifacts (single operation)
           mkdir -p dist
           docker run --rm -v "$PWD/dist:/tmp/dist" "resume-build:${{ github.sha }}" sh -c "cp -r /app/dist/* /tmp/dist/"
-          
+
           END_TIME=$(date +%s)
           echo "✅ Build completed in $((END_TIME - START_TIME))s"
           ls -la dist/
           echo "::endgroup::"
-        
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -218,7 +218,7 @@ jobs:
           node-version: '22'
           cache: 'npm'
         continue-on-error: true
-      
+
       - name: Install dependencies
         run: |
           echo "::group::Installing npm dependencies"
@@ -230,9 +230,9 @@ jobs:
         run: |
           echo "🔬 Running alpha tests - results are informational only"
           echo "⚠️ These tests CANNOT block deployment"
-          
+
           case "${{ matrix.test-type }}" in
-            unit) 
+            unit)
               echo "::group::🧪 Running unit tests (alpha)"
               if command -v npm >/dev/null 2>&1; then
                 npm run test:unit || echo "❌ Unit tests failed (non-blocking)"
@@ -252,7 +252,7 @@ jobs:
               ;;
           esac
         continue-on-error: true
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -269,7 +269,7 @@ jobs:
   deploy:
     name: Deploy to Production
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build]  # Only depends on build, not tests
+    needs: [build] # Only depends on build, not tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -293,13 +293,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
+
       - name: Generate production deployment summary
         if: always()
         run: |
           echo "# 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 📊 Deployment Information" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -310,13 +310,13 @@ jobs:
           echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## 🌐 Live Resume" >> $GITHUB_STEP_SUMMARY
           echo "### 📱 [**View Production Resume**](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **URL**: \`${{ steps.deployment.outputs.page_url }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## ✅ Production Pipeline Status" >> $GITHUB_STEP_SUMMARY
           echo "- 🏗️ **Build**: Resume HTML/PDF generated successfully" >> $GITHUB_STEP_SUMMARY
           echo "- 🔬 **Alpha Tests**: Informational testing (results don't affect deployment)" >> $GITHUB_STEP_SUMMARY

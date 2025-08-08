@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.0] - 2025-08-07
 
 ### ✨ Added
+
 - feat: optimize Skills section and implement cache busting (v1.4.0)
 - feat: implement modern typography system with Apple liquid glass design
 - feat: add smart golden-base management with fallback strategy
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add comprehensive development environment with Claude Code integration
 
 ### 🐛 Fixed
+
 - fix(ci): add missing --file parameter to Docker build command
 - fix(ui): improve pagination indicator styling and center Load More buttons
 - fix(docker): pass GitHub environment variables for commit hash injection
@@ -45,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: correct environment detection for GitHub Pages deployment
 
 ### 🔧 Changed
+
 - chore: clean up legacy code and unused files
 - docs: refactor README to reduce clutter and improve readability
 - test: add comprehensive unit tests for print/PDF functionality and theme switching
@@ -56,29 +59,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2025-01-07
 
 ### 🚨 Emergency Fixes
+
 - **CRITICAL**: Fix complete mobile/tablet rendering failure causing blank white screens
 - Add comprehensive JavaScript error handling with content visibility failsafes
 - Implement emergency fallback logic for pagination systems to prevent content hiding
 
-### ✨ New Features  
+### ✨ New Features
+
 - **Dynamic Pagination System**: Experience, Projects, Education, and Skills sections now support Load More functionality
 - **App Version Tracking**: Footer displays current app version and environment (production/preview)
 - **Interactive Date Components**: Enhanced date displays with hover details and duration calculations
 - **Multi-PDF Generation**: Screen-optimized, Print-optimized, and ATS-optimized PDF versions
 
 ### 🎨 Design Improvements
+
 - **Footer Redesign**: Replace complex gradient/shimmer effects with clean, professional styling
 - **Date Consistency**: Standardize Education section to use same interactive format as Work experience
 - **Narrow Screen Optimization**: Improved header layout for mobile devices with better spacing and typography
 - **PDF Layout Optimization**: Reduced ATS PDF from 26 to 4 pages (85% improvement) with optimized spacing
 
 ### 🔧 Technical Enhancements
+
 - **CI/CD Integration**: Dynamic app version injection from package.json during build process
 - **Error Recovery**: Comprehensive try-catch blocks prevent JavaScript failures from breaking site
 - **Responsive Design**: Enhanced mobile-first approach with better breakpoint handling
 - **Build System**: Improved PDF generation with light mode forcing and proper content visibility
 
 ### 🐛 Bug Fixes
+
 - Fix Load More button visibility issues across all sections
 - Resolve date hover animation causing layout shifts by removing transform scaling
 - Fix pagination JavaScript conflicts between different content types
@@ -86,18 +94,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent dark mode bleeding into PDF exports
 
 ### 📱 Mobile Experience
+
 - Emergency mobile fix ensures all content sections are immediately visible
 - Improved touch targets and interaction feedback
 - Better responsive typography and spacing
 - Enhanced PDF download options for mobile sharing
 
 ### 🧪 Testing & Quality
+
 - Added visual analysis workflow for comprehensive site testing
 - Implemented PDF to image conversion for layout inspection
 
 ## [1.2.1] - 2024-12-20
 
 ### 🐛 Bug Fixes
+
 - Fix initial release workflow issues
 - Update CI/CD pipeline configuration
 - Resolve Docker build problems
@@ -105,6 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2024-12-15
 
 ### ✨ Added
+
 - Initial automated release workflow
 - Basic CI/CD pipeline setup
 - Foundation for semantic versioning

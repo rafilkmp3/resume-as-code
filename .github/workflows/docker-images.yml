@@ -2,7 +2,7 @@ name: Docker Images
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docker/Dockerfile.browsers'
       - 'package.json'
@@ -10,7 +10,7 @@ on:
       - 'config/playwright.config*.js'
       - '.github/workflows/docker-images.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docker/Dockerfile.browsers'
       - 'package.json'
@@ -59,7 +59,7 @@ jobs:
         id: changes
         run: |
           echo "Detecting changes for efficient Docker builds..."
-          
+
           # Force rebuild if requested
           if [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
             echo "🔄 Force rebuild requested"
@@ -70,22 +70,22 @@ jobs:
             echo "any=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # Check for changes in specific Dockerfiles or dependencies
           BASE_CHANGED=false
           CHROMIUM_CHANGED=false
           FIREFOX_CHANGED=false
           WEBKIT_CHANGED=false
-          
+
           # Get changed files
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             CHANGED_FILES=$(git diff --name-only HEAD~1)
           else
             CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || echo "docker/Dockerfile.browsers")
           fi
-          
+
           echo "Changed files: $CHANGED_FILES"
-          
+
           # Check for changes in unified Dockerfile or shared dependencies
           if echo "$CHANGED_FILES" | grep -qE "(docker/Dockerfile\.browsers|package\.json|package-lock\.json|\.github/workflows/docker-images\.yml)"; then
             BASE_CHANGED=true
@@ -93,20 +93,20 @@ jobs:
             FIREFOX_CHANGED=true
             WEBKIT_CHANGED=true
           fi
-          
+
           # Set outputs
           echo "chromium=$CHROMIUM_CHANGED" >> $GITHUB_OUTPUT
           echo "firefox=$FIREFOX_CHANGED" >> $GITHUB_OUTPUT
           echo "webkit=$WEBKIT_CHANGED" >> $GITHUB_OUTPUT
-          
+
           ANY_CHANGED=false
           if [ "$CHROMIUM_CHANGED" = "true" ] || [ "$FIREFOX_CHANGED" = "true" ] || [ "$WEBKIT_CHANGED" = "true" ]; then
             ANY_CHANGED=true
           fi
           echo "any=$ANY_CHANGED" >> $GITHUB_OUTPUT
-          
+
           echo "📊 Change Detection Results:"
-          echo "  Chromium: $CHROMIUM_CHANGED" 
+          echo "  Chromium: $CHROMIUM_CHANGED"
           echo "  Firefox: $FIREFOX_CHANGED"
           echo "  WebKit: $WEBKIT_CHANGED"
           echo "  Any: $ANY_CHANGED"
@@ -147,13 +147,21 @@ jobs:
       - name: Checkout
         if: matrix.should-build == 'true'
         uses: actions/checkout@v4
-        
+
       - name: Set up Docker Buildx
         if: matrix.should-build == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-        
+
+      - name: Get package version
+        if: matrix.should-build == 'true'
+        id: version
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "Package version: $PACKAGE_VERSION"
+
       - name: Log in to Container Registry
         if: matrix.should-build == 'true'
         uses: docker/login-action@v3
@@ -161,7 +169,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Extract metadata
         if: matrix.should-build == 'true'
         id: meta
@@ -169,11 +177,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}
           tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=ref,event=branch
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
-            
+            type=raw,value=${{ env.PACKAGE_VERSION }},enable=true
+
       - name: Build AMD64 image for testing
         if: matrix.should-build == 'true'
         uses: docker/build-push-action@v5
@@ -199,29 +210,29 @@ jobs:
         if: matrix.should-build == 'true'
         run: |
           echo "🧪 Running smoke tests for ${{ matrix.browser }} (AMD64 - Multi-arch will be built during push)"
-          
+
           # Use local test tag for smoke tests
           IMAGE_TAG="test-${{ matrix.browser }}:local"
           echo "Testing image: $IMAGE_TAG"
-          
+
           # Test 1: Basic container startup
           echo "  ✓ Testing container startup..."
           docker run --rm $IMAGE_TAG echo "Container started successfully"
-          
+
           # Test 2: Node.js and npm are available
           echo "  ✓ Testing Node.js environment..."
           docker run --rm $IMAGE_TAG node --version
           docker run --rm $IMAGE_TAG npm --version
-          
+
           # Test 3: Playwright is installed
           echo "  ✓ Testing Playwright installation..."
           docker run --rm $IMAGE_TAG npx playwright --version
-          
+
           # Test 4: Verify testuser permissions and browser accessibility
           echo "  ✓ Verifying testuser can access browser files..."
           docker run --rm $IMAGE_TAG sh -c "whoami && id && test -r /opt/playwright && echo 'Browser directory accessible to testuser'"
-          
-          # Test 5: Verify browser installation and basic functionality  
+
+          # Test 5: Verify browser installation and basic functionality
           echo "  🎭 Testing ${{ matrix.browser }} browser installation..."
           case "${{ matrix.browser }}" in
             chromium)
@@ -229,7 +240,7 @@ jobs:
               docker run --rm $IMAGE_TAG node -e "const { chromium } = require('playwright'); (async () => { const browser = await chromium.launch({headless: true}); console.log('✅ Chromium browser launched successfully'); await browser.close(); })()"
               ;;
             firefox)
-              echo "    Testing Firefox browser startup"  
+              echo "    Testing Firefox browser startup"
               docker run --rm $IMAGE_TAG node -e "const { firefox } = require('playwright'); (async () => { const browser = await firefox.launch({headless: true}); console.log('✅ Firefox browser launched successfully'); await browser.close(); })()"
               ;;
             webkit)
@@ -237,7 +248,7 @@ jobs:
               docker run --rm $IMAGE_TAG node -e "const { webkit } = require('playwright'); (async () => { const browser = await webkit.launch({headless: true}); console.log('✅ WebKit browser launched successfully'); await browser.close(); })()"
               ;;
           esac
-          
+
           echo "✅ All smoke tests and Hello World test passed for ${{ matrix.browser }}"
 
       - name: Push image
@@ -265,7 +276,7 @@ jobs:
         run: |
           echo "## 🐳 ${{ matrix.browser }} Browser Image" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Image details
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -276,7 +287,7 @@ jobs:
           echo "| **Tags** | \`${{ github.ref_name }}\`, \`latest\`, \`${{ github.ref_name }}-${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Published** | ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Test results
           echo "### 🧪 Validation Results" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **Container startup**: Passed" >> $GITHUB_STEP_SUMMARY
@@ -285,16 +296,16 @@ jobs:
           echo "- ✅ **User permissions**: testuser (uid=1001) configured" >> $GITHUB_STEP_SUMMARY
           echo "- 🎭 **Hello World test**: Browser functionality verified" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Usage instructions
           echo "### 🚀 Usage" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Pull and run the image" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "# Pull and run the image (use specific version for reproducibility)" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ env.PACKAGE_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "# Run embedded hello world test" >> $GITHUB_STEP_SUMMARY
-          echo "docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ env.PACKAGE_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "# Run custom tests" >> $GITHUB_STEP_SUMMARY
-          echo "docker run --rm -v \"\$(pwd):/workspace\" ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ github.ref_name }} npx playwright test --project=desktop-${{ matrix.browser }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker run --rm -v \"\$(pwd):/workspace\" ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.browser }}:${{ env.PACKAGE_VERSION }} npx playwright test --project=desktop-${{ matrix.browser }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   # Summary job
@@ -309,7 +320,7 @@ jobs:
         run: |
           echo "# 🐳 Docker Browser Images Build Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Build information
           echo "## 📊 Build Information" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
@@ -321,7 +332,7 @@ jobs:
           echo "| **Actor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Run ID** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.detect-changes.outputs.any-changed }}" != "true" ]; then
             echo "## ℹ️ No Changes Detected" >> $GITHUB_STEP_SUMMARY
             echo "All Docker images are up to date. No builds were necessary." >> $GITHUB_STEP_SUMMARY
@@ -330,11 +341,11 @@ jobs:
             echo "Use **workflow_dispatch** with **force_rebuild=true** to rebuild all images regardless of changes." >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
-          
+
           echo "## 🎯 Build Results" >> $GITHUB_STEP_SUMMARY
           echo "| Browser | Changed | Status | Architecture | Hello World Test |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|---------|--------|--------------|------------------|" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check each image status
           for image in chromium firefox webkit; do
             case $image in
@@ -342,7 +353,7 @@ jobs:
               firefox) changed="${{ needs.detect-changes.outputs.firefox-changed }}" ;;
               webkit) changed="${{ needs.detect-changes.outputs.webkit-changed }}" ;;
             esac
-            
+
             if [ "$changed" = "true" ]; then
               if [ "${{ needs.build-images.result }}" = "success" ]; then
                 status="✅ Success"
@@ -358,12 +369,12 @@ jobs:
               arch="N/A"
               hello_test="⏭️ Skipped"
             fi
-            
+
             echo "| **$image** | $changed | $status | $arch | $hello_test |" >> $GITHUB_STEP_SUMMARY
           done
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.build-images.result }}" = "success" ]; then
             echo "## 🚀 Published Images" >> $GITHUB_STEP_SUMMARY
             if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -383,7 +394,7 @@ jobs:
               echo "Images built but not published (PR or manual trigger without push)." >> $GITHUB_STEP_SUMMARY
             fi
             echo "" >> $GITHUB_STEP_SUMMARY
-            
+
             echo "## 🎭 Embedded Tests" >> $GITHUB_STEP_SUMMARY
             echo "Each image includes embedded Hello World tests that verify:" >> $GITHUB_STEP_SUMMARY
             echo "- Browser functionality and binary execution" >> $GITHUB_STEP_SUMMARY

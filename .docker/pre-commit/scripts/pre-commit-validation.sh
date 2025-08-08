@@ -29,12 +29,12 @@ VALIDATION_FAILED=0
 validate_json() {
     local file="$1"
     echo -e "\n🔍 Validating JSON: $file"
-    
+
     if [ ! -f "$file" ]; then
         echo -e "${YELLOW}⚠️  File not found: $file${NC}"
         return 0
     fi
-    
+
     # Use jsonlint for validation
     if jsonlint "$file" >/dev/null 2>&1; then
         echo -e "${GREEN}✅ $file is valid JSON${NC}"
@@ -50,12 +50,12 @@ validate_json() {
 validate_yaml() {
     local file="$1"
     echo -e "\n🔍 Validating YAML: $file"
-    
+
     if [ ! -f "$file" ]; then
         echo -e "${YELLOW}⚠️  File not found: $file${NC}"
         return 0
     fi
-    
+
     # Use yamllint with relaxed rules for CI workflows
     if yamllint -d "{extends: default, rules: {line-length: {max: 120}, trailing-spaces: disable, truthy: disable, document-start: disable, empty-lines: {max: 3}, brackets: disable}}" "$file" >/dev/null 2>&1; then
         echo -e "${GREEN}✅ $file is valid YAML${NC}"
@@ -71,36 +71,36 @@ validate_yaml() {
 validate_github_workflow() {
     local file="$1"
     echo -e "\n🔄 Validating GitHub Actions workflow: $file"
-    
+
     if [ ! -f "$file" ]; then
         echo -e "${YELLOW}⚠️  File not found: $file${NC}"
         return 0
     fi
-    
+
     # First validate YAML syntax
     if ! validate_yaml "$file"; then
         return 1
     fi
-    
+
     # Additional GitHub Actions specific validations
     echo "  🔍 Checking GitHub Actions specific patterns..."
-    
+
     # Check for required fields
     if ! grep -q "^on:" "$file" && ! grep -q "^'on':" "$file"; then
         echo -e "${RED}  ❌ Missing 'on' trigger section${NC}"
         return 1
     fi
-    
+
     if ! grep -q "^jobs:" "$file"; then
         echo -e "${RED}  ❌ Missing 'jobs' section${NC}"
         return 1
     fi
-    
+
     # Check for common issues
     if grep -q "needs: \[\]" "$file"; then
         echo -e "${YELLOW}  ⚠️  Empty needs array found${NC}"
     fi
-    
+
     echo -e "${GREEN}  ✅ GitHub Actions workflow structure looks good${NC}"
     return 0
 }
@@ -109,11 +109,11 @@ validate_github_workflow() {
 check_sensitive_info() {
     local file="$1"
     echo -e "\n🔒 Checking for sensitive information in: $file"
-    
+
     if [ ! -f "$file" ]; then
         return 0
     fi
-    
+
     # Define sensitive patterns
     local patterns=(
         "password\s*[:=]\s*['\"][^'\"]*['\"]"
@@ -125,7 +125,7 @@ check_sensitive_info() {
         "sk_live_[0-9a-zA-Z]{24}"  # Stripe Live Key
         "ghp_[a-zA-Z0-9]{36}"  # GitHub Token
     )
-    
+
     local found_sensitive=0
     for pattern in "${patterns[@]}"; do
         if grep -iE "$pattern" "$file" >/dev/null 2>&1; then
@@ -134,11 +134,11 @@ check_sensitive_info() {
             found_sensitive=1
         fi
     done
-    
+
     if [ $found_sensitive -eq 0 ]; then
         echo -e "${GREEN}✅ No sensitive information detected${NC}"
     fi
-    
+
     return $found_sensitive
 }
 
@@ -150,12 +150,12 @@ for file in $STAGED_FILES; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     # Check for sensitive information in all files
     if ! check_sensitive_info "$file"; then
         VALIDATION_FAILED=1
     fi
-    
+
     # Validate based on file extension
     case "$file" in
         *.json)

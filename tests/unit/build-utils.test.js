@@ -8,7 +8,7 @@ describe('Build Process Validation', () => {
     'resume-data.json',
     'build.js',
     'server.js',
-    'dev-server.js'
+    'dev-server.js',
   ];
 
   const requiredDirectories = [
@@ -16,7 +16,7 @@ describe('Build Process Validation', () => {
     'assets/images',
     'tests',
     'tests/unit',
-    'scripts'
+    'scripts',
   ];
 
   describe('Required Files Exist', () => {
@@ -42,9 +42,9 @@ describe('Build Process Validation', () => {
     test('package.json should be valid JSON', () => {
       const packagePath = path.join(process.cwd(), 'package.json');
       const packageContent = fs.readFileSync(packagePath, 'utf8');
-      
+
       expect(() => JSON.parse(packageContent)).not.toThrow();
-      
+
       const packageJson = JSON.parse(packageContent);
       expect(packageJson.name).toBe('resume-as-code');
       expect(packageJson.scripts).toBeDefined();
@@ -54,9 +54,9 @@ describe('Build Process Validation', () => {
     test('resume-data.json should be valid JSON', () => {
       const resumeDataPath = path.join(process.cwd(), 'resume-data.json');
       const resumeDataContent = fs.readFileSync(resumeDataPath, 'utf8');
-      
+
       expect(() => JSON.parse(resumeDataContent)).not.toThrow();
-      
+
       const resumeData = JSON.parse(resumeDataContent);
       expect(resumeData.basics).toBeDefined();
       expect(resumeData.basics.name).toBeDefined();
@@ -65,7 +65,7 @@ describe('Build Process Validation', () => {
     test('template.html should contain required placeholders', () => {
       const templatePath = path.join(process.cwd(), 'template.html');
       const templateContent = fs.readFileSync(templatePath, 'utf8');
-      
+
       // Check for essential Handlebars placeholders
       expect(templateContent).toContain('{{basics.name}}');
       expect(templateContent).toContain('{{#each');
@@ -75,14 +75,20 @@ describe('Build Process Validation', () => {
 
   describe('Asset Files', () => {
     test('profile image should exist', () => {
-      const profileImagePath = path.join(process.cwd(), 'assets/images/profile.jpeg');
+      const profileImagePath = path.join(
+        process.cwd(),
+        'assets/images/profile.jpeg'
+      );
       expect(fs.existsSync(profileImagePath)).toBe(true);
     });
 
     test('profile image should be reasonable size', () => {
-      const profileImagePath = path.join(process.cwd(), 'assets/images/profile.jpeg');
+      const profileImagePath = path.join(
+        process.cwd(),
+        'assets/images/profile.jpeg'
+      );
       const stats = fs.statSync(profileImagePath);
-      
+
       // Should be between 1KB and 5MB
       expect(stats.size).toBeGreaterThan(1024);
       expect(stats.size).toBeLessThan(5 * 1024 * 1024);
@@ -91,9 +97,12 @@ describe('Build Process Validation', () => {
 
   describe('Test Configuration', () => {
     test('playwright.config.js should exist and be valid', () => {
-      const playwrightConfigPath = path.join(process.cwd(), 'playwright.config.js');
+      const playwrightConfigPath = path.join(
+        process.cwd(),
+        'playwright.config.js'
+      );
       expect(fs.existsSync(playwrightConfigPath)).toBe(true);
-      
+
       // Basic syntax check by requiring the file
       expect(() => require(playwrightConfigPath)).not.toThrow();
     });
@@ -101,7 +110,7 @@ describe('Build Process Validation', () => {
     test('jest.config.js should exist and be valid', () => {
       const jestConfigPath = path.join(process.cwd(), 'jest.config.js');
       expect(fs.existsSync(jestConfigPath)).toBe(true);
-      
+
       // Basic syntax check by requiring the file
       expect(() => require(jestConfigPath)).not.toThrow();
     });
@@ -121,7 +130,7 @@ describe('Build Process Validation', () => {
     test('.gitignore should contain essential patterns', () => {
       const gitignorePath = path.join(process.cwd(), '.gitignore');
       const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
-      
+
       expect(gitignoreContent).toContain('node_modules');
       expect(gitignoreContent).toContain('coverage');
       expect(gitignoreContent).toContain('.env');

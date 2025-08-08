@@ -13,7 +13,8 @@ describe('Theme Utilities', () => {
 
   beforeEach(() => {
     // Setup DOM environment
-    dom = new JSDOM(`
+    dom = new JSDOM(
+      `
       <!DOCTYPE html>
       <html>
         <head></head>
@@ -23,28 +24,30 @@ describe('Theme Utilities', () => {
           </button>
         </body>
       </html>
-    `, { url: 'http://localhost' });
-    
+    `,
+      { url: 'http://localhost' }
+    );
+
     document = dom.window.document;
     window = dom.window;
-    
+
     // Mock localStorage
     localStorage = {
       store: {},
-      getItem: function(key) {
+      getItem: function (key) {
         return this.store[key] || null;
       },
-      setItem: function(key, value) {
+      setItem: function (key, value) {
         this.store[key] = value.toString();
       },
-      removeItem: function(key) {
+      removeItem: function (key) {
         delete this.store[key];
       },
-      clear: function() {
+      clear: function () {
         this.store = {};
-      }
+      },
     };
-    
+
     global.document = document;
     global.window = window;
     global.localStorage = localStorage;
@@ -68,7 +71,9 @@ describe('Theme Utilities', () => {
         dispatchEvent: jest.fn(),
       }));
 
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
       expect(prefersDark).toBe(true);
     });
 
@@ -83,7 +88,9 @@ describe('Theme Utilities', () => {
         dispatchEvent: jest.fn(),
       }));
 
-      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const prefersLight = window.matchMedia(
+        '(prefers-color-scheme: light)'
+      ).matches;
       expect(prefersLight).toBe(true);
     });
   });
@@ -92,7 +99,7 @@ describe('Theme Utilities', () => {
     test('should initialize with light theme by default', () => {
       const body = document.body;
       expect(body.getAttribute('data-theme')).toBe('');
-      
+
       const themeIcon = document.getElementById('themeIcon');
       expect(themeIcon.textContent).toBe('🌙');
     });
@@ -119,12 +126,12 @@ describe('Theme Utilities', () => {
     test('should toggle from light to dark mode', () => {
       const body = document.body;
       const themeIcon = document.getElementById('themeIcon');
-      
+
       // Simulate theme toggle
       body.setAttribute('data-theme', 'dark');
       themeIcon.textContent = '☀️';
       localStorage.setItem('theme', 'dark');
-      
+
       expect(body.getAttribute('data-theme')).toBe('dark');
       expect(themeIcon.textContent).toBe('☀️');
       expect(localStorage.getItem('theme')).toBe('dark');
@@ -133,17 +140,17 @@ describe('Theme Utilities', () => {
     test('should toggle from dark to light mode', () => {
       const body = document.body;
       const themeIcon = document.getElementById('themeIcon');
-      
+
       // Start in dark mode
       body.setAttribute('data-theme', 'dark');
       themeIcon.textContent = '☀️';
       localStorage.setItem('theme', 'dark');
-      
+
       // Toggle to light mode
       body.setAttribute('data-theme', '');
       themeIcon.textContent = '🌙';
       localStorage.removeItem('theme');
-      
+
       expect(body.getAttribute('data-theme')).toBe('');
       expect(themeIcon.textContent).toBe('🌙');
       expect(localStorage.getItem('theme')).toBeNull();
@@ -154,7 +161,7 @@ describe('Theme Utilities', () => {
     test('should find required DOM elements', () => {
       const darkToggle = document.getElementById('darkToggle');
       const themeIcon = document.getElementById('themeIcon');
-      
+
       expect(darkToggle).toBeTruthy();
       expect(themeIcon).toBeTruthy();
     });
@@ -163,7 +170,7 @@ describe('Theme Utilities', () => {
       // Remove elements
       const darkToggle = document.getElementById('darkToggle');
       darkToggle.remove();
-      
+
       const missingToggle = document.getElementById('darkToggle');
       expect(missingToggle).toBeNull();
     });
@@ -184,15 +191,15 @@ describe('Theme Utilities', () => {
 
     test('should handle icon changes correctly', () => {
       const themeIcon = document.getElementById('themeIcon');
-      
+
       // Start with moon
       themeIcon.textContent = '🌙';
       expect(themeIcon.textContent).toBe('🌙');
-      
+
       // Change to sun
       themeIcon.textContent = '☀️';
       expect(themeIcon.textContent).toBe('☀️');
-      
+
       // Change back to moon
       themeIcon.textContent = '🌙';
       expect(themeIcon.textContent).toBe('🌙');
@@ -203,13 +210,19 @@ describe('Theme Utilities', () => {
     test('should handle localStorage errors gracefully', () => {
       // Mock localStorage that throws errors
       const erroringStorage = {
-        getItem: () => { throw new Error('Storage not available'); },
-        setItem: () => { throw new Error('Storage not available'); },
-        removeItem: () => { throw new Error('Storage not available'); }
+        getItem: () => {
+          throw new Error('Storage not available');
+        },
+        setItem: () => {
+          throw new Error('Storage not available');
+        },
+        removeItem: () => {
+          throw new Error('Storage not available');
+        },
       };
-      
+
       global.localStorage = erroringStorage;
-      
+
       // These should not throw errors
       expect(() => {
         try {
@@ -224,10 +237,10 @@ describe('Theme Utilities', () => {
       // Remove all theme-related elements
       const darkToggle = document.getElementById('darkToggle');
       const themeIcon = document.getElementById('themeIcon');
-      
+
       if (darkToggle) darkToggle.remove();
       if (themeIcon) themeIcon.remove();
-      
+
       // Should not throw when elements are missing
       expect(document.getElementById('darkToggle')).toBeNull();
       expect(document.getElementById('themeIcon')).toBeNull();

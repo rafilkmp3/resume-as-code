@@ -81,7 +81,15 @@
       "Bash(git reset:*)",
       "WebFetch(domain:rafilkmp3.github.io)",
       "Bash(jq:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(git checkout:*)",
+      "mcp__zen__precommit",
+      "Bash(detect-secrets scan:*)",
+      "Bash(pipx install:*)",
+      "Bash(pre-commit run:*)",
+      "Bash(pre-commit:*)",
+      "Bash(npm version:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }

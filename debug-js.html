@@ -5,16 +5,16 @@
 </head>
 <body>
     <div id="test">Testing JavaScript execution</div>
-    
+
     <script>
         console.log('Script started');
-        
+
         function testFunction() {
             return 'test works';
         }
-        
+
         window.testFunction = testFunction;
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded');
             console.log('testFunction defined:', typeof window.testFunction !== 'undefined');

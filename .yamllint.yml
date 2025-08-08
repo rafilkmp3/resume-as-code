@@ -1,0 +1,26 @@
+---
+# yamllint configuration for GitHub Actions and YAML files
+extends: default
+
+rules:
+  # Allow longer lines for GitHub Actions
+  line-length:
+    max: 120
+    level: warning
+
+  # Allow empty lines in GitHub Actions
+  empty-lines:
+    max-end: 1
+    max-start: 0
+
+  # GitHub Actions use 2-space indentation
+  indentation:
+    spaces: 2
+
+  # Allow truthy values in GitHub Actions (on, off, etc.)
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+
+  # Allow comments
+  comments:
+    min-spaces-from-content: 1

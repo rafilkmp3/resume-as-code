@@ -4,8 +4,11 @@ const path = require('path');
 
 function createSimpleServer(port, publicDir, useCache = false) {
   const server = http.createServer((req, res) => {
-    const filePath = req.url === '/' ? path.join(publicDir, 'index.html') : path.join(publicDir, req.url);
-    
+    const filePath =
+      req.url === '/'
+        ? path.join(publicDir, 'index.html')
+        : path.join(publicDir, req.url);
+
     try {
       const stat = fs.statSync(filePath);
       if (stat.isFile()) {
@@ -17,11 +20,11 @@ function createSimpleServer(port, publicDir, useCache = false) {
           '.jpg': 'image/jpeg',
           '.png': 'image/png',
           '.css': 'text/css',
-          '.js': 'application/javascript'
+          '.js': 'application/javascript',
         };
-        
+
         const headers = {
-          'Content-Type': contentTypes[ext] || 'application/octet-stream'
+          'Content-Type': contentTypes[ext] || 'application/octet-stream',
         };
 
         if (!useCache) {
@@ -39,15 +42,15 @@ function createSimpleServer(port, publicDir, useCache = false) {
       res.end('Not found');
     }
   });
-  
+
   return {
     start: () => {
       server.listen(port, () => {
         console.log(`🚀 Server running at http://localhost:${port}`);
         console.log('   Press Ctrl+C to stop');
       });
-    }
-  }
+    },
+  };
 }
 
 module.exports = createSimpleServer;

@@ -13,49 +13,49 @@ graph TB
         A1[Path Analysis]
         A2{Change Detection}
     end
-    
+
     subgraph "🐳 Docker Pipeline"
         B1[Docker Changes]
         B2[Multi-Arch Build]
         B3[Smoke Tests]
         B4[Push to GHCR]
     end
-    
-    subgraph "🏗️ Production Pipeline"  
+
+    subgraph "🏗️ Production Pipeline"
         C1[Source Changes]
         C2[Build Resume]
         C3[Alpha Tests]
         C4[Deploy to Pages]
     end
-    
+
     subgraph "🧪 Staging Pipeline"
         D1[E2E Tests]
         D2[Visual Tests]
         D3[Performance Tests]
     end
-    
+
     A --> A1
     A1 --> A2
     A2 -->|Docker files| B1
     A2 -->|Source files| C1
-    
+
     B1 --> B2
     B2 --> B3
     B3 --> B4
-    
+
     C1 --> C2
     C2 --> C3
     C3 --> C4
-    
+
     B4 -.->|Images Available| D1
     D1 --> D2
     D2 --> D3
-    
+
     classDef sourceNode fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef dockerNode fill:#e3f2fd,stroke:#0277bd,stroke-width:2px  
+    classDef dockerNode fill:#e3f2fd,stroke:#0277bd,stroke-width:2px
     classDef prodNode fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
     classDef stagingNode fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    
+
     class A,A1,A2 sourceNode
     class B1,B2,B3,B4 dockerNode
     class C1,C2,C3,C4 prodNode
@@ -69,14 +69,16 @@ graph TB
 **Primary Purpose**: Reliable, fast deployment to production
 **Triggers**: Source code changes on main branch
 
-#### Workflow Steps:
+#### Workflow Steps
+
 1. **Build Resume** - Docker-based HTML/PDF generation
 2. **Alpha Tests** (Non-blocking)
    - Unit tests with Jest
    - Security audit with npm audit
 3. **Deploy to GitHub Pages** - Production deployment
 
-#### Key Features:
+#### Key Features
+
 - **Guaranteed Deployment**: Tests cannot block production release
 - **Fast Execution**: ~5-8 minutes total
 - **Reliability First**: Only proven, working components
@@ -85,10 +87,10 @@ graph TB
 # Trigger paths
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'src/**'
-      - 'assets/**' 
+      - 'assets/**'
       - 'config/**'
       - '*.html'
       - '*.json'
@@ -105,7 +107,8 @@ on:
 **Primary Purpose**: Multi-architecture Docker image building and publishing
 **Triggers**: Docker-related file changes
 
-#### Workflow Steps:
+#### Workflow Steps
+
 1. **Change Detection** - Smart analysis of modified files
 2. **Multi-Architecture Build**
    - AMD64 + ARM64 support
@@ -113,7 +116,8 @@ on:
 3. **Smoke Testing** - Comprehensive validation
 4. **Registry Publishing** - Push to GitHub Container Registry
 
-#### Key Features:
+#### Key Features
+
 - **Multi-Architecture**: Supports both AMD64 (GitHub Actions) and ARM64 (Mac Apple Silicon)
 - **Smart Rebuilding**: Only builds changed images
 - **Comprehensive Testing**: 5-stage smoke test validation
@@ -138,12 +142,14 @@ on:
 ## 🎯 Pipeline Performance Metrics
 
 ### Production Pipeline (`ci-prod.yml`)
+
 - **Average Duration**: 5-8 minutes
 - **Success Rate**: 99.8%
 - **Deployment Frequency**: ~5-10 times/week
 - **Recovery Time**: < 2 minutes (Git-based rollback)
 
-### Docker Pipeline (`docker-images.yml`)  
+### Docker Pipeline (`docker-images.yml`)
+
 - **Average Duration**: 15-20 minutes (multi-arch)
 - **Cache Hit Rate**: 85% (golden base)
 - **Image Size Reduction**: 70% (browser-specific vs monolithic)
@@ -161,8 +167,8 @@ paths:
   - 'src/**'
   - 'assets/**'
   - 'config/**'
-  
-# Docker Pipeline - Infrastructure changes  
+
+# Docker Pipeline - Infrastructure changes
 paths:
   - 'docker/Dockerfile.browsers'
   - 'package.json'
@@ -171,12 +177,14 @@ paths:
 
 ### Multi-Architecture Docker Building
 
-#### Build Strategy:
+#### Build Strategy
+
 1. **AMD64 Test Build**: Fast validation on GitHub Actions runners
 2. **Multi-Arch Production**: Simultaneous AMD64 + ARM64 build
 3. **Manifest Creation**: Automatic multi-architecture manifest generation
 
-#### Caching Strategy:
+#### Caching Strategy
+
 ```yaml
 cache-from: |
   type=gha,scope=golden-base-${{ github.ref_name }}
@@ -187,12 +195,14 @@ cache-from: |
 
 ### Quality Gates
 
-#### Production Pipeline:
+#### Production Pipeline
+
 - ✅ **Build Success**: HTML/PDF generation must complete
 - ⚠️ **Alpha Tests**: Run for information only (non-blocking)
 - ✅ **Deployment**: Always proceeds regardless of test results
 
-#### Docker Pipeline:
+#### Docker Pipeline
+
 - ✅ **Build Success**: Multi-arch build must complete
 - ✅ **Smoke Tests**: 5-stage validation must pass
 - ✅ **Container Health**: Basic functionality verification required
@@ -208,13 +218,15 @@ if: github.actor != 'dependabot[bot]'
 
 ### GitHub Actions Insights
 
-#### Key Metrics Tracked:
+#### Key Metrics Tracked
+
 - **Workflow Duration**: Per-job and total execution time
 - **Cache Hit Rates**: Layer cache effectiveness
 - **Success/Failure Rates**: Reliability metrics
 - **Resource Usage**: CPU, memory, storage utilization
 
-#### Performance Dashboards:
+#### Performance Dashboards
+
 - **Run Duration Trends**: Track performance over time
 - **Cache Effectiveness**: Monitor cache hit rates
 - **Failure Analysis**: Root cause identification
@@ -222,15 +234,17 @@ if: github.actor != 'dependabot[bot]'
 
 ### Artifact Management
 
-#### Build Artifacts (Production):
+#### Build Artifacts (Production)
+
 ```yaml
 name: production-build-${{ github.sha }}
 path: dist/
 retention-days: 30
 ```
 
-#### Test Artifacts (Docker):
-```yaml  
+#### Test Artifacts (Docker)
+
+```yaml
 name: e2e-${{ matrix.browser }}-results-${{ github.sha }}
 path: |
   test-results/
@@ -241,18 +255,21 @@ retention-days: 7
 ## 🔒 Security & Compliance
 
 ### Secrets Management
+
 ```yaml
 # GitHub Container Registry access
-GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Auto-provided
 # No additional secrets required
 ```
 
 ### Security Scanning
+
 - **npm audit**: Dependency vulnerability scanning (high-severity only)
 - **Docker image scanning**: Registry-based vulnerability assessment
 - **Secret detection**: Pre-commit hooks prevent accidental exposure
 
 ### Access Control
+
 - **Repository permissions**: Read/write for workflows
 - **Package permissions**: Write access to GitHub Container Registry
 - **Pages deployment**: Deploy access to GitHub Pages environment
@@ -261,7 +278,8 @@ GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided
 
 ### Local Development Testing
 
-#### Test Production Pipeline Locally:
+#### Test Production Pipeline Locally
+
 ```bash
 # Simulate production build
 make build
@@ -271,18 +289,20 @@ make test-unit
 npm audit --audit-level=high
 ```
 
-#### Test Docker Pipeline Locally:
+#### Test Docker Pipeline Locally
+
 ```bash
 # Build images (single architecture)
 make build-images
 
 # Run smoke tests
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:main
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.5.0
 ```
 
 ### Debugging Failed Builds
 
-#### Production Pipeline Debug:
+#### Production Pipeline Debug
+
 ```bash
 # Check build logs
 gh run list --workflow=ci-prod.yml
@@ -292,8 +312,9 @@ gh run view <run-id>
 docker buildx build --target builder --file docker/Dockerfile .
 ```
 
-#### Docker Pipeline Debug:
-```bash  
+#### Docker Pipeline Debug
+
+```bash
 # Check specific browser build
 gh run list --workflow=docker-images.yml
 gh run view <run-id> --job="Build & Test (chromium)"
@@ -306,12 +327,14 @@ docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile.brow
 
 ### Build Time Optimization
 
-#### Golden Base Caching:
+#### Golden Base Caching
+
 - **Strategy**: Separate dependencies from source code
 - **Impact**: 70% reduction in build times
 - **Implementation**: Multi-stage Dockerfiles with static base layers
 
-#### Parallel Execution:
+#### Parallel Execution
+
 ```yaml
 strategy:
   fail-fast: false
@@ -319,19 +342,22 @@ strategy:
     browser: [chromium, firefox, webkit]
 ```
 
-#### Cache Optimization:
+#### Cache Optimization
+
 - **GitHub Actions Cache**: Dependency and layer caching
 - **Docker BuildKit**: Advanced caching features
 - **npm ci**: Offline-preferred dependency installation
 
 ### Resource Optimization
 
-#### Container Size Reduction:
+#### Container Size Reduction
+
 - **Before**: 1.6GB monolithic image
-- **After**: 300-500MB browser-specific images  
+- **After**: 300-500MB browser-specific images
 - **Savings**: 70% reduction in image size
 
-#### Network Optimization:
+#### Network Optimization
+
 - **Layer Sharing**: Common base layers across browser images
 - **Registry Optimization**: Multi-architecture manifests
 - **Pull Optimization**: Automatic architecture selection
@@ -340,7 +366,8 @@ strategy:
 
 ### Rollback Procedures
 
-#### Production Rollback:
+#### Production Rollback
+
 ```bash
 # Git-based rollback (fastest)
 git revert <commit-hash>
@@ -350,11 +377,12 @@ git push origin main
 gh workflow run ci-prod.yml
 ```
 
-#### Docker Image Rollback:
+#### Docker Image Rollback
+
 ```bash
 # Retag previous working images
 docker tag ghcr.io/rafilkmp3/resume-as-code-chromium:<old-sha> \
-         ghcr.io/rafilkmp3/resume-as-code-chromium:main
+         ghcr.io/rafilkmp3/resume-as-code-chromium:1.5.0
 
 # Or rebuild from specific commit
 gh workflow run docker-images.yml --ref <working-commit>
@@ -362,14 +390,16 @@ gh workflow run docker-images.yml --ref <working-commit>
 
 ### Emergency Procedures
 
-#### Complete CI Failure:
+#### Complete CI Failure
+
 1. **Assess Impact**: Check which pipelines are affected
 2. **Immediate Action**: Disable failing workflows temporarily
 3. **Investigation**: Use GitHub Actions logs and artifacts
 4. **Fix and Test**: Develop fix in feature branch
 5. **Gradual Rollout**: Test with workflow_dispatch before auto-triggers
 
-#### Docker Registry Issues:
+#### Docker Registry Issues
+
 1. **Local Testing**: Use locally built images
 2. **Alternative Registry**: Consider Docker Hub as backup
 3. **Cache Bypass**: Force fresh builds without cache
@@ -377,19 +407,22 @@ gh workflow run docker-images.yml --ref <working-commit>
 
 ## 📋 Maintenance Checklist
 
-### Weekly Maintenance:
+### Weekly Maintenance
+
 - [ ] Review workflow performance metrics
 - [ ] Check cache hit rates and optimize if needed
 - [ ] Review and clean up old artifacts
 - [ ] Monitor Docker image sizes and registry usage
 
-### Monthly Maintenance:
+### Monthly Maintenance
+
 - [ ] Update GitHub Actions versions
 - [ ] Review and update Node.js versions
 - [ ] Audit Docker base image versions
 - [ ] Performance benchmark comparisons
 
-### Quarterly Maintenance:
+### Quarterly Maintenance
+
 - [ ] Full security audit of workflow permissions
 - [ ] Capacity planning for artifact storage
 - [ ] Architecture review for new optimizations
@@ -406,4 +439,4 @@ gh workflow run docker-images.yml --ref <working-commit>
 
 **Engineered for enterprise-grade reliability and performance**
 
-*Supporting rapid iteration with production stability*
+_Supporting rapid iteration with production stability_

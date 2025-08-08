@@ -31,7 +31,7 @@ should_be_lfs() {
     local file="$1"
     local ext="${file##*.}"
     ext=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
-    
+
     for lfs_ext in "${lfs_extensions[@]}"; do
         if [[ "$ext" == "$lfs_ext" ]]; then
             return 0
@@ -52,7 +52,7 @@ is_lfs_pointer() {
     if [[ ! -f "$file" ]]; then
         return 1
     fi
-    
+
     # Check if file starts with "version https://git-lfs.github.com/spec"
     head -n 1 "$file" 2>/dev/null | grep -q "^version https://git-lfs.github.com/spec"
 }

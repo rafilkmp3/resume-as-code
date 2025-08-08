@@ -41,7 +41,7 @@ test.describe('Fast Smoke Tests', () => {
     // Check that contact links exist and have proper hrefs
     const linkedinLink = page.locator('a[href*="linkedin.com"]').first();
     const githubLink = page.locator('a[href*="github.com"]').first();
-    
+
     await expect(linkedinLink).toBeVisible();
     await expect(githubLink).toBeVisible();
   });
@@ -49,11 +49,11 @@ test.describe('Fast Smoke Tests', () => {
   test('Page is responsive on mobile viewport', async ({ page }) => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-    
+
     // Essential elements should still be visible
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.locator('.contact-info')).toBeVisible();
-    
+
     // Dark toggle should be accessible
     await expect(page.locator('#darkToggle')).toBeVisible();
   });
@@ -61,11 +61,11 @@ test.describe('Fast Smoke Tests', () => {
   test('Print media styles applied correctly', async ({ page }) => {
     // Emulate print media
     await page.emulateMedia({ media: 'print' });
-    
+
     // Check that dark toggle is hidden in print (actual behavior)
     const darkToggle = page.locator('#darkToggle');
     const isVisible = await darkToggle.isVisible();
-    
+
     // Dark toggle should be hidden in print
     expect(isVisible).toBeFalsy();
   });
@@ -91,10 +91,10 @@ test.describe('Fast Smoke Tests', () => {
         errors.push(msg.text());
       }
     });
-    
+
     await page.reload();
     await page.waitForLoadState('networkidle');
-    
+
     expect(errors).toHaveLength(0);
   });
 });
@@ -102,52 +102,54 @@ test.describe('Fast Smoke Tests', () => {
 test.describe('Fast Integration Tests', () => {
   test('Theme preference persists across page reloads', async ({ page }) => {
     await page.goto('http://localhost:3001');
-    
+
     // Switch to dark mode
     await page.locator('#darkToggle').click();
     await expect(page.locator('body')).toHaveAttribute('data-theme', 'dark');
-    
+
     // Reload page
     await page.reload();
     await page.waitForLoadState('networkidle');
-    
+
     // Theme should be preserved
     await expect(page.locator('body')).toHaveAttribute('data-theme', 'dark');
   });
 
   test('Page loads within performance budget', async ({ page }) => {
     const startTime = Date.now();
-    
+
     await page.goto('http://localhost:3001');
     await page.waitForLoadState('networkidle');
-    
+
     const loadTime = Date.now() - startTime;
-    
+
     // Should load within 3 seconds
     expect(loadTime).toBeLessThan(3000);
   });
 
-  test('Work experience dates are interactive with hover tooltips', async ({ page }) => {
+  test('Work experience dates are interactive with hover tooltips', async ({
+    page,
+  }) => {
     await page.goto('http://localhost:3001');
-    
+
     // Check that work dates exist
     const workDates = page.locator('.work-date');
     const count = await workDates.count();
     expect(count).toBeGreaterThan(0);
-    
+
     // Check first work date has proper structure
     const firstWorkDate = workDates.first();
     await expect(firstWorkDate).toBeVisible();
     await expect(firstWorkDate.locator('.date-range')).toBeVisible();
     await expect(firstWorkDate.locator('.duration-tooltip')).toBeAttached();
-    
+
     // Check hover behavior and wait for tooltip
     await firstWorkDate.hover();
     const tooltip = firstWorkDate.locator('.duration-tooltip');
-    
+
     // Wait a moment for tooltip to be populated
     await page.waitForTimeout(100);
-    
+
     // Tooltip should contain duration information
     const tooltipText = await tooltip.textContent();
     expect(tooltipText).toContain('Duration:');

@@ -37,7 +37,7 @@ FROM ghcr.io/rafilkmp3/resume-as-code:production AS production
 ARG GITHUB_SHA=dev-local
 ARG GITHUB_REF_NAME=main
 
-# Update only commit tracking (golden-base has everything else)  
+# Update only commit tracking (golden-base has everything else)
 ENV GITHUB_SHA=${GITHUB_SHA} GITHUB_REF_NAME=${GITHUB_REF_NAME}
 
 # Copy and build from source (leverages cached deps)
