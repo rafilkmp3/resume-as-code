@@ -1,5 +1,5 @@
 # Fallback Dockerfile for when golden-base is not available
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 # Accept build arguments
 ARG GITHUB_SHA=dev-local

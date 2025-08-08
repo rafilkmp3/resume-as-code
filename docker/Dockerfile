@@ -1,5 +1,5 @@
 # Builder stage - standalone build for local development
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -45,7 +45,7 @@ COPY . .
 RUN npm run build
 
 # Development stage
-FROM node:22-slim AS development
+FROM node:24-slim AS development
 
 # Install development dependencies including Playwright
 RUN apt-get update && apt-get install -y \
