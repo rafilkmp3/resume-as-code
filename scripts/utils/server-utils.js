@@ -1,9 +1,50 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const QRCode = require('qrcode');
 
 function createSimpleServer(port, publicDir, useCache = false) {
-  const server = http.createServer((req, res) => {
+  // Load resume data for QR code generation
+  let resumeData;
+  try {
+    const resumeDataPath = path.join(process.cwd(), 'resume-data.json');
+    resumeData = JSON.parse(fs.readFileSync(resumeDataPath, 'utf8'));
+  } catch (err) {
+    console.warn('Could not load resume-data.json for QR code generation');
+    resumeData = {
+      basics: { url: 'https://rafilkmp3.github.io/resume-as-code' },
+    };
+  }
+
+  const server = http.createServer(async (req, res) => {
+    // Handle /qrcode route
+    if (req.url === '/qrcode' || req.url === '/qrcode/') {
+      try {
+        const qrCodePNG = await QRCode.toBuffer(resumeData.basics.url, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF',
+          },
+        });
+
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Cache-Control': useCache ? 'max-age=3600' : 'no-cache',
+          'Content-Length': qrCodePNG.length,
+        });
+        res.end(qrCodePNG);
+        return;
+      } catch (err) {
+        console.error('Error generating QR code:', err);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error generating QR code');
+        return;
+      }
+    }
+
+    // Handle regular file serving
     const filePath =
       req.url === '/'
         ? path.join(publicDir, 'index.html')
@@ -21,6 +62,7 @@ function createSimpleServer(port, publicDir, useCache = false) {
           '.png': 'image/png',
           '.css': 'text/css',
           '.js': 'application/javascript',
+          '.svg': 'image/svg+xml',
         };
 
         const headers = {

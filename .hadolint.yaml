@@ -3,9 +3,11 @@
 # Excludes legacy backup files which are for reference only
 
 ignored:
-  - DL3008  # Pin versions in apt get install (handled by multi-stage builds)
-  - DL3009  # Delete apt-get lists cache (handled by cleanup)
-  - DL4006  # Set SHELL option -o pipefail (not needed for our use case)
+  - DL3008 # Pin versions in apt get install (handled by multi-stage builds)
+  - DL3009 # Delete apt-get lists cache (handled by cleanup)
+  - DL4006 # Set SHELL option -o pipefail (not needed for our use case)
+  - DL3004 # Do not use sudo (needed for user management in test containers)
+  - SC2016 # Expressions don't expand in single quotes (acceptable in echo commands)
 
 trustedRegistries:
   - docker.io
@@ -14,10 +16,10 @@ trustedRegistries:
 
 # Exclude legacy backup files from linting
 exclude:
-  - "docker/legacy-backup/*"
-  - "**/legacy-backup/*"
+  - 'docker/legacy-backup/*'
+  - '**/legacy-backup/*'
 
 # Override default Dockerfile patterns to exclude backup directories
 dockerfile:
-  - "Dockerfile*"
-  - "!docker/legacy-backup/*"
+  - 'Dockerfile*'
+  - '!docker/legacy-backup/*'

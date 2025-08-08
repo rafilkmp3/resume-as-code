@@ -167,37 +167,18 @@ COPY --chown=appuser:appuser . .
 
 # Create embedded Hello World test (browser-agnostic)
 RUN mkdir -p tests/hello-world && \
-    cat > tests/hello-world/hello-world.spec.js << 'EOF'
-const { test, expect } = require('@playwright/test');
-
-test.describe('Hello World Browser Test', () => {
-  test('should verify browser functionality', async ({ page, browserName }) => {
-    console.log(`🧪 Testing ${browserName} browser functionality`);
-
-    await page.setContent(`
-      <!DOCTYPE html>
-      <html>
-        <head><title>Hello World Test - ${browserName}</title></head>
-        <body>
-          <h1 id="greeting">Hello World from ${browserName}!</h1>
-          <p id="status">Browser is working correctly</p>
-          <button id="test-btn">Click me</button>
-          <script>
-            document.getElementById('test-btn').onclick = function() {
-              document.getElementById('status').textContent = 'Button clicked successfully!';
-            };
-          </script>
-        </body>
-      </html>
-    `);
-
-    await expect(page.locator('#greeting')).toHaveText(`Hello World from ${browserName}!`);
-    await page.click('#test-btn');
-    await expect(page.locator('#status')).toHaveText('Button clicked successfully!');
-    console.log(`✅ ${browserName} test passed`);
-  });
-});
-EOF
+    echo 'const { test, expect } = require("@playwright/test");' > tests/hello-world/hello-world.spec.js && \
+    echo '' >> tests/hello-world/hello-world.spec.js && \
+    echo 'test.describe("Hello World Browser Test", () => {' >> tests/hello-world/hello-world.spec.js && \
+    echo '  test("should verify browser functionality", async ({ page, browserName }) => {' >> tests/hello-world/hello-world.spec.js && \
+    echo '    console.log(`🧪 Testing ${browserName} browser functionality`);' >> tests/hello-world/hello-world.spec.js && \
+    echo '    await page.setContent(`<!DOCTYPE html><html><head><title>Hello World Test</title></head><body><h1 id="greeting">Hello World!</h1><p id="status">Browser is working</p><button id="test-btn">Click me</button><script>document.getElementById("test-btn").onclick = function() { document.getElementById("status").textContent = "Button clicked!"; };</script></body></html>`);' >> tests/hello-world/hello-world.spec.js && \
+    echo '    await expect(page.locator("#greeting")).toHaveText("Hello World!");' >> tests/hello-world/hello-world.spec.js && \
+    echo '    await page.click("#test-btn");' >> tests/hello-world/hello-world.spec.js && \
+    echo '    await expect(page.locator("#status")).toHaveText("Button clicked!");' >> tests/hello-world/hello-world.spec.js && \
+    echo '    console.log(`✅ ${browserName} test passed`);' >> tests/hello-world/hello-world.spec.js && \
+    echo '  });' >> tests/hello-world/hello-world.spec.js && \
+    echo '});' >> tests/hello-world/hello-world.spec.js
 
 USER appuser
 
