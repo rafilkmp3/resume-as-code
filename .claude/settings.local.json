@@ -106,7 +106,12 @@
       "Bash(npm run perf:report:*)",
       "Bash(git tag:*)",
       "Bash(git fetch:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release create:*)",
+      "Bash(--title \"Release v1.7.0\" )",
+      "Bash(--generate-notes )",
+      "Bash(--latest)"
     ],
     "deny": []
   }

@@ -22,13 +22,8 @@ repos:
         files: \.(js|mjs)$
         pass_filenames: false
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
-    hooks:
-      - id: prettier
-        additional_dependencies: ['prettier@3.6.2']
-        args: ['--write']
-        files: \.(js|ts|jsx|tsx|json|css|scss|md|yml|yaml)$
+  # PRETTIER REMOVED: Conflicts with CI/CD and AI workflows
+  # Causes unstaged file conflicts and formatting inconsistencies
 
   # Docker validation (PRIORITY: Critical for containerized builds)
   - repo: https://github.com/hadolint/hadolint
