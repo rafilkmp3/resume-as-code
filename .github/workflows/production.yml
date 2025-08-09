@@ -85,20 +85,20 @@ jobs:
             git push origin main
             git push origin --tags
 
-            # Create GitHub Release with Screenshots  
+            # Create GitHub Release with Screenshots
             echo "🏷️ Creating GitHub Release for v$NEW_VERSION..."
-            
+
             # Generate release screenshots for DR documentation
             echo "📸 Generating release screenshots..."
             mkdir -p release-screenshots
-            
+
             # Quick screenshot generation (lightweight approach)
             (
               npm run build > /dev/null 2>&1 || echo "Build failed"
               npx serve dist -l 3000 -s &
               SERVER_PID=$!
               sleep 8
-              
+
               # Desktop screenshot (1280x720)
               npx playwright eval "
                 const { chromium } = require('playwright');
@@ -111,8 +111,8 @@ jobs:
                   await browser.close();
                 })().catch(() => {});
               " || echo "Desktop screenshot failed"
-              
-              # Mobile screenshot (430x932)  
+
+              # Mobile screenshot (430x932)
               npx playwright eval "
                 const { chromium } = require('playwright');
                 (async () => {
@@ -124,11 +124,11 @@ jobs:
                   await browser.close();
                 })().catch(() => {});
               " || echo "Mobile screenshot failed"
-              
+
               kill $SERVER_PID 2>/dev/null || true
               sleep 2
             ) || echo "Screenshot generation failed (non-blocking)"
-            
+
             # Create release with screenshots if available, fallback without
             if ls release-screenshots/*.png 1> /dev/null 2>&1; then
               echo "📋 Creating release with screenshots..."
@@ -138,7 +138,7 @@ jobs:
                 --latest \
                 release-screenshots/*.png
             else
-              echo "📋 Creating release without screenshots..."  
+              echo "📋 Creating release without screenshots..."
               gh release create "v$NEW_VERSION" \
                 --title "Release v$NEW_VERSION" \
                 --generate-notes \
@@ -266,7 +266,7 @@ jobs:
           retention-days: ${{ env.IS_EMERGENCY == 'true' && '90' || '30' }}
           compression-level: ${{ env.IS_EMERGENCY == 'true' && '1' || '6' }}
 
-  # Quality Gates (comprehensive validation before deployment)  
+  # Quality Gates (comprehensive validation before deployment)
   quality-gates:
     name: Quality Gates (${{ matrix.gate-type }})
     runs-on: ubuntu-latest
@@ -321,7 +321,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-${{ matrix.test-type }}-results-${{ github.sha }}
+          name: quality-gate-${{ matrix.gate-type }}-results-${{ github.sha }}
           path: |
             coverage/
             test-results/
