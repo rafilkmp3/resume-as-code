@@ -302,7 +302,7 @@ jobs:
           case "${{ matrix.gate-type }}" in
             functionality)
               echo "🔧 Testing core functionality (profile image, navigation, theme switching)"
-              npx playwright test tests/smoke-functionality.spec.js --project=chromium --headed=false || echo "❌ Functionality gate failed (non-blocking)"
+              npx playwright test tests/smoke-functionality.spec.js --project=chromium || echo "❌ Functionality gate failed (non-blocking)"
               ;;
             security)
               echo "🔒 Security vulnerability scan"
