@@ -227,8 +227,9 @@ function main() {
   }
 
   // Check for uncommitted changes (skip in CI environment)
-  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  
+  const isCI =
+    process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
   if (!isCI) {
     try {
       const status = execSync('git status --porcelain', { encoding: 'utf8' });
@@ -243,7 +244,9 @@ function main() {
       process.exit(1);
     }
   } else {
-    console.log('🤖 Running in CI environment, skipping uncommitted changes check');
+    console.log(
+      '🤖 Running in CI environment, skipping uncommitted changes check'
+    );
   }
 
   // Read current version

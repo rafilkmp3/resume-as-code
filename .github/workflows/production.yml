@@ -36,10 +36,11 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write  # Changed from read to write for version bumping
   pages: write
   id-token: write
   packages: write
+  pull-requests: write  # For GitHub Release creation
 
 jobs:
   # Version management with conventional commits
