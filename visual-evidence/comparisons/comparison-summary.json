@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-08-09T20:53:42.614Z",
+  "devices": ["iphone-16-pro-max", "macos-retina"],
+  "themes": ["light", "dark"],
+  "total_screenshots": 6,
+  "comparison_notes": [
+    "Compare mobile vs desktop layouts",
+    "Analyze dark vs light mode contrast and usability",
+    "Check responsive breakpoints and element sizing",
+    "Validate navigation and interactive elements",
+    "Assess readability and visual hierarchy"
+  ]
+}

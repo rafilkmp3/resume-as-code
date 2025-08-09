@@ -54,11 +54,19 @@ help:
 	@echo "  $(CYAN)npm run dev:clean$(NC)   - Clean development artifacts"
 	@echo "  $(CYAN)npm run dev:setup$(NC)   - Quick development environment setup"
 	@echo ""
-	@echo "$(GREEN)📊 Performance Monitoring:$(NC)"
+	@echo "$(GREEN)📊 Performance & UX Monitoring:$(NC)"
 	@echo "  $(CYAN)npm run perf:report$(NC) - Full performance analysis report"
 	@echo "  $(CYAN)npm run perf:history$(NC)- Show performance history"
 	@echo "  $(CYAN)npm run perf:build$(NC)  - Measure build time only"
 	@echo "  $(CYAN)npm run perf:test$(NC)   - Measure test time only"
+	@echo "  $(CYAN)npm run ux:analyze$(NC) - User experience analysis"
+	@echo "  $(CYAN)npm run accessibility:audit$(NC) - Accessibility compliance check"
+	@echo ""
+	@echo "$(GREEN)📸 Visual Testing:$(NC)"
+	@echo "  $(CYAN)make visual-test$(NC)    - Enhanced visual testing (sections, load more, header)"
+	@echo "  $(CYAN)make visual-test-basic$(NC) - Basic device screenshots only"
+	@echo "  $(CYAN)make visual-analyze$(NC) - Analyze visual improvements with consensus"
+	@echo "  $(CYAN)make visual-clean$(NC)   - Clean visual evidence directory"
 
 # Install dependencies (deprecated - Docker handles this)
 install:
@@ -310,6 +318,26 @@ status:
 		echo "  $(YELLOW)⚠️  No test results available$(NC)"; \
 	fi
 	@echo "$(CYAN)================================$(NC)"
+
+# Visual Testing Commands
+visual-test: docker-check
+	@echo "$(CYAN)📸 Running enhanced visual tests...$(NC)"
+	@mkdir -p visual-evidence
+	@node scripts/enhanced-visual-tester.js
+
+visual-test-basic: docker-check
+	@echo "$(CYAN)📸 Running basic visual tests...$(NC)"
+	@mkdir -p visual-evidence
+	@node scripts/visual-tester.js
+
+visual-analyze: visual-test
+	@echo "$(CYAN)🔍 Analyzing visual improvements with consensus...$(NC)"
+	@node scripts/visual-analyzer.js
+
+visual-clean:
+	@echo "$(YELLOW)🧹 Cleaning visual evidence directory...$(NC)"
+	@rm -rf visual-evidence/*
+	@echo "$(GREEN)✅ Visual evidence cleared$(NC)"
 
 # Smart build system - only build and push if images don't exist or deps changed
 check-and-build-golden-base: docker-check

@@ -25,7 +25,9 @@
     "perf:report": "node scripts/performance-monitor.js report",
     "perf:history": "node scripts/performance-monitor.js history",
     "perf:build": "node scripts/performance-monitor.js build",
-    "perf:test": "node scripts/performance-monitor.js test"
+    "perf:test": "node scripts/performance-monitor.js test",
+    "ux:analyze": "node scripts/ux-analyzer.js",
+    "accessibility:audit": "node scripts/accessibility-audit.js"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",

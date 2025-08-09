@@ -1,0 +1,330 @@
+{
+  "timestamp": "2025-08-09T20:58:03.336Z",
+  "devices": {},
+  "sections": {},
+  "recommendations": [
+    {
+      "category": "Header Optimization",
+      "priority": "Critical",
+      "description": "Header section needs special attention - analyze sticky behavior, logo sizing, navigation accessibility",
+      "evidence": "header variation screenshots",
+      "action": "Fix header responsive layout, improve mobile navigation, optimize sticky behavior"
+    },
+    {
+      "category": "Load More Functionality",
+      "priority": "High",
+      "description": "Load more button states show significant layout changes - ensure smooth transitions",
+      "evidence": "before/after load more screenshots",
+      "action": "Optimize load more transitions, improve button visibility, ensure content flows properly"
+    },
+    {
+      "category": "Section Responsiveness",
+      "priority": "High",
+      "description": "Each major section needs mobile optimization for iPhone 16 Pro Max viewport",
+      "evidence": "section-specific screenshots",
+      "action": "Optimize each section for mobile, improve touch targets, enhance readability"
+    },
+    {
+      "category": "Desktop Layout Efficiency",
+      "priority": "High",
+      "description": "macOS Retina screenshots reveal opportunities for better space utilization",
+      "evidence": "desktop full-page screenshots",
+      "action": "Improve desktop layout density, optimize whitespace, enhance visual hierarchy"
+    },
+    {
+      "category": "Theme Consistency",
+      "priority": "Medium",
+      "description": "Dark vs light mode comparison across all sections and states",
+      "evidence": "theme comparison screenshots",
+      "action": "Ensure consistent theming, improve dark mode contrast, fix theme-specific issues"
+    }
+  ],
+  "summary": {
+    "total_screenshots": 100,
+    "sections_tested": 5,
+    "devices_tested": 2,
+    "themes_tested": 2,
+    "issues_found": [
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "section-header-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "section-header-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "section-header-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "section-header-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "section-experience-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "section-experience-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "section-experience-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "section-experience-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "section-skills-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "section-skills-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "section-skills-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "section-skills-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "section-education-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "section-education-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "section-education-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "section-education-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "section-footer-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "section-footer-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "section-footer-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "section-footer-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "load-more-before-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "load-more-after-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "load-more-before-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "load-more-after-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "load-more-before-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "load-more-after-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "load-more-before-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "load-more-after-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "header-top-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "light",
+        "testCase": "header-scrolled-iphone-16-pro-max-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "header-top-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "iphone-16-pro-max",
+        "theme": "dark",
+        "testCase": "header-scrolled-iphone-16-pro-max-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "header-top-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "light",
+        "testCase": "header-scrolled-macos-retina-light",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "header-top-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      },
+      {
+        "type": "screenshot_failed",
+        "device": "macos-retina",
+        "theme": "dark",
+        "testCase": "header-scrolled-macos-retina-dark",
+        "error": "Command failed: npx playwright test /Users/rafael.sathler/projetos/resume-as-code/scripts/temp-screenshot-script.js --config=config/playwright.config.js"
+      }
+    ]
+  }
+}
