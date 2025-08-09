@@ -135,7 +135,7 @@ jobs:
       - name: Pre-warm golden-base cache
         run: |
           echo "🔥 Pre-warming golden-base cache for all browsers..."
-          
+
           # Build golden-base once, cache for all browsers
           docker buildx build \
             --target golden-base \
@@ -145,7 +145,7 @@ jobs:
             --cache-to type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base,mode=max \
             --cache-to type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }},mode=max \
             . &
-          
+
           # Also warm test-base cache
           docker buildx build \
             --target test-base \
@@ -154,7 +154,7 @@ jobs:
             --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:test-base \
             --cache-to type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:test-base,mode=max \
             . &
-          
+
           # Wait for parallel warming to complete
           wait
           echo "✅ Cache warming completed for all base layers"
@@ -284,18 +284,18 @@ jobs:
             echo "  ✓ Testing container startup..."
             docker run --rm $IMAGE_TAG echo "Container started successfully"
           ) &
-          
+
           (
             echo "  ✓ Testing Node.js environment..."
             docker run --rm $IMAGE_TAG node --version
             docker run --rm $IMAGE_TAG npm --version
           ) &
-          
+
           (
             echo "  ✓ Testing Playwright installation..."
             docker run --rm $IMAGE_TAG npx playwright --version
           ) &
-          
+
           (
             echo "  ✓ Verifying testuser can access browser files..."
             docker run --rm $IMAGE_TAG sh -c "whoami && id && test -r /opt/playwright && echo 'Browser directory accessible to testuser'"

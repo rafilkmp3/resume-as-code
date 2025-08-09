@@ -64,10 +64,10 @@ log_phase() { echo -e "\n${PURPLE}🚀 $1${NC}"; }
 
 validate_docker_file() {
     log_phase "Phase 2B-1: Validating Docker Architecture Fixes"
-    
+
     local dockerfile="$PROJECT_ROOT/Dockerfile"
     local issues_found=0
-    
+
     # Check for sudo command pattern (should be eliminated)
     if grep -q "sudo" "$dockerfile" 2>/dev/null; then
         log_error "Found sudo commands in Dockerfile (Phase 2B-1a issue)"
@@ -75,7 +75,7 @@ validate_docker_file() {
     else
         log_success "No sudo commands found - Phase 2B-1a fix verified"
     fi
-    
+
     # Check for proper USER switching pattern
     if grep -A5 -B5 "USER root" "$dockerfile" | grep -q "RUN.*apt-get"; then
         log_success "Proper USER root -> package install -> USER appuser pattern found"
@@ -83,7 +83,7 @@ validate_docker_file() {
         log_warning "USER switching pattern not clearly identified"
         ((issues_found++))
     fi
-    
+
     # Check for devDependencies installation in test-base
     if grep -A10 "FROM golden-base AS test-base" "$dockerfile" | grep -q "npm ci"; then
         log_success "devDependencies installation found in test-base - Phase 2B-1b fix verified"
@@ -91,28 +91,28 @@ validate_docker_file() {
         log_error "Missing npm ci in test-base stage (Phase 2B-1b issue)"
         ((issues_found++))
     fi
-    
+
     # Check for BuildKit cache mount optimization
     if grep -q "mount=type=cache,target=/root/.npm" "$dockerfile"; then
         log_success "BuildKit cache mount optimization implemented"
     else
         log_warning "BuildKit cache mount not found - performance opportunity"
     fi
-    
+
     return $issues_found
 }
 
 validate_docker_images_workflow() {
     log_phase "Phase 2B-2 & 2B-3: Validating CI/CD Pipeline Optimizations"
-    
+
     local workflow_file="$PROJECT_ROOT/.github/workflows/docker-images.yml"
     local issues_found=0
-    
+
     if [[ ! -f "$workflow_file" ]]; then
         log_error "docker-images.yml workflow not found"
         return 1
     fi
-    
+
     # Phase 2B-2: Check for registry caching
     if grep -q "type=registry,ref=" "$workflow_file"; then
         log_success "Registry-based caching implemented (Phase 2B-2)"
@@ -120,14 +120,14 @@ validate_docker_images_workflow() {
         log_error "Registry caching not found (Phase 2B-2 missing)"
         ((issues_found++))
     fi
-    
+
     # Check for branch-aware caching
     if grep -q "github.ref_name" "$workflow_file"; then
         log_success "Branch-aware caching implemented"
     else
         log_warning "Branch-aware caching not detected"
     fi
-    
+
     # Phase 2B-3: Check for cache warming job
     if grep -q "warm-cache:" "$workflow_file"; then
         log_success "Cache warming job implemented (Phase 2B-3)"
@@ -135,55 +135,55 @@ validate_docker_images_workflow() {
         log_error "Cache warming job not found (Phase 2B-3 missing)"
         ((issues_found++))
     fi
-    
+
     # Check for parallel testing implementation
     if grep -A20 "Run parallel smoke tests" "$workflow_file" | grep -q "&.*wait"; then
         log_success "Parallel smoke tests implemented"
     else
         log_warning "Parallel testing pattern not clearly detected"
     fi
-    
+
     # Check for timeout optimization (should be 12 minutes)
     if grep -q "timeout-minutes: 12" "$workflow_file"; then
         log_success "Optimized timeout (12 minutes) implemented"
     else
         log_warning "Timeout optimization not detected (expected 12 minutes)"
     fi
-    
+
     return $issues_found
 }
 
 validate_production_workflow() {
     log_phase "Validating Production Pipeline Enhancements"
-    
+
     local workflow_file="$PROJECT_ROOT/.github/workflows/production.yml"
     local issues_found=0
-    
+
     if [[ ! -f "$workflow_file" ]]; then
         log_error "production.yml workflow not found"
         return 1
     fi
-    
+
     # Check for registry caching in production
     if grep -q "cache-from.*registry" "$workflow_file"; then
         log_success "Registry caching implemented in production pipeline"
     else
         log_warning "Registry caching not found in production pipeline"
     fi
-    
+
     # Check for dual-layer caching strategy
     if grep -q "cache-from.*local" "$workflow_file" && grep -q "cache-from.*registry" "$workflow_file"; then
         log_success "Dual-layer caching strategy implemented"
     else
         log_warning "Dual-layer caching not fully implemented"
     fi
-    
+
     return $issues_found
 }
 
 check_git_status() {
     log_phase "Checking Git Repository Status"
-    
+
     # Check for uncommitted changes that might affect testing
     if ! git diff --quiet; then
         log_warning "Uncommitted changes detected - may affect pipeline testing"
@@ -194,7 +194,7 @@ check_git_status() {
     else
         log_success "No uncommitted changes - clean state for testing"
     fi
-    
+
     # Check for untracked files that might affect Docker context
     if [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
         log_warning "Untracked files detected - may affect Docker build context"
@@ -207,52 +207,52 @@ check_git_status() {
 
 validate_github_cli() {
     log_phase "Validating GitHub CLI Configuration"
-    
+
     if ! command -v gh &> /dev/null; then
         log_error "GitHub CLI (gh) not installed - required for pipeline validation"
         return 1
     fi
-    
+
     if ! gh auth status &> /dev/null; then
         log_error "GitHub CLI not authenticated - run 'gh auth login'"
         return 1
     fi
-    
+
     log_success "GitHub CLI authenticated and ready"
     return 0
 }
 
 run_pipeline_test() {
     log_phase "Phase 2B Pipeline Performance Test"
-    
+
     if [[ "$DRY_RUN" == true ]]; then
         log_info "DRY RUN: Would trigger Docker Images workflow for performance testing"
         return 0
     fi
-    
+
     # Check if we can trigger the workflow
     if ! validate_github_cli; then
         log_error "Cannot run pipeline test - GitHub CLI not available"
         return 1
     fi
-    
+
     log_info "Triggering Docker Images workflow for performance validation..."
-    
+
     # Trigger the workflow with force rebuild to test all optimizations
     if gh workflow run "Docker Images" --ref main -f force_rebuild=true; then
         log_success "Docker Images workflow triggered successfully"
-        
+
         # Wait a moment for the run to appear
         sleep 5
-        
+
         # Get the latest run ID
         local run_id=$(gh run list --workflow="Docker Images" --limit=1 --json databaseId --jq '.[0].databaseId')
-        
+
         if [[ -n "$run_id" ]]; then
             log_info "Workflow run ID: $run_id"
             log_info "Monitor progress: gh run watch $run_id"
             log_info "View details: gh run view $run_id"
-            
+
             # Optionally watch the run
             read -p "Watch the workflow run now? (y/n): " -n 1 -r
             echo
@@ -270,9 +270,9 @@ run_pipeline_test() {
 
 generate_validation_report() {
     log_phase "Generating Phase 2B Validation Report"
-    
+
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    
+
     cat > "$VALIDATION_REPORT" << EOF
 # 🚀 Phase 2B Validation Report
 
@@ -290,7 +290,7 @@ generate_validation_report() {
 - Playwright module access fixed
 - USER privilege escalation patterns implemented
 
-### Phase 2B-2: Registry-based Cache Strategies ✅  
+### Phase 2B-2: Registry-based Cache Strategies ✅
 - Dual-layer caching (registry + local) implemented
 - Branch-aware cache scoping active
 - GitHub Container Registry integration complete
@@ -371,23 +371,23 @@ main() {
     echo "Project: $(basename "$PROJECT_ROOT")"
     echo "Date: $(date)"
     echo
-    
+
     if [[ "$DRY_RUN" == true ]]; then
         log_info "Running in DRY RUN mode - no actual changes will be made"
         echo
     fi
-    
+
     local total_issues=0
-    
+
     # Run validation steps
     validate_docker_file || ((total_issues+=$?))
     validate_docker_images_workflow || ((total_issues+=$?))
     validate_production_workflow || ((total_issues+=$?))
     check_git_status
-    
+
     # Generate report
     generate_validation_report
-    
+
     # Optionally run pipeline test
     if [[ "$total_issues" -eq 0 ]]; then
         log_success "All validations passed! Phase 2B optimizations are properly implemented."
@@ -401,11 +401,11 @@ main() {
         log_error "Found $total_issues issues - please resolve before testing pipeline"
         exit $total_issues
     fi
-    
+
     echo
     log_phase "Phase 2B Validation Complete"
     log_success "Report available: $VALIDATION_REPORT"
-    
+
     if [[ "$total_issues" -eq 0 ]]; then
         log_success "✅ Phase 2B optimizations successfully validated"
         log_info "Ready to proceed with Phase 2B-5: Commit and Testing"

@@ -296,6 +296,15 @@
             --slate-700: var(--neutral-700);
             --slate-800: var(--neutral-800);
             --slate-900: var(--neutral-900);
+            
+            /* Load More Button Colors */
+            --color-accent-primary: var(--primary-500);      /* #2196f3 blue */
+            --color-accent-secondary: var(--secondary-500);  /* #9c27b0 purple */
+            
+            /* Status Colors */
+            --color-success: #22c55e;                        /* Green for success states */
+            --color-warning: #f59e0b;                        /* Amber for warnings */
+            --color-error: #ef4444;                          /* Red for errors */
         }
 
         [data-theme="dark"] {
@@ -354,6 +363,15 @@
             --gradient-end: var(--color-gradient-end);
             --border-color: var(--color-border-default);
             --shadow: var(--shadow-default);
+            
+            /* Load More Button Colors - Dark Theme */
+            --color-accent-primary: var(--primary-400);      /* Brighter blue for dark mode */
+            --color-accent-secondary: var(--secondary-400);  /* Brighter purple for dark mode */
+            
+            /* Status Colors - Dark Theme */
+            --color-success: #10b981;                        /* Slightly darker green for better contrast */
+            --color-warning: #f59e0b;                        /* Amber works well in dark mode */
+            --color-error: #f87171;                          /* Lighter red for dark backgrounds */
         }
 
         /* Typography Scale - Modern fluid typography system */
@@ -390,6 +408,12 @@
             --letter-spacing-tight: -0.025em;
             --letter-spacing-normal: 0;
             --letter-spacing-wide: 0.025em;
+            
+            /* Advanced typography features */
+            --font-variant-numeric: tabular-nums;
+            --font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1;
+            --font-optical-sizing: auto;
+            --text-rendering: optimizeLegibility;
         }
 
         body {
@@ -397,6 +421,11 @@
             font-size: var(--font-size-base);
             line-height: var(--line-height-relaxed);
             font-weight: var(--font-weight-normal);
+            font-feature-settings: var(--font-feature-settings);
+            font-optical-sizing: var(--font-optical-sizing);
+            text-rendering: var(--text-rendering);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             color: var(--color-text-default);
             background: var(--color-background-base);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -604,7 +633,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, var(--purple-500) 100%);
             color: white;
             padding: 1.5rem; /* Reduced from 2rem for more compact desktop layout */
             display: flex;
@@ -1025,9 +1054,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 2.5rem -2rem 1rem 0; /* Extend into right padding area */
+            margin: 2.5rem 0 1rem 0;
             text-align: center;
-            width: calc(100% + 2rem); /* Compensate for left column padding */
+            width: 100%;
         }
 
         .load-more-btn {
@@ -1036,7 +1065,7 @@
             gap: 0.75rem;
             padding: 1rem 2rem;
             background: var(--color-accent-primary);
-            color: white;
+            color: var(--color-text-on-primary);
             border: none;
             border-radius: 3rem;
             font-size: var(--font-size-base);
@@ -1074,6 +1103,21 @@
         .load-more-btn:active {
             transform: translateY(0);
             box-shadow: 0 2px 8px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+        }
+
+        .load-more-btn:focus,
+        .load-more-btn:focus-visible {
+            outline: 2px solid var(--color-interactive-default);
+            outline-offset: 2px;
+            z-index: 1;
+        }
+
+        [data-theme="light"] .load-more-btn:focus-visible {
+            outline-color: var(--brand-600);
+        }
+
+        [data-theme="dark"] .load-more-btn:focus-visible {
+            outline-color: var(--brand-300);
         }
 
         .btn-icon {
@@ -1309,7 +1353,7 @@
             padding: 0.8rem;
             background: var(--bg-secondary);
             border-radius: 6px;
-            border-left: 3px solid #28a745;
+            border-left: 3px solid var(--color-success);
             transition: background-color 0.3s ease;
         }
 
@@ -1319,7 +1363,7 @@
         }
 
         .cert-issuer {
-            color: #28a745;
+            color: var(--color-success);
             font-size: var(--font-size-sm);
         }
 
@@ -1734,11 +1778,11 @@
         }
 
         [data-theme="light"] .header {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #8b5cf6, #6366f1);
+            background: linear-gradient(-45deg, var(--primary-500), var(--secondary-500), var(--purple-500), var(--primary-600));
         }
 
         [data-theme="dark"] .header {
-            background: linear-gradient(-45deg, #4c46e6, #5b21b6, #7c3aed, #4338ca);
+            background: linear-gradient(-45deg, var(--primary-400), var(--secondary-600), var(--purple-600), var(--primary-500));
         }
 
         .header::before {
@@ -2088,9 +2132,8 @@
                 --color-border: #cccccc !important;
                 --color-interactive-default: #0066cc !important;
                 --color-interactive-hover: #0052a3 !important;
-                --color-accent-primary: #667eea !important;
-                --color-accent-secondary: #764ba2 !important;
                 --color-accent-primary: #2196f3 !important;
+                --color-accent-secondary: #764ba2 !important;
             }
 
             /* Hide interactive elements but NOT content sections */
@@ -4735,7 +4778,7 @@
                     // Visual feedback
                     const originalText = qrCopyBtn.textContent;
                     qrCopyBtn.textContent = 'Copied!';
-                    qrCopyBtn.style.backgroundColor = '#22c55e';
+                    qrCopyBtn.style.backgroundColor = 'var(--color-success)';
 
                     setTimeout(() => {
                         qrCopyBtn.textContent = originalText;

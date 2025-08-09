@@ -32,62 +32,65 @@
 
 ### **Key Performance Indicators (KPIs)**
 
-| KPI Category | Metrics | Before | Target | After | Status |
-|--------------|---------|--------|--------|--------|--------|
-| **Build Speed** | Cold build time | >20min | <12min | TBD | 🔍 Measuring |
-| **Cache Efficiency** | Cache hit rate | ~15% | >80% | TBD | 🔍 Measuring |
-| **Pipeline Success** | Pipeline failure rate | ~30% | <5% | TBD | 🔍 Measuring |
-| **Resource Usage** | Docker registry usage | High | Optimized | TBD | 🔍 Measuring |
+| KPI Category         | Metrics               | Before | Target    | After | Status       |
+| -------------------- | --------------------- | ------ | --------- | ----- | ------------ |
+| **Build Speed**      | Cold build time       | >20min | <12min    | TBD   | 🔍 Measuring |
+| **Cache Efficiency** | Cache hit rate        | ~15%   | >80%      | TBD   | 🔍 Measuring |
+| **Pipeline Success** | Pipeline failure rate | ~30%   | <5%       | TBD   | 🔍 Measuring |
+| **Resource Usage**   | Docker registry usage | High   | Optimized | TBD   | 🔍 Measuring |
 
 ### **Performance Benchmarks**
 
 #### **Docker Images Pipeline (Target: .github/workflows/docker-images.yml)**
 
 **Before Phase 2B Optimizations:**
+
 ```yaml
 Issues Identified:
-- 🚫 Sudo command failures (exit code 127)
-- 🚫 Missing playwright modules in test-base stage
-- ⚠️ No cache warming strategy
-- ⚠️ Sequential cache operations
-- ⚠️ Basic smoke tests without parallelization
-- ⚠️ 15-minute timeout (conservative estimate)
+  - 🚫 Sudo command failures (exit code 127)
+  - 🚫 Missing playwright modules in test-base stage
+  - ⚠️ No cache warming strategy
+  - ⚠️ Sequential cache operations
+  - ⚠️ Basic smoke tests without parallelization
+  - ⚠️ 15-minute timeout (conservative estimate)
 
 Failure Rate: ~30% (estimated based on sudo/playwright issues)
 ```
 
 **After Phase 2B Optimizations:**
+
 ```yaml
 Optimizations Applied:
-- ✅ Fixed USER privilege escalation patterns
-- ✅ Added devDependencies in test-base stage
-- ✅ Implemented cache warming (warm-cache job)
-- ✅ Dual-layer caching (registry + GitHub Actions)
-- ✅ Parallel smoke tests (container, Node.js, Playwright, permissions)
-- ✅ Optimized timeout to 12 minutes
-- ✅ Enhanced summary reporting with performance metrics
+  - ✅ Fixed USER privilege escalation patterns
+  - ✅ Added devDependencies in test-base stage
+  - ✅ Implemented cache warming (warm-cache job)
+  - ✅ Dual-layer caching (registry + GitHub Actions)
+  - ✅ Parallel smoke tests (container, Node.js, Playwright, permissions)
+  - ✅ Optimized timeout to 12 minutes
+  - ✅ Enhanced summary reporting with performance metrics
 
 Expected Improvements:
-- 🎯 Pipeline success rate: >95%
-- 🚀 Build speed: 20-40% faster
-- 🔥 Cache hit rate: 80%+
-- ⚡ Reduced timeout: 15m → 12m
+  - 🎯 Pipeline success rate: >95
+  - 🚀 Build speed: 20-40% faster
+  - 🔥 Cache hit rate: 80%+
+  - ⚡ Reduced timeout: 15m → 12m
 ```
 
 #### **Production Pipeline (Target: .github/workflows/production.yml)**
 
 **Enhanced Caching Strategy:**
+
 ```yaml
 Cache Optimization:
-- Registry cache: ghcr.io cache for golden-base and builder layers
-- Branch-aware caching: Separate cache per branch
-- Local cache fallback: BuildX cache for registry failures
-- Dual-layer strategy: registry + local for maximum reliability
+  - Registry cache: ghcr.io cache for golden-base and builder layers
+  - Branch-aware caching: Separate cache per branch
+  - Local cache fallback: BuildX cache for registry failures
+  - Dual-layer strategy: registry + local for maximum reliability
 
 Performance Impact:
-- 🚀 Build speed: 40-60% improvement expected
-- 💾 Cache efficiency: 90%+ hit rate for registry cache
-- 🌍 Network efficiency: Reduced build context transfers
+  - 🚀 Build speed: 40-60% improvement expected
+  - 💾 Cache efficiency: 90%+ hit rate for registry cache
+  - 🌍 Network efficiency: Reduced build context transfers
 ```
 
 ---
@@ -99,10 +102,11 @@ Performance Impact:
 #### **Critical Issues Fixed:**
 
 1. **Sudo Command Failures (2B-1a)**
+
    ```dockerfile
    # Before (FAILED - exit code 127)
    RUN sudo apt-get install chromium
-   
+
    # After (SUCCESS - proper USER switching)
    USER root
    RUN apt-get install chromium
@@ -110,11 +114,12 @@ Performance Impact:
    ```
 
 2. **Playwright Module Access (2B-1b)**
+
    ```dockerfile
    # Before (FAILED - module not found)
    FROM golden-base AS test-base
    # Only source code, no devDependencies
-   
+
    # After (SUCCESS - full dependencies)
    FROM golden-base AS test-base
    RUN --mount=type=cache,target=/root/.npm \
@@ -160,14 +165,14 @@ warm-cache:
           --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base \
           --cache-to type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base,mode=max \
           . &
-        
+
         docker buildx build \
           --target test-base \
           --platform linux/amd64 \
           --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:test-base \
           --cache-to type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:test-base,mode=max \
           . &
-        
+
         wait
 ```
 
@@ -182,10 +187,10 @@ warm-cache:
     (docker run --rm $IMAGE_TAG node --version) &
     (docker run --rm $IMAGE_TAG npx playwright --version) &
     (docker run --rm $IMAGE_TAG sh -c "whoami && id") &
-    
+
     # Wait for parallel tests
     wait
-    
+
     # Sequential browser test (resource-intensive)
     docker run --rm $IMAGE_TAG node -e "const { chromium } = require('playwright'); ..."
 ```
@@ -196,30 +201,30 @@ warm-cache:
 
 ### **Phase 2B-1 Impact: Pipeline Reliability** ✅
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Pipeline Success Rate** | ~70% | **>95%** | **🚀 +25 points** |
-| **Sudo Command Failures** | 100% | **0%** | **✅ Eliminated** |
-| **Playwright Module Errors** | 100% | **0%** | **✅ Eliminated** |
-| **Build Reliability** | Unstable | **Stable** | **✅ Fixed** |
+| Metric                       | Before   | After      | Improvement       |
+| ---------------------------- | -------- | ---------- | ----------------- |
+| **Pipeline Success Rate**    | ~70%     | **>95%**   | **🚀 +25 points** |
+| **Sudo Command Failures**    | 100%     | **0%**     | **✅ Eliminated** |
+| **Playwright Module Errors** | 100%     | **0%**     | **✅ Eliminated** |
+| **Build Reliability**        | Unstable | **Stable** | **✅ Fixed**      |
 
 ### **Phase 2B-2 Impact: Cache Performance** ✅
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Cache Hit Rate** | ~15% | **80-95%** | **🚀 +65-80 points** |
-| **Registry Cache Availability** | 0% | **90%** | **🚀 +90 points** |
-| **Branch Isolation** | None | **Per-branch** | **✅ Implemented** |
-| **Cache Fallback Strategy** | None | **Dual-layer** | **✅ Implemented** |
+| Metric                          | Before | After          | Improvement          |
+| ------------------------------- | ------ | -------------- | -------------------- |
+| **Cache Hit Rate**              | ~15%   | **80-95%**     | **🚀 +65-80 points** |
+| **Registry Cache Availability** | 0%     | **90%**        | **🚀 +90 points**    |
+| **Branch Isolation**            | None   | **Per-branch** | **✅ Implemented**   |
+| **Cache Fallback Strategy**     | None   | **Dual-layer** | **✅ Implemented**   |
 
 ### **Phase 2B-3 Impact: Execution Speed** ✅
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Cache Warming** | None | **Pre-warmed** | **🚀 5min saved** |
-| **Parallel Testing** | Sequential | **Parallel** | **🚀 3-5min saved** |
-| **Timeout Optimization** | 15min | **12min** | **⚡ 20% reduction** |
-| **Job Dependencies** | Basic | **Optimized** | **✅ Enhanced** |
+| Metric                   | Before     | After          | Improvement          |
+| ------------------------ | ---------- | -------------- | -------------------- |
+| **Cache Warming**        | None       | **Pre-warmed** | **🚀 5min saved**    |
+| **Parallel Testing**     | Sequential | **Parallel**   | **🚀 3-5min saved**  |
+| **Timeout Optimization** | 15min      | **12min**      | **⚡ 20% reduction** |
+| **Job Dependencies**     | Basic      | **Optimized**  | **✅ Enhanced**      |
 
 ---
 
@@ -227,11 +232,11 @@ warm-cache:
 
 ### **CI/CD Pipeline Performance**
 
-| Pipeline | Before Duration | After Duration | Time Saved | Success Rate |
-|----------|----------------|----------------|------------|--------------|
-| **Docker Images** | 15-25min | **8-15min** | **40-50%** | **>95%** |
-| **Production Build** | 8-12min | **5-8min** | **30-40%** | **>99%** |
-| **Total CI Time** | 23-37min | **13-23min** | **40-45%** | **>95%** |
+| Pipeline             | Before Duration | After Duration | Time Saved | Success Rate |
+| -------------------- | --------------- | -------------- | ---------- | ------------ |
+| **Docker Images**    | 15-25min        | **8-15min**    | **40-50%** | **>95%**     |
+| **Production Build** | 8-12min         | **5-8min**     | **30-40%** | **>99%**     |
+| **Total CI Time**    | 23-37min        | **13-23min**   | **40-45%** | **>95%**     |
 
 ### **Developer Experience Improvements**
 
@@ -242,11 +247,11 @@ warm-cache:
 
 ### **Resource Efficiency**
 
-| Resource | Annual Savings | Impact |
-|----------|---------------|--------|
-| **Build Minutes** | ~800 hours | ⏰ Developer productivity |
+| Resource          | Annual Savings | Impact                       |
+| ----------------- | -------------- | ---------------------------- |
+| **Build Minutes** | ~800 hours     | ⏰ Developer productivity    |
 | **Cache Storage** | ~2TB transfers | 💾 Infrastructure efficiency |
-| **Failed Builds** | ~70% reduction | 🔧 Reduced debugging time |
+| **Failed Builds** | ~70% reduction | 🔧 Reduced debugging time    |
 
 ---
 
