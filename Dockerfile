@@ -186,8 +186,16 @@ FROM golden-base AS test-base
 ENV NODE_ENV=test \
     CI=true
 
-# Copy source code for testing
-COPY --chown=appuser:appuser . .
+# Install development dependencies for testing
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci && npm cache clean --force
+
+# Copy source code for testing, preserving npm dependencies from golden-base
+COPY --chown=appuser:appuser assets/ ./assets/
+COPY --chown=appuser:appuser tests/ ./tests/
+COPY --chown=appuser:appuser scripts/ ./scripts/
+COPY --chown=appuser:appuser config/ ./config/
+COPY --chown=appuser:appuser *.html *.json *.js ./
 
 # Create embedded Hello World test (browser-agnostic)
 RUN mkdir -p tests/hello-world && \
