@@ -73,7 +73,7 @@ test.describe('Basic Functionality Tests', () => {
     const href = await downloadBtn.getAttribute('href');
     expect(href).toContain('.pdf');
 
-    // Check share button exists 
+    // Check share button exists
     const shareBtn = page.locator('.resume-share-btn');
     await expect(shareBtn).toBeVisible();
 
@@ -85,6 +85,30 @@ test.describe('Basic Functionality Tests', () => {
     expect(shareBtnText).toContain('Share');
 
     console.log(`✅ Direct download and share buttons work correctly`);
+  });
+
+  test('Availability status displays correctly', async ({ page }) => {
+    // Check availability status section exists
+    const availabilityStatus = page.locator('.availability-status');
+    await expect(availabilityStatus).toBeVisible();
+
+    // Check status indicator
+    const statusIndicator = page.locator('.status-indicator');
+    await expect(statusIndicator).toBeVisible();
+
+    // Check status text
+    const statusText = await statusIndicator.textContent();
+    expect(statusText).toContain('Open to Work');
+
+    // Check work types are displayed
+    const workTypes = page.locator('.work-types');
+    await expect(workTypes).toBeVisible();
+
+    const workTypesText = await workTypes.textContent();
+    expect(workTypesText).toContain('Full-time');
+    expect(workTypesText).toContain('Contract');
+
+    console.log(`✅ Availability status displays: ${statusText.trim()}`);
   });
 
   test('Load more buttons function correctly', async ({ page }) => {
