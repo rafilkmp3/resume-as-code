@@ -97,7 +97,7 @@ jobs:
   build:
     name: Build Resume (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event.inputs.deployment_mode == 'emergency' && '5' || '10' }}
+    timeout-minutes: 10
     needs: version-check
     env:
       DOCKER_BUILDKIT: 1
