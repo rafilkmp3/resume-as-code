@@ -8,16 +8,27 @@
 # =============================================================================
 # 🏗️ STAGE 1: GOLDEN BASE - Shared Dependencies & Foundation
 # =============================================================================
-FROM node:22-slim AS golden-base
+# Phase 2A: Multi-architecture optimization with build platform awareness
+FROM --platform=$BUILDPLATFORM node:22-slim AS golden-base
+
+# Phase 2A: Build arguments for advanced caching strategies
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETARCH
 
 # Environment setup (shared across all stages)
 ENV DEBIAN_FRONTEND=noninteractive \
     NODE_ENV=production \
-    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright \
+    TARGETPLATFORM=${TARGETPLATFORM} \
+    TARGETARCH=${TARGETARCH}
 
-# Install shared system dependencies (defined once, used everywhere)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Core runtime dependencies
+# Phase 2A Optimization: Multi-layer caching strategy for better cache hit rates
+# Layer 1: Package repository update (changes least frequently)
+RUN apt-get update
+
+# Layer 2: Core runtime dependencies (stable, rarely changes)
+RUN apt-get install -y --no-install-recommends \
     fonts-liberation \
     libatk-bridge2.0-0 \
     libdrm2 \
@@ -26,8 +37,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrandr2 \
     libgbm1 \
     libxss1 \
-    libasound2 \
-    # Browser support libraries
+    libasound2
+
+# Layer 3: Browser support libraries (moderate change frequency)
+RUN apt-get install -y --no-install-recommends \
     libgtk-3-0 \
     libgbm-dev \
     libnss3 \
@@ -36,22 +49,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpangocairo-1.0-0 \
     libatk1.0-0 \
     libcairo-gobject2 \
-    libgdk-pixbuf2.0-0 \
-    # Development tools
+    libgdk-pixbuf2.0-0
+
+# Layer 4: Development tools (changes most frequently)
+RUN apt-get install -y --no-install-recommends \
     make \
     git \
     wget \
     curl \
-    dumb-init \
-    && rm -rf /var/lib/apt/lists/* \
+    dumb-init
+
+# Layer 5: Cleanup and final setup (always last)
+RUN rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     && mkdir -p /opt/playwright
 
 WORKDIR /app
 
-# Copy package files and install npm dependencies (stable caching layer)
-COPY package*.json Makefile ./
-RUN npm ci --ignore-scripts && npm cache clean --force
+# Phase 2A: Optimized npm caching strategy
+# Layer 6: Copy only package files first (most stable layer)
+COPY package*.json ./
+
+# Layer 7: Install npm dependencies with BuildKit cache mount optimization
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --ignore-scripts && npm cache clean --force
+
+# Layer 8: Copy Makefile separately (changes more frequently than packages)
+COPY Makefile ./
 
 # Create standardized user (uid=1001 across all stages)
 RUN groupadd -g 1001 appuser && \
@@ -190,14 +214,17 @@ FROM test-base AS chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install Chromium and dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+# Install Chromium and dependencies as root
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
-    && sudo rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright Chromium
-RUN npx playwright install chromium && \
-    npx playwright install-deps chromium
+# Install Playwright dependencies as root, then browsers as appuser
+RUN npx playwright install-deps chromium
+
+USER appuser
+RUN npx playwright install chromium
 
 CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=chromium"]
 
@@ -206,15 +233,18 @@ CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--pr
 # =============================================================================
 FROM test-base AS firefox
 
-# Install Firefox and dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+# Install Firefox and dependencies as root
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
     firefox-esr \
     libdbus-glib-1-2 \
-    && sudo rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright Firefox
-RUN npx playwright install firefox && \
-    npx playwright install-deps firefox
+# Install Playwright dependencies as root, then browsers as appuser
+RUN npx playwright install-deps firefox
+
+USER appuser
+RUN npx playwright install firefox
 
 CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=firefox"]
 
@@ -223,8 +253,9 @@ CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--pr
 # =============================================================================
 FROM test-base AS webkit
 
-# Install WebKit-specific dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+# Install WebKit-specific dependencies as root
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libopus0 \
     libwebp7 \
     libenchant-2-2 \
@@ -236,11 +267,13 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     libxslt1.1 \
     libevent-2.1-7 \
     libgles2-mesa \
-    && sudo rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright WebKit
-RUN npx playwright install webkit && \
-    npx playwright install-deps webkit
+# Install Playwright dependencies as root, then browsers as appuser
+RUN npx playwright install-deps webkit
+
+USER appuser
+RUN npx playwright install webkit
 
 CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--project=webkit"]
 
@@ -249,20 +282,24 @@ CMD ["npx", "playwright", "test", "tests/hello-world/hello-world.spec.js", "--pr
 # =============================================================================
 FROM test-base AS ci
 
-# Install all browsers for comprehensive testing
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+# Install all browsers for comprehensive testing as root
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     firefox-esr \
     libdbus-glib-1-2 \
     libopus0 \
     libwebp7 \
-    && sudo rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install all Playwright browsers
-RUN npx playwright install --with-deps chromium firefox webkit
+# Install Playwright system dependencies as root, then browsers as appuser
+RUN npx playwright install-deps chromium firefox webkit
+
+USER appuser
+RUN npx playwright install chromium firefox webkit
 
 CMD ["make", "test"]
 
