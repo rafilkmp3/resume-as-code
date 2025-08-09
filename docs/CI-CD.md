@@ -296,7 +296,7 @@ npm audit --audit-level=high
 make build-images
 
 # Run smoke tests
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.7.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.7.1
 ```
 
 ### Debugging Failed Builds
@@ -382,7 +382,7 @@ gh workflow run ci-prod.yml
 ```bash
 # Retag previous working images
 docker tag ghcr.io/rafilkmp3/resume-as-code-chromium:<old-sha> \
-         ghcr.io/rafilkmp3/resume-as-code-chromium:1.7.0
+         ghcr.io/rafilkmp3/resume-as-code-chromium:1.7.1
 
 # Or rebuild from specific commit
 gh workflow run docker-images.yml --ref <working-commit>
