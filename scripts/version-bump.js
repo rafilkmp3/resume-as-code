@@ -226,18 +226,24 @@ function main() {
     process.exit(1);
   }
 
-  // Check for uncommitted changes
-  try {
-    const status = execSync('git status --porcelain', { encoding: 'utf8' });
-    if (status.trim()) {
-      console.error(
-        '❌ Working directory has uncommitted changes. Please commit or stash them first.'
-      );
+  // Check for uncommitted changes (skip in CI environment)
+  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  
+  if (!isCI) {
+    try {
+      const status = execSync('git status --porcelain', { encoding: 'utf8' });
+      if (status.trim()) {
+        console.error(
+          '❌ Working directory has uncommitted changes. Please commit or stash them first.'
+        );
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check git status');
       process.exit(1);
     }
-  } catch (error) {
-    console.error('❌ Failed to check git status');
-    process.exit(1);
+  } else {
+    console.log('🤖 Running in CI environment, skipping uncommitted changes check');
   }
 
   // Read current version
