@@ -89,7 +89,6 @@ jobs:
             echo "🏷️ Creating GitHub Release for v$NEW_VERSION..."
             gh release create "v$NEW_VERSION" \
               --title "Release v$NEW_VERSION" \
-              --notes-from-tag \
               --generate-notes \
               --latest
           else
