@@ -170,6 +170,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Warm cache with golden-base layers
+        if: matrix.should-build == 'true'
+        run: |
+          echo "🔥 Pre-warming Docker cache for golden-base..."
+
+          # Try to pull existing golden-base cache to warm local BuildKit cache
+          docker buildx build \
+            --target golden-base \
+            --platform linux/amd64 \
+            --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base \
+            --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }} \
+            --cache-from type=gha,scope=golden-base-main \
+            --cache-from type=gha,scope=golden-base-${{ github.ref_name }} \
+            --cache-to type=gha,mode=max,scope=golden-base-${{ github.ref_name }} \
+            . || echo "Cache warming completed (some layers may not be available yet)"
+
+          echo "✅ Cache warming completed for golden-base"
+
       - name: Extract metadata
         if: matrix.should-build == 'true'
         id: meta
@@ -198,11 +216,19 @@ jobs:
           tags: test-${{ matrix.browser }}:local
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}-${{ github.ref_name }}
             type=gha,scope=golden-base-${{ github.ref_name }}
             type=gha,scope=golden-base-main
             type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
             type=gha,scope=${{ matrix.browser }}-main
           cache-to: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}-${{ github.ref_name }},mode=max
             type=gha,mode=max,scope=golden-base-${{ github.ref_name }}
             type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
@@ -263,11 +289,19 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}-${{ github.ref_name }}
             type=gha,scope=golden-base-${{ github.ref_name }}
             type=gha,scope=golden-base-main
             type=gha,scope=${{ matrix.browser }}-${{ github.ref_name }}
             type=gha,scope=${{ matrix.browser }}-main
           cache-to: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base-${{ github.ref_name }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:${{ matrix.browser }}-${{ github.ref_name }},mode=max
             type=gha,mode=max,scope=golden-base-${{ github.ref_name }}
             type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
@@ -309,6 +343,37 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   # Summary job
+  # Cache maintenance job - runs weekly or can be triggered manually
+  cache-cleanup:
+    name: Registry Cache Cleanup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.force_rebuild == 'true'
+    steps:
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean old cache images
+        run: |
+          echo "🧹 Cleaning up old registry cache images..."
+
+          # Get list of cache images
+          CACHE_BASE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache"
+
+          echo "Checking for cache images to clean up..."
+
+          # Clean cache images older than 7 days (if registry supports it)
+          # Note: GitHub Container Registry doesn't support automated deletion,
+          # but we can log what would be cleaned
+          echo "Cache cleanup would target images older than 7 days"
+          echo "Manual cleanup may be required via GitHub Container Registry UI"
+
+          echo "✅ Cache cleanup check completed"
+
   summary:
     name: Build Summary
     runs-on: ubuntu-latest

@@ -135,6 +135,14 @@ jobs:
         with:
           platforms: linux/amd64
 
+      - name: Log in to Container Registry for cache
+        if: env.IS_EMERGENCY != 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Cache Docker layers
         if: env.IS_EMERGENCY != 'true'
         uses: actions/cache@v4
@@ -147,19 +155,27 @@ jobs:
       - name: Optimized Docker build (normal mode)
         if: env.IS_EMERGENCY != 'true'
         run: |
-          echo "🏗️ Normal mode: Optimized build with caching"
+          echo "🏗️ Normal mode: Optimized build with registry + local caching"
           docker buildx build \
             --target builder \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA=${{ github.sha }} \
             --build-arg GITHUB_REF_NAME=${{ github.ref_name }} \
+            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
+            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base-${{ github.ref_name }} \
+            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder \
+            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder-${{ github.ref_name }} \
             --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base,mode=max \
+            --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base-${{ github.ref_name }},mode=max \
+            --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder,mode=max \
+            --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder-${{ github.ref_name }},mode=max \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             --tag resume:build-${{ github.sha }} \
             --load \
             .
 
-          # Update cache atomically
+          # Update local cache atomically (fallback for registry cache)
           if [[ -d "/tmp/.buildx-cache-new" ]]; then
             rm -rf /tmp/.buildx-cache
             mv /tmp/.buildx-cache-new /tmp/.buildx-cache
