@@ -269,17 +269,17 @@ jobs:
             type=gha,mode=max,scope=golden-base-${{ github.ref_name }}
             type=gha,mode=max,scope=${{ matrix.browser }}-${{ github.ref_name }}
 
-      - name: Run parallel smoke tests
+      - name: Run comprehensive browser tests
         if: matrix.should-build == 'true'
         run: |
-          echo "🧪 Running parallel smoke tests for ${{ matrix.browser }} (AMD64 - Multi-arch will be built during push)"
+          echo "🧪 Running comprehensive browser tests for ${{ matrix.browser }}"
 
-          # Use local test tag for smoke tests
+          # Use local test tag for testing
           IMAGE_TAG="test-${{ matrix.browser }}:local"
           echo "Testing image: $IMAGE_TAG"
 
-          # Run basic tests in parallel
-          echo "🚀 Starting parallel basic tests..."
+          # Run basic environment tests in parallel
+          echo "🚀 Phase 1: Basic Environment Validation"
           (
             echo "  ✓ Testing container startup..."
             docker run --rm $IMAGE_TAG echo "Container started successfully"
@@ -296,17 +296,44 @@ jobs:
             docker run --rm $IMAGE_TAG npx playwright --version
           ) &
 
-          (
-            echo "  ✓ Verifying testuser can access browser files..."
-            docker run --rm $IMAGE_TAG sh -c "whoami && id && test -r /opt/playwright && echo 'Browser directory accessible to testuser'"
-          ) &
-
-          # Wait for parallel basic tests
+          # Wait for basic tests
           wait
-          echo "✅ Basic tests completed"
+          echo "✅ Phase 1 completed - Environment validated"
 
-          # Run browser-specific test (this needs to be sequential due to resource usage)
-          echo "  🎭 Testing ${{ matrix.browser }} browser installation..."
+          # Phase 2: Test embedded hello-world tests (This is the key fix!)
+          echo "🎭 Phase 2: Running Embedded Hello-World Tests"
+          echo "  🧪 Executing default CMD with embedded browser tests..."
+          
+          # Create output directory for test results
+          mkdir -p /tmp/test-results
+          
+          # Run the actual embedded hello-world tests that are built into the image
+          # This uses the default CMD defined in the Dockerfile for each browser target
+          echo "    Running: docker run --rm $IMAGE_TAG"
+          echo "    This will execute the embedded hello-world Playwright tests"
+          
+          # Capture both stdout and stderr with timestamps
+          if docker run --rm --name "test-${{ matrix.browser }}-$$" \
+             -v /tmp/test-results:/test-results \
+             $IMAGE_TAG 2>&1 | tee /tmp/test-results/${{ matrix.browser }}-test-output.log; then
+            echo "✅ Embedded hello-world tests PASSED for ${{ matrix.browser }}"
+            echo "📊 Test output saved to: /tmp/test-results/${{ matrix.browser }}-test-output.log"
+          else
+            echo "❌ Embedded hello-world tests FAILED for ${{ matrix.browser }}"
+            echo "📋 Full test output:"
+            cat /tmp/test-results/${{ matrix.browser }}-test-output.log || echo "No output file found"
+            echo ""
+            echo "🔍 Debugging: Let's check what's in the image..."
+            docker run --rm $IMAGE_TAG ls -la tests/hello-world/ || echo "Failed to list hello-world directory"
+            echo "🔍 Checking Playwright config..."
+            docker run --rm $IMAGE_TAG ls -la config/ || echo "Failed to list config directory"
+            echo "🔍 Checking if tests exist..."
+            docker run --rm $IMAGE_TAG find . -name "*.spec.js" -type f || echo "No test files found"
+            exit 1
+          fi
+
+          # Phase 3: Additional browser validation
+          echo "🎯 Phase 3: Direct Browser Launch Validation"
           case "${{ matrix.browser }}" in
             chromium)
               echo "    Testing Chromium browser startup"
@@ -322,7 +349,18 @@ jobs:
               ;;
           esac
 
-          echo "✅ All smoke tests and Hello World test passed for ${{ matrix.browser }}"
+          echo "🎉 ALL TESTS PASSED for ${{ matrix.browser }}"
+          echo "  ✅ Environment validation"
+          echo "  ✅ Embedded hello-world tests"  
+          echo "  ✅ Direct browser validation"
+
+      - name: Upload test artifacts
+        if: always() && matrix.should-build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-${{ matrix.browser }}-test-results
+          path: /tmp/test-results/
+          retention-days: 7
 
       - name: Push image
         if: matrix.should-build == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
