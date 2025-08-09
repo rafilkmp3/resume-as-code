@@ -70,6 +70,8 @@ jobs:
 
       - name: Conventional commit version check
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🔍 Checking if version bump is needed..."
 
