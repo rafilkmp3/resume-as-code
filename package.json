@@ -21,7 +21,11 @@
     "dev:health": "node scripts/dev-tools.js health",
     "dev:perf": "node scripts/dev-tools.js perf",
     "dev:clean": "node scripts/dev-tools.js clean",
-    "dev:setup": "node scripts/dev-tools.js setup"
+    "dev:setup": "node scripts/dev-tools.js setup",
+    "perf:report": "node scripts/performance-monitor.js report",
+    "perf:history": "node scripts/performance-monitor.js history",
+    "perf:build": "node scripts/performance-monitor.js build",
+    "perf:test": "node scripts/performance-monitor.js test"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",

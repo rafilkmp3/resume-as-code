@@ -53,14 +53,16 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: ci
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    entrypoint: ["/app/scripts/docker-entrypoint.sh"]
     environment:
       - CI=true
       - NODE_ENV=test
     volumes:
       - ..:/app
       - /app/node_modules
-      - test-results:/app/test-results
-      - coverage:/app/coverage
+      - ../test-results:/app/test-results
+      - ../coverage:/app/coverage
     profiles:
       - ci
       - test

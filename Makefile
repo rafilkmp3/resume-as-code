@@ -53,6 +53,12 @@ help:
 	@echo "  $(CYAN)npm run dev:perf$(NC)    - Performance analysis and benchmarks"
 	@echo "  $(CYAN)npm run dev:clean$(NC)   - Clean development artifacts"
 	@echo "  $(CYAN)npm run dev:setup$(NC)   - Quick development environment setup"
+	@echo ""
+	@echo "$(GREEN)📊 Performance Monitoring:$(NC)"
+	@echo "  $(CYAN)npm run perf:report$(NC) - Full performance analysis report"
+	@echo "  $(CYAN)npm run perf:history$(NC)- Show performance history"
+	@echo "  $(CYAN)npm run perf:build$(NC)  - Measure build time only"
+	@echo "  $(CYAN)npm run perf:test$(NC)   - Measure test time only"
 
 # Install dependencies (deprecated - Docker handles this)
 install:
@@ -116,7 +122,8 @@ test: docker-check test-unit test-e2e test-visual test-accessibility test-perfor
 # Run fast smoke tests (recommended for development)
 test-fast: docker-check
 	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-fast-internal
+	@mkdir -p test-results coverage && chmod 755 test-results coverage
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-fast-internal
 
 # Internal test runner (runs inside Docker container)
 test-internal: test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
@@ -140,7 +147,8 @@ test-fast-internal:
 # Run unit tests
 test-unit: docker-check
 	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-unit-internal
+	@mkdir -p test-results coverage && chmod 755 test-results coverage
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-unit-internal
 
 test-unit-internal:
 	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
@@ -153,7 +161,8 @@ test-unit-internal:
 # Run end-to-end tests
 test-e2e: docker-check
 	@echo "$(BLUE)🎭 Running E2E tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-e2e-internal
+	@mkdir -p test-results coverage && chmod 755 test-results coverage
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-e2e-internal
 
 test-e2e-internal:
 	@echo "$(BLUE)🎭 Running end-to-end tests...$(NC)"
@@ -166,7 +175,8 @@ test-e2e-internal:
 # Run visual regression tests
 test-visual: docker-check
 	@echo "$(BLUE)🎨 Running visual tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-visual-internal
+	@mkdir -p test-results coverage && chmod 755 test-results coverage
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-visual-internal
 
 test-visual-internal:
 	@echo "$(BLUE)🎨 Running visual regression tests...$(NC)"
@@ -179,7 +189,7 @@ test-visual-internal:
 # Run accessibility tests
 test-accessibility: docker-check
 	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-accessibility-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-accessibility-internal
 
 test-accessibility-internal:
 	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
@@ -192,7 +202,7 @@ test-accessibility-internal:
 # Run performance tests
 test-performance: docker-check
 	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
-	@docker-compose -f docker/docker-compose.yml run --rm ci make test-performance-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-performance-internal
 
 test-performance-internal:
 	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
