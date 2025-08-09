@@ -10,13 +10,18 @@
     "test": "make test",
     "test:unit": "jest tests/unit/ --coverage --config=config/jest.config.js",
     "test:e2e": "playwright test --config=config/playwright.config.js",
+    "test:fast": "make test-fast",
     "version:patch": "npm version patch && git push --follow-tags",
     "version:minor": "npm version minor && git push --follow-tags",
     "version:major": "npm version major && git push --follow-tags",
     "version:auto": "node scripts/version-bump.js",
     "version:update-refs": "node scripts/update-version-refs.js",
     "version:inject": "node scripts/inject-version.js",
-    "changelog": "echo 'Please update CHANGELOG.md manually before releasing'"
+    "changelog": "echo 'Please update CHANGELOG.md manually before releasing'",
+    "dev:health": "node scripts/dev-tools.js health",
+    "dev:perf": "node scripts/dev-tools.js perf",
+    "dev:clean": "node scripts/dev-tools.js clean",
+    "dev:setup": "node scripts/dev-tools.js setup"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",

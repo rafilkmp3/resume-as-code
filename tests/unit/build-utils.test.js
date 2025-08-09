@@ -4,11 +4,11 @@ const path = require('path');
 describe('Build Process Validation', () => {
   const requiredFiles = [
     'package.json',
-    'template.html',
+    'template.html', 
     'resume-data.json',
-    'build.js',
-    'server.js',
-    'dev-server.js',
+    'scripts/build.js',
+    'scripts/server.js',
+    'scripts/dev-server.js',
   ];
 
   const requiredDirectories = [
@@ -99,7 +99,7 @@ describe('Build Process Validation', () => {
     test('playwright.config.js should exist and be valid', () => {
       const playwrightConfigPath = path.join(
         process.cwd(),
-        'playwright.config.js'
+        'config/playwright.config.js'
       );
       expect(fs.existsSync(playwrightConfigPath)).toBe(true);
 
@@ -108,7 +108,7 @@ describe('Build Process Validation', () => {
     });
 
     test('jest.config.js should exist and be valid', () => {
-      const jestConfigPath = path.join(process.cwd(), 'jest.config.js');
+      const jestConfigPath = path.join(process.cwd(), 'config/jest.config.js');
       expect(fs.existsSync(jestConfigPath)).toBe(true);
 
       // Basic syntax check by requiring the file

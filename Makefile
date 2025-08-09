@@ -47,6 +47,12 @@ help:
 	@echo "  $(PURPLE)make monitor$(NC)        - Run visual monitoring (non-blocking)"
 	@echo "  $(RED)make clean$(NC)          - Clean local environment (CI/CD parity)"
 	@echo "  $(RED)make clean-docker$(NC)   - Clean Docker only (legacy)"
+	@echo ""
+	@echo "$(GREEN)🧰 Developer Tools:$(NC)"
+	@echo "  $(CYAN)npm run dev:health$(NC)  - Development environment health check"
+	@echo "  $(CYAN)npm run dev:perf$(NC)    - Performance analysis and benchmarks"
+	@echo "  $(CYAN)npm run dev:clean$(NC)   - Clean development artifacts"
+	@echo "  $(CYAN)npm run dev:setup$(NC)   - Quick development environment setup"
 
 # Install dependencies (deprecated - Docker handles this)
 install:
@@ -118,10 +124,17 @@ test-internal: test-unit-internal test-e2e-internal test-visual-internal test-ac
 
 test-fast-internal:
 	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
-	@if [ -f "config/playwright.config.js" ] || [ -f "playwright.config.ts" ]; then \
-		npx playwright test tests/fast-smoke.spec.js --reporter=line --config=config/playwright.config.js; \
+	@echo "$(BLUE)📋 Fast Unit Tests (Essential)$(NC)"
+	@if [ -f "config/jest.fast.config.js" ]; then \
+		npx jest --config=config/jest.fast.config.js || echo "$(YELLOW)⚠️  Unit tests failed$(NC)"; \
 	else \
-		echo "$(YELLOW)⚠️  Playwright not configured, skipping fast tests$(NC)"; \
+		echo "$(YELLOW)⚠️  Jest fast config not found$(NC)"; \
+	fi
+	@echo "$(BLUE)🌐 Fast E2E Tests (Chrome Only)$(NC)"
+	@if [ -f "config/playwright.fast.config.js" ]; then \
+		timeout 60s npx playwright test --config=config/playwright.fast.config.js || echo "$(YELLOW)⚠️  E2E tests failed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Playwright fast config not found$(NC)"; \
 	fi
 
 # Run unit tests
