@@ -5,7 +5,12 @@ const Handlebars = require('handlebars');
 const QRCode = require('qrcode');
 // const sharp = require('sharp'); // Removed for multi-arch compatibility
 const { copyRecursive } = require('./utils/fs-utils');
-const { optimizeProfileImageForResume } = require('./utils/image-optimization-simple');
+// Use Canvas-based optimization for production, fallback to simple for development
+const isDraft = process.env.BUILD_MODE === 'draft';
+const imageOptimizer = isDraft
+  ? require('./utils/image-optimization-simple')
+  : require('./utils/image-optimization-canvas');
+const { optimizeProfileImageForResume } = imageOptimizer;
 
 console.log('🏗️  Building resume...');
 
@@ -137,21 +142,16 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+UVIgRVJST1I8L3RleHQ+PC9zdmc+';
   }
 
-  // Enhance resume data with optimized images
+  // Enhance resume data with optimized images AND QR code
   const enhancedResumeData = {
     ...resumeData,
-    profileImageOptimization
+    profileImageOptimization,
+    qrCodeDataURL
   };
 
-  // Replace the placeholder QR code with the real one
+  // Generate HTML with QR code data
   let html = template(enhancedResumeData);
-  if (qrCodeDataURL) {
-    html = html.replace(
-      /src="data:image\/png;base64,[^"]*"/,
-      `src="${qrCodeDataURL}"`
-    );
-    console.log('✅ QR code integrated successfully!');
-  }
+  console.log('✅ QR code integrated successfully as template data!');
 
   // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));

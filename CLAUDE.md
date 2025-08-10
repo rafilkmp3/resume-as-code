@@ -62,7 +62,7 @@ This is a **resume generation system** built with infrastructure-as-code princip
 
 ### Project Structure
 
-```
+```text
 ├── scripts/
 │   ├── build.js           # Main build script (HTML + PDF generation)
 │   ├── dev-server.js      # Development server with hot reload
@@ -138,13 +138,17 @@ This is a **resume generation system** built with infrastructure-as-code princip
 3. **Push to GitHub** to trigger AMD64 CI pipeline
 4. **Verify CI success** using `gh run list` and `gh run view <run-id>`
 5. **Only consider changes complete** when GitHub Actions pass on AMD64
-6. **Use `gh cli` for all CI/CD operations** - ensures authentication and proper API access
+6. **Use `gh cli` for all CI/CD operations** - ensures authentication and
+   proper API access
 
 ### 🧹 Environment Parity (Industry Standard)
 
-- **Always clean before major changes**: `make clean` removes all artifacts that could cause CI/local differences
-- **Mirrors GitHub Actions runners**: Comprehensive cleanup including system files, caches, and build artifacts
-- **Cross-platform considerations**: Removes macOS `.DS_Store`, Windows `Thumbs.db`, etc.
+- **Always clean before major changes**: `make clean` removes all artifacts
+  that could cause CI/local differences
+- **Mirrors GitHub Actions runners**: Comprehensive cleanup including system
+  files, caches, and build artifacts
+- **Cross-platform considerations**: Removes macOS `.DS_Store`, Windows
+  `Thumbs.db`, etc.
 - **Docker state reset**: Full container and image cleanup to prevent state leakage
 - **Git cleanup**: Removes untracked files and optimizes repository state
 

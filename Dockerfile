@@ -51,13 +51,21 @@ RUN apt-get install -y --no-install-recommends \
     libcairo-gobject2 \
     libgdk-pixbuf2.0-0
 
-# Layer 4: Development tools (changes most frequently)
+# Layer 4: Development tools and Canvas dependencies (changes most frequently)
 RUN apt-get install -y --no-install-recommends \
     make \
     git \
     wget \
     curl \
-    dumb-init
+    dumb-init \
+    # Canvas dependencies for image optimization
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    pkg-config
 
 # Layer 5: Cleanup and final setup (always last)
 RUN rm -rf /var/lib/apt/lists/* \
