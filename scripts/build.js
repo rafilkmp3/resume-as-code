@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
-const QRCode = require('qrcode');
 // const sharp = require('sharp'); // Removed for multi-arch compatibility
 const { copyRecursive } = require('./utils/fs-utils');
 // Use simple optimization for now (Canvas not working in GitHub Actions)
@@ -38,55 +37,8 @@ function getMacLanIP() {
   }
 }
 
-// Generate QR code with easter egg styling for the online version
-async function generateQRCode(url, options) {
-  const isDev = process.env.NODE_ENV === 'development' || process.env.BUILD_MODE === 'draft';
-
-  // Easter egg QR code options with custom styling
-  const easterEggOptions = {
-    width: 200,
-    margin: 1,
-    color: {
-      dark: '#2563eb',    // Professional blue instead of black (easter egg!)
-      light: '#ffffff'    // Keep white background
-    },
-    errorCorrectionLevel: 'M', // Medium error correction for better aesthetics
-    type: 'image/png',
-    quality: 0.92,
-    rendererOpts: {
-      quality: 0.92
-    }
-  };
-
-  // Merge custom options with easter egg defaults
-  const finalOptions = { ...easterEggOptions, ...options };
-
-  // In development mode, use LAN IP for mobile access
-  if (isDev) {
-    const lanIP = getMacLanIP();
-    if (lanIP) {
-      const devUrl = `http://${lanIP}:3000`;
-      console.log('🔗 Generating QR code for development (mobile access)...');
-      console.log(`📱 Mobile URL: ${devUrl}`);
-      console.log('🎨 Easter egg: Using professional blue QR code styling!');
-      try {
-        return await QRCode.toDataURL(devUrl, finalOptions);
-      } catch (error) {
-        console.error('Error generating development QR code:', error);
-        // Fallback to original URL if QR generation fails
-      }
-    }
-  }
-
-  console.log('🔗 Generating QR code for online version...');
-  console.log('🎨 Easter egg: Professional blue QR code with enhanced quality!');
-  try {
-    return await QRCode.toDataURL(url, finalOptions);
-  } catch (error) {
-    console.error('Error generating QR code:', error);
-    return null;
-  }
-}
+// QR codes are now generated dynamically in the browser for better performance
+// This eliminates the need for server-side QR generation and reduces HTML size
 
 // DRY Profile Image Optimization using utility
 async function optimizeProfileImage(imagePath, resumeData, options = {}) {
@@ -122,33 +74,18 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     resumeData.basics.image = 'assets/images/profile-mobile.jpg';
   }
 
-  // Generate QR code (fast operation even in draft mode)
-  let qrCodeDataURL = null;
-  qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
-    width: 200,
-    margin: 1,
-    color: {
-      dark: '#2563eb',  // Use easter egg blue color
-      light: '#FFFFFF'
-    }
-  });
+  // QR codes are now generated dynamically in the browser (much more efficient!)
+  // No need to embed 2.9KB base64 data in HTML anymore
 
-  if (!qrCodeDataURL) {
-    console.log('⚠️  QR code generation failed, using placeholder');
-    // Use placeholder if QR generation fails
-    qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+UVIgRVJST1I8L3RleHQ+PC9zdmc+';
-  }
-
-  // Enhance resume data with optimized images AND QR code
+  // Enhance resume data with optimized images only
   const enhancedResumeData = {
     ...resumeData,
-    profileImageOptimization,
-    qrCodeDataURL
+    profileImageOptimization
   };
 
-  // Generate HTML with QR code data
+  // Generate HTML (QR codes will be generated dynamically in browser)
   let html = template(enhancedResumeData);
-  console.log('✅ QR code integrated successfully as template data!');
+  console.log('✅ Template generated successfully with dynamic QR code support!');
 
   // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));

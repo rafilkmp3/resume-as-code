@@ -4614,7 +4614,7 @@
 
         <!-- QR Code Section - Only visible in print -->
         <div class="print-qr-section">
-            <img src="{{qrCodeDataURL}}AAADICAYAAACtWK6eAAAMGklEQVR4Xu2dQXLjOAyFv5p7dWrSnE5OnMksd2qvzjJrz8ZZubIKk4LAN/jzXS7SFEXwIwBScrxer9e3ePENAQhshOBNQBECAAIQEBAwAhCAAAQgYAQgAAEIQMEoQgACENgIQAACEICAEYAABCAABaMIAQhAYCMAAQhAAAJGAAIQgAAEjCIEIACBjQAEIAABCBgBCEAAAhAwiRBAAGAgYAEQgAAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAQgAAEIAABCCAAQhAAAIQgAAEIAABCEAAAhCAAAQgAAEIQAAC7/8HgwAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAQwAAEIAABCAAAQgAAIEIAABCAAAQhAAAIQgAAEIQAACEIAABCAAAAhCAAAQgAAEIQAACEIAABCAAAQgAAI" class="print-qr-code" alt="QR Code to online resume">
+            <canvas id="print-qr-code" class="print-qr-code" width="100" height="100"></canvas>
             <p class="print-qr-text">
                 <strong>View online version:</strong><br>
                 rafilkmp3.github.io/resume-as-code
@@ -5890,7 +5890,7 @@
                 <button class="qr-modal-close" id="qr-modal-close" aria-label="Close QR code modal">&times;</button>
             </div>
             <div class="qr-modal-body">
-                <img src="{{qrCodeDataURL}}AAADICAYAAACtWK6eAAAMGklEQVR4Xu2dQXLjOAyFv5p7dWrSnE5OnMksd2qvzjJrz8ZZubIKk4LAN/jzXS7SFEXwIwBScrxer9e3ePENAQhshOBNQBECAAIQEBAwAhCAAAQgYAQgAAEIQMEoQgACENgIQAACEICAEYAABCAABaMIAQhAYCMAAQhAAAJGAAIQgAAEjCIEIACBjQAEIAABCBgBCEAAAhAwiRBAAGAgYAEQgAAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAQwAAEIAABCAAAQgAAIEIAABCAAAQhAAAIQgAAEIQAACEIAABCAAAAhCAAAQgAAEIQAACEIAABCAAAQgAAI" class="qr-code-large" alt="Resume QR Code" id="qr-code-image">
+                <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
                 <p class="qr-code-url">{{basics.url}}</p>
                 <p class="qr-code-description">Scan to view online resume</p>
             </div>
@@ -5910,10 +5910,14 @@
             const qrCopyBtn = document.getElementById('qr-copy-btn');
             const qrDownloadBtn = document.getElementById('qr-download-btn');
             const qrCodeImage = document.getElementById('qr-code-image');
-            // Function to open QR modal
-            function openQrModal() {
+            // Function to open QR modal and generate QR code dynamically
+            async function openQrModal() {
                 qrModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
+
+                // Generate QR code dynamically when modal opens (much more efficient!)
+                const resumeURL = '{{basics.url}}' || window.location.href;
+                await generateQRCodeOnDemand(resumeURL);
 
                 // Analytics tracking
                 if (typeof gtag !== 'undefined') {
@@ -5924,6 +5928,95 @@
                         custom_parameter_2: 'qr_share'
                     });
                 }
+            }
+
+            // Dynamic QR code generation function
+            async function generateQRCodeOnDemand(url) {
+                const modalCanvas = document.getElementById('qr-code-image');
+                const printCanvas = document.getElementById('print-qr-code');
+
+                try {
+                    // Load QR code library dynamically from CDN (only when needed!)
+                    if (!window.QRCode) {
+                        await loadQRCodeLibrary();
+                    }
+
+                    // Generate QR code for modal (larger)
+                    if (modalCanvas && window.QRCode) {
+                        await window.QRCode.toCanvas(modalCanvas, url, {
+                            width: 200,
+                            height: 200,
+                            margin: 1,
+                            color: {
+                                dark: '#2563eb',  // Professional blue
+                                light: '#FFFFFF'
+                            }
+                        });
+                    }
+
+                    // Generate QR code for print (smaller)
+                    if (printCanvas && window.QRCode) {
+                        await window.QRCode.toCanvas(printCanvas, url, {
+                            width: 100,
+                            height: 100,
+                            margin: 1,
+                            color: {
+                                dark: '#2563eb',
+                                light: '#FFFFFF'
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Dynamic QR generation failed, using fallback:', error);
+                    generateFallbackQR(modalCanvas, printCanvas, url);
+                }
+            }
+
+            // Load QR code library from CDN only when needed
+            function loadQRCodeLibrary() {
+                return new Promise((resolve, reject) => {
+                    if (window.QRCode) {
+                        resolve();
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                    script.async = true;
+
+                    script.onload = () => resolve();
+                    script.onerror = () => reject(new Error('Failed to load QR library'));
+
+                    document.head.appendChild(script);
+                });
+            }
+
+            // Fallback QR generation using external service
+            function generateFallbackQR(modalCanvas, printCanvas, url) {
+                const modalSize = 200;
+                const printSize = 100;
+
+                // Use qr-server.com as fallback (lightweight external service)
+                const modalURL = `https://api.qrserver.com/v1/create-qr-code/?size=${modalSize}x${modalSize}&data=${encodeURIComponent(url)}&color=2563eb&bgcolor=ffffff&margin=10`;
+                const printURL = `https://api.qrserver.com/v1/create-qr-code/?size=${printSize}x${printSize}&data=${encodeURIComponent(url)}&color=2563eb&bgcolor=ffffff&margin=5`;
+
+                // Load images and draw to canvas
+                [
+                    { canvas: modalCanvas, url: modalURL, size: modalSize },
+                    { canvas: printCanvas, url: printURL, size: printSize }
+                ].forEach(({ canvas, url, size }) => {
+                    if (canvas) {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = () => {
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = size;
+                            canvas.height = size;
+                            ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = url;
+                    }
+                });
             }
 
             // Event listener for QR modal opening
