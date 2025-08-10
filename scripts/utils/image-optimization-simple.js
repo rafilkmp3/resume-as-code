@@ -12,7 +12,10 @@ const RESPONSIVE_SIZES = {
   'profile-64': { width: 64, height: 64, quality: 85 },
   'profile-128': { width: 128, height: 128, quality: 80 },
   'profile-256': { width: 256, height: 256, quality: 75 },
-  'profile-512': { width: 512, height: 512, quality: 70 }
+  'profile-512': { width: 512, height: 512, quality: 70 },
+  // Template-required files
+  'profile-mobile': { width: 120, height: 120, quality: 80 },
+  'profile-desktop': { width: 150, height: 150, quality: 75 }
 };
 
 /**
@@ -20,9 +23,9 @@ const RESPONSIVE_SIZES = {
  * Compatible with all architectures - no native dependencies
  */
 async function generateResponsiveImages(sourceImagePath, outputDir, options = {}) {
-  const { 
+  const {
     baseFilename = 'profile',
-    generateWebP = false 
+    generateWebP = false
   } = options;
 
   // Ensure output directory exists
@@ -37,11 +40,12 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
     for (const [sizeName, dimensions] of Object.entries(RESPONSIVE_SIZES)) {
       // Use original file as base for all sizes
       // In production, this would be handled by the browser or CDN
-      const jpegPath = path.join(outputDir, `${baseFilename}-${dimensions.width}.jpg`);
-      
+      const filename = sizeName.startsWith('profile-') ? `${sizeName}.jpg` : `${baseFilename}-${dimensions.width}.jpg`;
+      const jpegPath = path.join(outputDir, filename);
+
       // Simple file copy - works on all architectures
       fs.copyFileSync(sourceImagePath, jpegPath);
-      
+
       results.push({
         format: 'jpeg',
         width: dimensions.width,
@@ -50,7 +54,7 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
         size: fs.statSync(jpegPath).size
       });
 
-      console.log(`✅ Generated: ${baseFilename}-${dimensions.width}.jpg (${dimensions.width}x${dimensions.height})`);
+      console.log(`✅ Generated: ${filename} (${dimensions.width}x${dimensions.height})`);
     }
 
     // Copy original as main profile image
@@ -59,7 +63,7 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
     results.push({
       format: 'jpeg',
       width: 'original',
-      height: 'original', 
+      height: 'original',
       path: mainPath,
       size: fs.statSync(mainPath).size
     });
@@ -94,17 +98,17 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
  */
 async function optimizeProfileImageForResume(sourceImagePath, outputDir) {
   console.log('🖼️  Optimizing profile image (multi-arch compatible)...');
-  
+
   try {
     const results = await generateResponsiveImages(sourceImagePath, outputDir, {
-      baseFilename: 'profile-source',
+      baseFilename: 'profile',
       generateWebP: false // Disabled for compatibility
     });
 
     const totalSize = results.reduce((sum, result) => sum + result.size, 0);
     console.log(`📊 Generated ${results.length} image variants (${(totalSize / 1024).toFixed(1)}KB total)`);
     console.log('💡 Note: Using copy-based approach for maximum architecture compatibility');
-    
+
     return results;
   } catch (error) {
     console.error('❌ Profile image optimization failed:', error.message);
