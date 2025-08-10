@@ -4,11 +4,12 @@ const path = require('path');
 describe('Build Process Validation', () => {
   const requiredFiles = [
     'package.json',
-    'template.html', 
+    'template.html',
     'resume-data.json',
     'scripts/build.js',
     'scripts/server.js',
     'scripts/dev-server.js',
+    'scripts/utils/image-optimization.js',
   ];
 
   const requiredDirectories = [
@@ -17,6 +18,7 @@ describe('Build Process Validation', () => {
     'tests',
     'tests/unit',
     'scripts',
+    'scripts/utils',
   ];
 
   describe('Required Files Exist', () => {
@@ -74,24 +76,24 @@ describe('Build Process Validation', () => {
   });
 
   describe('Asset Files', () => {
-    test('profile image should exist', () => {
+    test('profile source image should exist', () => {
       const profileImagePath = path.join(
         process.cwd(),
-        'assets/images/profile.jpeg'
+        'assets/images/profile-source.jpeg'
       );
       expect(fs.existsSync(profileImagePath)).toBe(true);
     });
 
-    test('profile image should be reasonable size', () => {
+    test('profile source image should be reasonable size', () => {
       const profileImagePath = path.join(
         process.cwd(),
-        'assets/images/profile.jpeg'
+        'assets/images/profile-source.jpeg'
       );
       const stats = fs.statSync(profileImagePath);
 
-      // Should be between 1KB and 5MB
-      expect(stats.size).toBeGreaterThan(1024);
-      expect(stats.size).toBeLessThan(5 * 1024 * 1024);
+      // Should be between 10KB and 10MB (high quality source image)
+      expect(stats.size).toBeGreaterThan(10240); // 10KB
+      expect(stats.size).toBeLessThan(10 * 1024 * 1024); // 10MB
     });
   });
 

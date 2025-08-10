@@ -27,10 +27,135 @@ async function generateQRCode(url, options) {
 
 // DRY Profile Image Optimization using utility
 async function optimizeProfileImage(imagePath, resumeData, options = {}) {
-  return optimizeProfileImageForResume(imagePath, {
-    isDraft: options.isDraft || false,
-    outputDir: './dist/assets/images'
-  });
+  console.log('🖼️  Optimizing profile image for web performance...');
+
+  const profileImagePath = imagePath;
+  const distImagesDir = './dist/assets/images';
+
+  if (!fs.existsSync(profileImagePath)) {
+    console.log('⚠️  Profile image not found, skipping optimization');
+    return null;
+  }
+
+  // Ensure dist images directory exists
+  if (!fs.existsSync(distImagesDir)) {
+    fs.mkdirSync(distImagesDir, { recursive: true });
+  }
+
+  try {
+    const originalImage = sharp(profileImagePath);
+    const metadata = await originalImage.metadata();
+
+    console.log(`📏 Original image: ${metadata.width}x${metadata.height}, ${metadata.format}, ${Math.round(metadata.size / 1024)}KB`);
+
+    // Create multiple optimized versions for different use cases
+    const optimizations = [
+      {
+        name: 'desktop',
+        width: 150,
+        height: 150,
+        quality: 85,
+        description: 'Desktop header profile (150x150)'
+      },
+      {
+        name: 'mobile',
+        width: 120,
+        height: 120,
+        quality: 80,
+        description: 'Mobile header profile (120x120)'
+      },
+      {
+        name: 'thumbnail',
+        width: 64,
+        height: 64,
+        quality: 75,
+        description: 'Thumbnail/favicon (64x64)'
+      },
+      {
+        name: 'original-optimized',
+        width: metadata.width,
+        height: metadata.height,
+        quality: 90,
+        description: 'Original size WebP optimized'
+      }
+    ];
+
+    const optimizedFiles = [];
+
+    for (const opt of optimizations) {
+      // Generate WebP version (best compression, modern browsers)
+      const webpPath = path.join(distImagesDir, `profile-${opt.name}.webp`);
+      const webpResult = await originalImage
+        .resize(opt.width, opt.height, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .webp({
+          quality: opt.quality,
+          effort: 6, // High compression effort
+          nearLossless: false
+        })
+        .toFile(webpPath);
+
+      // Generate JPEG fallback (universal compatibility)
+      const jpegPath = path.join(distImagesDir, `profile-${opt.name}.jpg`);
+      const jpegResult = await originalImage
+        .resize(opt.width, opt.height, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({
+          quality: opt.quality,
+          progressive: true,
+          mozjpeg: true
+        })
+        .toFile(jpegPath);
+
+      optimizedFiles.push({
+        name: opt.name,
+        description: opt.description,
+        webp: {
+          path: webpPath,
+          size: Math.round(webpResult.size / 1024),
+          dimensions: `${webpResult.width}x${webpResult.height}`
+        },
+        jpeg: {
+          path: jpegPath,
+          size: Math.round(jpegResult.size / 1024),
+          dimensions: `${jpegResult.width}x${jpegResult.height}`
+        }
+      });
+
+      console.log(`✅ ${opt.description}:`);
+      console.log(`   📦 WebP: ${Math.round(webpResult.size / 1024)}KB (${webpResult.width}x${webpResult.height})`);
+      console.log(`   📦 JPEG: ${Math.round(jpegResult.size / 1024)}KB (${jpegResult.width}x${jpegResult.height})`);
+    }
+
+    // Calculate total size savings
+    const originalSize = Math.round(metadata.size / 1024);
+    const optimizedSizes = optimizedFiles.map(f => f.webp.size + f.jpeg.size);
+    const totalOptimizedSize = optimizedSizes.reduce((sum, size) => sum + size, 0);
+    const sizeSaving = Math.round(((originalSize - (optimizedFiles[0].webp.size)) / originalSize) * 100);
+
+    console.log(`🎯 Optimization Results:`);
+    console.log(`   📊 Original: ${originalSize}KB`);
+    console.log(`   📊 Desktop WebP: ${optimizedFiles[0].webp.size}KB (${sizeSaving}% smaller)`);
+    console.log(`   📊 Total generated: ${optimizedFiles.length * 2} files (${totalOptimizedSize}KB)`);
+    console.log(`   🚀 Primary profile loads ${sizeSaving}% faster!`);
+
+    return {
+      optimized: true,
+      files: optimizedFiles,
+      savings: sizeSaving,
+      originalSize: originalSize,
+      primaryWebP: `assets/images/profile-desktop.webp`,
+      primaryJPEG: `assets/images/profile-desktop.jpg`
+    };
+
+  } catch (error) {
+    console.error('❌ Profile image optimization failed:', error);
+    return null;
+  }
 }
 
 // Generate HTML from template and data
@@ -54,10 +179,10 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   // Always copy assets (fast operation)
   copyAssets(resumeData);
 
-  // Optimize profile image for web performance (new DRY approach!)
+  // Optimize profile image for web performance (new feature!)
   let profileImageOptimization = null;
-  if (resumeData.basics.image) {
-    profileImageOptimization = await optimizeProfileImage(resumeData.basics.image, resumeData, { isDraft });
+  if (resumeData.basics.image && !isDraft) {
+    profileImageOptimization = await optimizeProfileImage(resumeData.basics.image, resumeData);
   }
 
   // Skip QR code generation in draft mode (expensive operation)

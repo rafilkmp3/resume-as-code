@@ -115,7 +115,9 @@
       "Bash(gh repo view:*)",
       "Bash(PORT=3002 npm run serve)",
       "Bash(BUILD_MODE=production make build)",
-      "Bash(timeout 60 make test-fast)"
+      "Bash(timeout 60 make test-fast)",
+      "Bash(BUILD_MODE=production node scripts/build.js)",
+      "Bash(BUILD_MODE=draft node scripts/build.js)"
     ],
     "deny": []
   }
