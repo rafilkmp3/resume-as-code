@@ -42,9 +42,9 @@ graph LR
 
 Each release automatically creates:
 
-- **Git Tag**: `v1.15.0`
+- **Git Tag**: `v1.16.0`
 - **GitHub Release**: With auto-generated changelog
-- **Versioned PDF**: `resume-rafael-sathler-v1.15.0pdf`
+- **Versioned PDF**: `resume-rafael-sathler-v1.16.0pdf`
 - **Deployment**: Live site with version footer
 
 ## 📋 Version Enforcement
@@ -73,8 +73,8 @@ git commit -m "feat: add awesome feature"
 
 ### Live Site Display
 
-- **Footer**: Shows current version `v1.15.0` with link to GitHub release
-- **Meta tags**: `<meta name="app-version" content="1.15.0">`
+- **Footer**: Shows current version `v1.16.0` with link to GitHub release
+- **Meta tags**: `<meta name="app-version" content="1.16.0">`
 - **Build info**: Commit hash and timestamp visible
 
 ### Deployment Tracking
@@ -91,7 +91,7 @@ git commit -m "feat: add awesome feature"
 
 ```bash
 # Deploy specific version immediately
-gh workflow run emergency-deploy.yml -f version=v1.15.0
+gh workflow run emergency-deploy.yml -f version=v1.16.0
 ```
 
 #### Option 2: Revert and Release
@@ -107,7 +107,7 @@ git commit -m "fix: revert problematic changes"
 
 ```bash
 # Create release from specific tag
-gh release create v1.15.0 --notes "Emergency hotfix release"
+gh release create v1.16.0 --notes "Emergency hotfix release"
 # Triggers automatic deployment
 ```
 
@@ -232,7 +232,7 @@ npm run version:auto
 # Pull latest tags
 git fetch origin --tags
 # Check for conflicts
-git tag --list | grep v1.15.0
+git tag --list | grep v1.16.0
 ```
 
 #### "Release creation failed"
@@ -241,7 +241,7 @@ git tag --list | grep v1.15.0
 # Check GitHub token permissions
 gh auth status
 # Retry release creation
-gh release create v1.15.0 --generate-notes
+gh release create v1.16.0 --generate-notes
 ```
 
 ### Emergency Procedures
@@ -250,7 +250,7 @@ gh release create v1.15.0 --generate-notes
 
 ```bash
 # Emergency: Reset to known good state
-git checkout v1.15.0
+git checkout v1.16.0
 gh workflow run emergency-deploy.yml
 ```
 
@@ -258,8 +258,8 @@ gh workflow run emergency-deploy.yml
 
 ```bash
 # Create release manually if CI fails
-gh release create v1.15.0 \
-  --title "Release v1.15.0" \
+gh release create v1.16.0 \
+  --title "Release v1.16.0" \
   --notes "Manual release due to CI issues" \
   --latest
 ```
