@@ -101,6 +101,10 @@ build-internal:
 # Development server with hot reload (draft mode for speed)
 dev: docker-check
 	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
+	@echo "$(CYAN)🔍 Checking for existing containers on port $(DEV_PORT)...$(NC)"
+	@-docker ps -q --filter "publish=$(DEV_PORT)" | xargs -r docker kill > /dev/null 2>&1 || true
+	@-pkill -f "serve.*$(DEV_PORT)" > /dev/null 2>&1 || true
+	@sleep 1
 	@echo "$(CYAN)⚡ Draft Mode: Lightning-fast builds (HTML only)$(NC)"
 	@echo "$(CYAN)🔥 Hot Reload: Browser auto-refresh on changes$(NC)"
 	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"

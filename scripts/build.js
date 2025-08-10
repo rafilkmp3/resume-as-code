@@ -101,6 +101,17 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `$1${buildTimestamp}$2`);
   html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
     `$1${appVersion}$2`);
+  
+  // Inject livereload script for development mode
+  const isDevelopment = process.env.NODE_ENV === 'development' || isDraft;
+  if (isDevelopment) {
+    const livereloadScript = `
+    <script>
+      document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
+    </script>`;
+    html = html.replace('</body>', `${livereloadScript}\n</body>`);
+    console.log('🔥 LiveReload script injected for hot reload');
+  }
     
   console.log(`🔖 App version: ${appVersion} (${environment} on ${buildBranch})`);
   console.log(`📝 Build info: ${commitShort} at ${buildTimestamp}`);

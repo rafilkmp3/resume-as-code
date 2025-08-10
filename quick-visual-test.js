@@ -1,60 +1,82 @@
 const { chromium } = require('playwright');
-const fs = require('fs').promises;
-const path = require('path');
 
-async function captureScreenshots() {
-  console.log('📸 Taking screenshots of integrated counter...');
-
-  // Create evidence directory
-  const evidenceDir = path.join(
-    __dirname,
-    'visual-evidence',
-    'integrated-counter'
-  );
-  await fs.mkdir(evidenceDir, { recursive: true });
-
+async function captureHeaderScreenshots() {
   const browser = await chromium.launch();
-
+  
   try {
-    // iPhone 16 Pro Max screenshots
+    // Desktop viewport
+    const desktopContext = await browser.newContext({
+      viewport: { width: 1280, height: 720 }
+    });
+    const desktopPage = await desktopContext.newPage();
+    
+    // Navigate to localhost:3001 (serve port)
+    await desktopPage.goto('http://localhost:3001');
+    await desktopPage.waitForLoadState('networkidle');
+    await desktopPage.waitForTimeout(2000);
+    
+    // Take header screenshot in light mode
+    await desktopPage.screenshot({
+      path: 'visual-evidence/header-desktop-light.png',
+      clip: { x: 0, y: 0, width: 1280, height: 400 }
+    });
+    console.log('✓ Desktop light mode header screenshot saved');
+    
+    // Switch to dark mode
+    await desktopPage.evaluate(() => {
+      const toggle = document.getElementById('darkToggle');
+      if (toggle) toggle.click();
+    });
+    await desktopPage.waitForTimeout(1000);
+    
+    // Take header screenshot in dark mode
+    await desktopPage.screenshot({
+      path: 'visual-evidence/header-desktop-dark.png',
+      clip: { x: 0, y: 0, width: 1280, height: 400 }
+    });
+    console.log('✓ Desktop dark mode header screenshot saved');
+    
+    await desktopContext.close();
+    
+    // Mobile viewport
     const mobileContext = await browser.newContext({
       viewport: { width: 430, height: 932 },
-      userAgent:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15'
     });
-
     const mobilePage = await mobileContext.newPage();
-    await mobilePage.goto('http://localhost:3000');
+    
+    await mobilePage.goto('http://localhost:3001');
     await mobilePage.waitForLoadState('networkidle');
-
-    // Screenshot the new resume download section
-    console.log('📸 Header with new download section...');
+    await mobilePage.waitForTimeout(2000);
+    
+    // Mobile light mode
     await mobilePage.screenshot({
-      path: path.join(evidenceDir, 'mobile_header_new_download.png'),
-      fullPage: false,
-      clip: { x: 0, y: 0, width: 430, height: 600 },
+      path: 'visual-evidence/header-mobile-light.png',
+      clip: { x: 0, y: 0, width: 430, height: 400 }
     });
-
-    // Screenshot the experience section with integrated counter
-    console.log('📸 Experience section with integrated counter...');
-    await mobilePage.locator('#experience-section').screenshot({
-      path: path.join(evidenceDir, 'mobile_experience_integrated_counter.png'),
+    console.log('✓ Mobile light mode header screenshot saved');
+    
+    // Mobile dark mode
+    await mobilePage.evaluate(() => {
+      const toggle = document.getElementById('darkToggle');
+      if (toggle) toggle.click();
     });
-
-    // Full page screenshot
+    await mobilePage.waitForTimeout(1000);
+    
     await mobilePage.screenshot({
-      path: path.join(evidenceDir, 'mobile_full_page.png'),
-      fullPage: true,
+      path: 'visual-evidence/header-mobile-dark.png',
+      clip: { x: 0, y: 0, width: 430, height: 400 }
     });
-
+    console.log('✓ Mobile dark mode header screenshot saved');
+    
     await mobileContext.close();
-
-    console.log('✅ Screenshots saved to:', evidenceDir);
+    
   } catch (error) {
-    console.error('❌ Screenshot error:', error);
-  } finally {
-    await browser.close();
+    console.error('❌ Screenshot failed:', error.message);
+    process.exit(1);
   }
+  
+  await browser.close();
 }
 
-captureScreenshots().catch(console.error);
+captureHeaderScreenshots();

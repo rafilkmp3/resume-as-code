@@ -26,3 +26,4 @@
 *.woff filter=lfs diff=lfs merge=lfs -text
 *.woff2 filter=lfs diff=lfs merge=lfs -text
 docs/screenshots/*.png filter=lfs diff=lfs merge=lfs -text
+visual-evidence/*.png filter=lfs diff=lfs merge=lfs -text

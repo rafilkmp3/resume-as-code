@@ -1,8 +1,20 @@
 {
-  "timestamp": "2025-08-09T21:56:19.138Z",
-  "devices": ["iphone-16-pro-max", "macos-retina"],
-  "themes": ["light", "dark"],
-  "sections": ["header", "experience", "skills", "education", "footer"],
+  "timestamp": "2025-08-09T23:11:27.896Z",
+  "devices": [
+    "iphone-16-pro-max",
+    "macos-retina"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "sections": [
+    "header",
+    "experience",
+    "skills",
+    "education",
+    "footer"
+  ],
   "total_screenshots": 0,
   "comparison_notes": [
     "Compare mobile vs desktop layouts across all sections",

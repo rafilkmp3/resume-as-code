@@ -805,8 +805,8 @@
         .availability-status {
             margin-top: 1.5rem;
             padding: 1rem 1.25rem;
-            background: linear-gradient(135deg, 
-                rgba(34, 197, 94, 0.1) 0%, 
+            background: linear-gradient(135deg,
+                rgba(34, 197, 94, 0.1) 0%,
                 rgba(16, 185, 129, 0.05) 100%);
             border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 0.75rem;
@@ -825,9 +825,9 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(34, 197, 94, 0.1), 
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(34, 197, 94, 0.1),
                 transparent);
             transition: left 2s ease;
         }
@@ -894,8 +894,8 @@
 
         /* Dark theme support for availability status */
         [data-theme="dark"] .availability-status {
-            background: linear-gradient(135deg, 
-                rgba(34, 197, 94, 0.15) 0%, 
+            background: linear-gradient(135deg,
+                rgba(34, 197, 94, 0.15) 0%,
                 rgba(16, 185, 129, 0.08) 100%);
             border-color: rgba(34, 197, 94, 0.25);
         }
@@ -916,32 +916,63 @@
             gap: 0.5rem;
             margin: 0.75rem 0;
             font-size: var(--font-size-sm);
-            opacity: 0.9;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            /* Default to dark theme appearance */
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff !important;
+        }
+
+        .header-location span {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        /* Light theme variations */
+        [data-theme="light"] .header-location,
+        .light-mode .header-location,
+        body:not(.dark-mode) .header-location {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #1f2937 !important;
+        }
+
+        [data-theme="light"] .header-location span,
+        .light-mode .header-location span,
+        body:not(.dark-mode) .header-location span {
+            color: #1f2937 !important;
         }
 
         .header-cta {
             margin-top: 1.5rem;
         }
 
-        .contact-cta-btn {
+        /* Minimal email link - expert consensus implementation */
+        .contact-cta-link {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 2rem;
-            color: white;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            /* Minimal styling to reduce header clutter */
         }
 
-        .contact-cta-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
+        .contact-cta-link:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
         }
 
         /* Theme Toggle - Top Right Utility */
@@ -953,23 +984,70 @@
         }
 
         .theme-toggle {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            color: white;
+            font-size: 1.3rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-accent-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        /* Light theme toggle button */
+        [data-theme="light"] .theme-toggle,
+        .light-mode .theme-toggle,
+        body:not(.dark-mode) .theme-toggle {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #374151;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .theme-toggle:hover,
+        .light-mode .theme-toggle:hover,
+        body:not(.dark-mode) .theme-toggle:hover {
+            background: #ffffff;
+            border-color: var(--color-accent-primary);
             transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .theme-toggle:hover::before,
+        .light-mode .theme-toggle:hover::before,
+        body:not(.dark-mode) .theme-toggle:hover::before {
+            opacity: 0.1;
+        }
+
+        /* Dark theme toggle button */
+        [data-theme="dark"] .theme-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         [data-theme="dark"] .theme-toggle .sun-icon { display: block; }
@@ -977,35 +1055,47 @@
         [data-theme="light"] .theme-toggle .sun-icon { display: none; }
         [data-theme="light"] .theme-toggle .moon-icon { display: block; }
 
-        /* Contact Section Styling */
+        /* Modern Contact Section - Light & Clean */
         .contact-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .contact-card {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--color-background-secondary);
-            border: 1px solid var(--color-border);
-            border-radius: 0.75rem;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            background: var(--color-background);
+            border: 1px solid var(--color-border-light, rgba(229, 231, 235, 0.6));
+            border-radius: 1rem;
             transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .contact-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.12);
             border-color: var(--color-accent-primary);
+            background: var(--color-background-hover, var(--color-background));
         }
 
         .contact-icon {
-            font-size: 1.5rem;
-            min-width: 2rem;
+            font-size: 1.75rem;
+            min-width: 2.5rem;
             text-align: center;
+            color: var(--color-text-muted);
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .contact-card:hover .contact-icon {
+            color: var(--color-accent-primary);
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         .contact-info {
@@ -1021,15 +1111,37 @@
             font-weight: 600;
         }
 
+        /* Light theme contact text colors for better readability */
+        [data-theme="light"] .contact-label,
+        .light-mode .contact-label,
+        body:not(.dark-mode) .contact-label {
+            color: #6b7280 !important; /* Medium gray for labels */
+        }
+
+        [data-theme="light"] .contact-icon,
+        .light-mode .contact-icon,
+        body:not(.dark-mode) .contact-icon {
+            color: #4b5563 !important; /* Darker gray for icons */
+            opacity: 1;
+        }
+
         .contact-link {
             color: var(--color-accent-primary);
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s ease;
+            font-size: var(--font-size-sm);
+            transition: color 0.2s ease;
+        }
+
+        [data-theme="light"] .contact-link,
+        .light-mode .contact-link,
+        body:not(.dark-mode) .contact-link {
+            color: #2563eb !important; /* Blue for links in light theme */
         }
 
         .contact-link:hover {
             color: var(--color-accent-secondary);
+            text-decoration: underline;
         }
 
         .contact-actions {
@@ -1041,26 +1153,47 @@
         .social-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            justify-content: center;
         }
 
         .social-link {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--color-background-secondary);
+            padding: 0.5rem 0.75rem;
+            background: transparent;
             border: 1px solid var(--color-border);
             border-radius: 0.5rem;
             color: var(--color-text);
             text-decoration: none;
             font-size: var(--font-size-sm);
-            transition: all 0.3s ease;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        /* Light theme social links */
+        [data-theme="light"] .social-link,
+        .light-mode .social-link,
+        body:not(.dark-mode) .social-link {
+            background: #ffffff;
+            border-color: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Dark theme social links */
+        [data-theme="dark"] .social-link {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #e5e7eb;
         }
 
         .social-link:hover {
             background: var(--color-accent-primary);
-            color: white;
+            color: white !important;
+            border-color: var(--color-accent-primary);
             transform: translateY(-1px);
         }
 
@@ -1068,6 +1201,12 @@
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        /* Ensure primary button doesn't appear where it shouldn't */
+        .social-links .primary-btn {
+            display: none !important;
         }
 
         .action-btn {
@@ -1137,7 +1276,7 @@
                 height: 40px;
             }
         }
-            
+
             .work-types {
                 align-self: stretch;
                 justify-content: center;
@@ -1307,7 +1446,7 @@
         }
 
         .section:hover h2::after {
-            width: 60px;
+            width: 100% !important; /* Full width underline for consistency */
         }
 
         .profile-summary {
@@ -3849,20 +3988,17 @@
             <div class="header-content">
                 <h1>{{basics.name}}</h1>
                 <div class="subtitle">{{basics.label}}</div>
-                
+
                 <!-- Optional location for context -->
                 <div class="header-location">
                     <span class="location-icon">🇧🇷</span>
                     <span class="location-text">{{basics.location.city}}, {{basics.location.region}}</span>
                 </div>
 
-                <!-- Simple scroll-to-contact CTA -->
+                <!-- Direct email CTA - expert consensus implementation -->
                 <div class="header-cta">
-                    <a href="#contact" class="contact-cta-btn" aria-label="Scroll to contact information">
-                        <span>Get in Touch</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                        </svg>
+                    <a href="mailto:{{basics.email}}" class="contact-cta-link" aria-label="Send email to Rafael">
+                        <span>Email Me</span>
                     </a>
                 </div>
             </div>
@@ -3873,7 +4009,7 @@
                 <section class="section fade-in-section">
                     <h2>Profile</h2>
                     <div class="profile-summary">{{basics.summary}}</div>
-                    
+
                     <div class="availability-status">
                         <div class="status-indicator">
                             <span class="status-icon">🟢</span>
@@ -3890,7 +4026,7 @@
                 <!-- Dedicated Contact Section - All contact info moved from header -->
                 <section class="section fade-in-section" id="contact">
                     <h2>Contact & Connect</h2>
-                    
+
                     <!-- Primary contact methods -->
                     <div class="contact-grid">
                         <div class="contact-card">
@@ -4183,7 +4319,6 @@
     <script>
         // Dark Mode Toggle Functionality
         const themeToggle = document.getElementById('darkToggle');
-        const themeIcon = document.getElementById('themeIcon');
         const body = document.body;
 
         // Function to detect OS theme preference
@@ -4191,14 +4326,12 @@
             return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
 
-        // Function to apply theme
+        // Function to apply theme - SVG icons are handled by CSS, no need to set text content
         function applyTheme(theme) {
             if (theme === 'dark') {
                 body.setAttribute('data-theme', 'dark');
-                themeIcon.textContent = '☀️'; // Sun icon when in dark mode (to switch to light)
             } else {
                 body.removeAttribute('data-theme');
-                themeIcon.textContent = '🌙'; // Moon icon when in light mode (to switch to dark)
             }
         }
 
