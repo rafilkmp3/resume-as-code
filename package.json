@@ -33,7 +33,7 @@
     "@google-analytics/data": "^5.2.0",
     "canvas": "^3.1.2",
     "handlebars": "^4.7.8",
-    "puppeteer": "^24.15.0",
+    "puppeteer": "^24.16.0",
     "qrcode": "^1.5.4"
   },
   "jest": {
@@ -65,6 +65,6 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
-    "livereload": "^0.9.3"
+    "livereload": "^0.10.2"
   }
 }
