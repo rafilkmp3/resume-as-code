@@ -100,29 +100,39 @@ jobs:
               sleep 8
 
               # Desktop screenshot (1280x720)
-              npx playwright eval "
+              node -e "
                 const { chromium } = require('playwright');
                 (async () => {
-                  const browser = await chromium.launch();
-                  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-                  await page.goto('http://localhost:3000');
-                  await page.waitForLoadState('networkidle');
-                  await page.screenshot({ path: 'release-screenshots/desktop-v$NEW_VERSION.png', fullPage: true });
-                  await browser.close();
-                })().catch(() => {});
+                  try {
+                    const browser = await chromium.launch();
+                    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+                    await page.goto('http://localhost:3000');
+                    await page.waitForLoadState('networkidle');
+                    await page.screenshot({ path: 'release-screenshots/desktop-v$NEW_VERSION.png', fullPage: true });
+                    await browser.close();
+                    console.log('✅ Desktop screenshot generated');
+                  } catch (error) {
+                    console.log('❌ Desktop screenshot failed:', error.message);
+                  }
+                })();
               " || echo "Desktop screenshot failed"
 
               # Mobile screenshot (430x932)
-              npx playwright eval "
+              node -e "
                 const { chromium } = require('playwright');
                 (async () => {
-                  const browser = await chromium.launch();
-                  const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
-                  await page.goto('http://localhost:3000');
-                  await page.waitForLoadState('networkidle');
-                  await page.screenshot({ path: 'release-screenshots/mobile-v$NEW_VERSION.png', fullPage: true });
-                  await browser.close();
-                })().catch(() => {});
+                  try {
+                    const browser = await chromium.launch();
+                    const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
+                    await page.goto('http://localhost:3000');
+                    await page.waitForLoadState('networkidle');
+                    await page.screenshot({ path: 'release-screenshots/mobile-v$NEW_VERSION.png', fullPage: true });
+                    await browser.close();
+                    console.log('✅ Mobile screenshot generated');
+                  } catch (error) {
+                    console.log('❌ Mobile screenshot failed:', error.message);
+                  }
+                })();
               " || echo "Mobile screenshot failed"
 
               kill $SERVER_PID 2>/dev/null || true
