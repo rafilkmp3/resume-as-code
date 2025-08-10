@@ -55,6 +55,8 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   let profileImageOptimization = null;
   if (resumeData.basics.image) {
     profileImageOptimization = await optimizeProfileImage(resumeData.basics.image, resumeData, { isDraft });
+    // Update resume data to use optimized mobile image for main display
+    resumeData.basics.image = 'assets/images/profile-mobile.jpg';
   }
 
   // Skip QR code generation in draft mode (expensive operation)

@@ -89,7 +89,14 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
     }
   }
 
-  return results;
+  // Return results with template-compatible structure
+  return {
+    images: results,
+    primaryJPEG: 'assets/images/profile-mobile.jpg',
+    primaryWebP: 'assets/images/profile-mobile.webp',
+    desktopJPEG: 'assets/images/profile-desktop.jpg',
+    desktopWebP: 'assets/images/profile-desktop.webp'
+  };
 }
 
 /**
@@ -105,8 +112,8 @@ async function optimizeProfileImageForResume(sourceImagePath, outputDir) {
       generateWebP: false // Disabled for compatibility
     });
 
-    const totalSize = results.reduce((sum, result) => sum + result.size, 0);
-    console.log(`📊 Generated ${results.length} image variants (${(totalSize / 1024).toFixed(1)}KB total)`);
+    const totalSize = results.images.reduce((sum, result) => sum + result.size, 0);
+    console.log(`📊 Generated ${results.images.length} image variants (${(totalSize / 1024).toFixed(1)}KB total)`);
     console.log('💡 Note: Using copy-based approach for maximum architecture compatibility');
 
     return results;
