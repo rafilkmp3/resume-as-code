@@ -25,14 +25,22 @@
     <meta property="og:url" content="https://rafaelbsathler.github.io/resume-as-code/">
     <meta property="og:title" content="{{basics.name}} - {{basics.label}}">
     <meta property="og:description" content="{{basics.summary}}">
+    {{#if profileImageOptimization}}
+    <meta property="og:image" content="{{profileImageOptimization.primaryJPEG}}">
+    {{else}}
     <meta property="og:image" content="{{basics.image}}">
+    {{/if}}
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://rafaelbsathler.github.io/resume-as-code/">
     <meta property="twitter:title" content="{{basics.name}} - {{basics.label}}">
     <meta property="twitter:description" content="{{basics.summary}}">
+    {{#if profileImageOptimization}}
+    <meta property="twitter:image" content="{{profileImageOptimization.primaryJPEG}}">
+    {{else}}
     <meta property="twitter:image" content="{{basics.image}}">
+    {{/if}}
 
     <!-- Enhanced Google Analytics 4 with Event Tracking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1L4XD6LG6Z"></script>
@@ -103,7 +111,11 @@
       "@type": "Person",
       "name": "{{basics.name}}",
       "url": "{{basics.url}}",
+      {{#if profileImageOptimization}}
+      "image": "{{profileImageOptimization.primaryJPEG}}",
+      {{else}}
       "image": "{{basics.image}}",
+      {{/if}}
       "sameAs": [
         {{#each basics.profiles}}
         "{{url}}"{{#unless @last}},{{/unless}}
@@ -686,6 +698,11 @@
         @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
+        }
+
+        .profile-photo-container {
+            display: block;
+            flex-shrink: 0;
         }
 
         .profile-photo {
@@ -3982,8 +3999,42 @@
     <div class="container" id="main-content">
         <!-- Minimal Professional Header - Identity Focus Only -->
         <header class="header">
+            {{#if profileImageOptimization}}
+            <picture class="profile-photo-container">
+                <!-- Modern WebP for supported browsers -->
+                <source
+                    srcset="{{profileImageOptimization.primaryWebP}}"
+                    type="image/webp"
+                    media="(min-width: 768px)">
+                <source
+                    srcset="assets/images/profile-mobile.webp"
+                    type="image/webp"
+                    media="(max-width: 767px)">
+
+                <!-- JPEG fallback for older browsers -->
+                <source
+                    srcset="{{profileImageOptimization.primaryJPEG}}"
+                    type="image/jpeg"
+                    media="(min-width: 768px)">
+                <source
+                    srcset="assets/images/profile-mobile.jpg"
+                    type="image/jpeg"
+                    media="(max-width: 767px)">
+
+                <!-- Default fallback image -->
+                <img
+                    src="{{profileImageOptimization.primaryJPEG}}"
+                    alt="{{basics.name}}"
+                    class="profile-photo"
+                    loading="eager"
+                    decoding="async"
+                    width="150"
+                    height="150">
+            </picture>
+            {{else}}
             {{#if basics.image}}
             <img src="{{basics.image}}" alt="{{basics.name}}" class="profile-photo">
+            {{/if}}
             {{/if}}
             <div class="header-content">
                 <h1>{{basics.name}}</h1>

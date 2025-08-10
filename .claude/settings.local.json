@@ -111,7 +111,9 @@
       "Bash(gh release create:*)",
       "Bash(--title \"Release v1.7.0\" )",
       "Bash(--generate-notes )",
-      "Bash(--latest)"
+      "Bash(--latest)",
+      "Bash(gh repo view:*)",
+      "Bash(PORT=3002 npm run serve)"
     ],
     "deny": []
   }

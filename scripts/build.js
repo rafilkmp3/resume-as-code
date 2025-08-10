@@ -3,6 +3,7 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
 const QRCode = require('qrcode');
+const sharp = require('sharp');
 const { copyRecursive } = require('./utils/fs-utils');
 
 console.log('🏗️  Building resume...');
@@ -23,14 +24,147 @@ async function generateQRCode(url, options) {
   }
 }
 
+// Advanced Profile Image Optimization System
+async function optimizeProfileImage(imagePath, resumeData) {
+  console.log('🖼️  Optimizing profile image for web performance...');
+
+  const profileImagePath = imagePath;
+  const distImagesDir = './dist/assets/images';
+
+  if (!fs.existsSync(profileImagePath)) {
+    console.log('⚠️  Profile image not found, skipping optimization');
+    return null;
+  }
+
+  // Ensure dist images directory exists
+  if (!fs.existsSync(distImagesDir)) {
+    fs.mkdirSync(distImagesDir, { recursive: true });
+  }
+
+  try {
+    const originalImage = sharp(profileImagePath);
+    const metadata = await originalImage.metadata();
+
+    console.log(`📏 Original image: ${metadata.width}x${metadata.height}, ${metadata.format}, ${Math.round(metadata.size / 1024)}KB`);
+
+    // Create multiple optimized versions for different use cases
+    const optimizations = [
+      {
+        name: 'desktop',
+        width: 150,
+        height: 150,
+        quality: 85,
+        description: 'Desktop header profile (150x150)'
+      },
+      {
+        name: 'mobile',
+        width: 120,
+        height: 120,
+        quality: 80,
+        description: 'Mobile header profile (120x120)'
+      },
+      {
+        name: 'thumbnail',
+        width: 64,
+        height: 64,
+        quality: 75,
+        description: 'Thumbnail/favicon (64x64)'
+      },
+      {
+        name: 'original-optimized',
+        width: metadata.width,
+        height: metadata.height,
+        quality: 90,
+        description: 'Original size WebP optimized'
+      }
+    ];
+
+    const optimizedFiles = [];
+
+    for (const opt of optimizations) {
+      // Generate WebP version (best compression, modern browsers)
+      const webpPath = path.join(distImagesDir, `profile-${opt.name}.webp`);
+      const webpResult = await originalImage
+        .resize(opt.width, opt.height, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .webp({
+          quality: opt.quality,
+          effort: 6, // High compression effort
+          nearLossless: false
+        })
+        .toFile(webpPath);
+
+      // Generate JPEG fallback (universal compatibility)
+      const jpegPath = path.join(distImagesDir, `profile-${opt.name}.jpg`);
+      const jpegResult = await originalImage
+        .resize(opt.width, opt.height, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({
+          quality: opt.quality,
+          progressive: true,
+          mozjpeg: true
+        })
+        .toFile(jpegPath);
+
+      optimizedFiles.push({
+        name: opt.name,
+        description: opt.description,
+        webp: {
+          path: webpPath,
+          size: Math.round(webpResult.size / 1024),
+          dimensions: `${webpResult.width}x${webpResult.height}`
+        },
+        jpeg: {
+          path: jpegPath,
+          size: Math.round(jpegResult.size / 1024),
+          dimensions: `${jpegResult.width}x${jpegResult.height}`
+        }
+      });
+
+      console.log(`✅ ${opt.description}:`);
+      console.log(`   📦 WebP: ${Math.round(webpResult.size / 1024)}KB (${webpResult.width}x${webpResult.height})`);
+      console.log(`   📦 JPEG: ${Math.round(jpegResult.size / 1024)}KB (${jpegResult.width}x${jpegResult.height})`);
+    }
+
+    // Calculate total size savings
+    const originalSize = Math.round(metadata.size / 1024);
+    const optimizedSizes = optimizedFiles.map(f => f.webp.size + f.jpeg.size);
+    const totalOptimizedSize = optimizedSizes.reduce((sum, size) => sum + size, 0);
+    const sizeSaving = Math.round(((originalSize - (optimizedFiles[0].webp.size)) / originalSize) * 100);
+
+    console.log(`🎯 Optimization Results:`);
+    console.log(`   📊 Original: ${originalSize}KB`);
+    console.log(`   📊 Desktop WebP: ${optimizedFiles[0].webp.size}KB (${sizeSaving}% smaller)`);
+    console.log(`   📊 Total generated: ${optimizedFiles.length * 2} files (${totalOptimizedSize}KB)`);
+    console.log(`   🚀 Primary profile loads ${sizeSaving}% faster!`);
+
+    return {
+      optimized: true,
+      files: optimizedFiles,
+      savings: sizeSaving,
+      originalSize: originalSize,
+      primaryWebP: `assets/images/profile-desktop.webp`,
+      primaryJPEG: `assets/images/profile-desktop.jpg`
+    };
+
+  } catch (error) {
+    console.error('❌ Profile image optimization failed:', error);
+    return null;
+  }
+}
+
 // Generate HTML from template and data
 async function generateHTML(resumeData, templatePath, options = {}) {
   const isDraft = options.mode === 'draft' || process.env.BUILD_MODE === 'draft';
   console.log(`📝 Generating HTML from template... ${isDraft ? '(draft mode)' : ''}`);
-  
+
   const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = Handlebars.compile(templateSource);
-  
+
   // Register a helper to stringify JSON
   Handlebars.registerHelper('json', function(context) {
       return JSON.stringify(context);
@@ -43,7 +177,13 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // Always copy assets (fast operation)
   copyAssets(resumeData);
-  
+
+  // Optimize profile image for web performance (new feature!)
+  let profileImageOptimization = null;
+  if (resumeData.basics.image && !isDraft) {
+    profileImageOptimization = await optimizeProfileImage(resumeData.basics.image, resumeData);
+  }
+
   // Skip QR code generation in draft mode (expensive operation)
   let qrCodeDataURL = null;
   if (!isDraft) {
@@ -60,9 +200,15 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     // Use placeholder for draft mode
     qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+RFJBRlQgTU9ERTwvdGV4dD48L3N2Zz4=';
   }
-  
+
+  // Enhance resume data with optimized images
+  const enhancedResumeData = {
+    ...resumeData,
+    profileImageOptimization
+  };
+
   // Replace the placeholder QR code with the real one
-  let html = template(resumeData);
+  let html = template(enhancedResumeData);
   if (qrCodeDataURL) {
     html = html.replace(
       /src="data:image\/png;base64,[^"]*"/,
@@ -70,7 +216,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     );
     console.log('✅ QR code integrated successfully!');
   }
-  
+
   // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   const appVersion = packageJson.version;
@@ -80,20 +226,20 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
   const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
   const buildTimestamp = new Date().toISOString();
-  
+
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
-  html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/, 
+  html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/,
     `const branchName = '${buildBranch}';`);
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
-  html = html.replace(/<span id="app-version">[\d.]+<\/span>/, 
+  html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
-  html = html.replace(/<span id="app-environment">[^<]*<\/span>/, 
+  html = html.replace(/<span id="app-environment">[^<]*<\/span>/,
     `<span id="app-environment">${environment}</span>`);
-  html = html.replace(/<span id="app-commit">[^<]*<\/span>/, 
+  html = html.replace(/<span id="app-commit">[^<]*<\/span>/,
     `<span id="app-commit">${commitShort}</span>`);
-  
+
   // Update meta tags with build information
   html = html.replace(/(<meta name="build-commit" content=")[^"]*(")/,
     `$1${commitShort}$2`);
@@ -101,7 +247,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `$1${buildTimestamp}$2`);
   html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
     `$1${appVersion}$2`);
-  
+
   // Inject livereload script for development mode
   const isDevelopment = process.env.NODE_ENV === 'development' || isDraft;
   if (isDevelopment) {
@@ -112,12 +258,12 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     html = html.replace('</body>', `${livereloadScript}\n</body>`);
     console.log('🔥 LiveReload script injected for hot reload');
   }
-    
+
   console.log(`🔖 App version: ${appVersion} (${environment} on ${buildBranch})`);
   console.log(`📝 Build info: ${commitShort} at ${buildTimestamp}`);
-  
+
   fs.writeFileSync('./dist/index.html', html);
-  
+
   console.log('✅ HTML generated successfully!');
 }
 
@@ -125,28 +271,28 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 function copyAssets(resumeData) {
   const assetsDir = './assets';
   const distAssetsDir = './dist/assets';
-  
+
   if (fs.existsSync(assetsDir)) {
     // Create assets directory in dist
     if (!fs.existsSync(distAssetsDir)) {
       fs.mkdirSync(distAssetsDir, { recursive: true });
     }
-    
+
     copyRecursive(assetsDir, distAssetsDir);
     console.log('📁 Copied assets directory to dist/');
   }
-  
+
   // Also copy profile image if it exists (backward compatibility)
   if (resumeData.basics.image && fs.existsSync(resumeData.basics.image)) {
     const imagePath = resumeData.basics.image;
     const destPath = `./dist/${imagePath}`;
     const destDir = path.dirname(destPath);
-    
+
     // Ensure destination directory exists
     if (!fs.existsSync(destDir)) {
       fs.mkdirSync(destDir, { recursive: true });
     }
-    
+
     fs.copyFileSync(imagePath, destPath);
     console.log(`📸 Copied profile image: ${imagePath}`);
   }
@@ -162,20 +308,20 @@ async function generatePDF(resumeData) {
 
     console.log('📄 Generating multiple PDF versions...');
     console.log('⏱️  PDF generation timeout: 60 seconds');
-    
+
     const browser = await puppeteer.launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--allow-running-insecure-content']
     });
-    
+
     const filePath = path.resolve('./dist/index.html');
 
     // 1. Screen-Optimized PDF (Default - good-looking version)
     await generateScreenOptimizedPDF(browser, filePath, resumeData);
-    
+
     // 2. Print-Optimized PDF (Enhanced for physical printing)
     await generatePrintOptimizedPDF(browser, filePath, resumeData);
-    
+
     // 3. ATS-Optimized PDF (Simplified for ATS systems)
     await generateATSOptimizedPDF(browser, filePath, resumeData);
 
@@ -191,37 +337,37 @@ async function generatePDF(resumeData) {
 async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
   console.log('📱 Generating Screen-Optimized PDF...');
   const page = await browser.newPage();
-  
+
   await page.setViewport({ width: 1200, height: 1600 });
   await page.goto(`file://${filePath}`, { waitUntil: 'networkidle0', timeout: 30000 });
-  
+
   // Wait for images and animations
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
-  
+
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
     // Force light mode for PDF
     document.documentElement.setAttribute('data-theme', 'light');
     document.body.classList.remove('dark-mode');
     document.body.classList.add('light-mode');
-    
+
     // Show all items immediately - all sections
     document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item').forEach(item => {
       item.style.display = 'block';
       item.style.visibility = 'visible';
       item.classList.remove('hidden');
     });
-    
+
     // Hide all pagination and interactive controls
     document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
       el.style.display = 'none !important';
     });
   });
-  
+
   // Set screen media type for full visual experience
   await page.emulateMediaType('screen');
-  
+
   // Inject CSS to optimize for screen viewing with proper light mode and better spacing
   await page.addStyleTag({
     content: `
@@ -233,14 +379,14 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
         --color-surface: #ffffff !important;
         --color-border: #e5e7eb !important;
       }
-      
+
       [data-theme="light"] {
         --color-background: #ffffff !important;
         --color-text: #000000 !important;
       }
-      
-      body { 
-        background: white !important; 
+
+      body {
+        background: white !important;
         color: #000000 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -248,37 +394,37 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
       .parallax-bg { display: none !important; }
       .fade-in-section { opacity: 1 !important; transform: none !important; }
       .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
-      
+
       /* Reduce excessive spacing in main content */
       .main-content {
         padding: 1rem !important;
         gap: 1rem !important;
         min-height: auto !important;
       }
-      
+
       .section {
         margin-bottom: 1rem !important;
         page-break-inside: avoid;
       }
-      
+
       .container {
         min-height: auto !important;
         padding: 0 !important;
       }
-      
+
       /* Make sections more compact */
       .left-column, .right-column {
         gap: 1rem !important;
       }
-      
+
       .work-item, .project-item {
         margin-bottom: 1rem !important;
       }
     `
   });
-  
+
   await page.emulateMediaType('print');
-  
+
   await page.pdf({
     path: './dist/resume.pdf',
     format: 'A4',
@@ -295,7 +441,7 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
     creator: 'Resume-as-Code System',
     producer: 'Puppeteer PDF Generator'
   });
-  
+
   await page.close();
   console.log('✅ Screen-Optimized PDF completed');
 }
@@ -304,39 +450,39 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
 async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
   console.log('🖨️  Generating Print-Optimized PDF...');
   const page = await browser.newPage();
-  
+
   await page.setViewport({ width: 1200, height: 1600 });
   await page.goto(`file://${filePath}`, { waitUntil: 'networkidle0', timeout: 30000 });
-  
+
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
-  
+
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
     // Force light mode for PDF
     document.documentElement.setAttribute('data-theme', 'light');
     document.body.classList.remove('dark-mode');
     document.body.classList.add('light-mode');
-    
+
     // Show all items immediately - all sections
     document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item').forEach(item => {
       item.style.display = 'block';
       item.style.visibility = 'visible';
       item.classList.remove('hidden');
     });
-    
+
     // Hide all pagination and interactive controls
     document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
       el.style.display = 'none !important';
     });
   });
-  
+
   // Inject CSS optimizations for physical printing
   await page.addStyleTag({
     content: `
       @media print {
         * { -webkit-print-color-adjust: exact !important; }
-        body { 
+        body {
           background: white !important;
           font-size: 11pt !important;
           line-height: 1.3 !important;
@@ -367,9 +513,9 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
       }
     `
   });
-  
+
   await page.emulateMediaType('print');
-  
+
   await page.pdf({
     path: './dist/resume-print.pdf',
     format: 'A4',
@@ -386,7 +532,7 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
     creator: 'Resume-as-Code System',
     producer: 'Puppeteer PDF Generator'
   });
-  
+
   await page.close();
   console.log('✅ Print-Optimized PDF completed');
 }
@@ -395,26 +541,26 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
 async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   console.log('🤖 Generating ATS-Optimized PDF...');
   const page = await browser.newPage();
-  
+
   await page.setViewport({ width: 1200, height: 1600 });
   await page.goto(`file://${filePath}`, { waitUntil: 'networkidle0', timeout: 30000 });
-  
+
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
-  
+
   // Disable JavaScript pagination during PDF generation
   await page.evaluate(() => {
     // Force light mode for PDF
     document.documentElement.setAttribute('data-theme', 'light');
     document.body.classList.remove('dark-mode');
     document.body.classList.add('light-mode');
-    
+
     // Disable all pagination JavaScript completely
     window.initializeExperiencePagination = () => {};
     window.initializeProjectsPagination = () => {};
     window.initializeEducationPagination = () => {};
     window.initializeSkillsPagination = () => {};
-    
+
     // Force show ALL items and remove any hidden classes
     document.querySelectorAll('.work-item, .project-item, .education-item, .skill-category-item, .fade-in-section').forEach(item => {
       item.style.display = 'block !important';
@@ -423,13 +569,13 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
       item.classList.remove('fade-in');
       item.setAttribute('style', 'display: block !important; visibility: visible !important;');
     });
-    
+
     // Hide all pagination controls completely
     document.querySelectorAll('.load-more-container, .load-more-btn, .experience-counter, .experience-controls, .skills-counter, .education-counter, .no-print, .dark-toggle').forEach(el => {
       el.style.display = 'none !important';
       el.style.visibility = 'hidden !important';
     });
-    
+
     // Remove any height restrictions that might be causing spacing issues
     document.querySelectorAll('*').forEach(el => {
       const computed = window.getComputedStyle(el);
@@ -443,7 +589,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
   await page.addStyleTag({
     content: `
       @media print {
-        * { 
+        * {
           background: white !important;
           color: #000 !important;
           margin: 0 !important;
@@ -515,18 +661,18 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         }
         ul, ol { margin: 5pt 0 !important; }
         li { margin: 2pt 0 !important; color: #000 !important; }
-        
+
         /* Hide visual elements for ATS */
         .profile-photo, .parallax-bg, .dark-toggle, .controls, .links,
         .fade-in-section::before, .gradient-text, .print-only,
         .print-qr-section, .pdf-download-group { display: none !important; }
-        
+
         /* Ensure all text is black and readable */
         p, span, div, li, td, th, h2, h3, h4, h5, h6 {
           color: #000 !important;
           background: transparent !important;
         }
-        
+
         /* Simple, clean layout with better page breaks */
         .main-content {
           display: block !important;
@@ -539,7 +685,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           column-count: 1 !important;
           display: block !important;
         }
-        
+
         /* Remove all page break controls - let content flow naturally */
         .fade-in-section, .work-item, .project-item, .education-item {
           page-break-inside: auto !important;
@@ -548,27 +694,27 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           page-break-after: auto !important;
           margin-bottom: 3pt !important;
         }
-        
+
         /* Only minimal spacing and flow control */
         .section-title {
           margin: 8pt 0 4pt 0 !important;
           page-break-after: auto !important;
           break-after: auto !important;
         }
-        
+
         /* Hide pagination elements in ATS */
         .experience-counter, .experience-controls,
         .load-more-container, .load-more-btn,
         .section-controls, .load-more-projects-btn,
         .projects-counter { display: none !important; }
-        
+
         /* Force show all content items */
         .work-item, .project-item, .fade-in-section {
           display: block !important;
           visibility: visible !important;
           opacity: 1 !important;
         }
-        
+
         .work-item.hidden, .project-item.hidden {
           display: block !important;
           visibility: visible !important;
@@ -576,9 +722,9 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
       }
     `
   });
-  
+
   await page.emulateMediaType('print');
-  
+
   await page.pdf({
     path: './dist/resume-ats.pdf',
     format: 'A4',
@@ -595,7 +741,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
     creator: 'Resume-as-Code System - ATS Optimized',
     producer: 'Puppeteer PDF Generator'
   });
-  
+
   await page.close();
   console.log('✅ ATS-Optimized PDF completed');
 }
@@ -605,14 +751,14 @@ async function build(options = {}) {
   const mode = options.mode || process.env.BUILD_MODE || 'production';
   const isDraft = mode === 'draft';
   const isProduction = mode === 'production';
-  
+
   console.log(`🏗️  Starting ${isDraft ? 'DRAFT' : 'PRODUCTION'} build...`);
-  
+
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
-  
+
   // Always run core build steps
   await generateHTML(resumeData, './template.html', { mode });
-  
+
   // Skip expensive operations in draft mode
   if (isDraft) {
     console.log('⚡ Draft mode: Skipping PDF generation and QR code creation');
@@ -620,32 +766,32 @@ async function build(options = {}) {
     console.log('🌐 Preview: ./dist/index.html');
     return;
   }
-  
+
   // Production mode: Generate PDFs with timeout
   if (isProduction) {
     try {
-      const timeout = new Promise((_, reject) => 
+      const timeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('PDF generation timeout (60s)')), 60000)
       );
-      
+
       await Promise.race([generatePDF(resumeData), timeout]);
     } catch (error) {
       console.error('⚠️  PDF generation failed or timed out:', error.message);
       console.log('✅ HTML generation completed - continuing without PDF');
     }
   }
-  
+
   console.log('🎉 Resume build complete!');
   console.log('📁 Files generated in ./dist/');
   console.log('🌐 HTML: ./dist/index.html');
-  
+
   // Report all PDF versions generated
   const pdfVersions = [
     { file: './dist/resume.pdf', name: 'Screen-Optimized PDF', icon: '📱' },
     { file: './dist/resume-print.pdf', name: 'Print-Optimized PDF', icon: '🖨️' },
     { file: './dist/resume-ats.pdf', name: 'ATS-Optimized PDF', icon: '🤖' }
   ];
-  
+
   let pdfCount = 0;
   pdfVersions.forEach(pdf => {
     if (fs.existsSync(pdf.file)) {
@@ -653,7 +799,7 @@ async function build(options = {}) {
       pdfCount++;
     }
   });
-  
+
   if (pdfCount === 0) {
     console.log('📄 PDFs: Not generated (HTML-only build)');
   } else {
