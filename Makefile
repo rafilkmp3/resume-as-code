@@ -21,12 +21,16 @@ help:
 	@echo ""
 	@echo "$(GREEN)🏗️  Build & Development:$(NC)"
 	@echo "  $(GREEN)make build$(NC)         - Build HTML and PDF resume"
-	@echo "  $(GREEN)make check-and-build-golden-base$(NC) - Smart golden-base management"
-	@echo "  $(PURPLE)make dev$(NC)           - Development server with hot reload"
-	@echo "  $(PURPLE)make serve$(NC)         - Serve built resume"
+	@echo "  $(PURPLE)make dev$(NC)           - Development server with mobile LAN access"
+	@echo "  $(PURPLE)make dev-start$(NC)     - Start dev server in background (mobile ready)"
+	@echo "  $(PURPLE)make dev-stop$(NC)      - Stop background dev server"
+	@echo "  $(PURPLE)make serve$(NC)         - Production server (Port 3001) with built content"
+	@echo "  $(CYAN)make get-lan-ip$(NC)     - Get Mac LAN IP for mobile testing"
 	@echo ""
-	@echo "$(GREEN)🧪 Testing & Quality:$(NC)"
-	@echo "  $(BLUE)make test$(NC)          - Run all tests"
+	@echo "$(GREEN)🧪 Testing & Quality (Enhanced):$(NC)"
+	@echo "  $(BLUE)make test-visual-matrix$(NC) - Test all 20 viewport/theme combinations"
+	@echo "  $(BLUE)make test-pdf$(NC)      - Validate PDF generation (all 3 variants)"
+	@echo "  $(BLUE)make test-all$(NC)      - Run comprehensive test suite"
 	@echo "  $(BLUE)make test-fast$(NC)     - Run fast smoke tests (recommended)"
 	@echo "  $(BLUE)make test-unit$(NC)     - Run unit tests with coverage"
 	@echo "  $(BLUE)make test-e2e$(NC)      - Run end-to-end tests"
@@ -80,12 +84,10 @@ docker-check:
 	@docker info >/dev/null 2>&1 || { echo "$(RED)❌ Docker daemon is not running. Please start Docker first.$(NC)"; exit 1; }
 	@echo "$(GREEN)✅ Docker is running$(NC)"
 
-# Build resume (HTML + PDF + assets)
+# Build resume (HTML + PDF + assets) using docker-compose
 build: docker-check
 	@echo "$(GREEN)🏗️ Building resume...$(NC)"
-	@docker build --target builder -t $(DOCKER_IMAGE):builder .
-	@mkdir -p dist
-	@docker run --rm -v "$(PWD):/host" $(DOCKER_IMAGE):builder sh -c "cp -r /app/dist/* /host/dist/ || cp -r /app/dist/. /host/dist/"
+	@COMPOSE_BAKE=true docker-compose --profile build up --build build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 	@echo "$(CYAN)📁 Output files:$(NC)"
 	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
@@ -99,37 +101,88 @@ build-internal:
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 
 # Development server with hot reload (draft mode for speed)
-dev: docker-check
+# Get Mac's LAN IP address for mobile testing
+get-lan-ip:
+	@echo "$(CYAN)🌐 Getting Mac LAN IP address...$(NC)"
+	@LAN_IP=$$(ifconfig | grep -E "inet.*broadcast" | grep -v 127.0.0.1 | awk '{print $$2}' | head -n1); \
+	if [ -n "$$LAN_IP" ]; then \
+		echo "$(GREEN)📱 Mac LAN IP: $$LAN_IP$(NC)"; \
+		echo "$(CYAN)🔗 Mobile access: http://$$LAN_IP:3000$(NC)"; \
+		echo "$(YELLOW)💡 Use this URL on your phone to test the resume$(NC)"; \
+	else \
+		echo "$(RED)❌ Could not detect LAN IP$(NC)"; \
+	fi
+
+# Development server - Port 3000 (can run in background with -d)
+dev: docker-check get-lan-ip
 	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
-	@echo "$(CYAN)🔍 Checking for existing containers on port $(DEV_PORT)...$(NC)"
-	@-docker ps -q --filter "publish=$(DEV_PORT)" | xargs -r docker kill > /dev/null 2>&1 || true
-	@-pkill -f "serve.*$(DEV_PORT)" > /dev/null 2>&1 || true
+	@echo "$(CYAN)🔍 Cleaning up any existing containers on port 3000...$(NC)"
+	@-docker-compose down dev > /dev/null 2>&1 || true
+	@-pkill -f "serve.*3000" > /dev/null 2>&1 || true
 	@sleep 1
 	@echo "$(CYAN)⚡ Draft Mode: Lightning-fast builds (HTML only)$(NC)"
 	@echo "$(CYAN)🔥 Hot Reload: Browser auto-refresh on changes$(NC)"
-	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"
+	@echo "$(CYAN)🖥️  Desktop: http://localhost:3000$(NC)"
+	@LAN_IP=$$(ifconfig | grep -E "inet.*broadcast" | grep -v 127.0.0.1 | awk '{print $$2}' | head -n1); \
+	if [ -n "$$LAN_IP" ]; then \
+		echo "$(GREEN)📱 Mobile: http://$$LAN_IP:3000$(NC)"; \
+	fi
 	@echo "$(YELLOW)📄 Note: PDF generation skipped in dev mode$(NC)"
-	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@docker run --rm \
-		-p $(DEV_PORT):$(DEV_PORT) \
-		-p $(TEST_PORT):$(TEST_PORT) \
-		-v "$(PWD):/app" \
-		-e BUILD_MODE=draft \
-		-e NODE_ENV=development \
-		$(DOCKER_IMAGE):builder \
-		npm run dev
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop (or use 'make dev-stop' for background)$(NC)"
+	@echo "$(CYAN)💡 Tip: Use 'make dev-start' to run in background$(NC)"
+	@COMPOSE_BAKE=true docker-compose --profile dev up dev
 
-# Serve built resume
-serve: docker-check
+# Start development server in background (detached)
+dev-start: docker-check get-lan-ip
+	@echo "$(PURPLE)🚀 Starting development server in background...$(NC)"
+	@COMPOSE_BAKE=true docker-compose --profile dev up -d dev
+	@sleep 3
+	@echo "$(GREEN)✅ Development server running in background$(NC)"
+	@echo "$(CYAN)🖥️  Desktop: http://localhost:3000$(NC)"
+	@LAN_IP=$$(ifconfig | grep -E "inet.*broadcast" | grep -v 127.0.0.1 | awk '{print $$2}' | head -n1); \
+	if [ -n "$$LAN_IP" ]; then \
+		echo "$(GREEN)📱 Mobile: http://$$LAN_IP:3000$(NC)"; \
+		echo "$(YELLOW)📲 Scan QR code or type the mobile URL on your phone$(NC)"; \
+	fi
+	@echo "$(CYAN)🛑 Use 'make dev-stop' to stop$(NC)"
+
+# Stop background development server
+dev-stop:
+	@echo "$(PURPLE)🛑 Stopping development server...$(NC)"
+	@docker-compose down dev || true
+	@echo "$(GREEN)✅ Development server stopped$(NC)"
+
+# Production server (serve built files) - Port 3001
+serve: docker-check build
 	@echo "$(PURPLE)🌐 Starting production server...$(NC)"
-	@echo "$(CYAN)📱 Resume: http://localhost:$(DEV_PORT)$(NC)"
-	@echo "$(CYAN)📄 PDF: http://localhost:$(DEV_PORT)/resume.pdf$(NC)"
+	@echo "$(CYAN)📱 Resume: http://localhost:3001$(NC)"
+	@echo "$(CYAN)📄 PDF: http://localhost:3001/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@docker-compose -f docker/docker-compose.yml up production
+	@COMPOSE_BAKE=true docker-compose --profile serve up serve
 
 # Run all tests
 test: docker-check test-unit test-e2e test-visual test-accessibility test-performance
 	@echo "$(GREEN)🎉 All tests completed!$(NC)"
+
+# Run comprehensive visual validation tests - Port 3002
+test-visual-matrix: docker-check serve
+	@echo "$(BLUE)🎨 Running comprehensive visual validation matrix...$(NC)"
+	@echo "$(CYAN)📱 Testing 20 viewport/theme combinations...$(NC)"
+	@mkdir -p visual-evidence/mobile visual-evidence/tablet visual-evidence/desktop test-results
+	@COMPOSE_BAKE=true docker-compose --profile test up test
+	@echo "$(GREEN)✅ Visual matrix validation completed!$(NC)"
+
+# Run PDF validation tests
+test-pdf: docker-check build
+	@echo "$(BLUE)📄 Running PDF validation tests...$(NC)"
+	@COMPOSE_BAKE=true docker-compose --profile pdf up pdf-validate
+	@echo "$(GREEN)✅ PDF validation completed!$(NC)"
+
+# Run all comprehensive tests
+test-all: docker-check
+	@echo "$(BLUE)🧪 Running all comprehensive tests...$(NC)"
+	@COMPOSE_BAKE=true docker-compose --profile test-all up test-all
+	@echo "$(GREEN)✅ All comprehensive tests completed!$(NC)"
 
 # Run fast smoke tests (recommended for development)
 test-fast: docker-check

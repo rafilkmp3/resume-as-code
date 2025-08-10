@@ -164,15 +164,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     firefox-esr \
     && rm -rf /var/lib/apt/lists/*
 
-# Install development dependencies
-RUN npm install && npm cache clean --force
-
-# Copy source code and set up development environment
+# Copy source code first to ensure package.json is current
 COPY --chown=appuser:appuser . .
-USER appuser
 
-# Install Playwright browsers for development testing
+# Install all dependencies including devDependencies for development
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci && npm cache clean --force
+
+# Install Playwright browsers as root (needs system dependencies)
 RUN npx playwright install --with-deps chromium firefox webkit
+
+# Create dist directory with proper permissions
+RUN mkdir -p /app/dist && chown -R appuser:appuser /app/dist
+
+# Switch to appuser for running the development server
+USER appuser
 
 EXPOSE 3000 3001
 CMD ["npm", "run", "dev"]

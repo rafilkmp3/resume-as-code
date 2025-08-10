@@ -14,11 +14,72 @@ if (!fs.existsSync('./dist')) {
   fs.mkdirSync('./dist');
 }
 
-// Generate QR code for the online version
-async function generateQRCode(url, options) {
-  console.log('🔗 Generating QR code for online version...');
+// Get Mac LAN IP address for development mode
+function getMacLanIP() {
   try {
-    return await QRCode.toDataURL(url, options);
+    const os = require('os');
+    const networkInterfaces = os.networkInterfaces();
+
+    // Find the first non-internal IPv4 address
+    for (const [name, interfaces] of Object.entries(networkInterfaces)) {
+      for (const interface of interfaces || []) {
+        if (interface.family === 'IPv4' && !interface.internal) {
+          console.log(`🌐 Detected LAN IP: ${interface.address} (interface: ${name})`);
+          return interface.address;
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting LAN IP:', error);
+    return null;
+  }
+}
+
+// Generate QR code with easter egg styling for the online version
+async function generateQRCode(url, options) {
+  const isDev = process.env.NODE_ENV === 'development' || process.env.BUILD_MODE === 'draft';
+
+  // Easter egg QR code options with custom styling
+  const easterEggOptions = {
+    width: 200,
+    margin: 1,
+    color: {
+      dark: '#2563eb',    // Professional blue instead of black (easter egg!)
+      light: '#ffffff'    // Keep white background
+    },
+    errorCorrectionLevel: 'M', // Medium error correction for better aesthetics
+    type: 'image/png',
+    quality: 0.92,
+    rendererOpts: {
+      quality: 0.92
+    }
+  };
+
+  // Merge custom options with easter egg defaults
+  const finalOptions = { ...easterEggOptions, ...options };
+
+  // In development mode, use LAN IP for mobile access
+  if (isDev) {
+    const lanIP = getMacLanIP();
+    if (lanIP) {
+      const devUrl = `http://${lanIP}:3000`;
+      console.log('🔗 Generating QR code for development (mobile access)...');
+      console.log(`📱 Mobile URL: ${devUrl}`);
+      console.log('🎨 Easter egg: Using professional blue QR code styling!');
+      try {
+        return await QRCode.toDataURL(devUrl, finalOptions);
+      } catch (error) {
+        console.error('Error generating development QR code:', error);
+        // Fallback to original URL if QR generation fails
+      }
+    }
+  }
+
+  console.log('🔗 Generating QR code for online version...');
+  console.log('🎨 Easter egg: Professional blue QR code with enhanced quality!');
+  try {
+    return await QRCode.toDataURL(url, finalOptions);
   } catch (error) {
     console.error('Error generating QR code:', error);
     return null;
@@ -59,21 +120,21 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     resumeData.basics.image = 'assets/images/profile-mobile.jpg';
   }
 
-  // Skip QR code generation in draft mode (expensive operation)
+  // Generate QR code (fast operation even in draft mode)
   let qrCodeDataURL = null;
-  if (!isDraft) {
-    qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
-      width: 200,
-      margin: 1,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
-  } else {
-    console.log('⚡ Draft mode: Skipping QR code generation');
-    // Use placeholder for draft mode
-    qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+RFJBRlQgTU9ERTwvdGV4dD48L3N2Zz4=';
+  qrCodeDataURL = await generateQRCode(resumeData.basics.url, {
+    width: 200,
+    margin: 1,
+    color: {
+      dark: '#2563eb',  // Use easter egg blue color
+      light: '#FFFFFF'
+    }
+  });
+
+  if (!qrCodeDataURL) {
+    console.log('⚠️  QR code generation failed, using placeholder');
+    // Use placeholder if QR generation fails
+    qrCodeDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+UVIgRVJST1I8L3RleHQ+PC9zdmc+';
   }
 
   // Enhance resume data with optimized images
@@ -634,9 +695,9 @@ async function build(options = {}) {
   // Always run core build steps
   await generateHTML(resumeData, './template.html', { mode });
 
-  // Skip expensive operations in draft mode
+  // Skip expensive PDF operations in draft mode (but keep QR code)
   if (isDraft) {
-    console.log('⚡ Draft mode: Skipping PDF generation and QR code creation');
+    console.log('⚡ Draft mode: Skipping PDF generation');
     console.log('🎉 Draft build complete! (HTML only)');
     console.log('🌐 Preview: ./dist/index.html');
     return;

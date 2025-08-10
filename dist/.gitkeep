@@ -1,8 +1,0 @@
-# This directory contains generated build artifacts
-#
-# Files in this directory are created by:
-# - scripts/build.js (HTML and PDF generation)
-# - Asset copying from assets/ directory
-#
-# This .gitkeep ensures the directory structure is preserved
-# in version control while the actual build artifacts are ignored

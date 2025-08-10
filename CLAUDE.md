@@ -6,28 +6,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Build & Development
 
-- `make build` - Build HTML and PDF resume using Docker
-- `make dev` - Start development server with hot reload on port 3000
-- `make serve` - Serve built resume on port 3000
+- `make build` - Build HTML and PDF resume using Docker Compose
+- `make dev` - Start development server with mobile LAN access (Port 3000)
+- `make dev-start` - Start dev server in background (detached mode)
+- `make dev-stop` - Stop background dev server
+- `make serve` - Production server (Port 3001) with built content
+- `make get-lan-ip` - Get Mac LAN IP address for mobile testing
 - `npm run build` - Direct Node.js build (inside Docker containers)
 - `npm run dev` - Direct development server (inside Docker containers)
 
-### Testing
+### Enhanced Testing & Quality Assurance
 
-- `make test` - Run complete test suite (unit + E2E + visual + accessibility + performance)
+- `make test-visual-matrix` - Test all 20 viewport/theme combinations with screenshots
+- `make test-pdf` - Validate PDF generation (all 3 variants: screen, print, ATS)
+- `make test-all` - Run comprehensive test suite using Docker Compose
 - `make test-fast` - Run fast smoke tests (recommended for development)
 - `make test-unit` - Run Jest unit tests with coverage
 - `make test-e2e` - Run Playwright end-to-end tests
 - `make test-visual` - Run visual regression tests
+- `make test-accessibility` - Run accessibility tests
+- `make test-performance` - Run performance tests
 - `npm test` - Alias for `make test`
-- `npm run test:unit` - Jest unit tests directly
-- `npm run test:e2e` - Playwright tests directly
 
 ### Docker Operations
 
 - `make docker-check` - Verify Docker is running (required for all operations)
 - `make build-images` - Build all browser-specific test images
 - `make status` - Comprehensive project health check
+
+### Developer Tools
+
+- `npm run dev:health` - Development environment health check (6 automated validations)
+- `npm run dev:perf` - Performance analysis and benchmarks
+- `npm run dev:clean` - Clean development artifacts
+- `npm run dev:setup` - Automated environment setup
 
 ### Utilities
 
@@ -79,12 +91,28 @@ This is a **resume generation system** built with infrastructure-as-code princip
 5. **PDF Export**: Puppeteer generates print-ready PDFs with proper metadata
 6. **Responsive Design**: Mobile-first with dark/light mode support
 
-### Docker-First Development
+### Docker Compose Architecture (Enhanced)
 
-- **All commands use Docker** - no local Node.js installation required
-- **Browser-specific images** for E2E testing (Chromium, Firefox, WebKit)
-- **Development containers** with hot reload and file watching
-- **Production containers** for serving built resume
+- **All commands use Docker Compose** - no local Node.js installation required
+- **Service-based architecture** with dedicated containers for each workflow
+- **Port allocation strategy** for predictable development experience
+- **Mobile testing support** with LAN IP detection for cross-device testing
+- **Background development server** that runs continuously while working
+
+#### Port Allocation Strategy
+
+- **Port 3000**: Development server with hot reload (always running in background)
+- **Port 3001**: Production preview server (built content)
+- **Port 3002**: CI and automated testing exclusive port
+
+#### Docker Compose Services
+
+- **`dev`**: Development server with hot reload and mobile LAN access
+- **`build`**: Build service for HTML + PDF generation
+- **`serve`**: Production preview server for built content
+- **`test`**: Visual testing with comprehensive viewport/theme matrix (20 combinations)
+- **`pdf-validate`**: PDF validation for all 3 variants (screen, print, ATS)
+- **`test-all`**: Complete test suite runner
 
 ## CRITICAL Platform Engineering Rules
 
@@ -136,12 +164,109 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **Performance**: Core Web Vitals monitoring
 - **Cross-Device**: Desktop (1280x720), iPhone 15 Pro Max, iPad Pro
 
-### Development Workflow
+## Mobile Testing & QR Code Workflow
 
-1. **File Watching**: `make dev` watches `template.html` and `resume-data.json`
-2. **Auto-Rebuild**: Changes trigger automatic rebuild via `scripts/build.js`
-3. **Hot Reload**: Development server serves updated content immediately
-4. **Port Strategy**: Port 3000 for dev, Port 3001 for testing
+### 📱 Mobile LAN Access (macOS)
+
+The system automatically detects your Mac's LAN IP address to enable seamless mobile testing:
+
+#### Quick Mobile Testing Setup
+
+```bash
+make dev-start          # Start dev server in background
+make get-lan-ip         # Display mobile access URL
+# Use the displayed URL on your phone: http://192.168.x.x:3000
+```
+
+#### QR Code Generation Strategy
+
+- **Development Mode**: QR code points to `http://[LAN_IP]:3000` for easy mobile scanning
+- **Production Mode**: QR code points to production URL `https://rafilkmp3.github.io/resume-as-code/`
+- **Automatic Detection**: Build script detects development vs production environment
+- **Mobile-Friendly**: Large QR code (200px) with high contrast for easy scanning
+
+#### Mobile Testing Workflow
+
+1. **Start Background Server**: `make dev-start` (runs continuously)
+2. **Get Mobile URL**: `make get-lan-ip` shows `http://192.168.x.x:3000`
+3. **Test on Phone**: Scan QR code or type URL manually
+4. **Live Updates**: Changes auto-reload on both desktop and mobile
+5. **Stop When Done**: `make dev-stop`
+
+### 🎨 Comprehensive Visual Testing Matrix
+
+Advanced visual validation testing 20 viewport/theme combinations:
+
+#### Test Coverage
+
+- **5 Mobile Devices**: iPhone SE, iPhone 15, iPhone 15 Pro Max, Pixel 7, Galaxy S21
+- **2 Tablet Devices**: iPad, iPad Pro
+- **3 Desktop Resolutions**: HD (1366x768), FHD (1920x1080), QHD (2560x1440)
+- **2 Themes**: Light mode and Dark mode
+- **Total**: 20 combinations with full-page screenshots
+
+#### Visual Testing Commands
+
+```bash
+make test-visual-matrix  # Test all 20 viewport/theme combinations
+make visual-test        # Enhanced visual testing (sections, load more, header)
+make visual-test-basic  # Basic device screenshots only
+make visual-clean       # Clean visual evidence directory
+```
+
+Screenshots saved to:
+
+- `visual-evidence/mobile/` - Mobile device screenshots
+- `visual-evidence/tablet/` - Tablet device screenshots
+- `visual-evidence/desktop/` - Desktop resolution screenshots
+
+## Enhanced Development Workflow (Docker Compose)
+
+### 🚀 Continuous Background Development
+
+```bash
+# Start development server in background (recommended workflow)
+make dev-start              # Runs continuously in background
+make get-lan-ip             # Get mobile access URL
+
+# Work normally - changes auto-reload
+# Desktop: http://localhost:3000
+# Mobile: http://192.168.x.x:3000 (from get-lan-ip output)
+
+# Stop when done
+make dev-stop
+```
+
+### 📋 Complete Development Session
+
+```bash
+# 1. Clean environment (CI/CD parity)
+make clean
+
+# 2. Start background dev server
+make dev-start
+
+# 3. Run fast tests during development
+make test-fast
+
+# 4. Visual validation across devices
+make test-visual-matrix
+
+# 5. PDF generation validation
+make test-pdf
+
+# 6. Production preview
+make serve                  # http://localhost:3001
+```
+
+### 🔧 Docker Compose Architecture Benefits
+
+- **Background Development**: `make dev-start` runs continuously while you work
+- **Port Predictability**: Fixed ports prevent conflicts (3000, 3001, 3002)
+- **Mobile Testing**: Automatic LAN IP detection for cross-device testing
+- **Container Isolation**: Each service runs in dedicated container
+- **No Container Duplication**: Docker Compose prevents port conflicts
+- **Service Dependencies**: Automated service startup ordering
 
 ### Important Implementation Details
 
