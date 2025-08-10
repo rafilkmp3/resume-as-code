@@ -5,12 +5,9 @@ const Handlebars = require('handlebars');
 const QRCode = require('qrcode');
 // const sharp = require('sharp'); // Removed for multi-arch compatibility
 const { copyRecursive } = require('./utils/fs-utils');
-// Use Canvas-based optimization for production, fallback to simple for development
-const isDraft = process.env.BUILD_MODE === 'draft';
-const imageOptimizer = isDraft
-  ? require('./utils/image-optimization-simple')
-  : require('./utils/image-optimization-canvas');
-const { optimizeProfileImageForResume } = imageOptimizer;
+// Use simple optimization for now (Canvas not working in GitHub Actions)
+// TODO: Fix Canvas dependencies in Docker for production optimization
+const { optimizeProfileImageForResume } = require('./utils/image-optimization-simple');
 
 console.log('🏗️  Building resume...');
 
