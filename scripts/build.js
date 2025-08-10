@@ -27,10 +27,7 @@ async function generateQRCode(url, options) {
 
 // DRY Profile Image Optimization using utility
 async function optimizeProfileImage(imagePath, resumeData, options = {}) {
-  return optimizeProfileImageForResume(imagePath, {
-    isDraft: options.isDraft || false,
-    outputDir: './dist/assets/images'
-  });
+  return optimizeProfileImageForResume(imagePath, './dist/assets/images');
 }
 
 // Generate HTML from template and data
