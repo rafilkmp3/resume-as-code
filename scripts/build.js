@@ -3,9 +3,9 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
 const QRCode = require('qrcode');
-const sharp = require('sharp');
+// const sharp = require('sharp'); // Removed for multi-arch compatibility
 const { copyRecursive } = require('./utils/fs-utils');
-const { optimizeProfileImageForResume } = require('./utils/image-optimization');
+const { optimizeProfileImageForResume } = require('./utils/image-optimization-simple');
 
 console.log('🏗️  Building resume...');
 
