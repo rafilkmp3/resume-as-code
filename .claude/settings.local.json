@@ -113,7 +113,9 @@
       "Bash(--generate-notes )",
       "Bash(--latest)",
       "Bash(gh repo view:*)",
-      "Bash(PORT=3002 npm run serve)"
+      "Bash(PORT=3002 npm run serve)",
+      "Bash(BUILD_MODE=production make build)",
+      "Bash(timeout 60 make test-fast)"
     ],
     "deny": []
   }
