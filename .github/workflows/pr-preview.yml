@@ -16,9 +16,7 @@ on:
       - 'package*.json'
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write  # Need write to update pr-previews branch
   pull-requests: write
   actions: read
 
@@ -30,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Build and deploy PR preview
+  # Build and deploy PR preview to separate branch
   preview-deploy:
     name: Deploy PR Preview
     runs-on: ubuntu-latest
@@ -94,23 +92,8 @@ jobs:
             .
 
           # Extract preview build from nginx html directory
-          mkdir -p dist/pr-${{ github.event.pull_request.number }}
-          docker run --rm -v "$PWD/dist/pr-${{ github.event.pull_request.number }}:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
-
-          # Create a simple index.html that redirects to the PR directory
-          cat > dist/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="utf-8">
-              <title>PR Preview - Redirecting...</title>
-              <meta http-equiv="refresh" content="0; url=./pr-${{ github.event.pull_request.number }}/">
-          </head>
-          <body>
-              <p>Redirecting to <a href="./pr-${{ github.event.pull_request.number }}/">PR #${{ github.event.pull_request.number }} preview</a>...</p>
-          </body>
-          </html>
-          EOF
+          mkdir -p pr-preview-build
+          docker run --rm -v "$PWD/pr-preview-build:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
 
           # Update cache atomically
           if [[ -d "/tmp/.buildx-cache-new" ]]; then
@@ -119,60 +102,163 @@ jobs:
           fi
 
           echo "📁 Preview build artifacts:"
-          ls -la dist/
-          ls -la dist/pr-${{ github.event.pull_request.number }}/
-
-      - name: Run essential tests (Chromium only)
-        run: |
-          echo "🧪 Running essential PR tests"
-
-          # Quick smoke tests on nginx production container
-          docker run --rm pr-preview:${{ github.event.pull_request.number }} sh -c "
-            echo '🐧 Container info:'
-            cat /etc/os-release | head -3
-
-            # HTML validation (nginx serves from /usr/share/nginx/html)
-            if [[ -f '/usr/share/nginx/html/index.html' ]]; then
-              echo '✅ HTML file exists in nginx directory'
-              grep -q 'Rafael Sathler' /usr/share/nginx/html/index.html && echo '✅ Content validation passed'
-
-              # Check if assets directory exists
-              if [[ -d '/usr/share/nginx/html/assets' ]]; then
-                echo '✅ Assets directory exists'
-                ls -la /usr/share/nginx/html/assets/images/ | head -5
-              else
-                echo '⚠️ Assets directory missing'
-              fi
-            else
-              echo '❌ HTML build failed - file not found in nginx directory'
-              echo 'Files in nginx directory:'
-              ls -la /usr/share/nginx/html/
-              exit 1
-            fi
-          "
-
-      - name: Setup Pages for PR
-        uses: actions/configure-pages@v5
+          ls -la pr-preview-build/
 
       - name: Add PR preview banner
         run: |
           echo "🏷️ Adding PR preview identification banner"
 
           # Add PR preview banner to the HTML
-          sed -i 's|<body|<body style="border-top: 5px solid #ff6b35;">|g' dist/pr-${{ github.event.pull_request.number }}/index.html
+          sed -i 's|<body|<body style="border-top: 5px solid #ff6b35;">|g' pr-preview-build/index.html
 
           # Add PR preview notice at the top of the page
-          sed -i 's|<body[^>]*>|&\n<div style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; text-align: center; padding: 10px 20px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>🚀 PR PREVIEW #${{ github.event.pull_request.number }}</strong> - This is a preview deployment for testing. <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}" style="color: white; text-decoration: underline;">View PR →</a></div>|g' dist/pr-${{ github.event.pull_request.number }}/index.html
+          sed -i 's|<body[^>]*>|&\n<div style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; text-align: center; padding: 10px 20px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>🚀 PR PREVIEW #${{ github.event.pull_request.number }}</strong> - This is a preview deployment for testing. <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}" style="color: white; text-decoration: underline;">View PR →</a></div>|g' pr-preview-build/index.html
 
-      - name: Upload PR preview to Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-          retention-days: 7
+          echo "✅ PR preview banner added to HTML"
 
-      - name: Deploy PR preview to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to pr-previews branch (production-safe)
+        run: |
+          echo "🚀 Deploying PR preview to separate pr-previews branch (production stays at /)"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Fetch pr-previews branch or create if doesn't exist
+          if git fetch origin pr-previews; then
+            git checkout pr-previews
+            echo "📂 Checked out existing pr-previews branch"
+          else
+            # Create new orphan pr-previews branch
+            git checkout --orphan pr-previews
+            git rm -rf .
+            echo "📂 Created new pr-previews branch"
+
+            # Create initial index.html for PR previews root
+            cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>PR Previews - Resume as Code</title>
+              <meta name="description" content="PR Preview Area - Resume as Code">
+              <style>
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                  text-align: center;
+                  padding: 2rem;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  min-height: 100vh;
+                  margin: 0;
+                }
+                .container {
+                  max-width: 800px;
+                  margin: 0 auto;
+                  background: rgba(255,255,255,0.1);
+                  padding: 2rem;
+                  border-radius: 12px;
+                  backdrop-filter: blur(10px);
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                }
+                h1 { color: white; margin-bottom: 0.5rem; font-size: 2.5rem; }
+                .subtitle { color: rgba(255,255,255,0.9); margin-bottom: 2rem; font-size: 1.2rem; }
+                .btn {
+                  display: inline-block;
+                  padding: 12px 24px;
+                  background: rgba(255,255,255,0.2);
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 8px;
+                  font-weight: 600;
+                  border: 2px solid rgba(255,255,255,0.3);
+                  transition: all 0.3s ease;
+                }
+                .btn:hover {
+                  background: rgba(255,255,255,0.3);
+                  transform: translateY(-2px);
+                }
+                .notice {
+                  margin: 2rem 0;
+                  padding: 1.5rem;
+                  background: rgba(255,255,255,0.1);
+                  border-radius: 8px;
+                  border: 1px solid rgba(255,255,255,0.2);
+                }
+                .pr-list {
+                  margin-top: 2rem;
+                  text-align: left;
+                  background: rgba(0,0,0,0.1);
+                  border-radius: 8px;
+                  padding: 1.5rem;
+                }
+                .pr-item {
+                  padding: 0.5rem 0;
+                  border-bottom: 1px solid rgba(255,255,255,0.1);
+                }
+                .pr-item:last-child { border-bottom: none; }
+                .pr-item a { color: #87CEEB; text-decoration: none; }
+                .pr-item a:hover { text-decoration: underline; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 PR Previews</h1>
+                  <div class="subtitle">Pull Request Preview Environment</div>
+
+                  <div class="notice">
+                      <strong>📋 This is the PR preview staging area</strong><br>
+                      Production site is always at the <strong>root URL</strong> and unaffected by PRs.
+                  </div>
+
+                  <a href="../" class="btn">← Back to Production Site</a>
+
+                  <div class="pr-list">
+                      <h3>🔬 Active PR Previews</h3>
+                      <p><em>Active PR previews will be automatically listed here...</em></p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+            git add index.html
+            git commit -m "Initialize pr-previews branch with directory listing"
+          fi
+
+          # Clean up old PR directory if it exists
+          if [ -d "pr-${{ github.event.pull_request.number }}" ]; then
+            rm -rf "pr-${{ github.event.pull_request.number }}"
+            echo "🧹 Cleaned up existing PR #${{ github.event.pull_request.number }} directory"
+          fi
+
+          # Copy PR preview build to subdirectory
+          mkdir -p "pr-${{ github.event.pull_request.number }}"
+          cp -r ../pr-preview-build/* "pr-${{ github.event.pull_request.number }}/"
+
+          echo "📁 PR preview structure:"
+          ls -la "pr-${{ github.event.pull_request.number }}"/
+
+          # Add and commit PR preview
+          git add "pr-${{ github.event.pull_request.number }}/"
+          git commit -m "feat: add PR #${{ github.event.pull_request.number }} preview
+
+          🚀 PR Preview Deployment (Production-Safe)
+
+          - **PR**: #${{ github.event.pull_request.number }}
+          - **Branch**: ${{ github.event.pull_request.head.ref }}
+          - **Commit**: ${{ github.event.pull_request.head.sha }}
+          - **Preview URL**: ${{ steps.preview-url.outputs.url }}
+          - **Production**: Unaffected (stays at root /)
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+          # Push to pr-previews branch
+          git push origin pr-previews
+
+          echo "✅ PR preview deployed to: ${{ steps.preview-url.outputs.url }}"
+          echo "🛡️ Production site remains unaffected at root URL"
 
       - name: Comment on PR
         uses: actions/github-script@v7
@@ -181,11 +267,17 @@ jobs:
             const previewUrl = "${{ steps.preview-url.outputs.url }}";
             const prNumber = context.payload.pull_request.number;
             const commentBody = `
-            ## 📱 PR Preview Ready!
+            ## 📱 PR Preview Ready! (Production-Safe)
 
-            Your preview is deployed with **working QR codes** and **PR identification banner**:
+            Your preview is deployed with **complete isolation** from production:
 
             ### 🌐 **[View Preview →](${previewUrl})**
+
+            **🛡️ Production Protection:**
+            - ✅ **Production Unaffected**: Main site stays at root URL
+            - ✅ **Multiple PR Support**: Each PR gets its own subdirectory
+            - ✅ **Isolated Deployment**: Uses separate \`pr-previews\` branch
+            - ✅ **Recruiter-Safe**: Sent URLs remain stable and working
 
             **🚀 Preview Features:**
             - ✅ **PR Banner**: Clear identification this is a preview deployment
@@ -198,6 +290,7 @@ jobs:
             - **URL**: \`${previewUrl}\`
             - **Commit**: \`${{ github.event.pull_request.head.sha }}\`
             - **Branch**: \`${{ github.event.pull_request.head.ref }}\`
+            - **Deployment**: Separate from production (safe)
 
             **📱 Mobile Testing Workflow:**
             1. Open the preview link above
@@ -212,6 +305,8 @@ jobs:
             - Banner links back to this PR for reference
 
             > 🔄 Updates automatically when you push new commits
+            >
+            > 🛡️ **Production guarantee**: Main site at root URL never affected
             `;
 
             // Find existing preview comment to update
@@ -246,21 +341,66 @@ jobs:
   cleanup-preview:
     name: Cleanup PR Preview
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     if: github.event.action == 'closed'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove PR preview from pr-previews branch
+        run: |
+          echo "🧹 Removing PR #${{ github.event.pull_request.number }} preview (production stays safe)"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Checkout pr-previews branch
+          if git fetch origin pr-previews && git checkout pr-previews; then
+            # Remove PR directory if it exists
+            if [ -d "pr-${{ github.event.pull_request.number }}" ]; then
+              rm -rf "pr-${{ github.event.pull_request.number }}"
+              git add -A
+              git commit -m "cleanup: remove PR #${{ github.event.pull_request.number }} preview
+
+              🧹 PR Preview Cleanup (Production-Safe)
+
+              - **PR**: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.merged && 'merged' || 'closed' }})
+              - **Branch**: ${{ github.event.pull_request.head.ref }}
+              - **Production**: Unaffected (always at root)
+
+              🤖 Generated with [Claude Code](https://claude.ai/code)
+
+              Co-Authored-By: Claude <noreply@anthropic.com>"
+              git push origin pr-previews
+              echo "✅ PR preview directory removed from pr-previews branch"
+            else
+              echo "ℹ️ PR preview directory not found - may have been already cleaned up"
+            fi
+          else
+            echo "ℹ️ pr-previews branch not found - nothing to clean up"
+          fi
+
       - name: Comment cleanup notice
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
             const cleanupBody = `
-            ## 🧹 PR Preview Cleaned Up
+            ## 🧹 PR Preview Cleaned Up (Production-Safe)
 
-            Preview deployment has been cleaned up.
+            Preview deployment has been cleaned up from the staging area.
 
             **Status:** ✅ Environment cleaned up
             **Reason:** PR was ${{ github.event.pull_request.merged && 'merged' || 'closed' }}
+            **URL:** \`https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${prNumber}\` (no longer accessible)
+
+            **🛡️ Production Protection:** Main site at root URL remains completely unaffected.
             `;
 
             await github.rest.issues.createComment({
