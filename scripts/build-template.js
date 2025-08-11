@@ -3,7 +3,7 @@
 /**
  * Template Assembly Script
  * Assembles modular components back into template.html
- * 
+ *
  * This replaces the monolithic 6,115-line template.html with a component-based architecture
  */
 
@@ -35,7 +35,7 @@ ${mainJS}
     <script>
 ${themeJS}
     </script>
-    
+
     <script>
 ${analyticsJS}
     </script>
@@ -45,7 +45,7 @@ ${analyticsJS}
 
     // Write the assembled template
     fs.writeFileSync('template.html.new', assembledTemplate);
-    
+
     console.log('✅ Template assembled successfully!');
     console.log('📊 Component Statistics:');
     console.log(`   Head: ${headComponent.split('\n').length} lines`);
@@ -55,7 +55,7 @@ ${analyticsJS}
     console.log(`   Theme JS: ${themeJS.split('\n').length} lines`);
     console.log(`   Analytics JS: ${analyticsJS.split('\n').length} lines`);
     console.log(`   Total: ${assembledTemplate.split('\n').length} lines`);
-    
+
     console.log('🔄 To activate: mv template.html.new template.html');
 
 } catch (error) {
