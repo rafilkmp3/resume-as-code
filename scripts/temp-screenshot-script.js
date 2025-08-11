@@ -39,7 +39,7 @@ test('macOS Retina Desktop - Dark Mode - Mid Page', async ({ page }) => {
 
   // Take full page screenshot
   await page.screenshot({
-    path: '/Users/rafael.sathler/projetos/resume-as-code/visual-evidence/macos-retina/macos-retina_dark_scrolled.png',
+    path: '/Users/rafael.sathler/projetos/resume-as-code/docs/screenshots/visual-evidence/macos-retina/macos-retina_dark_scrolled.png',
     fullPage: true,
     animations: 'disabled'
   });

@@ -168,7 +168,7 @@ test: docker-check test-unit test-e2e test-visual test-accessibility test-perfor
 test-visual-matrix: docker-check serve
 	@echo "$(BLUE)🎨 Running comprehensive visual validation matrix...$(NC)"
 	@echo "$(CYAN)📱 Testing 20 viewport/theme combinations...$(NC)"
-	@mkdir -p visual-evidence/mobile visual-evidence/tablet visual-evidence/desktop test-results
+	@mkdir -p docs/screenshots/visual-evidence/mobile docs/screenshots/visual-evidence/tablet docs/screenshots/visual-evidence/desktop test-results
 	@COMPOSE_BAKE=true docker-compose --profile test up test
 	@echo "$(GREEN)✅ Visual matrix validation completed!$(NC)"
 
@@ -393,7 +393,7 @@ visual-analyze: visual-test
 
 visual-clean:
 	@echo "$(YELLOW)🧹 Cleaning visual evidence directory...$(NC)"
-	@rm -rf visual-evidence/*
+	@rm -rf docs/screenshots/visual-evidence/*
 	@echo "$(GREEN)✅ Visual evidence cleared$(NC)"
 
 # Smart build system - only build and push if images don't exist or deps changed

@@ -156,12 +156,16 @@ Thumbs.db
 *.bak
 *.orig
 
-# Test results
+# Test results and visual evidence
 test-results/*
 !test-results/.gitkeep
 /test-reports/
 /playwright-report/
 playwright/.cache/
+visual-evidence/
+mobile-header-screenshots/
+test-screenshots/
+screenshots/development/
 
 # Jest and coverage
 jest_*.json

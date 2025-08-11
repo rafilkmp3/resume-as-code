@@ -26,6 +26,8 @@ async function captureMobileHeaderScreenshots() {
     const screenshotDir = path.join(
       __dirname,
       '..',
+      'docs',
+      'screenshots',
       'mobile-header-screenshots'
     );
     await fs.mkdir(screenshotDir, { recursive: true });

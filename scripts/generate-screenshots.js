@@ -8,7 +8,7 @@ async function generateScreenshots() {
   const browser = await chromium.launch();
 
   // Create screenshots directory
-  const screenshotsDir = path.join(__dirname, '..', 'visual-evidence');
+  const screenshotsDir = path.join(__dirname, '..', 'docs', 'screenshots', 'visual-evidence');
   if (!fs.existsSync(screenshotsDir)) {
     fs.mkdirSync(screenshotsDir, { recursive: true });
   }

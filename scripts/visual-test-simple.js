@@ -8,7 +8,7 @@ const { spawn } = require('child_process');
 
 class SimpleVisualTester {
   constructor() {
-    this.screenshotDir = path.join(__dirname, '..', 'visual-evidence');
+    this.screenshotDir = path.join(__dirname, '..', 'docs', 'screenshots', 'visual-evidence');
     this.serverProcess = null;
   }
 

@@ -132,12 +132,12 @@ jobs:
 
           # Create timestamped directory for historical comparison
           TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
-          mkdir -p "screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}"
+          mkdir -p "docs/screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}"
 
           # Copy screenshots to baseline archive
-          find test-results-${{ matrix.browser }} -name "*.png" -exec cp {} "screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/" \; || true
+          find test-results-${{ matrix.browser }} -name "*.png" -exec cp {} "docs/screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/" \; || true
 
-          echo "📁 Baseline screenshots archived to screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/"
+          echo "📁 Baseline screenshots archived to docs/screenshots/baseline-$TIMESTAMP-${{ matrix.browser }}/"
           echo "::endgroup::"
         continue-on-error: true
 

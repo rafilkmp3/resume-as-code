@@ -116,7 +116,7 @@ test.describe('Comprehensive Visual Validation Matrix', () => {
         await validateContactSection(page, viewport, theme);
 
         // Take screenshot with descriptive name
-        const screenshotPath = `visual-evidence/${viewport.category}/${viewport.name.toLowerCase().replace(/\s+/g, '-')}-${viewport.width}x${viewport.height}-${theme}.png`;
+        const screenshotPath = `docs/screenshots/visual-evidence/${viewport.category}/${viewport.name.toLowerCase().replace(/\s+/g, '-')}-${viewport.width}x${viewport.height}-${theme}.png`;
         await page.screenshot({
           path: screenshotPath,
           fullPage: true

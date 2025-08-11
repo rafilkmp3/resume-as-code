@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 
 class VisualTester {
   constructor() {
-    this.screenshotDir = path.join(__dirname, '..', 'visual-evidence');
+    this.screenshotDir = path.join(__dirname, '..', 'docs', 'screenshots', 'visual-evidence');
     this.testResults = {
       timestamp: new Date().toISOString(),
       devices: {},

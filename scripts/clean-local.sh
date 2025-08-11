@@ -69,6 +69,9 @@ safe_remove "playwright/.cache/" "Playwright cache"
 safe_remove "coverage/" "Jest coverage reports"
 safe_remove ".nyc_output/" "NYC coverage output"
 safe_remove "jest_*.json" "Jest cache files"
+safe_remove "visual-evidence/" "Visual test evidence"
+safe_remove "mobile-header-screenshots/" "Mobile screenshots"
+safe_remove "test-screenshots/" "Test screenshot artifacts"
 
 # Node.js artifacts
 echo -e "${CYAN}📦 Node.js Artifacts${NC}"

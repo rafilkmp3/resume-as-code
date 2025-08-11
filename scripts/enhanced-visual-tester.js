@@ -14,7 +14,7 @@ const { spawn, execSync } = require('child_process');
 
 class EnhancedVisualTester {
   constructor() {
-    this.screenshotDir = path.join(__dirname, '..', 'visual-evidence');
+    this.screenshotDir = path.join(__dirname, '..', 'docs', 'screenshots', 'visual-evidence');
     this.serverProcess = null;
     this.testResults = {
       timestamp: new Date().toISOString(),
