@@ -91,8 +91,23 @@ jobs:
             .
 
           # Extract preview build from nginx html directory
-          mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
+          mkdir -p dist/pr-${{ github.event.pull_request.number }}
+          docker run --rm -v "$PWD/dist/pr-${{ github.event.pull_request.number }}:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
+
+          # Create a simple index.html that redirects to the PR directory
+          cat > dist/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>PR Preview - Redirecting...</title>
+              <meta http-equiv="refresh" content="0; url=./pr-${{ github.event.pull_request.number }}/">
+          </head>
+          <body>
+              <p>Redirecting to <a href="./pr-${{ github.event.pull_request.number }}/">PR #${{ github.event.pull_request.number }} preview</a>...</p>
+          </body>
+          </html>
+          EOF
 
           # Update cache atomically
           if [[ -d "/tmp/.buildx-cache-new" ]]; then
@@ -102,6 +117,7 @@ jobs:
 
           echo "📁 Preview build artifacts:"
           ls -la dist/
+          ls -la dist/pr-${{ github.event.pull_request.number }}/
 
       - name: Run essential tests (Chromium only)
         run: |
