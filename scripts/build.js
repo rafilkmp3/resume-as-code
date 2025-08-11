@@ -120,6 +120,11 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `const branchName = '${buildBranch}';`);
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
+
+  // Fix environment detection in JavaScript - replace hardcoded logic with build-time value
+  html = html.replace(/const environment = isGitHubPages \? 'production' : 'development';/,
+    `const environment = '${environment}';`);
+
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/,
