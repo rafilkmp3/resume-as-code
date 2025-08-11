@@ -57,6 +57,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -172,6 +173,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -294,6 +297,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         continue-on-error: true
+        with:
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
