@@ -4651,6 +4651,29 @@
         </footer>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="qr-modal">
+        <div class="qr-modal-content">
+            <div class="qr-modal-header">
+                <h3>Share Resume</h3>
+                <button id="qr-modal-close" class="qr-modal-close" aria-label="Close QR code modal">×</button>
+            </div>
+            <div class="qr-modal-body">
+                <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
+                <div class="qr-code-url">{{basics.url}}</div>
+                <p class="qr-code-description">Scan to access resume online or share this URL</p>
+            </div>
+            <div class="qr-modal-footer">
+                <button id="qr-copy-btn" class="qr-copy-btn">
+                    📋 Copy URL
+                </button>
+                <button id="qr-download-btn" class="qr-download-btn">
+                    💾 Download QR
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script id="resume-data" type="application/json">
         {{{json this}}}
     </script>
