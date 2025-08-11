@@ -39,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: true
 
       - name: Validate commit messages
         uses: wagoid/commitlint-action@v6
@@ -60,6 +61,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -117,6 +119,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          lfs: true
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -179,26 +182,30 @@ jobs:
         run: |
           echo "🧪 Running essential tests with Chromium"
 
-          # Run smoke tests in container
-          docker run --rm \
-            -v "$PWD/dist:/app/dist" \
-            resume-production:latest \
-            sh -c "
-              # Basic smoke tests
-              node --version
-              npm --version
+          # Run smoke tests in nginx production container
+          docker run --rm resume-production:latest sh -c "
+            echo '🐧 Container info:'
+            cat /etc/os-release | head -3
 
-              # HTML validation
-              if [[ -f '/app/dist/index.html' ]]; then
-                echo '✅ HTML file exists'
-                grep -q 'Rafael Sathler' /app/dist/index.html && echo '✅ Content validation passed'
-              fi
+            # HTML validation (nginx serves from /usr/share/nginx/html)
+            if [[ -f '/usr/share/nginx/html/index.html' ]]; then
+              echo '✅ HTML file exists in nginx directory'
+              grep -q 'Rafael Sathler' /usr/share/nginx/html/index.html && echo '✅ Content validation passed'
 
-              # Asset validation
-              if [[ -d '/app/dist/assets' ]]; then
+              # Check if assets directory exists
+              if [[ -d '/usr/share/nginx/html/assets' ]]; then
                 echo '✅ Assets directory exists'
+                ls -la /usr/share/nginx/html/assets/images/ | head -5
+              else
+                echo '⚠️ Assets directory missing'
               fi
-            "
+            else
+              echo '❌ HTML build failed - file not found in nginx directory'
+              echo 'Files in nginx directory:'
+              ls -la /usr/share/nginx/html/
+              exit 1
+            fi
+          "
 
       - name: Update version and create release
         if: needs.version-check.outputs.should_release == 'true'
