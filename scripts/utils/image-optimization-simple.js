@@ -43,8 +43,21 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
       const filename = sizeName.startsWith('profile-') ? `${sizeName}.jpg` : `${baseFilename}-${dimensions.width}.jpg`;
       const jpegPath = path.join(outputDir, filename);
 
-      // Simple file copy - works on all architectures
+      // Simple file copy with CI environment debugging
+      if (!fs.existsSync(sourceImagePath)) {
+        throw new Error(`Source image not found: ${sourceImagePath}`);
+      }
+
+      const sourceStats = fs.statSync(sourceImagePath);
+      console.log(`🔍 Source image: ${sourceImagePath} (${sourceStats.size} bytes)`);
+
       fs.copyFileSync(sourceImagePath, jpegPath);
+
+      // Verify copy was successful
+      const destStats = fs.statSync(jpegPath);
+      if (destStats.size !== sourceStats.size) {
+        console.warn(`⚠️ Size mismatch: source=${sourceStats.size}, dest=${destStats.size}`);
+      }
 
       results.push({
         format: 'jpeg',
@@ -59,6 +72,7 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
 
     // Copy original as main profile image
     const mainPath = path.join(outputDir, `${baseFilename}.jpg`);
+    console.log(`🔍 Copying main profile image: ${sourceImagePath} -> ${mainPath}`);
     fs.copyFileSync(sourceImagePath, mainPath);
     results.push({
       format: 'jpeg',
