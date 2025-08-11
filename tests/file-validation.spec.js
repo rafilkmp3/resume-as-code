@@ -42,7 +42,7 @@ test.describe('File Validation - Critical Assets', () => {
     }
   });
 
-  test('should have valid HTML file with QR code data', async () => {
+  test('should have valid HTML file with dynamic QR code support', async () => {
     const htmlPath = path.join(process.cwd(), 'dist/index.html');
 
     // HTML file must exist
@@ -55,22 +55,20 @@ test.describe('File Validation - Critical Assets', () => {
     // Read HTML content
     const htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
-    // Must contain QR code data URL
-    expect(htmlContent).toContain('qrCodeDataURL');
-    expect(htmlContent).toContain('data:image/png;base64,');
+    // Must NOT contain embedded QR code data (we removed it for performance!)
+    expect(htmlContent).not.toContain('qrCodeDataURL');
+    expect(htmlContent).not.toContain('data:image/png;base64,iVBORw0KGgo'); // Old embedded QR code
 
-    // Extract QR code data URL
-    const qrCodeMatch = htmlContent.match(/"qrCodeDataURL":"(data:image\/png;base64,[^"]+)"/);
-    expect(qrCodeMatch, 'QR code data URL not found in HTML').toBeTruthy();
+    // Must contain dynamic QR code generation functions
+    expect(htmlContent).toContain('generateQRCodeOnDemand');
+    expect(htmlContent).toContain('loadQRCodeLibrary');
+    expect(htmlContent).toContain('qrcode@1.5.3'); // CDN reference
 
-    if (qrCodeMatch) {
-      const qrCodeDataURL = qrCodeMatch[1];
+    // Must contain QR canvas elements
+    expect(htmlContent).toContain('id="qr-code-image"');
+    expect(htmlContent).toContain('id="print-qr-code"');
 
-      // QR code data must be reasonable size (not empty)
-      expect(qrCodeDataURL.length).toBeGreaterThan(1000); // At least 1KB of base64 data
-
-      console.log(`✅ QR Code: ${(qrCodeDataURL.length / 1024).toFixed(1)}KB base64 data`);
-    }
+    console.log(`✅ HTML file: ${(stats.size / 1024).toFixed(1)}KB with dynamic QR code support`);
   });
 
   test('should have all required PDF files', async () => {
@@ -112,7 +110,7 @@ test.describe('File Validation - Critical Assets', () => {
       expect(resumeData.basics.name).toBeTruthy();
       expect(resumeData.basics.image).toBeTruthy();
       expect(resumeData.basics.url).toBeTruthy();
-      expect(resumeData.qrCodeDataURL).toBeTruthy();
+      // QR codes are now generated dynamically - no longer embedded in resume data
 
       // Validate profile image optimization data
       expect(resumeData.profileImageOptimization).toBeDefined();
