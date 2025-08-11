@@ -117,6 +117,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy source code and build (as appuser for security)
 COPY --chown=appuser:appuser . .
 USER appuser
+
+# CRITICAL DEBUG: Verify source image exists and is readable in Docker context
+RUN echo "🔍 Debugging profile image in Docker build context:" && \
+    ls -la assets/images/ && \
+    echo "📏 Source image size:" && \
+    stat assets/images/profile-source.jpeg && \
+    echo "📄 File type:" && \
+    file assets/images/profile-source.jpeg && \
+    echo "✅ Docker context verification complete"
+
 RUN npm run build
 
 # =============================================================================
