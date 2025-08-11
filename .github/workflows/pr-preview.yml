@@ -89,9 +89,9 @@ jobs:
             --load \
             .
 
-          # Extract preview build
+          # Extract preview build from nginx html directory
           mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /app/dist/* /tmp/dist/"
+          docker run --rm -v "$PWD/dist:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
 
           # Update cache atomically
           if [[ -d "/tmp/.buildx-cache-new" ]]; then

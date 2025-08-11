@@ -152,9 +152,9 @@ jobs:
             --load \
             .
 
-          # Extract build artifacts
+          # Extract build artifacts from nginx html directory
           mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" resume-production:latest sh -c "cp -r /app/dist/* /tmp/dist/"
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-production:latest sh -c "cp -r /usr/share/nginx/html/* /tmp/dist/"
 
           # Update cache atomically
           if [[ -d "/tmp/.buildx-cache-new" ]]; then
