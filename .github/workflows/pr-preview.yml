@@ -120,6 +120,10 @@ jobs:
         run: |
           echo "🚀 Deploying PR preview to separate pr-previews branch (production stays at /)"
 
+          # Store the build directory path (absolute) before switching branches
+          BUILD_DIR="$(pwd)/pr-preview-build"
+          echo "📁 Build directory: $BUILD_DIR"
+
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -231,9 +235,9 @@ jobs:
             echo "🧹 Cleaned up existing PR #${{ github.event.pull_request.number }} directory"
           fi
 
-          # Copy PR preview build to subdirectory
+          # Copy PR preview build to subdirectory using absolute path
           mkdir -p "pr-${{ github.event.pull_request.number }}"
-          cp -r ../pr-preview-build/* "pr-${{ github.event.pull_request.number }}/"
+          cp -r "$BUILD_DIR"/* "pr-${{ github.event.pull_request.number }}/"
 
           echo "📁 PR preview structure:"
           ls -la "pr-${{ github.event.pull_request.number }}"/
