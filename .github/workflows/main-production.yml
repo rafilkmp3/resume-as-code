@@ -111,7 +111,7 @@ jobs:
     timeout-minutes: 10
     needs: [validate-commits, version-check]
     environment:
-      name: production
+      name: prod
       url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
     steps:
       - name: Checkout
@@ -139,16 +139,16 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF_NAME: main
-          NODE_ENV: production
+          NODE_ENV: prod
         run: |
           echo "🏗️ Building production site with Docker"
 
           docker buildx build \
-            --target production \
+            --target prod \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA="${GITHUB_SHA}" \
             --build-arg GITHUB_REF_NAME="${GITHUB_REF_NAME}" \
-            --build-arg NODE_ENV=production \
+            --build-arg NODE_ENV=prod \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             --tag resume-production:latest \

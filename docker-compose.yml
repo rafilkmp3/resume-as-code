@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: dev
     container_name: resume-dev
     ports:
       - "3000:3000"    # Development server
@@ -35,7 +35,7 @@ services:
       - node_modules_cache:/app/node_modules
       - ./dist:/app/dist:delegated
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=dev
       - CHOKIDAR_USEPOLLING=true
       - BUILD_MODE=draft
       - HOST=0.0.0.0    # Listen on all interfaces for mobile testing
@@ -60,18 +60,18 @@ services:
       args:
         - GITHUB_SHA=${GITHUB_SHA:-local-build}
         - GITHUB_REF_NAME=${GITHUB_REF_NAME:-main}
-        - NODE_ENV=production
+        - NODE_ENV=prod
         - PREVIEW_URL=${PREVIEW_URL:-}
     container_name: resume-build
     volumes:
       - ./dist:/tmp/dist:delegated
       - build_cache:/app/.cache
     environment:
-      - NODE_ENV=production
-      - BUILD_MODE=${BUILD_MODE:-production}
+      - NODE_ENV=prod
+      - BUILD_MODE=${BUILD_MODE:-prod}
     networks:
       - resume-network
-    profiles: ["build", "production"]
+    profiles: ["build", "prod"]
     command: sh -c "npm run build && cp -r /app/dist/* /tmp/dist/ && echo '✅ Build completed and artifacts copied'"
 
   # =============================================
@@ -81,7 +81,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production
+      target: prod
       args:
         - GITHUB_SHA=${GITHUB_SHA:-local-serve}
         - GITHUB_REF_NAME=${GITHUB_REF_NAME:-main}
@@ -90,7 +90,7 @@ services:
       - "3001:80"
     networks:
       - resume-network
-    profiles: ["serve", "production"]
+    profiles: ["serve", "prod"]
     depends_on:
       - build
     healthcheck:

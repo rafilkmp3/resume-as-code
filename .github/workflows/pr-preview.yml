@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 8
     if: github.event.action != 'closed'
     environment:
-      name: pr-preview-${{ github.event.pull_request.number }}
+      name: stage-pr-${{ github.event.pull_request.number }}
       url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
     steps:
       - name: Checkout PR
@@ -73,17 +73,20 @@ jobs:
           PREVIEW_URL: ${{ steps.preview-url.outputs.url }}
           GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_REF_NAME: pr-${{ github.event.pull_request.number }}
+          NODE_ENV: stage
+          BUILD_MODE: stage
         run: |
           echo "🏗️ Building PR preview with QR code integration"
           echo "📱 Preview URL: $PREVIEW_URL"
 
           docker buildx build \
-            --target production \
+            --target prod \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF_NAME="$GITHUB_REF_NAME" \
             --build-arg PREVIEW_URL="$PREVIEW_URL" \
-            --build-arg NODE_ENV=production \
+            --build-arg NODE_ENV=stage \
+            --build-arg BUILD_MODE=stage \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             --tag pr-preview:${{ github.event.pull_request.number }} \
@@ -151,6 +154,16 @@ jobs:
       - name: Setup Pages for PR
         uses: actions/configure-pages@v5
 
+      - name: Add PR preview banner
+        run: |
+          echo "🏷️ Adding PR preview identification banner"
+
+          # Add PR preview banner to the HTML
+          sed -i 's|<body|<body style="border-top: 5px solid #ff6b35;">|g' dist/pr-${{ github.event.pull_request.number }}/index.html
+
+          # Add PR preview notice at the top of the page
+          sed -i 's|<body[^>]*>|&\n<div style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; text-align: center; padding: 10px 20px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>🚀 PR PREVIEW #${{ github.event.pull_request.number }}</strong> - This is a preview deployment for testing. <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}" style="color: white; text-decoration: underline;">View PR →</a></div>|g' dist/pr-${{ github.event.pull_request.number }}/index.html
+
       - name: Upload PR preview to Pages
         uses: actions/upload-pages-artifact@v3
         with:
@@ -170,15 +183,16 @@ jobs:
             const commentBody = `
             ## 📱 PR Preview Ready!
 
-            Your preview is deployed with **working QR codes** for mobile testing:
+            Your preview is deployed with **working QR codes** and **PR identification banner**:
 
             ### 🌐 **[View Preview →](${previewUrl})**
 
-            **🎯 What's New:**
+            **🚀 Preview Features:**
+            - ✅ **PR Banner**: Clear identification this is a preview deployment
             - ✅ **QR Code Integration**: Scan to test on mobile devices
             - ✅ **Mobile Testing**: Perfect for cross-device validation
             - ✅ **Live Changes**: Reflects all changes in this PR
-            - ✅ **Shareable**: Send URL to stakeholders for review
+            - ✅ **Git LFS Assets**: Profile images and all assets included
 
             **📊 Preview Details:**
             - **URL**: \`${previewUrl}\`
@@ -187,9 +201,15 @@ jobs:
 
             **📱 Mobile Testing Workflow:**
             1. Open the preview link above
-            2. Click the QR code button in the resume
-            3. Scan with your phone for instant mobile testing
-            4. QR codes automatically point to this preview! 🎯
+            2. Look for the orange **"🚀 PR PREVIEW #${prNumber}"** banner at the top
+            3. Click the QR code button in the resume
+            4. Scan with your phone for instant mobile testing
+            5. QR codes automatically point to this preview! 🎯
+
+            **🔍 How to Verify This is the PR Preview:**
+            - Orange banner at the top: "🚀 PR PREVIEW #${prNumber}"
+            - URL shows the PR subdirectory: \`/pr-${prNumber}/\`
+            - Banner links back to this PR for reference
 
             > 🔄 Updates automatically when you push new commits
             `;

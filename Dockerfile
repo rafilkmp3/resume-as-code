@@ -1,8 +1,8 @@
 # =============================================================================
 # 🐳 STATE-OF-THE-ART MULTI-STAGE DOCKERFILE - Resume as Code
 # =============================================================================
-# Streamlined architecture focused on Chromium-only testing for speed
-# Optimized for GitHub Actions cache with simple, reliable approach
+# 5 stages: base → builder → prod → test → dev
+# Chromium-only for speed, optimized GitHub Actions cache
 # =============================================================================
 
 # =============================================================================
@@ -107,7 +107,7 @@ RUN echo "🏗️ Building application..." \
 # =============================================================================
 # 🌐 STAGE 3: PRODUCTION - Optimized runtime with nginx
 # =============================================================================
-FROM nginx:alpine AS production
+FROM nginx:alpine AS prod
 
 # Build arguments for metadata
 ARG GITHUB_SHA=unknown
@@ -256,10 +256,10 @@ CMD ["npx", "playwright", "test", "tests/essential/smoke.spec.js", "--project=ch
 # =============================================================================
 # 🚀 STAGE 5: DEVELOPMENT - Local development environment
 # =============================================================================
-FROM base AS development
+FROM base AS dev
 
 # Development environment
-ENV NODE_ENV=development \
+ENV NODE_ENV=dev \
     CHOKIDAR_USEPOLLING=true
 
 USER root

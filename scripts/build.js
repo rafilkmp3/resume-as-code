@@ -89,13 +89,30 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-  const appVersion = packageJson.version;
   const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main' || process.env.GITHUB_ACTIONS;
-  const environment = isProduction && buildBranch === 'main' ? 'production' : 'preview';
   const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
   const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
   const buildTimestamp = new Date().toISOString();
+
+  // Determine app version and environment based on build context
+  let appVersion = packageJson.version;
+  let environment = 'development';
+
+  // PR Preview/Staging: Show PR number as version and stage environment
+  if (process.env.NODE_ENV === 'stage' || process.env.BUILD_MODE === 'stage' || process.env.NODE_ENV === 'preview' || process.env.BUILD_MODE === 'preview') {
+    environment = 'stage';
+    if (buildBranch.startsWith('pr-')) {
+      appVersion = buildBranch; // Show "pr-19" as version
+    }
+  }
+  // Production: Main branch with prod environment
+  else if (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'production' || buildBranch === 'main' || process.env.GITHUB_ACTIONS) {
+    environment = buildBranch === 'main' ? 'prod' : 'stage';
+  }
+  // Development: Local dev environment
+  else {
+    environment = 'dev';
+  }
 
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
@@ -140,7 +157,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   }
 
   // Inject livereload script for development mode
-  const isDevelopment = process.env.NODE_ENV === 'development' || isDraft;
+  const isDevelopment = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development' || isDraft;
   if (isDevelopment) {
     const livereloadScript = `
     <script>
