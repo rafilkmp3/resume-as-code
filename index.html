@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PR Previews - Resume as Code</title>
+    <meta name="description" content="PR Preview Area - Resume as Code">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255,255,255,0.1);
+        padding: 2rem;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      }
+      h1 { color: white; margin-bottom: 0.5rem; font-size: 2.5rem; }
+      .subtitle { color: rgba(255,255,255,0.9); margin-bottom: 2rem; font-size: 1.2rem; }
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 2px solid rgba(255,255,255,0.3);
+        transition: all 0.3s ease;
+      }
+      .btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+      }
+      .notice {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+      .pr-list {
+        margin-top: 2rem;
+        text-align: left;
+        background: rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+      }
+      .pr-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .pr-item:last-child { border-bottom: none; }
+      .pr-item a { color: #87CEEB; text-decoration: none; }
+      .pr-item a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PR Previews</h1>
+        <div class="subtitle">Pull Request Preview Environment</div>
+
+        <div class="notice">
+            <strong>📋 This is the PR preview staging area</strong><br>
+            Production site is always at the <strong>root URL</strong> and unaffected by PRs.
+        </div>
+
+        <a href="../" class="btn">← Back to Production Site</a>
+
+        <div class="pr-list">
+            <h3>🔬 Active PR Previews</h3>
+            <p><em>Active PR previews will be automatically listed here...</em></p>
+        </div>
+    </div>
+</body>
+</html>
