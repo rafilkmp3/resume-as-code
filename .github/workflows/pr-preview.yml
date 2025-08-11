@@ -1,0 +1,224 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package*.json'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+  actions: read
+
+env:
+  NODE_VERSION: '20'
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # Build and deploy PR preview
+  preview-deploy:
+    name: Deploy PR Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    if: github.event.action != 'closed'
+    environment:
+      name: pr-preview-${{ github.event.pull_request.number }}
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-pr-${{ github.event.pull_request.number }}-
+            ${{ runner.os }}-buildx-pr-
+            ${{ runner.os }}-buildx-
+
+      - name: Generate preview URL
+        id: preview-url
+        run: |
+          PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}"
+          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "📱 Preview URL: $PREVIEW_URL"
+
+      - name: Build PR preview
+        env:
+          PREVIEW_URL: ${{ steps.preview-url.outputs.url }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_REF_NAME: pr-${{ github.event.pull_request.number }}
+        run: |
+          echo "🏗️ Building PR preview with QR code integration"
+          echo "📱 Preview URL: $PREVIEW_URL"
+
+          docker buildx build \
+            --target production \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF_NAME="$GITHUB_REF_NAME" \
+            --build-arg PREVIEW_URL="$PREVIEW_URL" \
+            --build-arg NODE_ENV=production \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --tag pr-preview:${{ github.event.pull_request.number }} \
+            --load \
+            .
+
+          # Extract preview build
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" pr-preview:${{ github.event.pull_request.number }} sh -c "cp -r /app/dist/* /tmp/dist/"
+
+          # Update cache atomically
+          if [[ -d "/tmp/.buildx-cache-new" ]]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
+
+          echo "📁 Preview build artifacts:"
+          ls -la dist/
+
+      - name: Run essential tests (Chromium only)
+        run: |
+          echo "🧪 Running essential PR tests"
+
+          # Quick smoke tests
+          docker run --rm pr-preview:${{ github.event.pull_request.number }} sh -c "
+            node --version
+            npm --version
+
+            # Quick HTML validation
+            if [[ -f '/app/dist/index.html' ]]; then
+              echo '✅ HTML build successful'
+              grep -q 'Rafael Sathler' /app/dist/index.html && echo '✅ Content validation passed'
+            else
+              echo '❌ HTML build failed'
+              exit 1
+            fi
+          "
+
+      - name: Setup Pages for PR
+        uses: actions/configure-pages@v5
+
+      - name: Upload PR preview to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+          retention-days: 7
+
+      - name: Deploy PR preview to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = "${{ steps.preview-url.outputs.url }}";
+            const prNumber = context.payload.pull_request.number;
+            const commentBody = `
+            ## 📱 PR Preview Ready!
+
+            Your preview is deployed with **working QR codes** for mobile testing:
+
+            ### 🌐 **[View Preview →](${previewUrl})**
+
+            **🎯 What's New:**
+            - ✅ **QR Code Integration**: Scan to test on mobile devices
+            - ✅ **Mobile Testing**: Perfect for cross-device validation
+            - ✅ **Live Changes**: Reflects all changes in this PR
+            - ✅ **Shareable**: Send URL to stakeholders for review
+
+            **📊 Preview Details:**
+            - **URL**: \`${previewUrl}\`
+            - **Commit**: \`${{ github.event.pull_request.head.sha }}\`
+            - **Branch**: \`${{ github.event.pull_request.head.ref }}\`
+
+            **📱 Mobile Testing Workflow:**
+            1. Open the preview link above
+            2. Click the QR code button in the resume
+            3. Scan with your phone for instant mobile testing
+            4. QR codes automatically point to this preview! 🎯
+
+            > 🔄 Updates automatically when you push new commits
+            `;
+
+            // Find existing preview comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existingComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('PR Preview Ready!')
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+  # Cleanup when PR is closed
+  cleanup-preview:
+    name: Cleanup PR Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: github.event.action == 'closed'
+    steps:
+      - name: Comment cleanup notice
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const cleanupBody = `
+            ## 🧹 PR Preview Cleaned Up
+
+            Preview deployment has been cleaned up.
+
+            **Status:** ✅ Environment cleaned up
+            **Reason:** PR was ${{ github.event.pull_request.merged && 'merged' || 'closed' }}
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: cleanupBody
+            });

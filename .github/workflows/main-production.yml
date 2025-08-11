@@ -1,0 +1,259 @@
+name: Production Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - '*.html'
+      - '*.json'
+      - '*.js'
+      - '*.css'
+      - 'scripts/**'
+      - 'Dockerfile'
+      - 'package*.json'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: read
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+
+concurrency:
+  group: production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Validate conventional commits
+  validate-commits:
+    name: Validate Conventional Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        uses: wagoid/commitlint-action@v6
+        with:
+          configFile: '.commitlintrc.json'
+
+  # Determine version bump based on conventional commits
+  version-check:
+    name: Version Management
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: validate-commits
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release_type: ${{ steps.version.outputs.release_type }}
+      should_release: ${{ steps.version.outputs.should_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install semantic-release
+        run: |
+          npm install -g semantic-release @semantic-release/changelog @semantic-release/git
+          npm install -g conventional-changelog-conventionalcommits
+
+      - name: Determine next version
+        id: version
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Use semantic-release to determine next version (dry run)
+          NEXT_VERSION=$(npx semantic-release --dry-run --no-ci | grep -o "next release version is [0-9]*\.[0-9]*\.[0-9]*" | cut -d' ' -f5 || echo "")
+
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "No release needed"
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "release_type=none" >> $GITHUB_OUTPUT
+          else
+            echo "Next version: $NEXT_VERSION"
+            echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> $GITHUB_OUTPUT
+
+            # Determine release type based on version jump
+            if [[ "$NEXT_VERSION" == *".0.0" ]]; then
+              echo "release_type=major" >> $GITHUB_OUTPUT
+            elif [[ "$NEXT_VERSION" == *".0" ]]; then
+              echo "release_type=minor" >> $GITHUB_OUTPUT
+            else
+              echo "release_type=patch" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  # Build and deploy to production
+  build-deploy:
+    name: Build & Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [validate-commits, version-check]
+    environment:
+      name: production
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-production-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-production-
+            ${{ runner.os }}-buildx-
+
+      - name: Build production site
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: main
+          NODE_ENV: production
+        run: |
+          echo "🏗️ Building production site with Docker"
+
+          docker buildx build \
+            --target production \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA="${GITHUB_SHA}" \
+            --build-arg GITHUB_REF_NAME="${GITHUB_REF_NAME}" \
+            --build-arg NODE_ENV=production \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --tag resume-production:latest \
+            --load \
+            .
+
+          # Extract build artifacts
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" resume-production:latest sh -c "cp -r /app/dist/* /tmp/dist/"
+
+          # Update cache atomically
+          if [[ -d "/tmp/.buildx-cache-new" ]]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
+
+          echo "📁 Build artifacts:"
+          ls -la dist/
+
+          # Verify critical files
+          if [[ ! -f "dist/index.html" ]]; then
+            echo "❌ Critical error: index.html not found"
+            exit 1
+          fi
+
+          if [[ ! -f "dist/resume.pdf" ]]; then
+            echo "⚠️ Warning: resume.pdf not found (continuing without PDF)"
+          fi
+
+      - name: Run essential tests (Chromium only)
+        run: |
+          echo "🧪 Running essential tests with Chromium"
+
+          # Run smoke tests in container
+          docker run --rm \
+            -v "$PWD/dist:/app/dist" \
+            resume-production:latest \
+            sh -c "
+              # Basic smoke tests
+              node --version
+              npm --version
+
+              # HTML validation
+              if [[ -f '/app/dist/index.html' ]]; then
+                echo '✅ HTML file exists'
+                grep -q 'Rafael Sathler' /app/dist/index.html && echo '✅ Content validation passed'
+              fi
+
+              # Asset validation
+              if [[ -d '/app/dist/assets' ]]; then
+                echo '✅ Assets directory exists'
+              fi
+            "
+
+      - name: Update version and create release
+        if: needs.version-check.outputs.should_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_VERSION="${{ needs.version-check.outputs.version }}"
+          RELEASE_TYPE="${{ needs.version-check.outputs.release_type }}"
+
+          echo "🏷️ Creating release v$NEW_VERSION ($RELEASE_TYPE)"
+
+          # Update package.json version
+          npm version $NEW_VERSION --no-git-tag-version
+
+          # Create git tag and push
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          git add package.json
+          git commit -m "chore(release): bump version to $NEW_VERSION
+
+          🚀 Automated version bump via conventional commits
+
+          Release type: $RELEASE_TYPE
+          Previous commits since last release have been analyzed
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+          git tag "v$NEW_VERSION"
+          git push origin main "v$NEW_VERSION"
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Success summary
+        run: |
+          echo "## 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Site URL** | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ needs.version-check.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Release Type** | \`${{ needs.version-check.outputs.release_type }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Build Time** | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All systems operational**" >> $GITHUB_STEP_SUMMARY

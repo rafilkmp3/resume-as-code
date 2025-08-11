@@ -66,6 +66,13 @@ help:
 	@echo "  $(CYAN)npm run ux:analyze$(NC) - User experience analysis"
 	@echo "  $(CYAN)npm run accessibility:audit$(NC) - Accessibility compliance check"
 	@echo ""
+	@echo "$(GREEN)🎯 Local CI Testing (Act):$(NC)"
+	@echo "  $(PURPLE)make act-test$(NC)       - Comprehensive Act CI/CD testing suite"
+	@echo "  $(PURPLE)make act-test-quick$(NC) - Quick tests for critical jobs only"
+	@echo "  $(PURPLE)make act-test-emergency$(NC) - Emergency scenario testing"
+	@echo "  $(CYAN)make act-list$(NC)        - List all available Act jobs"
+	@echo "  $(CYAN)make act-test-workflow$(NC) - Test specific workflow (WORKFLOW=file.yml JOB=job-name)"
+	@echo ""
 	@echo "$(GREEN)📸 Visual Testing:$(NC)"
 	@echo "  $(CYAN)make visual-test$(NC)    - Enhanced visual testing (sections, load more, header)"
 	@echo "  $(CYAN)make visual-test-basic$(NC) - Basic device screenshots only"
@@ -84,14 +91,45 @@ docker-check:
 	@docker info >/dev/null 2>&1 || { echo "$(RED)❌ Docker daemon is not running. Please start Docker first.$(NC)"; exit 1; }
 	@echo "$(GREEN)✅ Docker is running$(NC)"
 
-# Build resume (HTML + PDF + assets) using docker-compose
+# Act-based CI/CD testing (LOCAL GITHUB ACTIONS)
+act-test: docker-check
+	@echo "$(PURPLE)🧪 Running comprehensive Act CI/CD testing...$(NC)"
+	@scripts/act-test.sh
+
+# Quick act tests for critical jobs only
+act-test-quick: docker-check
+	@echo "$(PURPLE)⚡ Running quick Act tests for critical jobs...$(NC)"
+	@act workflow_dispatch -W .github/workflows/docker-images.yml -j detect-changes --input force_rebuild=false
+	@act workflow_dispatch -W .github/workflows/production.yml -j version-check
+
+# Test specific workflow with act
+act-test-workflow: docker-check
+	@echo "$(PURPLE)🎯 Testing specific workflow with Act...$(NC)"
+	@echo "Usage: make act-test-workflow WORKFLOW=production.yml JOB=version-check"
+	@test -n "$(WORKFLOW)" || { echo "$(RED)❌ WORKFLOW parameter required$(NC)"; exit 1; }
+	@test -n "$(JOB)" || { echo "$(RED)❌ JOB parameter required$(NC)"; exit 1; }
+	@act workflow_dispatch -W .github/workflows/$(WORKFLOW) -j $(JOB)
+
+# List all available act jobs
+act-list:
+	@echo "$(PURPLE)📋 Available Act jobs:$(NC)"
+	@act -l
+
+# Act emergency testing (aggressive scenarios)
+act-test-emergency: docker-check
+	@echo "$(RED)🚨 Running emergency scenario testing with Act...$(NC)"
+	@act workflow_dispatch -W .github/workflows/production.yml -j version-check --input deployment_mode=emergency --input emergency_reason="Act emergency testing"
+
+# Build resume (HTML + PDF + assets) using streamlined docker-compose
 build: docker-check
-	@echo "$(GREEN)🏗️ Building resume...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile build up --build build
+	@echo "$(GREEN)🏗️ Building resume with streamlined architecture...$(NC)"
+	@docker-compose --profile build up --build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 	@echo "$(CYAN)📁 Output files:$(NC)"
 	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
-	@echo "  - PDF:  $(GREEN)./dist/resume.pdf$(NC)"
+	@echo "  - Screen PDF: $(GREEN)./dist/resume.pdf$(NC)"
+	@echo "  - Print PDF: $(GREEN)./dist/resume-print.pdf$(NC)"
+	@echo "  - ATS PDF: $(GREEN)./dist/resume-ats.pdf$(NC)"
 	@echo "  - Assets: $(GREEN)./dist/assets/$(NC)"
 
 # Build resume inside Docker container (no docker-check needed)
@@ -113,12 +151,11 @@ get-lan-ip:
 		echo "$(RED)❌ Could not detect LAN IP$(NC)"; \
 	fi
 
-# Development server - Port 3000 (can run in background with -d)
+# Development server - Port 3000 (streamlined with hot reload)
 dev: docker-check get-lan-ip
-	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
-	@echo "$(CYAN)🔍 Cleaning up any existing containers on port 3000...$(NC)"
-	@-docker-compose down dev > /dev/null 2>&1 || true
-	@-pkill -f "serve.*3000" > /dev/null 2>&1 || true
+	@echo "$(PURPLE)🚀 Starting streamlined development server...$(NC)"
+	@echo "$(CYAN)🔍 Cleaning up any existing containers...$(NC)"
+	@-docker-compose down > /dev/null 2>&1 || true
 	@sleep 1
 	@echo "$(CYAN)⚡ Draft Mode: Lightning-fast builds (HTML only)$(NC)"
 	@echo "$(CYAN)🔥 Hot Reload: Browser auto-refresh on changes$(NC)"
@@ -127,22 +164,21 @@ dev: docker-check get-lan-ip
 	if [ -n "$$LAN_IP" ]; then \
 		echo "$(GREEN)📱 Mobile: http://$$LAN_IP:3000$(NC)"; \
 	fi
-	@echo "$(YELLOW)📄 Note: PDF generation skipped in dev mode$(NC)"
-	@echo "$(YELLOW)🛑 Press Ctrl+C to stop (or use 'make dev-stop' for background)$(NC)"
-	@echo "$(CYAN)💡 Tip: Use 'make dev-start' to run in background$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile dev up dev
+	@echo "$(YELLOW)📄 Note: PDF generation available with 'make build'$(NC)"
+	@echo "$(YELLOW)🛑 Press Ctrl+C to stop (or use 'make dev-start' for background)$(NC)"
+	@docker-compose --profile dev up
 
 # Start development server in background (detached)
 dev-start: docker-check get-lan-ip
-	@echo "$(PURPLE)🚀 Starting development server in background...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile dev up -d dev
+	@echo "$(PURPLE)🚀 Starting streamlined dev server in background...$(NC)"
+	@docker-compose --profile dev up -d
 	@sleep 3
 	@echo "$(GREEN)✅ Development server running in background$(NC)"
 	@echo "$(CYAN)🖥️  Desktop: http://localhost:3000$(NC)"
 	@LAN_IP=$$(ifconfig | grep -E "inet.*broadcast" | grep -v 127.0.0.1 | awk '{print $$2}' | head -n1); \
 	if [ -n "$$LAN_IP" ]; then \
 		echo "$(GREEN)📱 Mobile: http://$$LAN_IP:3000$(NC)"; \
-		echo "$(YELLOW)📲 Scan QR code or type the mobile URL on your phone$(NC)"; \
+		echo "$(YELLOW)📲 QR codes in resume automatically point to this URL$(NC)"; \
 	fi
 	@echo "$(CYAN)🛑 Use 'make dev-stop' to stop$(NC)"
 
@@ -154,11 +190,13 @@ dev-stop:
 
 # Production server (serve built files) - Port 3001
 serve: docker-check build
-	@echo "$(PURPLE)🌐 Starting production server...$(NC)"
+	@echo "$(PURPLE)🌐 Starting production server with nginx...$(NC)"
 	@echo "$(CYAN)📱 Resume: http://localhost:3001$(NC)"
-	@echo "$(CYAN)📄 PDF: http://localhost:3001/resume.pdf$(NC)"
+	@echo "$(CYAN)📄 Screen PDF: http://localhost:3001/resume.pdf$(NC)"
+	@echo "$(CYAN)🖨️ Print PDF: http://localhost:3001/resume-print.pdf$(NC)"
+	@echo "$(CYAN)🤖 ATS PDF: http://localhost:3001/resume-ats.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile serve up serve
+	@docker-compose --profile serve up
 
 # Run all tests
 test: docker-check test-unit test-e2e test-visual test-accessibility test-performance
@@ -184,11 +222,11 @@ test-all: docker-check
 	@COMPOSE_BAKE=true docker-compose --profile test-all up test-all
 	@echo "$(GREEN)✅ All comprehensive tests completed!$(NC)"
 
-# Run fast smoke tests (recommended for development)
+# Run fast smoke tests (recommended for development) - Streamlined
 test-fast: docker-check
-	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
+	@echo "$(BLUE)⚡ Running fast Chromium-only tests...$(NC)"
 	@mkdir -p test-results coverage && chmod 755 test-results coverage
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-fast-internal
+	@docker-compose --profile test up
 
 # Internal test runner (runs inside Docker container)
 test-internal: test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal

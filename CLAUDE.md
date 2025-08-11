@@ -280,16 +280,30 @@ make serve                  # http://localhost:3001
 - **Error Handling**: Graceful degradation if PDF generation fails
 - **Security**: Puppeteer runs with sandbox disabled for Docker compatibility
 
-### 🚀 Optimized Three-Tier CI/CD Architecture
+### 🚀 Refactored Multi-Architecture CI/CD Architecture
 
-#### Production Pipeline (`ci-prod.yml`) - **ROCK SOLID**
+#### Production Pipeline V2 (`production-v2.yml`) - **NEXT GENERATION**
 
-- **Triggers**: Main branch changes to `src/`, `assets/`, `*.html`, `*.json`, `*.js`, `*.css`, `scripts/`
+- **Multi-Architecture Support**: AMD64 + ARM64 builds for cross-platform compatibility
+- **Reusable Docker Setup**: Eliminates duplication with `_docker-setup.yml` workflow
+- **Comprehensive Caching**: Registry + local caching with branch-aware scoping
+- **Emergency Mode**: Fast deployment bypassing optimizations when needed
 - **Philosophy**: **Deployment NEVER blocked by tests** - guaranteed success
-- **Build**: 2-3 minutes using Docker with PDF generation (60s timeout)
-- **Alpha Tests**: Unit + Security tests run informational-only with `continue-on-error: true`
+- **Build**: 2-3 minutes using multi-stage Docker with optimized caching
+- **Alpha Tests**: Quality gates run informational-only with `continue-on-error: true`
 - **Deploy**: Automatic to GitHub Pages (production)
 - **Status**: ✅ **Every commit to main deploys automatically**
+
+#### PR Preview System (`pr-preview.yml`) - **MOBILE TESTING REVOLUTION**
+
+- **Automatic PR Previews**: Every PR gets a live preview deployment
+- **QR Code Integration**: QR codes automatically point to PR preview URL
+- **Mobile Testing Workflow**: Scan QR codes to test PR changes on mobile
+- **Preview URL**: `https://username.github.io/repo/pr-123`
+- **Cleanup**: Automatic cleanup when PR is closed/merged
+- **Status**: ✅ **Mobile testing made effortless**
+
+#### Production Pipeline Legacy (`production.yml`) - **STABLE FALLBACK**
 
 #### Staging Pipeline (`ci-staging.yml`) - **EXPERIMENTAL**
 
@@ -361,6 +375,14 @@ gh run view <run-id>                    # View specific run details
 gh run watch                            # Monitor current workflows
 gh workflow list                        # List all available workflows
 
+# Local GitHub Actions testing with nektos/act
+act --version                           # Verify act installation
+act -l                                  # List available workflows/jobs
+act -n                                  # Dry run (show what would run)
+act pull_request                        # Test PR preview workflow locally
+act push                                # Test production workflow locally
+act workflow_dispatch                   # Test manual dispatch workflows
+
 # Docker validation (ARM/AMD64 compatibility)
 make docker-check                       # Verify Docker daemon
 make build-images                       # Build multi-arch test images
@@ -382,3 +404,74 @@ git status                              # Check repository state
 - **Directory Structure Preservation**: `.gitkeep` files maintain important folder structure
 - **Optimized Docker Context**: Comprehensive `.dockerignore` reduces build context size
 - **Security by Default**: Excludes secrets, credentials, and sensitive files from Docker builds
+
+### 🔧 Multi-Architecture Docker Setup
+
+The system now supports building for both AMD64 and ARM64 architectures:
+
+#### Reusable Docker Workflow (`_docker-setup.yml`)
+
+- **Purpose**: Eliminates duplication across workflows
+- **Platforms**: Configurable multi-architecture support (default: `linux/amd64,linux/arm64`)
+- **Caching**: Registry + local caching with scope isolation
+- **Usage**: Called by production, PR preview, and docker-images workflows
+- **Benefits**: Consistent setup, reduced maintenance, better caching
+
+#### Multi-Architecture Build Strategy
+
+```bash
+# Normal builds: AMD64 + ARM64
+--platform linux/amd64,linux/arm64
+
+# Emergency builds: AMD64 only (faster)
+--platform linux/amd64
+
+# Local development: Native architecture
+--platform $BUILDPLATFORM
+```
+
+#### Docker Images Pipeline Enhancements
+
+- **Enhanced Testing**: 3-phase validation (Environment → Embedded Tests → Direct Browser)
+- **Multi-Architecture**: AMD64 + ARM64 browser images published to GHCR
+- **Cache Warming**: Pre-warm shared layers (golden-base, test-base) for faster builds
+- **Browser Support**: Chromium, Firefox, WebKit with embedded hello-world tests
+
+### ⚡ Optimized Developer Experience
+
+#### Pre-Commit Hooks - PERFORMANCE OPTIMIZED
+
+The pre-commit configuration has been streamlined for developer experience:
+
+**✅ KEPT (Fast, Essential < 2 seconds total):**
+- **Conventional commits**: All semantic types (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert)
+- **File integrity checks**: JSON, YAML, trailing whitespace, large files, merge conflicts
+- **Security scanning**: detect-secrets for credential leak prevention
+
+**❌ REMOVED (Slow, Moved to CI/CD):**
+- **Docker linting** (hadolint 3-5s) → Comprehensive validation in CI/CD pipeline
+- **GitHub Actions validation** (actionlint 2-4s) → Syntax errors caught by GitHub
+- **YAML formatting** (yamllint 1-2s) → Basic validation kept, formatting in CI
+- **npm audit** (5-15s) → Comprehensive security scanning in CI/CD
+- **Resume data validation** (2-3s) → JSON Schema validation in CI/CD
+
+**🎯 Result**: Pre-commit hooks now run in under 2 seconds total
+
+#### PR Preview Mobile Testing Workflow
+
+1. **Create PR**: Automatic preview deployment triggered
+2. **Get Preview URL**: `https://username.github.io/repo/pr-123`
+3. **QR Code Integration**: QR codes automatically point to PR preview environment
+4. **Mobile Testing**: Scan QR code to test changes on mobile devices
+5. **Iterate**: Push changes, preview updates automatically with updated QR codes
+6. **Cleanup**: Environment cleaned up when PR closed/merged
+
+#### PREVIEW_URL Build System Integration
+
+The build system now supports dynamic URL injection for PR previews:
+
+- **Environment Variable**: `PREVIEW_URL` overrides default resume URL
+- **QR Code Integration**: QR codes automatically use preview URL when set
+- **Template Processing**: Dynamic URL replacement in HTML template
+- **Docker Support**: `PREVIEW_URL` build argument in Dockerfile
+- **Usage**: Enables seamless mobile testing workflow for PR reviews

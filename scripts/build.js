@@ -118,6 +118,27 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
     `$1${appVersion}$2`);
 
+  // Handle PREVIEW_URL for PR preview deployments
+  const previewUrl = process.env.PREVIEW_URL;
+  if (previewUrl) {
+    console.log(`🔗 Building for PR preview: ${previewUrl}`);
+    // Replace QR code URL with preview URL for PR deployments
+    html = html.replace(/const resumeURL = '[^']*' \|\| window\.location\.href;/,
+      `const resumeURL = '${previewUrl}' || window.location.href;`);
+
+    // Also replace the displayed URL in the QR modal
+    html = html.replace(/<div class="qr-code-url">{{basics\.url}}<\/div>/,
+      `<div class="qr-code-url">${previewUrl}</div>`);
+
+    // Update copy functionality to use preview URL
+    html = html.replace(/const url = '{{basics\.url}}';/g,
+      `const url = '${previewUrl}';`);
+    html = html.replace(/textArea\.value = '{{basics\.url}}';/,
+      `textArea.value = '${previewUrl}';`);
+
+    console.log(`✅ QR codes will point to preview URL: ${previewUrl}`);
+  }
+
   // Inject livereload script for development mode
   const isDevelopment = process.env.NODE_ENV === 'development' || isDraft;
   if (isDevelopment) {

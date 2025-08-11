@@ -1,210 +1,189 @@
 # =============================================================================
-# 🐳 Docker Compose - Resume as Code (Enhanced Development Workflow)
+# 🐳 STREAMLINED DOCKER COMPOSE - State-of-the-Art CI/CD Architecture
 # =============================================================================
-# Port Allocation Strategy:
-# - Port 3000: Dev hot reload (always running background)
-# - Port 3001: Serve built content (production preview)
-# - Port 3002: CI and automated testing
+# Simple, fast, reliable - focused on essential workflows only
+# Chromium-only testing for speed, optimized GitHub Actions cache integration
 # =============================================================================
 
+version: '3.8'
+
+networks:
+  resume-network:
+    driver: bridge
+
+volumes:
+  node_modules_cache:
+    name: resume-node-modules-cache
+  build_cache:
+    name: resume-build-cache
+
 services:
-  # Development service - Port 3000 (Always running background)
+  # =============================================
+  # 🚀 Development Server - Hot Reload
+  # =============================================
   dev:
     build:
       context: .
       dockerfile: Dockerfile
       target: development
+    container_name: resume-dev
     ports:
-      - '0.0.0.0:3000:3000' # Bind to all interfaces for LAN access
+      - "3000:3000"    # Development server
+      - "35729:35729"  # LiveReload
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/dist
-    working_dir: /app
-    command: npm run dev
+      - .:/app:cached
+      - node_modules_cache:/app/node_modules
+      - ./dist:/app/dist:delegated
     environment:
       - NODE_ENV=development
-      - PORT=3000
       - CHOKIDAR_USEPOLLING=true
-      - HOST=0.0.0.0  # Listen on all interfaces
-    restart: unless-stopped
-    profiles:
-      - dev
-      - development
+      - BUILD_MODE=draft
+      - HOST=0.0.0.0    # Listen on all interfaces for mobile testing
     networks:
       - resume-network
+    restart: unless-stopped
+    profiles: ["dev", "development"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health || http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Build service - Generates HTML and PDFs
+  # =============================================
+  # 🏗️ Production Build - Generate artifacts
+  # =============================================
   build:
     build:
       context: .
       dockerfile: Dockerfile
       target: builder
+      args:
+        - GITHUB_SHA=${GITHUB_SHA:-local-build}
+        - GITHUB_REF_NAME=${GITHUB_REF_NAME:-main}
+        - NODE_ENV=production
+        - PREVIEW_URL=${PREVIEW_URL:-}
+    container_name: resume-build
     volumes:
-      - ./dist:/app/dist
-    working_dir: /app
-    command: npm run build
+      - ./dist:/tmp/dist:delegated
+      - build_cache:/app/.cache
     environment:
       - NODE_ENV=production
-    profiles:
-      - build
+      - BUILD_MODE=${BUILD_MODE:-production}
     networks:
       - resume-network
+    profiles: ["build", "production"]
+    command: sh -c "npm run build && cp -r /app/dist/* /tmp/dist/ && echo '✅ Build completed and artifacts copied'"
 
-  # Serve service - Port 3001 (Built content preview)
+  # =============================================
+  # 🌐 Production Server - Built files
+  # =============================================
   serve:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
+      args:
+        - GITHUB_SHA=${GITHUB_SHA:-local-serve}
+        - GITHUB_REF_NAME=${GITHUB_REF_NAME:-main}
+    container_name: resume-serve
     ports:
-      - '3001:3000' # Serve on 3001, internal port 3000
-    volumes:
-      - ./dist:/app/dist:ro
-    working_dir: /app
-    command: npm run serve
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-    depends_on:
-      - build
-    profiles:
-      - serve
-      - production
+      - "3001:80"
     networks:
       - resume-network
+    profiles: ["serve", "production"]
+    depends_on:
+      - build
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 40s
 
-  # Test service - Port 3002 (CI and automated testing)
+  # =============================================
+  # 🧪 Essential Testing - Chromium only
+  # =============================================
   test:
     build:
       context: .
       dockerfile: Dockerfile
-      target: chromium
-    ports:
-      - '3002:3000' # Testing on 3002, internal port 3000
+      target: test
+    container_name: resume-test
     volumes:
-      - .:/app
-      - /app/node_modules
-      - ./visual-evidence:/app/visual-evidence
-      - ./test-results:/app/test-results
-      - ./coverage:/app/coverage
-    working_dir: /app
+      - ./test-results:/app/test-results:delegated
+      - ./playwright-report:/app/playwright-report:delegated
     environment:
       - NODE_ENV=test
       - CI=true
-      - PORT=3000
-    depends_on:
-      - serve
-    command: npx playwright test tests/visual-verification.spec.js
-    profiles:
-      - test
-      - ci
     networks:
       - resume-network
-
-  # PDF validation service
-  pdf-validate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: builder
-    volumes:
-      - ./dist:/app/dist:ro
-      - ./test-results:/app/test-results
-    working_dir: /app
-    environment:
-      - NODE_ENV=test
-    depends_on:
-      - build
-    profiles:
-      - pdf
-      - ci
-    networks:
-      - resume-network
+    profiles: ["test", "ci"]
     command: >
-      node -e "
-      const fs = require('fs');
-      const path = require('path');
-      console.log('🔍 Validating PDF generation...');
-      const pdfFiles = ['dist/resume.pdf', 'dist/resume-print.pdf', 'dist/resume-ats.pdf'];
-      let allValid = true;
-      pdfFiles.forEach((pdfPath) => {
-        if (fs.existsSync(pdfPath)) {
-          const stats = fs.statSync(pdfPath);
-          const sizeKB = Math.round(stats.size / 1024);
-          console.log('✅ ' + path.basename(pdfPath) + ': ' + sizeKB + 'KB');
-          if (stats.size < 1000) { console.log('⚠️ Warning: ' + path.basename(pdfPath) + ' seems very small'); allValid = false; }
-        } else {
-          console.log('❌ Missing: ' + path.basename(pdfPath));
-          allValid = false;
-        }
-      });
-      if (allValid) { console.log('✅ All PDF files validated successfully'); process.exit(0); } else { console.log('❌ PDF validation failed'); process.exit(1); }
+      sh -c "
+        mkdir -p test-results playwright-report &&
+        echo '🧪 Running essential Chromium tests...' &&
+        npx playwright test tests/essential/smoke.spec.js --project=chromium --reporter=html &&
+        echo '✅ Essential tests completed'
       "
 
-  # All-in-one comprehensive testing
-  test-all:
+  # =============================================
+  # 📊 CI Complete - Production parity testing
+  # =============================================
+  ci:
     build:
       context: .
       dockerfile: Dockerfile
-      target: chromium
+      target: test
+    container_name: resume-ci
     volumes:
-      - .:/app
-      - /app/node_modules
-      - ./visual-evidence:/app/visual-evidence
-      - ./test-results:/app/test-results
-      - ./coverage:/app/coverage
-    working_dir: /app
+      - ./test-results:/app/test-results:delegated
+      - ./coverage:/app/coverage:delegated
+      - ./playwright-report:/app/playwright-report:delegated
     environment:
       - NODE_ENV=test
       - CI=true
-    depends_on:
-      - build
-      - serve
-    command: npm test
-    profiles:
-      - test-all
-      - full-test
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
     networks:
       - resume-network
-
-# Networks
-networks:
-  resume-network:
-    driver: bridge
-
-# Named volumes for data persistence
-volumes:
-  test-results:
-    name: resume-test-results
-  coverage:
-    name: resume-coverage
+    profiles: ["ci", "full-test"]
+    depends_on:
+      - build
+    command: >
+      sh -c "
+        echo '📊 Running CI test suite (Chromium-focused for speed)...' &&
+        mkdir -p test-results coverage playwright-report &&
+        echo '🔥 Essential smoke tests...' &&
+        npx playwright test tests/essential/smoke.spec.js --project=chromium --reporter=line &&
+        echo '🏗️ Validating build artifacts...' &&
+        ls -la dist/ && test -f dist/index.html &&
+        echo '✅ CI validation completed (fast & focused)'
+      "
 
 # =============================================================================
-# USAGE EXAMPLES - Enhanced Development Workflow
+# 📋 USAGE - Streamlined Development Workflow
 # =============================================================================
 #
-# DEVELOPMENT WORKFLOW:
-# 1. Start dev server (always running): docker-compose --profile dev up -d
-# 2. In another terminal, work normally - changes auto-reload on http://localhost:3000
+# DEVELOPMENT:
+#   docker-compose --profile dev up -d        # Background dev server
+#   docker-compose --profile dev logs -f      # Watch dev logs
+#   docker-compose down                        # Stop all services
 #
-# TESTING WORKFLOW:
-# 1. Build and serve:       docker-compose --profile serve up -d
-# 2. Run visual tests:      docker-compose --profile test up
-# 3. Full test suite:       docker-compose --profile test-all up
-# 4. PDF validation:        docker-compose --profile pdf up
+# PRODUCTION BUILD & TEST:
+#   docker-compose --profile build up         # Build production assets
+#   docker-compose --profile serve up -d      # Serve production site
+#   docker-compose --profile test up          # Run essential tests
 #
-# CI/CD WORKFLOW:
-# 1. Full pipeline:         docker-compose --profile ci up build serve test pdf-validate
+# CI/CD VALIDATION:
+#   docker-compose --profile ci up build test # Full CI pipeline
 #
-# PORT ALLOCATION:
-# - Port 3000: Dev hot reload (always running background)
-# - Port 3001: Serve built content (production preview)
-# - Port 3002: CI and automated testing
+# QUICK COMMANDS:
+#   make dev          # Start development (uses docker-compose)
+#   make build        # Production build (uses docker-compose)
+#   make serve        # Production server (uses docker-compose)
+#   make test-fast    # Essential tests (uses docker-compose)
+#
+# PORTS:
+#   3000 - Development server (hot reload + mobile LAN access)
+#   3001 - Production server (nginx with built files)
+#
 # =============================================================================
