@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <title>{{basics.name}} - {{basics.label}}</title>
+    <meta name="author" content="{{basics.name}}">
+    <meta name="description" content="{{basics.summary}}">
+
+    <!-- Build metadata for cache busting and version tracking -->
+    <meta name="generator" content="Resume-as-Code">
+    <meta name="build-commit" content="dev-local">
+    <meta name="build-timestamp" content="2025-01-08T00:00:00.000Z">
+    <meta name="app-version" content="{{appVersion}}">
+    <meta name="keywords" content="resume, cv, {{basics.name}}, {{basics.label}}, platform engineer, devops, cloud architect, aws, gcp, kubernetes">
+
+    <!-- Cache busting headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rafaelbsathler.github.io/resume-as-code/">
+    <meta property="og:title" content="{{basics.name}} - {{basics.label}}">
+    <meta property="og:description" content="{{basics.summary}}">
+    {{#if profileImageOptimization}}
+    <meta property="og:image" content="{{profileImageOptimization.primaryJPEG}}">
+    {{else}}
+    <meta property="og:image" content="{{basics.image}}">
+    {{/if}}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://rafaelbsathler.github.io/resume-as-code/">
+    <meta property="twitter:title" content="{{basics.name}} - {{basics.label}}">
+    <meta property="twitter:description" content="{{basics.summary}}">
+    {{#if profileImageOptimization}}
+    <meta property="twitter:image" content="{{profileImageOptimization.primaryJPEG}}">
+    {{else}}
+    <meta property="twitter:image" content="{{basics.image}}">
+    {{/if}}
+
+    <!-- Enhanced Google Analytics 4 with Event Tracking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1L4XD6LG6Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // App version and environment detection
+      const appVersion = '1.4.0'; // Auto-updated from package.json during build
+      const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
+      const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
+      const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
+      const environment = isGitHubPages ? 'production' : 'development';
+      const branchName = isGitHubPages ? 'main' : 'development';
+
+      // Enhanced GA4 configuration
+      gtag('config', 'G-1L4XD6LG6Z', {
+        send_page_view: true,
+        anonymize_ip: true,
+        allow_google_signals: true,
+        custom_map: {
+          'custom_parameter_1': 'resume_section',
+          'custom_parameter_2': 'user_action',
+          'custom_parameter_3': 'app_version',
+          'custom_parameter_4': 'environment'
+        },
+        // Global parameters for all events
+        app_version: appVersion,
+        environment: environment,
+        branch: branchName
+      });
+
+      // Enhanced event tracking will be loaded after DOM is ready
+
+      // Update footer with dynamic version info
+      document.addEventListener('DOMContentLoaded', function() {
+        const versionElement = document.getElementById('app-version');
+        const environmentElement = document.getElementById('app-environment');
+        const commitElement = document.getElementById('app-commit');
+        const versionLinkElement = document.getElementById('version-link');
+        const commitLinkElement = document.getElementById('commit-link');
+
+        if (versionElement) versionElement.textContent = appVersion;
+        if (environmentElement) environmentElement.textContent = environment;
+        if (commitElement) commitElement.textContent = commitHash;
+
+        // Update version link URL dynamically
+        if (versionLinkElement && appVersion) {
+          const cleanVersion = appVersion.replace(/[^0-9.]/g, ''); // Remove non-numeric chars except dots
+          versionLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/releases/tag/v${cleanVersion}`;
+        }
+
+        // Update commit link URL dynamically
+        if (commitLinkElement && commitHash && commitHash !== 'dev-local') {
+          commitLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/commit/${commitHash.length === 7 ? commitHash + '...' : commitHash}`;
+          commitLinkElement.title = `View commit ${commitHash} on GitHub`;
+        } else if (commitLinkElement && commitHash === 'dev-local') {
+          commitLinkElement.href = 'https://github.com/rafilkmp3/resume-as-code';
+          commitLinkElement.title = 'Development build - view repository';
+        }
+      });
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "{{basics.name}}",
+      "url": "{{basics.url}}",
+      {{#if profileImageOptimization}}
+      "image": "{{profileImageOptimization.primaryJPEG}}",
+      {{else}}
+      "image": "{{basics.image}}",
+      {{/if}}
+      "sameAs": [
+        {{#each basics.profiles}}
+        "{{url}}"{{#unless @last}},{{/unless}}
+        {{/each}}
+      ],
+      "jobTitle": "{{basics.label}}",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "{{work.0.name}}"
+      },
+      "alumniOf": {
+        "@type": "CollegeOrUniversity",
+        "name": "{{education.0.institution}}"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{{basics.location.city}}",
+        "addressRegion": "{{basics.location.region}}",
+        "addressCountry": "{{basics.location.countryCode}}"
+      },
+      "email": "mailto:{{basics.email}}",
+      "telephone": "{{basics.phone}}"
+    }
+    </script>

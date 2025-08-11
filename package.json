@@ -17,6 +17,7 @@
     "version:auto": "node scripts/version-bump.js",
     "version:update-refs": "node scripts/update-version-refs.js",
     "version:inject": "node scripts/inject-version.js",
+    "template:build": "node scripts/build-template.js",
     "changelog": "echo 'Please update CHANGELOG.md manually before releasing'",
     "dev:health": "node scripts/dev-tools.js health",
     "dev:perf": "node scripts/dev-tools.js perf",

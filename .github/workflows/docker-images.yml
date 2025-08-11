@@ -308,15 +308,15 @@ jobs:
           # Phase 2: Test embedded hello-world tests (This is the key fix!)
           echo "🎭 Phase 2: Running Embedded Hello-World Tests"
           echo "  🧪 Executing default CMD with embedded browser tests..."
-          
+
           # Create output directory for test results
           mkdir -p /tmp/test-results
-          
+
           # Run the actual embedded hello-world tests that are built into the image
           # This uses the default CMD defined in the Dockerfile for each browser target
           echo "    Running: docker run --rm $IMAGE_TAG"
           echo "    This will execute the embedded hello-world Playwright tests"
-          
+
           # Capture both stdout and stderr with timestamps
           if docker run --rm --name "test-${{ matrix.browser }}-$$" \
              -v /tmp/test-results:/test-results \
@@ -356,7 +356,7 @@ jobs:
 
           echo "🎉 ALL TESTS PASSED for ${{ matrix.browser }}"
           echo "  ✅ Environment validation"
-          echo "  ✅ Embedded hello-world tests"  
+          echo "  ✅ Embedded hello-world tests"
           echo "  ✅ Direct browser validation"
 
       - name: Upload test artifacts
