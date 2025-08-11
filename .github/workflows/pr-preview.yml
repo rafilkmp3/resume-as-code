@@ -118,81 +118,19 @@ jobs:
 
           echo "✅ PR preview banner added to HTML"
 
-      - name: Create PR preview directory structure
-        run: |
-          echo "🚀 Preparing PR preview deployment structure"
-
-          # Create PR subdirectory in build artifacts
-          mkdir -p "pr-preview-deploy/pr-${{ github.event.pull_request.number }}"
-          cp -r pr-preview-build/* "pr-preview-deploy/pr-${{ github.event.pull_request.number }}/"
-
-          # Create a simple index.html for the preview root if it doesn't exist
-          cat > pr-preview-deploy/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="utf-8">
-              <title>PR Previews - Resume as Code</title>
-              <meta name="description" content="PR Preview Area">
-              <style>
-                body {
-                  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-                  text-align: center;
-                  padding: 2rem;
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  color: white;
-                  min-height: 100vh;
-                  margin: 0;
-                }
-                .container {
-                  max-width: 600px;
-                  margin: 0 auto;
-                  background: rgba(255,255,255,0.1);
-                  padding: 2rem;
-                  border-radius: 12px;
-                }
-                h1 { font-size: 2rem; margin-bottom: 1rem; }
-                .btn {
-                  display: inline-block;
-                  padding: 12px 24px;
-                  background: rgba(255,255,255,0.2);
-                  color: white;
-                  text-decoration: none;
-                  border-radius: 8px;
-                  margin: 1rem;
-                }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <h1>🚀 PR Preview Environment</h1>
-                  <p>This area is for PR previews only.</p>
-                  <a href="/" class="btn">← Back to Main Site</a>
-                  <a href="pr-${{ github.event.pull_request.number }}/" class="btn">View PR #${{ github.event.pull_request.number }}</a>
-              </div>
-          </body>
-          </html>
-          EOF
-
-          echo "📁 PR preview structure created:"
-          ls -la pr-preview-deploy/
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload to Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to temporary preview repository
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: './pr-preview-deploy'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          token: ${{ secrets.CROSS_REPO_PAT }}
+          repository-name: rafilkmp3/temploy-resume-as-code
+          branch: main # The branch the action should deploy to.
+          folder: pr-preview-build # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch
 
       - name: Update preview URL with actual deployment
         id: final-preview-url
         run: |
-          FINAL_URL="${{ steps.deployment.outputs.page_url }}pr-${{ github.event.pull_request.number }}/"
+          FINAL_URL="https://rafilkmp3.github.io/temploy-resume-as-code/"
           echo "url=$FINAL_URL" >> $GITHUB_OUTPUT
           echo "✅ PR preview deployed to: $FINAL_URL"
 
@@ -203,46 +141,22 @@ jobs:
             const previewUrl = "${{ steps.final-preview-url.outputs.url }}";
             const prNumber = context.payload.pull_request.number;
             const commentBody = `
-            ## 📱 PR Preview Ready! (Production-Safe)
+            ## 📱 Temporary PR Preview Ready!
 
-            Your preview is deployed with **complete isolation** from production:
+            Your preview is deployed to a shared, temporary environment:
 
             ### 🌐 **[View Preview →](${previewUrl})**
 
-            **🛡️ Production Protection:**
-            - ✅ **Production Unaffected**: Main site stays at root URL
-            - ✅ **Multiple PR Support**: Each PR gets its own subdirectory
-            - ✅ **Isolated Deployment**: Uses separate \`pr-previews\` branch
-            - ✅ **Recruiter-Safe**: Sent URLs remain stable and working
-
-            **🚀 Preview Features:**
-            - ✅ **PR Banner**: Clear identification this is a preview deployment
-            - ✅ **QR Code Integration**: Scan to test on mobile devices
-            - ✅ **Mobile Testing**: Perfect for cross-device validation
-            - ✅ **Live Changes**: Reflects all changes in this PR
-            - ✅ **Git LFS Assets**: Profile images and all assets included
+            **⚠️ Important Notes:**
+            - This is a **shared environment**. The latest pushed PR will overwrite the previous one.
+            - This URL is for temporary review and will be replaced by the next PR preview.
 
             **📊 Preview Details:**
-            - **URL**: \`${previewUrl}\`
-            - **Commit**: \`${{ github.event.pull_request.head.sha }}\`
-            - **Branch**: \`${{ github.event.pull_request.head.ref }}\`
-            - **Deployment**: Separate from production (safe)
+            - **URL**: `${previewUrl}`
+            - **Commit**: `${{ github.event.pull_request.head.sha }}`
+            - **Branch**: `${{ github.event.pull_request.head.ref }}`
 
-            **📱 Mobile Testing Workflow:**
-            1. Open the preview link above
-            2. Look for the orange **"🚀 PR PREVIEW #${prNumber}"** banner at the top
-            3. Click the QR code button in the resume
-            4. Scan with your phone for instant mobile testing
-            5. QR codes automatically point to this preview! 🎯
-
-            **🔍 How to Verify This is the PR Preview:**
-            - Orange banner at the top: "🚀 PR PREVIEW #${prNumber}"
-            - URL shows the PR subdirectory: \`/pr-${prNumber}/\`
-            - Banner links back to this PR for reference
-
-            > 🔄 Updates automatically when you push new commits
-            >
-            > 🛡️ **Production guarantee**: Main site at root URL never affected
+            > 🔄 Pushing a new commit to this PR will update the preview.
             `;
 
             // Find existing preview comment to update
