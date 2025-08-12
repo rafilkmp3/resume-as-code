@@ -126,7 +126,8 @@
       "Bash(npx markdownlint:*)",
       "Bash(npm run template:build:*)",
       "Bash(ln:*)",
-      "Bash(timeout 120 make build)"
+      "Bash(timeout 120 make build)",
+      "Bash(act push:*)"
     ],
     "deny": []
   }

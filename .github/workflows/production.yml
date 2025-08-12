@@ -12,7 +12,7 @@ on:
       - '*.js'
       - '*.css'
       - 'scripts/**'
-      - 'Dockerfile'
+      - 'docker/Dockerfile'
       - '.github/workflows/production.yml'
       - 'Makefile'
       - 'package*.json'
@@ -217,7 +217,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('package*.json', 'Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('package*.json', 'docker/Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
@@ -226,6 +226,7 @@ jobs:
         run: |
           echo "🏗️ Normal mode: Optimized build with registry + local caching"
           docker buildx build \
+            --file docker/Dockerfile \
             --target builder \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA=${{ github.sha }} \
@@ -255,6 +256,7 @@ jobs:
         run: |
           echo "🚨 Emergency mode: Fast build, no cache, no optimization"
           docker buildx build \
+            --file docker/Dockerfile \
             --target builder \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA=${{ github.sha }} \

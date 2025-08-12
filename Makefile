@@ -15,6 +15,9 @@ TEST_PORT=3001
 DOCKER_IMAGE=resume-as-code
 DOCKER_TAG=latest
 
+# act configuration for local GitHub Actions testing
+ACT_FLAGS=--container-architecture linux/amd64
+
 # Default target
 help:
 	@echo "$(CYAN)📋 Resume-as-Code - Available Commands$(NC)"
@@ -57,6 +60,12 @@ help:
 	@echo "  $(CYAN)npm run dev:perf$(NC)    - Performance analysis and benchmarks"
 	@echo "  $(CYAN)npm run dev:clean$(NC)   - Clean development artifacts"
 	@echo "  $(CYAN)npm run dev:setup$(NC)   - Quick development environment setup"
+	@echo ""
+	@echo "$(GREEN)⚡ Local GitHub Actions Testing (act):$(NC)"
+	@echo "  $(CYAN)make act-production$(NC)  - Test production workflow locally"
+	@echo "  $(CYAN)make act-docker$(NC)      - Test docker images workflow locally"
+	@echo "  $(CYAN)make act-list$(NC)        - List all available workflows"
+	@echo "  $(CYAN)make act-check$(NC)       - Check act installation and setup"
 	@echo ""
 	@echo "$(GREEN)📊 Performance & UX Monitoring:$(NC)"
 	@echo "  $(CYAN)npm run perf:report$(NC) - Full performance analysis report"
@@ -476,3 +485,47 @@ monitor: docker-check
 	done
 	@echo "$(GREEN)📊 Visual monitoring completed!$(NC)"
 	@echo "$(CYAN)Check test-results/ for detailed screenshots and reports$(NC)"
+
+# =============================================================================
+# ⚡ Local GitHub Actions Testing with act
+# =============================================================================
+
+# Check if act is installed and configured
+act-check:
+	@echo "$(CYAN)⚡ Checking act installation and configuration...$(NC)"
+	@command -v act >/dev/null 2>&1 || { echo "$(RED)❌ act is not installed. Install with: brew install act$(NC)"; exit 1; }
+	@ACT_VERSION=$$(act --version | head -n1); echo "$(GREEN)✅ act installed: $$ACT_VERSION$(NC)"
+	@if [ -f ".actrc" ]; then echo "$(GREEN)✅ .actrc configuration found$(NC)"; else echo "$(YELLOW)⚠️  .actrc not found$(NC)"; fi
+	@if [ -f ".env.act" ]; then echo "$(GREEN)✅ .env.act environment file found$(NC)"; else echo "$(YELLOW)⚠️  .env.act not found$(NC)"; fi
+	@echo "$(CYAN)💡 Use 'make act-list' to see available workflows$(NC)"
+
+# List all available GitHub Actions workflows
+act-list: act-check
+	@echo "$(CYAN)📋 Available GitHub Actions workflows:$(NC)"
+	@act --list $(ACT_FLAGS) 2>/dev/null || echo "$(YELLOW)⚠️  No workflows found or act configuration issue$(NC)"
+
+# Test production workflow locally
+act-production: act-check
+	@echo "$(PURPLE)🚀 Testing Production Pipeline locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This will run the full production build locally$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/production.yml --verbose
+
+# Test docker images workflow locally
+act-docker: act-check
+	@echo "$(PURPLE)🐳 Testing Docker Images Pipeline locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This will build Docker images locally$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/docker-images.yml --verbose
+
+# Test workflow with dry-run (see what would happen without running)
+act-dry-run: act-check
+	@echo "$(CYAN)🔍 Dry run - showing what act would do...$(NC)"
+	@act push $(ACT_FLAGS) --dry-run
+
+# Test specific workflow file
+act-workflow: act-check
+	@if [ -z "$(WORKFLOW)" ]; then \
+		echo "$(RED)❌ Usage: make act-workflow WORKFLOW=.github/workflows/production.yml$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(PURPLE)⚡ Testing workflow: $(WORKFLOW)$(NC)"
+	@act push $(ACT_FLAGS) --workflows $(WORKFLOW) --verbose

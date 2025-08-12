@@ -1,0 +1,16 @@
+# act configuration for resume-as-code
+# Platform mappings for consistent local testing
+
+# Use larger runner for comprehensive builds
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+
+# Container architecture for Apple Silicon compatibility
+--container-architecture linux/amd64
+
+# Default settings
+--artifact-server-path /tmp/act-artifacts
+--env-file .env.act
+
+# GitHub token for API access (will be set via environment)
+--secret-file .secrets.act

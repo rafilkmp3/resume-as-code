@@ -17,11 +17,17 @@ module.exports = {
   // Coverage
   collectCoverageFrom: [
     'src/**/*.js',
-    'build.js',
-    'dev-server.js',
+    'scripts/build.js',
+    'scripts/dev-server.js',
+    'scripts/server.js',
+    'scripts/utils/*.js',
+    'components/**/*.js',
     '!src/**/*.test.js',
     '!src/**/*.spec.js',
     '!node_modules/**',
+    '!archive/**',
+    '!config/**',
+    '!dist/**',
   ],
 
   coverageDirectory: 'coverage',

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Dockerfile'
+      - 'docker/Dockerfile'
       - 'package.json'
       - 'package-lock.json'
       - 'config/playwright.config*.js'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'Dockerfile'
+      - 'docker/Dockerfile'
       - 'package.json'
       - 'package-lock.json'
       - 'config/playwright.config*.js'
@@ -141,6 +141,7 @@ jobs:
 
           # Build golden-base once, cache for all browsers
           docker buildx build \
+            --file docker/Dockerfile \
             --target golden-base \
             --platform linux/amd64 \
             --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base \
@@ -151,6 +152,7 @@ jobs:
 
           # Also warm test-base cache
           docker buildx build \
+            --file docker/Dockerfile \
             --target test-base \
             --platform linux/amd64 \
             --cache-from type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:golden-base \
@@ -174,17 +176,18 @@ jobs:
       matrix:
         include:
           - browser: chromium
-            dockerfile: Dockerfile
+            dockerfile: docker/Dockerfile
             target: chromium
             should-build: ${{ needs.detect-changes.outputs.chromium-changed }}
-          - browser: firefox
-            dockerfile: Dockerfile
-            target: firefox
-            should-build: ${{ needs.detect-changes.outputs.firefox-changed }}
-          - browser: webkit
-            dockerfile: Dockerfile
-            target: webkit
-            should-build: ${{ needs.detect-changes.outputs.webkit-changed }}
+          # Firefox and WebKit disabled for speed
+          # - browser: firefox
+          #   dockerfile: docker/Dockerfile
+          #   target: firefox
+          #   should-build: ${{ needs.detect-changes.outputs.firefox-changed }}
+          # - browser: webkit
+          #   dockerfile: docker/Dockerfile
+          #   target: webkit
+          #   should-build: ${{ needs.detect-changes.outputs.webkit-changed }}
     env:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1

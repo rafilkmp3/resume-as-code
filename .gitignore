@@ -210,3 +210,8 @@ lighthouse-reports/
 # Debug files
 dist/resume-ats-debug*.png
 dist/resume-ats-test*.png
+
+# act (local GitHub Actions runner)
+.secrets.act
+.actrc.local
+/tmp/act-*

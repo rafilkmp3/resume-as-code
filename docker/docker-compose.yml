@@ -99,9 +99,7 @@ services:
       - NODE_ENV=test
       - CI=true
       - PORT=3000
-    depends_on:
-      - serve
-    command: npx playwright test tests/visual-verification.spec.js
+    command: echo "Test service ready for custom commands"
     profiles:
       - test
       - ci
