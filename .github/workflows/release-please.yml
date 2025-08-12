@@ -12,6 +12,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  issues: write  # Required for label management
 
 jobs:
   release-please:
