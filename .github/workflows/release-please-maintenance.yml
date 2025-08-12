@@ -68,7 +68,7 @@ jobs:
               echo "⚠️ Skipping PR with invalid number data"
               continue
             fi
-            
+
             PR_TITLE=$(echo "$pr_json" | jq -r '.title' 2>/dev/null || echo "Unknown Title")
             PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName' 2>/dev/null || echo "unknown-branch")
             PR_MERGEABLE=$(echo "$pr_json" | jq -r '.mergeable' 2>/dev/null || echo "UNKNOWN")
@@ -91,7 +91,7 @@ jobs:
                   sleep 2
                 fi
               done
-              
+
               if [ "$COMMENT_SUCCESS" = "false" ]; then
                 echo "❌ Could not add comment to PR #$PR_NUMBER, but continuing..."
               fi
@@ -125,7 +125,7 @@ jobs:
                       sleep 2
                     fi
                   done
-                  
+
                   if [ "$STALE_COMMENT_SUCCESS" = "false" ]; then
                     echo "❌ Could not add stale comment to PR #$PR_NUMBER, but continuing..."
                   fi
@@ -237,7 +237,7 @@ jobs:
           # Count commits since last release with comprehensive error handling
           if [ -n "$LAST_RELEASE" ]; then
             RELEASE_TAG=$(echo "$LAST_RELEASE" | jq -r '.tagName')
-            
+
             # Ensure tags are fetched with retry logic
             echo "🔄 Ensuring tags are available for summary..."
             FETCH_SUCCESS=false
@@ -250,7 +250,7 @@ jobs:
                 sleep $((attempt))
               fi
             done
-            
+
             if [ "$FETCH_SUCCESS" = "true" ] && git tag -l | grep -q "^${RELEASE_TAG}$" 2>/dev/null; then
               COMMITS_COUNT=$(git rev-list --count "${RELEASE_TAG}..HEAD" 2>/dev/null || echo "unknown")
               echo "**New Commits:** $COMMITS_COUNT since last release" >> $GITHUB_STEP_SUMMARY

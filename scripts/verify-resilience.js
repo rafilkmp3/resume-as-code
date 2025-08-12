@@ -20,7 +20,7 @@ class ResilienceVerifier {
 
     async verifyWorkflows() {
         console.log('🔍 Verifying workflow resilience patterns...\n');
-        
+
         const workflowFiles = fs.readdirSync(this.workflowsDir)
             .filter(file => file.endsWith('.yml') || file.endsWith('.yaml'));
 
@@ -34,7 +34,7 @@ class ResilienceVerifier {
     async verifyWorkflowFile(filename) {
         const filePath = path.join(this.workflowsDir, filename);
         const content = fs.readFileSync(filePath, 'utf8');
-        
+
         console.log(`🔧 Analyzing ${filename}...`);
 
         const checks = [
@@ -46,7 +46,7 @@ class ResilienceVerifier {
         ];
 
         const workflowResults = checks.filter(Boolean);
-        
+
         if (workflowResults.some(r => r.type === 'error')) {
             this.results.failed.push({
                 file: filename,
@@ -77,10 +77,10 @@ class ResilienceVerifier {
     }
 
     checkErrorHandling(content, filename) {
-        const hasBasicErrorHandling = content.includes('2>/dev/null') || 
-                                     content.includes('|| echo') || 
+        const hasBasicErrorHandling = content.includes('2>/dev/null') ||
+                                     content.includes('|| echo') ||
                                      content.includes('if [');
-        
+
         if (!hasBasicErrorHandling && !filename.includes('simple')) {
             return {
                 type: 'warning',

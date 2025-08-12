@@ -63,16 +63,16 @@ jobs:
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
           echo "🏗️ Building resume without docker-compose (CI-compatible)..."
-          
+
           # Create backup of package.json and resume-data.json for recovery
           cp package.json package.json.backup 2>/dev/null || echo "⚠️ Could not backup package.json"
           cp resume-data.json resume-data.json.backup 2>/dev/null || echo "⚠️ Could not backup resume-data.json"
-          
+
           # Resilient build with retry mechanism
           BUILD_SUCCESS=false
           for attempt in 1 2 3; do
             echo "🔄 Build attempt $attempt/3..."
-            
+
             if timeout 300 npm run build; then
               echo "✅ Build successful on attempt $attempt"
               BUILD_SUCCESS=true
@@ -80,11 +80,11 @@ jobs:
             else
               BUILD_EXIT_CODE=$?
               echo "⚠️ Build failed on attempt $attempt (exit code: $BUILD_EXIT_CODE)"
-              
+
               if [ $attempt -lt 3 ]; then
                 echo "🔄 Retrying in 10 seconds..."
                 sleep 10
-                
+
                 # Restore backups if they exist
                 if [ -f package.json.backup ]; then
                   cp package.json.backup package.json
@@ -97,23 +97,23 @@ jobs:
               fi
             fi
           done
-          
+
           # Cleanup backups
           rm -f package.json.backup resume-data.json.backup
-          
+
           if [ "$BUILD_SUCCESS" = "false" ]; then
             echo "❌ All build attempts failed"
             echo "::error::Build process failed after 3 attempts"
             exit 1
           fi
-          
+
           # Verify critical build outputs exist
           if [ ! -f "dist/index.html" ]; then
             echo "❌ Critical build output missing: dist/index.html"
             echo "::error::Build verification failed - missing HTML output"
             exit 1
           fi
-          
+
           if [ ! -f "dist/resume.pdf" ]; then
             echo "⚠️ PDF output missing, but continuing deployment"
             echo "::warning::PDF generation may have failed"
@@ -136,11 +136,11 @@ jobs:
       - name: Create versioned PDF asset
         run: |
           echo "📄 Creating versioned PDF asset..."
-          
+
           # Verify PDF exists before processing
           if [ ! -f "dist/resume.pdf" ]; then
             echo "⚠️ dist/resume.pdf not found, checking for alternative formats"
-            
+
             # Look for any PDF in dist directory
             PDF_FILES=$(find dist -name "*.pdf" -type f | head -1)
             if [ -n "$PDF_FILES" ]; then
@@ -163,16 +163,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "📤 Uploading assets to release..."
-          
+
           TAG_NAME="${{ needs.release-please.outputs.tag_name }}"
           PDF_FILE="rafael-sathler-${TAG_NAME}.pdf"
           ERROR_FILE="rafael-sathler-${TAG_NAME}-ERROR.txt"
-          
+
           # Upload with retry mechanism and comprehensive error handling
           UPLOAD_SUCCESS=false
           for attempt in 1 2 3; do
             echo "🔄 Upload attempt $attempt/3..."
-            
+
             # Upload PDF if it exists
             if [ -f "$PDF_FILE" ]; then
               if gh release upload "$TAG_NAME" "$PDF_FILE" --clobber 2>/dev/null; then
@@ -195,13 +195,13 @@ jobs:
               echo "❌ No files to upload found"
               break
             fi
-            
+
             if [ $attempt -lt 3 ]; then
               echo "🔄 Retrying upload in 5 seconds..."
               sleep 5
             fi
           done
-          
+
           if [ "$UPLOAD_SUCCESS" = "false" ]; then
             echo "⚠️ Asset upload failed after all attempts"
             echo "::warning::PDF asset could not be uploaded to release"
@@ -209,7 +209,7 @@ jobs:
           else
             echo "✅ Asset upload completed successfully"
           fi
-          
+
           # Verify the release was created properly
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             echo "✅ Release $TAG_NAME verified and accessible"

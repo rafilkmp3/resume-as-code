@@ -3,13 +3,16 @@
 # Based on expert consensus analysis for comprehensive quality gates
 
 repos:
-  # Conventional Commits validation
+  # Conventional Commits validation (configured for release-please compatibility)
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.4.0
+    rev: v4.2.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-        args: [optional-scope]
+        args: [
+          feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert,
+          optional-scope
+        ]
 
   # JavaScript/Node.js Quality (PRIORITY: Fast feedback <2s)
   - repo: local
@@ -64,14 +67,14 @@ repos:
 
   # YAML validation
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args: [-c=.yamllint.yml]
 
   # JSON validation and resume-data.json integrity (CRITICAL)
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: check-json
       - id: check-yaml

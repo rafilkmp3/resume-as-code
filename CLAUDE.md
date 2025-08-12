@@ -283,10 +283,11 @@ This is a **resume generation system** built with infrastructure-as-code princip
 
 1. **Clean local environment** using `make clean` to match fresh GitHub Actions runner
 2. **Make changes locally** using Docker commands (`make build`, `make test-fast`)
-3. **Push to GitHub** to trigger AMD64 CI pipeline
-4. **Verify CI success** using `gh run list` and `gh run view <run-id>`
-5. **Only consider changes complete** when GitHub Actions pass on AMD64
-6. **Use `gh cli` for all CI/CD operations** - ensures authentication and
+3. **ALWAYS rebase before pushing** using `git pull --rebase` to synchronize with remote
+4. **Push to GitHub** to trigger AMD64 CI pipeline
+5. **Verify CI success** using `gh run list` and `gh run view <run-id>`
+6. **Only consider changes complete** when GitHub Actions pass on AMD64
+7. **Use `gh cli` for all CI/CD operations** - ensures authentication and
    proper API access
 
 ### 🧹 Environment Parity (Industry Standard)
@@ -306,6 +307,22 @@ This is a **resume generation system** built with infrastructure-as-code princip
 - **GitHub CLI (`gh`)**: Must be authenticated for CI/CD validation
 - **Make**: All commands go through Makefile entrypoints
 - **Git**: For version control and triggering CI/CD
+
+### 🚨 CRITICAL Git Workflow Rules
+
+- **NEVER push without rebasing first**: Always run `git pull --rebase` before any `git push`
+- **This prevents merge conflicts and ensures clean commit history**
+- **Essential for maintaining workflow reliability and preventing push failures**
+- **Required for proper integration with release-please and automated versioning**
+
+```bash
+# ✅ CORRECT workflow (ALWAYS do this)
+git pull --rebase
+git push
+
+# ❌ WRONG workflow (causes conflicts and failures)
+git push  # Without rebase - can fail and cause issues
+```
 
 ### Testing Strategy
 
@@ -433,13 +450,13 @@ make serve                  # http://localhost:3001
 All GitHub Actions workflows implement comprehensive resilience patterns:
 
 - **🔄 Retry Mechanisms**: 3-attempt retry with exponential backoff for all network operations
-- **🛠️ Error Recovery**: Automatic fallback strategies for non-critical failures  
+- **🛠️ Error Recovery**: Automatic fallback strategies for non-critical failures
 - **⚡ Idempotent Operations**: Safe to run multiple times with `--clobber` flags
 - **🔍 Validation**: Pre/post-operation checks with comprehensive logging
 - **📊 Monitoring**: Detailed step summaries and performance metrics
 - **🎯 Graceful Degradation**: PDF failures don't block HTML deployment
 
-**Verification**: `node scripts/verify-resilience.js` validates all patterns  
+**Verification**: `node scripts/verify-resilience.js` validates all patterns
 **Documentation**: See `WORKFLOW-RESILIENCE.md` for complete implementation details
 
 ### 🚀 Optimized Three-Tier CI/CD Architecture
@@ -517,7 +534,8 @@ git commit -m "feat: describe your feature"  # Use conventional commits format
 make build                              # Build using Docker
 make test-fast                          # Quick validation before push
 
-# CI/CD validation workflow
+# CI/CD validation workflow (CRITICAL: Always rebase before push)
+git pull --rebase                       # MANDATORY: Synchronize with remote before push
 git push                                # Trigger CI pipeline (includes conventional commits check)
 gh run list --limit 5                  # Check recent workflow runs
 gh run view <run-id>                    # View specific run details
@@ -558,3 +576,5 @@ pre-commit --version                    # Verify pre-commit installation
 - **Directory Structure Preservation**: `.gitkeep` files maintain important folder structure
 - **Optimized Docker Context**: Comprehensive `.dockerignore` reduces build context size
 - **Security by Default**: Excludes secrets, credentials, and sensitive files from Docker builds
+
+- memorize always git pull --rebase before any commit also try work beeter with pre-hok or always by default skip the pre commit hooks since claude code not work weel wthi thoose and we are slow down and speding tokens , never skip conventional commit message find a way to always commit following this patter
