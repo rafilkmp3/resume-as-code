@@ -97,25 +97,26 @@ jobs:
               echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
 
               if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
-                echo "⚠️ PR #$PR_NUMBER has conflicts - triggering automatic rebase..."
-                gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
-                echo "✅ Rebase command sent for PR #$PR_NUMBER"
+                echo "⚠️ PR #$PR_NUMBER has conflicts - triggering automatic recreate..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
               elif [ "$PR_MERGEABLE" = "MERGEABLE" ]; then
                 echo "✅ PR #$PR_NUMBER is up-to-date and ready"
               elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
-                echo "❓ PR #$PR_NUMBER status is UNKNOWN - triggering rebase to refresh..."
-                gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
-                echo "✅ Rebase command sent for PR #$PR_NUMBER to refresh status"
+                echo "❓ PR #$PR_NUMBER status is UNKNOWN - triggering recreate to refresh..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
               else
                 echo "❓ PR #$PR_NUMBER status: $PR_MERGEABLE"
               fi
             done
 
             echo ""
-            echo "ℹ️ Dependabot auto-rebase strategy:"
-            echo "   • CONFLICTING → Automatic @dependabot rebase command"
-            echo "   • UNKNOWN → Automatic @dependabot rebase command (status refresh)"
+            echo "ℹ️ Dependabot auto-recreate strategy:"
+            echo "   • CONFLICTING → Automatic @dependabot recreate command"
+            echo "   • UNKNOWN → Automatic @dependabot recreate command (status refresh)"
             echo "   • MERGEABLE → No action needed"
+            echo "   • Recreate triggers clean PRs + Netlify preview environments"
             echo "   • All commands executed automatically - no manual intervention required"
           fi
 
@@ -131,9 +132,9 @@ jobs:
           PR_AUTHOR=$(gh pr view "$PR_NUMBER" --json author --jq '.author.login')
 
           if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            echo "📦 This is a Dependabot PR, using comment command..."
-            gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
-            echo "✅ Rebase command sent"
+            echo "📦 This is a Dependabot PR, using recreate command..."
+            gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+            echo "✅ Recreate command sent (will trigger Netlify preview)"
           else
             # For other PRs, attempt direct rebase
             PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
@@ -175,4 +176,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
           DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
-          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) - **automatic rebase** for CONFLICTING/UNKNOWN status" >> $GITHUB_STEP_SUMMARY
+          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) - **automatic recreate** for CONFLICTING/UNKNOWN status (triggers Netlify previews)" >> $GITHUB_STEP_SUMMARY
