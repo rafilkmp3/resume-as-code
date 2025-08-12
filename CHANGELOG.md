@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.2.0...resume-as-code-v3.2.1) (2025-08-12)
+
+
+### Bug Fixes
+
+* improve PDF release asset naming to remove redundant 'resume' word ([5b67818](https://github.com/rafilkmp3/resume-as-code/commit/5b678188dd31aeb266ef3ea6ebba055c5a8c4fba))
+
 ## [3.2.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.1.2...resume-as-code-v3.2.0) (2025-08-12)
 
 
