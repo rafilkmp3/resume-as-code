@@ -124,7 +124,9 @@
       "Bash(COMPOSE_BAKE=true docker-compose up dev)",
       "Bash(COMPOSE_BAKE=true docker-compose --profile test up test)",
       "Bash(npx markdownlint:*)",
-      "Bash(npm run template:build:*)"
+      "Bash(npm run template:build:*)",
+      "Bash(ln:*)",
+      "Bash(timeout 120 make build)"
     ],
     "deny": []
   }

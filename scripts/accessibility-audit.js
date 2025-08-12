@@ -28,7 +28,7 @@ class AccessibilityAuditor {
   auditHTML() {
     console.log('🔍 Analyzing HTML structure...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     // 1. Language and Document Structure
@@ -264,7 +264,7 @@ class AccessibilityAuditor {
     console.log('🎨 Analyzing CSS for accessibility...');
 
     // Look for CSS files in the template
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     // Check for color contrast considerations

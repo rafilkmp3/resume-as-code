@@ -18,7 +18,7 @@ test('macOS Retina Desktop - Dark Mode - Mid Page', async ({ page }) => {
   await page.waitForLoadState('networkidle');
 
   // Apply theme if dark mode
-  
+
   await page.evaluate(() => {
     document.body.setAttribute('data-theme', 'dark');
     // Trigger dark mode
@@ -26,13 +26,13 @@ test('macOS Retina Desktop - Dark Mode - Mid Page', async ({ page }) => {
     if (toggleButton) toggleButton.click();
   });
   await page.waitForTimeout(500);
-  
+
 
   // Scroll if specified
-  
+
   await page.evaluate(() => window.scrollTo(0, 1000));
   await page.waitForTimeout(300);
-  
+
 
   // Wait for animations to complete
   await page.waitForTimeout(1000);
@@ -44,4 +44,3 @@ test('macOS Retina Desktop - Dark Mode - Mid Page', async ({ page }) => {
     animations: 'disabled'
   });
 });
-    

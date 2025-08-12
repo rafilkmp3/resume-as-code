@@ -87,7 +87,7 @@ docker-check:
 # Build resume (HTML + PDF + assets) using docker-compose
 build: docker-check
 	@echo "$(GREEN)🏗️ Building resume...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile build up --build build
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile build up --build build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 	@echo "$(CYAN)📁 Output files:$(NC)"
 	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
@@ -117,7 +117,7 @@ get-lan-ip:
 dev: docker-check get-lan-ip
 	@echo "$(PURPLE)🚀 Starting development server...$(NC)"
 	@echo "$(CYAN)🔍 Cleaning up any existing containers on port 3000...$(NC)"
-	@-docker-compose down dev > /dev/null 2>&1 || true
+	@-docker-compose -f docker/docker-compose.yml down dev > /dev/null 2>&1 || true
 	@-pkill -f "serve.*3000" > /dev/null 2>&1 || true
 	@sleep 1
 	@echo "$(CYAN)⚡ Draft Mode: Lightning-fast builds (HTML only)$(NC)"
@@ -130,12 +130,12 @@ dev: docker-check get-lan-ip
 	@echo "$(YELLOW)📄 Note: PDF generation skipped in dev mode$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop (or use 'make dev-stop' for background)$(NC)"
 	@echo "$(CYAN)💡 Tip: Use 'make dev-start' to run in background$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile dev up dev
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile dev up dev
 
 # Start development server in background (detached)
 dev-start: docker-check get-lan-ip
 	@echo "$(PURPLE)🚀 Starting development server in background...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile dev up -d dev
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile dev up -d dev
 	@sleep 3
 	@echo "$(GREEN)✅ Development server running in background$(NC)"
 	@echo "$(CYAN)🖥️  Desktop: http://localhost:3000$(NC)"
@@ -149,7 +149,7 @@ dev-start: docker-check get-lan-ip
 # Stop background development server
 dev-stop:
 	@echo "$(PURPLE)🛑 Stopping development server...$(NC)"
-	@docker-compose down dev || true
+	@docker-compose -f docker/docker-compose.yml down dev || true
 	@echo "$(GREEN)✅ Development server stopped$(NC)"
 
 # Production server (serve built files) - Port 3001
@@ -158,7 +158,7 @@ serve: docker-check build
 	@echo "$(CYAN)📱 Resume: http://localhost:3001$(NC)"
 	@echo "$(CYAN)📄 PDF: http://localhost:3001/resume.pdf$(NC)"
 	@echo "$(YELLOW)🛑 Press Ctrl+C to stop$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile serve up serve
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile serve up serve
 
 # Run all tests
 test: docker-check test-unit test-e2e test-visual test-accessibility test-performance
@@ -169,26 +169,26 @@ test-visual-matrix: docker-check serve
 	@echo "$(BLUE)🎨 Running comprehensive visual validation matrix...$(NC)"
 	@echo "$(CYAN)📱 Testing 20 viewport/theme combinations...$(NC)"
 	@mkdir -p docs/screenshots/visual-evidence/mobile docs/screenshots/visual-evidence/tablet docs/screenshots/visual-evidence/desktop test-results
-	@COMPOSE_BAKE=true docker-compose --profile test up test
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile test up test
 	@echo "$(GREEN)✅ Visual matrix validation completed!$(NC)"
 
 # Run PDF validation tests
 test-pdf: docker-check build
 	@echo "$(BLUE)📄 Running PDF validation tests...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile pdf up pdf-validate
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile pdf up pdf-validate
 	@echo "$(GREEN)✅ PDF validation completed!$(NC)"
 
 # Run all comprehensive tests
 test-all: docker-check
 	@echo "$(BLUE)🧪 Running all comprehensive tests...$(NC)"
-	@COMPOSE_BAKE=true docker-compose --profile test-all up test-all
+	@COMPOSE_BAKE=true docker-compose -f docker/docker-compose.yml --profile test-all up test-all
 	@echo "$(GREEN)✅ All comprehensive tests completed!$(NC)"
 
 # Run fast smoke tests (recommended for development)
 test-fast: docker-check
 	@echo "$(BLUE)⚡ Running fast smoke tests...$(NC)"
 	@mkdir -p test-results coverage && chmod 755 test-results coverage
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-fast-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-fast-internal
 
 # Internal test runner (runs inside Docker container)
 test-internal: test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal
@@ -213,7 +213,7 @@ test-fast-internal:
 test-unit: docker-check
 	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
 	@mkdir -p test-results coverage && chmod 755 test-results coverage
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-unit-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-unit-internal
 
 test-unit-internal:
 	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
@@ -227,7 +227,7 @@ test-unit-internal:
 test-e2e: docker-check
 	@echo "$(BLUE)🎭 Running E2E tests...$(NC)"
 	@mkdir -p test-results coverage && chmod 755 test-results coverage
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-e2e-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-e2e-internal
 
 test-e2e-internal:
 	@echo "$(BLUE)🎭 Running end-to-end tests...$(NC)"
@@ -241,7 +241,7 @@ test-e2e-internal:
 test-visual: docker-check
 	@echo "$(BLUE)🎨 Running visual tests...$(NC)"
 	@mkdir -p test-results coverage && chmod 755 test-results coverage
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-visual-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-visual-internal
 
 test-visual-internal:
 	@echo "$(BLUE)🎨 Running visual regression tests...$(NC)"
@@ -254,7 +254,7 @@ test-visual-internal:
 # Run accessibility tests
 test-accessibility: docker-check
 	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-accessibility-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-accessibility-internal
 
 test-accessibility-internal:
 	@echo "$(BLUE)♿ Running accessibility tests...$(NC)"
@@ -267,7 +267,7 @@ test-accessibility-internal:
 # Run performance tests
 test-performance: docker-check
 	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
-	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm ci make test-performance-internal
+	@HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker-compose -f docker/docker-compose.yml run --rm test make test-performance-internal
 
 test-performance-internal:
 	@echo "$(BLUE)⚡ Running performance tests...$(NC)"
@@ -310,8 +310,8 @@ status:
 	else \
 		echo "  $(RED)❌ Resume Data: Missing$(NC)"; \
 	fi
-	@if [ -f "template.html" ]; then \
-		echo "  $(GREEN)✅ Template: template.html$(NC)"; \
+	@if [ -f "templates/template.html" ]; then \
+		echo "  $(GREEN)✅ Template: templates/template.html$(NC)"; \
 	else \
 		echo "  $(RED)❌ Template: Missing$(NC)"; \
 	fi
@@ -466,7 +466,7 @@ monitor: docker-check
 	@echo ""
 	@for project in desktop-chrome iphone-15-pro-max ipad-pro; do \
 		echo "$(BLUE)🎭 Testing $$project...$(NC)"; \
-		docker-compose run --rm ci \
+		docker-compose -f docker/docker-compose.yml run --rm test \
 			npx playwright test tests/visual-analysis.spec.js \
 			--project=$$project \
 			--workers=1 \

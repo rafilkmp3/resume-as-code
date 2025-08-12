@@ -30,9 +30,9 @@ graph TD
     A[JSON Data] --> B[Handlebars Template]
     B --> C[HTML Generation]
     C --> D[Screen PDF - 4.5MB]
-    C --> E[Print PDF - 4.6MB] 
+    C --> E[Print PDF - 4.6MB]
     C --> F[ATS PDF - 865KB]
-    
+
     D --> G[Online Sharing]
     E --> H[Physical Printing]
     F --> I[Job Applications]
@@ -117,7 +117,7 @@ make clean
 Multi-service architecture for predictable development experience:
 
 - **Port 3000**: Development server with hot reload
-- **Port 3001**: Production preview server  
+- **Port 3001**: Production preview server
 - **Port 3002**: CI/CD and automated testing
 
 ```bash
@@ -185,7 +185,7 @@ make test-performance       # Core Web Vitals monitoring
 - **Tests**: Unit + Security (informational-only with `continue-on-error: true`)
 - **Deploy**: Automatic to GitHub Pages
 
-#### **Staging Pipeline** (`ci-staging.yml`) - **EXPERIMENTAL** ⚠️  
+#### **Staging Pipeline** (`ci-staging.yml`) - **EXPERIMENTAL** ⚠️
 - **Triggers**: Manual dispatch or test file changes
 - **Purpose**: E2E tests, visual regression, experimental features
 - **Docker**: Smart availability checking
@@ -203,7 +203,7 @@ make test-performance       # Core Web Vitals monitoring
 make clean                  # Match fresh GitHub Actions runner
 make build && make test-fast # Local validation
 
-# CI/CD monitoring  
+# CI/CD monitoring
 git push                    # Trigger production pipeline
 gh run list --limit 5       # Monitor workflow runs
 gh run watch                # Real-time pipeline monitoring
@@ -213,7 +213,7 @@ gh workflow list            # Available workflows
 ### **Platform Engineering Features**
 
 - **Multi-Architecture**: ARM64 (local) + AMD64 (CI) Docker support
-- **Environment Parity**: `make clean` ensures local/CI consistency  
+- **Environment Parity**: `make clean` ensures local/CI consistency
 - **Smart Caching**: 70% faster builds through intelligent caching
 - **Zero-Downtime**: Blue-green deployment strategy
 - **Quality Gates**: Comprehensive validation before deployment
@@ -222,7 +222,7 @@ gh workflow list            # Available workflows
 
 ### **Advanced PDF Generation**
 - **Screen PDF**: High-quality for online sharing (4.5MB)
-- **Print PDF**: Optimized margins for physical printing (4.6MB)  
+- **Print PDF**: Optimized margins for physical printing (4.6MB)
 - **ATS PDF**: Text-focused for applicant tracking systems (865KB)
 
 ### **Responsive Design System**
@@ -279,7 +279,7 @@ gh workflow run "Emergency Deploy" --ref main
 3. Follow the platform engineering workflow:
    ```bash
    make clean              # Environment parity
-   make build              # Local validation  
+   make build              # Local validation
    make test-fast          # Quick verification
    git commit -m "feat: description"
    git push                # Trigger CI pipeline

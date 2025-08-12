@@ -212,7 +212,8 @@ COPY --chown=appuser:appuser assets/ ./assets/
 COPY --chown=appuser:appuser tests/ ./tests/
 COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser config/ ./config/
-COPY --chown=appuser:appuser *.html *.json *.js ./
+COPY --chown=appuser:appuser templates/ ./templates/
+COPY --chown=appuser:appuser *.json *.js ./
 
 # Create embedded Hello World test (browser-agnostic)
 RUN mkdir -p tests/hello-world && \

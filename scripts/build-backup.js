@@ -758,7 +758,7 @@ async function build(options = {}) {
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
 
   // Always run core build steps
-  await generateHTML(resumeData, './template.html', { mode });
+  await generateHTML(resumeData, './templates/template.html', { mode });
 
   // Skip expensive operations in draft mode
   if (isDraft) {

@@ -157,7 +157,7 @@ docs/screenshots/
 !config/
 !Makefile
 !resume-data.json
-!template.html
+!templates/
 !src/
 !assets/images/
 !scripts/build.js

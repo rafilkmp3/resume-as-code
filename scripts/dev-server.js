@@ -7,17 +7,17 @@ const createSimpleServer = require('./utils/server-utils');
 
 const PORT = 3000;
 const LIVERELOAD_PORT = 35729;
-const WATCH_FILES = ['template.html', 'resume-data.json', 'assets/**/*'];
+const WATCH_FILES = ['templates/template.html', 'resume-data.json', 'assets/**/*'];
 
 let isBuilding = false;
 
 // Build function using direct module call (10x faster than exec)
 async function buildResume() {
     if (isBuilding) return;
-    
+
     isBuilding = true;
     console.log('🔄 Building resume...');
-    
+
     try {
         // Use draft mode for development - skips expensive PDF generation
         await build({ mode: 'draft' });
@@ -33,18 +33,18 @@ async function buildResume() {
 function watchFiles() {
     console.log('👀 Watching files for changes...');
     console.log(`🔥 LiveReload server: http://localhost:${LIVERELOAD_PORT}`);
-    
+
     // Create livereload server
     const liveReloadServer = livereload.createServer({ port: LIVERELOAD_PORT });
     liveReloadServer.watch(path.resolve('./dist'));
-    
+
     // Watch source files with chokidar
     const watcher = chokidar.watch(WATCH_FILES, {
         ignored: /node_modules|\.git|dist/,
         ignoreInitial: true,
         persistent: true
     });
-    
+
     watcher
         .on('change', async (filePath) => {
             const relativePath = path.relative('.', filePath);
@@ -62,12 +62,12 @@ function watchFiles() {
             console.log(`➖ ${relativePath} removed`);
             await buildResume();
         });
-        
+
     // Display watched patterns
     WATCH_FILES.forEach(pattern => {
         console.log(`   - ${pattern}`);
     });
-    
+
     return { watcher, liveReloadServer };
 }
 
@@ -83,14 +83,14 @@ let watchers = null;
 (async () => {
     // Initial build
     await buildResume();
-    
+
     // Start file watching with hot reload
     watchers = watchFiles();
-    
+
     // Start server
     const server = createSimpleServer(PORT, './dist', false); // No cache for dev
     server.start();
-    
+
     console.log('=====================================');
     console.log(`🌐 Resume: http://localhost:${PORT}`);
     console.log(`🔥 LiveReload: Add to HTML or use browser extension`);
@@ -101,7 +101,7 @@ let watchers = null;
 // Graceful shutdown
 process.on('SIGINT', () => {
     console.log('\n👋 Shutting down development server...');
-    
+
     if (watchers) {
         console.log('🧹 Closing file watchers...');
         watchers.watcher.close();
@@ -109,7 +109,7 @@ process.on('SIGINT', () => {
             watchers.liveReloadServer.close();
         }
     }
-    
+
     console.log('✅ Clean shutdown completed');
     process.exit(0);
 });

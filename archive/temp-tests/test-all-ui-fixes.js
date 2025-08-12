@@ -3,10 +3,10 @@ const puppeteer = require('puppeteer');
 async function testAllUIFixes() {
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
-  
+
   await page.goto('http://localhost:3000', { waitUntil: 'networkidle0' });
   await page.setViewport({ width: 1280, height: 720 });
-  
+
   console.log('🔍 Testing all UI fixes...');
 
   // Test 1: Calendly link text
@@ -28,7 +28,7 @@ async function testAllUIFixes() {
     const themeToggleInfo = await page.evaluate(() => {
       const toggle = document.getElementById('darkToggle');
       if (!toggle) return { error: 'Toggle not found' };
-      
+
       return {
         textContent: toggle.textContent.trim(),
         hasTextOverflow: toggle.textContent.trim().length > 0,
@@ -37,7 +37,7 @@ async function testAllUIFixes() {
         hasSvgIcons: toggle.querySelectorAll('svg').length >= 2
       };
     });
-    
+
     if (themeToggleInfo.hasTextOverflow) {
       console.log(`❌ Theme toggle has text overflow: "${themeToggleInfo.textContent}"`);
     } else {
@@ -47,31 +47,31 @@ async function testAllUIFixes() {
     console.log('❌ Theme toggle test failed:', e.message);
   }
 
-  // Test 3: Section underline consistency 
+  // Test 3: Section underline consistency
   console.log('\n📏 Test 3: Section underline consistency');
   try {
     // Trigger hover on sections to test underline width
     const sections = await page.$$('.section');
     const underlineResults = [];
-    
+
     for (let i = 0; i < Math.min(sections.length, 4); i++) {
       const section = sections[i];
-      
+
       // Get section title
       const sectionTitle = await section.$eval('h2', el => el.textContent.trim());
-      
+
       // Hover on section and check h2::after width
       await section.hover();
       await page.waitForTimeout(500); // Wait for animation
-      
+
       const underlineWidth = await section.$eval('h2', el => {
         const afterStyles = window.getComputedStyle(el, '::after');
         return afterStyles.width;
       });
-      
+
       underlineResults.push({ title: sectionTitle, width: underlineWidth });
     }
-    
+
     console.log('Section underline widths:');
     underlineResults.forEach(result => {
       const isFullWidth = result.width === '100%' || parseFloat(result.width) > 200;
@@ -84,47 +84,47 @@ async function testAllUIFixes() {
   // Test 4: Contact section readability in both themes
   console.log('\n📞 Test 4: Contact section theme readability');
   const themes = ['light', 'dark'];
-  
+
   for (const theme of themes) {
     try {
       await page.evaluate((theme) => {
         document.body.setAttribute('data-theme', theme === 'light' ? '' : theme);
       }, theme);
-      
+
       await page.waitForTimeout(500);
-      
+
       const contactInfo = await page.evaluate(() => {
         const contactSection = document.getElementById('contact');
         if (!contactSection) return { error: 'Contact section not found' };
-        
+
         const labels = Array.from(contactSection.querySelectorAll('.contact-label'));
         const links = Array.from(contactSection.querySelectorAll('.contact-link'));
-        
+
         return {
           labelColors: labels.map(label => ({
             text: label.textContent.trim(),
             color: window.getComputedStyle(label).color
           })),
           linkColors: links.map(link => ({
-            text: link.textContent.trim(), 
+            text: link.textContent.trim(),
             color: window.getComputedStyle(link).color
           }))
         };
       });
-      
+
       if (contactInfo.error) {
         console.log(`❌ ${theme} theme: ${contactInfo.error}`);
       } else {
-        const hasProperContrast = contactInfo.labelColors.every(label => 
+        const hasProperContrast = contactInfo.labelColors.every(label =>
           label.color !== 'rgba(0, 0, 0, 0)' && label.color !== 'transparent'
         );
         console.log(`${hasProperContrast ? '✅' : '❌'} ${theme} theme: Contact section readability`);
       }
-      
+
       // Take screenshots
       const contactSection = await page.$('#contact');
       if (contactSection) {
-        await contactSection.screenshot({ 
+        await contactSection.screenshot({
           path: `./visual-evidence/contact-final-${theme}.png`
         });
       }
@@ -139,10 +139,10 @@ async function testAllUIFixes() {
     await page.evaluate((theme) => {
       document.body.setAttribute('data-theme', theme === 'light' ? '' : theme);
     }, theme);
-    
+
     await page.waitForTimeout(1000);
-    
-    await page.screenshot({ 
+
+    await page.screenshot({
       path: `./visual-evidence/full-page-final-${theme}.png`,
       fullPage: true
     });

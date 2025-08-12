@@ -29,7 +29,7 @@ class UXAnalyzer {
   analyzeNavigation() {
     console.log('🧭 Analyzing navigation and user flow...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     let score = 0;
@@ -118,7 +118,7 @@ class UXAnalyzer {
   analyzeReadability() {
     console.log('📖 Analyzing readability and content structure...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     let score = 0;
@@ -192,7 +192,7 @@ class UXAnalyzer {
   analyzeUserEngagement() {
     console.log('🎯 Analyzing user engagement and interactivity...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     let score = 0;
@@ -269,7 +269,7 @@ class UXAnalyzer {
   analyzeVisualDesign() {
     console.log('🎨 Analyzing visual design and aesthetics...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     let score = 0;
@@ -338,7 +338,7 @@ class UXAnalyzer {
   analyzePerformanceUX() {
     console.log('⚡ Analyzing performance impact on user experience...');
 
-    const templatePath = path.join(__dirname, '..', 'template.html');
+    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
     const htmlContent = fs.readFileSync(templatePath, 'utf8');
 
     let score = 0;
