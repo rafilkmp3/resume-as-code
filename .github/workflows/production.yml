@@ -43,55 +43,12 @@ permissions:
   pull-requests: write  # For GitHub Release creation
 
 jobs:
-  # Version management with conventional commits
-  version-check:
-    name: Version Management
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      version-bumped: ${{ steps.version.outputs.bumped }}
-      new-version: ${{ steps.version.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          lfs: true
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies for screenshot generation
-        run: |
-          # Install minimal dependencies needed for screenshot generation
-          npm ci --prefer-offline --no-audit
-          npx playwright install chromium --with-deps
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Conventional commit version check (disabled - managed by release-please)
-        id: version
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "🔍 Version management handled by release-please"
-          echo "bumped=false" >> $GITHUB_OUTPUT
-          echo "ℹ️ Version bumping disabled - release-please manages all versioning"
-          echo "📋 Production deployment will proceed without version changes"
-
   # Unified build job (handles both normal and emergency modes)
+  # Note: Version management is fully handled by release-please workflow
   build:
     name: Build Resume (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: version-check
     env:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -261,7 +218,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload test results
-        if: always()
+        if: always() && hashFiles('coverage/**/*', 'test-results/**/*') != ''
         uses: actions/upload-artifact@v4
         with:
           name: quality-gate-${{ matrix.gate-type }}-results-${{ github.sha }}
