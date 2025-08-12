@@ -18,12 +18,7 @@ if (!fs.existsSync('./dist')) {
 // Get the appropriate URL for QR code generation based on environment
 function getQRCodeURL() {
   try {
-    // Production environment (GitHub Pages)
-    if (process.env.GITHUB_PAGES === 'true' || process.env.NODE_ENV === 'production') {
-      return 'https://rafilkmp3.github.io/resume-as-code/';
-    }
-
-    // Netlify preview environment
+    // Netlify environment (check first as it has highest priority for previews)
     if (process.env.NETLIFY === 'true') {
       const prNumber = process.env.REVIEW_ID; // Netlify sets this for PR previews
       if (prNumber) {
@@ -36,6 +31,11 @@ function getQRCodeURL() {
       }
       // Netlify production
       return 'https://resume-as-code.netlify.app';
+    }
+
+    // Production environment (GitHub Pages) - only if not on Netlify
+    if (process.env.GITHUB_PAGES === 'true' || process.env.NODE_ENV === 'production') {
+      return 'https://rafilkmp3.github.io/resume-as-code/';
     }
 
     // Development environment - try to get LAN IP for mobile access
