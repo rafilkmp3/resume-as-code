@@ -18,24 +18,51 @@ if (!fs.existsSync('./dist')) {
 // Get the appropriate URL for QR code generation based on environment
 function getQRCodeURL() {
   try {
+    // Debug: Log all relevant environment variables for troubleshooting
+    console.log('🔍 Environment Debug Info:');
+    console.log('  NETLIFY:', process.env.NETLIFY);
+    console.log('  REVIEW_ID:', process.env.REVIEW_ID);
+    console.log('  HEAD:', process.env.HEAD);
+    console.log('  BRANCH:', process.env.BRANCH);
+    console.log('  CONTEXT:', process.env.CONTEXT);
+    console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
+    console.log('  DEPLOY_URL:', process.env.DEPLOY_URL);
+    console.log('  URL:', process.env.URL);
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+    console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES);
+
     // Netlify environment (check first as it has highest priority for previews)
     if (process.env.NETLIFY === 'true') {
+      // Use Netlify's DEPLOY_PRIME_URL if available (most reliable)
+      if (process.env.DEPLOY_PRIME_URL) {
+        console.log('🌐 Using DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
+        return process.env.DEPLOY_PRIME_URL;
+      }
+
       const prNumber = process.env.REVIEW_ID; // Netlify sets this for PR previews
       if (prNumber) {
-        return `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
+        const url = `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
+        console.log('🌐 Using PR preview URL:', url);
+        return url;
       }
       // Netlify branch deploy or production
       const branchName = process.env.HEAD || process.env.BRANCH;
       if (branchName && branchName !== 'main') {
-        return `https://${branchName}--resume-as-code.netlify.app`;
+        const url = `https://${branchName}--resume-as-code.netlify.app`;
+        console.log('🌐 Using branch deploy URL:', url);
+        return url;
       }
       // Netlify production
-      return 'https://resume-as-code.netlify.app';
+      const url = 'https://resume-as-code.netlify.app';
+      console.log('🌐 Using Netlify production URL:', url);
+      return url;
     }
 
     // Production environment (GitHub Pages) - only if not on Netlify
     if (process.env.GITHUB_PAGES === 'true' || process.env.NODE_ENV === 'production') {
-      return 'https://rafilkmp3.github.io/resume-as-code/';
+      const url = 'https://rafilkmp3.github.io/resume-as-code/';
+      console.log('🌐 Using GitHub Pages URL:', url);
+      return url;
     }
 
     // Development environment - try to get LAN IP for mobile access
