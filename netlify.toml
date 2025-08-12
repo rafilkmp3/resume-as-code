@@ -1,0 +1,84 @@
+[build]
+  # Build command for resume generation with Puppeteer setup
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+
+  # Directory to publish (contains HTML + PDF + assets)
+  publish = "dist"
+
+  # Function directory (not used but required)
+  functions = "netlify/functions"
+
+  # Environment variables for build
+  [build.environment]
+    NODE_VERSION = "22"
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+
+# Production deployment settings (main branch)
+[context.production]
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+  publish = "dist"
+
+  [context.production.environment]
+    NODE_ENV = "production"
+    GITHUB_PAGES = "false"
+
+# Deploy Preview settings (for PRs)
+[context.deploy-preview]
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+  publish = "dist"
+
+  [context.deploy-preview.environment]
+    NODE_ENV = "preview"
+    GITHUB_PAGES = "false"
+    PREVIEW_MODE = "true"
+
+# Branch deploy settings (feature branches)
+[context.branch-deploy]
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+  publish = "dist"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com"
+
+# PDF files with proper headers
+[[headers]]
+  for = "*.pdf"
+  [headers.values]
+    Content-Type = "application/pdf"
+    Cache-Control = "public, max-age=31536000"
+
+# Static assets caching
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+# HTML files
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# Redirects for clean URLs
+[[redirects]]
+  from = "/resume"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/cv"
+  to = "/index.html"
+  status = 200
+
+# 404 fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404

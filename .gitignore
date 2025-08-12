@@ -215,3 +215,7 @@ dist/resume-ats-test*.png
 .secrets.act
 .actrc.local
 /tmp/act-*
+
+# Local Netlify folder
+.netlify
+netlify-browsers/

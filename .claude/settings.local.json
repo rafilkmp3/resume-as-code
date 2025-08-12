@@ -130,7 +130,14 @@
       "Bash(act push:*)",
       "Bash(gh issue view:*)",
       "Bash(./scripts/install-git-hooks.sh:*)",
-      "Bash(gh release view:*)"
+      "Bash(gh release view:*)",
+      "Bash(git merge:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(SKIP=conventional-pre-commit git commit -m \"resolve merge conflict: keep release-please version 2.0.0\")",
+      "WebFetch(domain:app.netlify.com)",
+      "Bash(netlify link:*)",
+      "Bash(netlify sites:list:*)",
+      "Bash(netlify:*)"
     ],
     "deny": []
   }
