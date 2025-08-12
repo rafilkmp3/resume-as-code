@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v2.0.0...resume-as-code-v2.1.0) (2025-08-12)
+
+
+### Features
+
+* comprehensive Netlify PR preview environment setup ([fb0af5e](https://github.com/rafilkmp3/resume-as-code/commit/fb0af5ed927992216a9f4c2eb00e1f7b0a67886a))
+* improve Netlify site URL to professional naming ([213e0a2](https://github.com/rafilkmp3/resume-as-code/commit/213e0a28c0d109b0db14972b89e516d3c4a8b20e))
+* update URLs to match new Netlify site name 'resume-as-code' ([558a84b](https://github.com/rafilkmp3/resume-as-code/commit/558a84b4190331d1aacaf1e291af53a2786ea027))
+
+
+### Bug Fixes
+
+* disable conflicting version bump logic in production workflow ([cabd3e3](https://github.com/rafilkmp3/resume-as-code/commit/cabd3e3101098602996f419ec4326d897fc8bd8d))
+* resolve Netlify deployment failure with Chrome installation ([0dc2134](https://github.com/rafilkmp3/resume-as-code/commit/0dc21346291ab4697859bef2da6fff1d5e059b13))
+* update Netlify site URLs to correct domain ([ec139c5](https://github.com/rafilkmp3/resume-as-code/commit/ec139c5af8a1b4e09d30a042a937fe52796b6e0a))
+
+
+### Miscellaneous
+
+* **release:** bump version to 2.1.0 ([1651e85](https://github.com/rafilkmp3/resume-as-code/commit/1651e85bd3bfb77b68c9c90607845010dcb40417))
+* **release:** bump version to 2.1.1 ([5ad16ba](https://github.com/rafilkmp3/resume-as-code/commit/5ad16bac05163db47c2a14aa1903578392e1693f))
+* **release:** bump version to 2.2.0 ([10624e5](https://github.com/rafilkmp3/resume-as-code/commit/10624e5d1a4652324ee7890fc61d2ba8fd82d1df))
+* **release:** bump version to 2.3.0 ([4807927](https://github.com/rafilkmp3/resume-as-code/commit/480792787d01f7ebc6a52256f225f53c53817eaa))
+
 ## [2.0.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v1.21.1...resume-as-code-v2.0.0) (2025-08-12)
 
 
