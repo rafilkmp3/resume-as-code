@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.1.1...resume-as-code-v3.1.2) (2025-08-12)
+
+
+### Bug Fixes
+
+* add missing environment variables to release-please build step ([ce48c03](https://github.com/rafilkmp3/resume-as-code/commit/ce48c035d85436d69bd38cc6e23852cb64b5a6c6))
+
 ## [3.1.1](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.1.0...resume-as-code-v3.1.1) (2025-08-12)
 
 
