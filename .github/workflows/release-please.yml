@@ -57,6 +57,10 @@ jobs:
         run: npm ci
 
       - name: Build resume
+        env:
+          GITHUB_PAGES: 'true'
+          NODE_ENV: 'production'
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
           echo "🏗️ Building resume without docker-compose (CI-compatible)..."
           npm run build
