@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write  # Required for uploading release assets
       pages: write
       id-token: write
 

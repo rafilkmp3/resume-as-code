@@ -137,7 +137,8 @@
       "WebFetch(domain:app.netlify.com)",
       "Bash(netlify link:*)",
       "Bash(netlify sites:list:*)",
-      "Bash(netlify:*)"
+      "Bash(netlify:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   }
