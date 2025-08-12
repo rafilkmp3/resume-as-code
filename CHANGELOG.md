@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.2.1...resume-as-code-v3.3.0) (2025-08-12)
+
+
+### Features
+
+* add comprehensive version tracking with commits since release ([8e5ef5b](https://github.com/rafilkmp3/resume-as-code/commit/8e5ef5b618cba9a6023761eb05b11535ee949c39))
+* enhanced footer with smart contextual linking system ([7e48970](https://github.com/rafilkmp3/resume-as-code/commit/7e48970b71da7e4c20d388bfd1097fd07dce2b14))
+* implement world-class workflow resilience and fault tolerance patterns ([c8acb63](https://github.com/rafilkmp3/resume-as-code/commit/c8acb6321cb6c7b997ebd20d43a519bc438562e3))
+
+
+### Bug Fixes
+
+* Docker environment variables propagation for version tracking ([e63419b](https://github.com/rafilkmp3/resume-as-code/commit/e63419b31497108342eedf34f0de062143433cc6))
+* optimize Production Pipeline by removing redundant jobs and warnings ([a6c85d1](https://github.com/rafilkmp3/resume-as-code/commit/a6c85d1800636b296321d0ed613b51d0291fa3dd))
+* populate GitHub Pages environment variables for proper build configuration ([b0a1c27](https://github.com/rafilkmp3/resume-as-code/commit/b0a1c27f3ee44cc66a08c4abca515648c94aed2b))
+
+
+### Miscellaneous
+
+* confirm emoji and unicode support in conventional commits ([df82caf](https://github.com/rafilkmp3/resume-as-code/commit/df82cafdabe9bd30f8115673b4bc423f0788fe03))
+
+
+### Documentation
+
+* add critical git pull --rebase instruction and update pre-commit hooks ([1a5a9fb](https://github.com/rafilkmp3/resume-as-code/commit/1a5a9fb505ccd530211d381ae3969072e339dd5f))
+* update all documentation with latest pre-commit hooks and emoji support ([41328fd](https://github.com/rafilkmp3/resume-as-code/commit/41328fde1468f65e72793630ec60c9de592ec056))
+
 ## [3.2.1](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.2.0...resume-as-code-v3.2.1) (2025-08-12)
 
 
