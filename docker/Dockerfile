@@ -9,7 +9,7 @@
 # 🏗️ STAGE 1: GOLDEN BASE - Shared Dependencies & Foundation
 # =============================================================================
 # Phase 2A: Multi-architecture optimization with build platform awareness
-FROM --platform=$BUILDPLATFORM node:22-slim AS golden-base
+FROM --platform=$BUILDPLATFORM node:24-slim AS golden-base
 
 # Phase 2A: Build arguments for advanced caching strategies
 ARG TARGETPLATFORM
@@ -141,7 +141,7 @@ RUN npm run build
 # =============================================================================
 # 🌐 STAGE 3: PRODUCTION RUNTIME - Lightweight Production Server
 # =============================================================================
-FROM node:22-slim AS production
+FROM node:24-slim AS production
 
 # Runtime environment
 ENV NODE_ENV=production \
