@@ -75,12 +75,12 @@ jobs:
             done
           fi
 
-      - name: Check Dependabot PRs status
+      - name: Auto-rebase Dependabot PRs
         if: github.event_name == 'push' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Checking Dependabot PRs status..."
+          echo "🔍 Checking and auto-rebasing Dependabot PRs..."
 
           # Find all open Dependabot PRs
           DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable --jq '.[] | @json')
@@ -97,18 +97,26 @@ jobs:
               echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
 
               if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
-                echo "⚠️ PR #$PR_NUMBER has conflicts - Dependabot will auto-rebase with rebase-strategy: auto"
+                echo "⚠️ PR #$PR_NUMBER has conflicts - triggering automatic rebase..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
+                echo "✅ Rebase command sent for PR #$PR_NUMBER"
               elif [ "$PR_MERGEABLE" = "MERGEABLE" ]; then
                 echo "✅ PR #$PR_NUMBER is up-to-date and ready"
+              elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
+                echo "❓ PR #$PR_NUMBER status is UNKNOWN - triggering rebase to refresh..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
+                echo "✅ Rebase command sent for PR #$PR_NUMBER to refresh status"
               else
                 echo "❓ PR #$PR_NUMBER status: $PR_MERGEABLE"
               fi
             done
 
             echo ""
-            echo "ℹ️ Dependabot PRs auto-rebase via dependabot.yml configuration:"
-            echo "   rebase-strategy: 'auto' handles rebasing automatically"
-            echo "   No manual intervention needed"
+            echo "ℹ️ Dependabot auto-rebase strategy:"
+            echo "   • CONFLICTING → Automatic @dependabot rebase command"
+            echo "   • UNKNOWN → Automatic @dependabot rebase command (status refresh)"
+            echo "   • MERGEABLE → No action needed"
+            echo "   • All commands executed automatically - no manual intervention required"
           fi
 
       - name: Rebase specific PR
@@ -167,4 +175,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
           DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
-          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) (auto-rebase via rebase-strategy)" >> $GITHUB_STEP_SUMMARY
+          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) - **automatic rebase** for CONFLICTING/UNKNOWN status" >> $GITHUB_STEP_SUMMARY
