@@ -490,15 +490,15 @@ Git Push → CI/CD → Build Artifacts → GitHub Pages → Live Site
 ```
 🐳 Multi-Architecture Manifests:
 
-ghcr.io/rafilkmp3/resume-as-code-chromium:2.1.1
+ghcr.io/rafilkmp3/resume-as-code-chromium:2.2.0
 ├── linux/amd64 (for GitHub Actions)
 └── linux/arm64 (for Mac Apple Silicon)
 
-ghcr.io/rafilkmp3/resume-as-code-firefox:2.1.1
+ghcr.io/rafilkmp3/resume-as-code-firefox:2.2.0
 ├── linux/amd64 (for GitHub Actions)
 └── linux/arm64 (for Mac Apple Silicon)
 
-ghcr.io/rafilkmp3/resume-as-code-webkit:2.1.1
+ghcr.io/rafilkmp3/resume-as-code-webkit:2.2.0
 ├── linux/amd64 (for GitHub Actions)
 └── linux/arm64 (for Mac Apple Silicon)
 ```
