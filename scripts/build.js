@@ -27,15 +27,15 @@ function getQRCodeURL() {
     if (process.env.NETLIFY === 'true') {
       const prNumber = process.env.REVIEW_ID; // Netlify sets this for PR previews
       if (prNumber) {
-        return `https://deploy-preview-${prNumber}--resume-as-code-rafilkmp3.netlify.app`;
+        return `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
       }
       // Netlify branch deploy or production
       const branchName = process.env.HEAD || process.env.BRANCH;
       if (branchName && branchName !== 'main') {
-        return `https://${branchName}--resume-as-code-rafilkmp3.netlify.app`;
+        return `https://${branchName}--resume-as-code.netlify.app`;
       }
       // Netlify production
-      return 'https://resume-as-code-rafilkmp3.netlify.app';
+      return 'https://resume-as-code.netlify.app';
     }
 
     // Development environment - try to get LAN IP for mobile access
