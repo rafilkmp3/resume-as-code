@@ -204,8 +204,11 @@ make test-performance       # Core Web Vitals monitoring
 make clean                  # Match fresh GitHub Actions runner
 make build && make test-fast # Local validation
 
-# CI/CD monitoring
+# CRITICAL: Always rebase before push
+git pull --rebase           # Prevent merge conflicts (MANDATORY)
 git push                    # Trigger production pipeline
+
+# CI/CD monitoring
 gh run list --limit 5       # Monitor workflow runs
 gh run watch                # Real-time pipeline monitoring
 gh workflow list            # Available workflows
@@ -219,6 +222,15 @@ gh workflow list            # Available workflows
 - **Zero-Downtime**: Blue-green deployment strategy
 - **Quality Gates**: Comprehensive validation before deployment
 - **🌐 PR Preview Environment**: Automatic Netlify deployments with QR codes for every pull request
+
+### **Enhanced Pre-commit Hooks** ✨
+
+Latest versions with emoji and unicode support:
+
+- **Conventional Commits v4.2.0**: Full emoji support (🎨, ✅, 🚀)
+- **YAML Lint v1.37.1**: Latest configuration validation
+- **Pre-commit Hooks v6.0.0**: Enhanced file validation
+- **Supports**: Multi-line commits, structured formatting, all conventional types (feat, fix, docs, chore, etc.)
 
 ## 🎨 Key Features
 
@@ -283,10 +295,16 @@ gh workflow run "Emergency Deploy" --ref main
    make clean              # Environment parity
    make build              # Local validation
    make test-fast          # Quick verification
-   git commit -m "feat: description"
+   git pull --rebase       # CRITICAL: Always rebase before commit
+   git commit -m "feat: description 🎨"  # Emojis supported!
    git push                # Trigger CI pipeline
    ```
 4. Open Pull Request
+
+### **Commit Message Guidelines** ✨
+- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `chore:`, etc.
+- **Emoji Support**: 🎨, ✅, 🚀, 🐛, 📝, ⚡, 🔧
+- **Multi-line**: Structured formatting with sections supported
 
 ## 📝 License
 
