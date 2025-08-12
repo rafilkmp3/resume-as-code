@@ -104,6 +104,16 @@ build-internal:
 	@npm run build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
 
+# Netlify-specific build (no Docker required)
+build-netlify:
+	@echo "$(GREEN)🏗️  Building resume for Netlify...$(NC)"
+	@npm run build
+	@echo "$(GREEN)✅ Netlify build completed successfully!$(NC)"
+	@echo "$(CYAN)📁 Output files:$(NC)"
+	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
+	@echo "  - PDFs: $(GREEN)./dist/*.pdf$(NC)"
+	@echo "  - Assets: $(GREEN)./dist/assets/$(NC)"
+
 # Development server with hot reload (draft mode for speed)
 # Get Mac's LAN IP address for mobile testing
 get-lan-ip:

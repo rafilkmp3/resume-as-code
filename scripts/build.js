@@ -15,26 +15,58 @@ if (!fs.existsSync('./dist')) {
   fs.mkdirSync('./dist');
 }
 
-// Get Mac LAN IP address for development mode
-function getMacLanIP() {
+// Get the appropriate URL for QR code generation based on environment
+function getQRCodeURL() {
   try {
+    // Production environment (GitHub Pages)
+    if (process.env.GITHUB_PAGES === 'true' || process.env.NODE_ENV === 'production') {
+      return 'https://rafilkmp3.github.io/resume-as-code/';
+    }
+
+    // Netlify preview environment
+    if (process.env.NETLIFY === 'true') {
+      const prNumber = process.env.REVIEW_ID; // Netlify sets this for PR previews
+      if (prNumber) {
+        return `https://deploy-preview-${prNumber}--resume-as-code-rafilkmp3.netlify.app`;
+      }
+      // Netlify branch deploy or production
+      const branchName = process.env.HEAD || process.env.BRANCH;
+      if (branchName && branchName !== 'main') {
+        return `https://${branchName}--resume-as-code-rafilkmp3.netlify.app`;
+      }
+      // Netlify production
+      return 'https://resume-as-code-rafilkmp3.netlify.app';
+    }
+
+    // Development environment - try to get LAN IP for mobile access
     const os = require('os');
     const networkInterfaces = os.networkInterfaces();
-
-    // Find the first non-internal IPv4 address
     for (const [name, interfaces] of Object.entries(networkInterfaces)) {
       for (const interface of interfaces || []) {
         if (interface.family === 'IPv4' && !interface.internal) {
           console.log(`🌐 Detected LAN IP: ${interface.address} (interface: ${name})`);
-          return interface.address;
+          return `http://${interface.address}:3000`;
         }
       }
     }
-    return null;
+
+    // Fallback to localhost for development
+    return 'http://localhost:3000';
   } catch (error) {
-    console.error('Error getting LAN IP:', error);
-    return null;
+    console.error('Error getting QR code URL:', error);
+    return 'http://localhost:3000';
   }
+
+}
+
+// Legacy function for backward compatibility
+function getMacLanIP() {
+  const url = getQRCodeURL();
+  if (url.startsWith('http://')) {
+    const match = url.match(/http:\/\/([^:]+):/);
+    return match ? match[1] : null;
+  }
+  return null;
 }
 
 // QR codes are now generated dynamically in the browser for better performance
@@ -77,11 +109,15 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   // QR codes are now generated dynamically in the browser (much more efficient!)
   // No need to embed 2.9KB base64 data in HTML anymore
 
-  // Enhance resume data with optimized images only
+  // Enhance resume data with optimized images and QR code URL
+  const qrCodeUrl = getQRCodeURL();
   const enhancedResumeData = {
     ...resumeData,
-    profileImageOptimization
+    profileImageOptimization,
+    qrCodeUrl: qrCodeUrl
   };
+
+  console.log(`📱 QR Code URL: ${qrCodeUrl}`);
 
   // Generate HTML (QR codes will be generated dynamically in browser)
   let html = template(enhancedResumeData);
@@ -179,10 +215,29 @@ async function generatePDF(resumeData) {
     console.log('📄 Generating multiple PDF versions...');
     console.log('⏱️  PDF generation timeout: 60 seconds');
 
-    const browser = await puppeteer.launch({
+    // Netlify/CI-specific Puppeteer configuration
+    const isNetlify = process.env.NETLIFY === 'true';
+    const isCI = process.env.CI === 'true';
+
+    const launchOptions = {
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--allow-running-insecure-content']
-    });
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-web-security',
+        '--allow-running-insecure-content',
+        '--disable-features=VizDisplayCompositor'
+      ]
+    };
+
+    // Use system Chrome on Netlify
+    if (isNetlify && process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    console.log(`🌍 Environment: ${isNetlify ? 'Netlify' : (isCI ? 'CI' : 'Local')}`);
+
+    const browser = await puppeteer.launch(launchOptions);
 
     const filePath = path.resolve('./dist/index.html');
 

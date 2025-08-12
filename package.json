@@ -61,6 +61,7 @@
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
     "@playwright/test": "^1.54.2",
+    "@puppeteer/browsers": "^2.5.0",
     "babel-jest": "^30.0.5",
     "chokidar": "^3.5.3",
     "jest": "^30.0.5",
