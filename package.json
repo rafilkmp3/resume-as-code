@@ -63,7 +63,7 @@
     "@playwright/test": "^1.54.2",
     "@puppeteer/browsers": "^2.5.0",
     "babel-jest": "^30.0.5",
-    "chokidar": "^3.5.3",
+    "chokidar": "^4.0.3",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
