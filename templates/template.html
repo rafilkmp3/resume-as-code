@@ -4660,7 +4660,7 @@
             </div>
             <div class="qr-modal-body">
                 <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
-                <div class="qr-code-url">{{basics.url}}</div>
+                <div class="qr-code-url">{{qrCodeUrl}}</div>
                 <p class="qr-code-description">Scan to access resume online or share this URL</p>
             </div>
             <div class="qr-modal-footer">
@@ -5920,7 +5920,7 @@
                 document.body.style.overflow = 'hidden';
 
                 // Generate QR code dynamically when modal opens (much more efficient!)
-                const resumeURL = '{{basics.url}}' || window.location.href;
+                const resumeURL = '{{qrCodeUrl}}' || '{{basics.url}}' || window.location.href;
                 await generateQRCodeOnDemand(resumeURL);
 
                 // Analytics tracking
@@ -6044,7 +6044,7 @@
             // Copy URL to clipboard
             qrCopyBtn?.addEventListener('click', async function() {
                 try {
-                    const url = '{{basics.url}}';
+                    const url = '{{qrCodeUrl}}';
                     await navigator.clipboard.writeText(url);
 
                     // Visual feedback
