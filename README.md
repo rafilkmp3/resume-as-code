@@ -4,6 +4,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-brightgreen?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
 [![CI/CD Status](https://github.com/rafilkmp3/resume-as-code/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Release Please](https://img.shields.io/badge/📦_Release_Please-Automated-purple?style=for-the-badge)](https://github.com/rafilkmp3/resume-as-code/releases)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Arch-blue?style=for-the-badge&logo=docker)](https://github.com/rafilkmp3/resume-as-code)
 
 > Infrastructure-as-Code approach to resume generation, showcasing modern DevOps practices and platform engineering excellence.
