@@ -33,7 +33,7 @@ on:
 
 concurrency:
   group: production-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write  # Changed from read to write for version bumping
