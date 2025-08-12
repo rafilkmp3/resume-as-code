@@ -1,24 +1,6 @@
 ---
 name: Auto Rebase
 
-# Forceful Dependabot Management - Idempotent & Simple
-# 
-# REUSABILITY: This workflow uses GitHub App tokens for comprehensive permissions.
-# To use in your repo:
-# 1. Create GitHub App at: https://github.com/settings/apps/new
-# 2. Grant permissions: contents:write, pull-requests:write, metadata:read
-# 3. Install app on your repository
-# 4. Add secrets: APP_ID and PRIVATE_KEY (from GitHub App)
-# 
-# PHILOSOPHY: All bot PRs are disposable - we can be forceful and idempotent
-# - Conflicting PRs: Force recreate from main + dependency changes
-# - Mergeable PRs: Daily sync with main to stay current  
-# - All PRs: Guarantee Netlify preview deployments via trigger commits
-# - Result: "always ready to merge" with preview links
-#
-# IMPORTANT: GitHub API mergeable status is unreliable - we test REAL merges
-# See: https://github.com/rafilkmp3/resume-as-code/pull/20#issuecomment-3180749658
-
 on:
   push:
     branches:
@@ -57,7 +39,7 @@ jobs:
       - name: Setup GitHub CLI and Git Config
         run: |
           gh auth setup-git
-          
+
           # Configure git identity for commits
           git config --global user.name "resume-pipeline-bot[bot]"
           git config --global user.email "noreply@github.com"
@@ -65,58 +47,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Find and rebase release-please PRs
+      - name: Auto-rebase Dependabot PRs
         if: github.event_name == 'push' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "🔍 Looking for release-please PRs to rebase..."
-
-          # Find all open release-please PRs
-          RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number,title,headRefName --jq '.[] | @json')
-
-          if [ -z "$RELEASE_PRS" ]; then
-            echo "ℹ️ No release-please PRs found"
-          else
-            echo "$RELEASE_PRS" | while IFS= read -r pr_json; do
-              PR_DATA=$(echo "$pr_json" | jq -r '.')
-              PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
-              PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
-              PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
-
-              echo "🔄 Rebasing release-please PR #$PR_NUMBER: $PR_TITLE"
-
-              # Check if PR needs rebasing
-              if gh pr view "$PR_NUMBER" --json mergeable --jq '.mergeable' | grep -q "CONFLICTING"; then
-                echo "⚠️ PR #$PR_NUMBER has conflicts, attempting rebase..."
-
-                # Checkout the PR branch
-                git fetch origin "$PR_BRANCH"
-                git checkout "$PR_BRANCH"
-
-                # Attempt rebase
-                if git rebase origin/main; then
-                  git push --force-with-lease origin "$PR_BRANCH"
-                  echo "✅ Successfully rebased PR #$PR_NUMBER"
-                else
-                  echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts"
-                  git rebase --abort
-                fi
-              else
-                echo "✅ PR #$PR_NUMBER is already up-to-date"
-              fi
-            done
-          fi
-
-      - name: Forceful Dependabot Management (Idempotent)
-        if: github.event_name == 'push' || !github.event.inputs.pr_number
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          echo "🔍 Forceful Dependabot PR management (all PRs are disposable)..."
+          echo "🔍 Checking and auto-rebasing Dependabot PRs..."
 
           # Find all open Dependabot PRs
-          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,isDraft --jq '.[] | @json')
+          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable --jq '.[] | @json')
 
           if [ -z "$DEPENDABOT_PRS" ]; then
             echo "ℹ️ No Dependabot PRs found"
@@ -126,203 +65,62 @@ jobs:
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
               PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
               PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
-              PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
-              IS_DRAFT=$(echo "$PR_DATA" | jq -r '.isDraft')
 
               echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
-              echo "   Branch: $PR_BRANCH"
-              echo "   Status: $PR_MERGEABLE"
 
-              # REAL MERGE CONFLICT DETECTION: Test actual merge instead of trusting API
-              echo "🔍 Testing actual merge capability (GitHub API lies about conflicts)..."
-              
-              git fetch origin main
-              git fetch origin $PR_BRANCH
-              
-              # Create test merge to detect REAL conflicts
-              git checkout main
-              git checkout -B test-merge-$PR_NUMBER main
-              
-              REAL_CONFLICTS=false
-              if git merge origin/$PR_BRANCH --no-commit --no-ff 2>/dev/null; then
-                echo "✅ PR #$PR_NUMBER: No real conflicts detected"
-                git merge --abort 2>/dev/null || true
+              if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
+                echo "⚠️ PR #$PR_NUMBER has conflicts - triggering automatic recreate..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
+              elif [ "$PR_MERGEABLE" = "MERGEABLE" ]; then
+                echo "✅ PR #$PR_NUMBER is up-to-date and ready"
+              elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
+                echo "❓ PR #$PR_NUMBER status is UNKNOWN - triggering recreate to refresh..."
+                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
               else
-                echo "⚠️ PR #$PR_NUMBER: REAL merge conflicts detected (API was wrong!)"
-                git merge --abort 2>/dev/null || true
-                REAL_CONFLICTS=true
+                echo "❓ PR #$PR_NUMBER status: $PR_MERGEABLE"
               fi
-              
-              git checkout main
-              git branch -D test-merge-$PR_NUMBER 2>/dev/null || true
-              
-              # AGGRESSIVE STRATEGY: ALWAYS rebase ALL Dependabot PRs (disposable)
-              # This ensures they're always current with main and triggers Netlify
-              echo "🔨 AGGRESSIVE REBASE: Always updating $PR_BRANCH (ensures Netlify trigger)..."
-              
-              # Get Dependabot's dependency changes
-              DEPENDABOT_COMMITS=$(gh api repos/:owner/:repo/pulls/$PR_NUMBER/commits --jq '.[].sha' | head -3)
-              
-              # Always force recreate from main (idempotent and guaranteed fresh)
-              git checkout -B force-$PR_BRANCH main
-              
-              # Apply dependency changes with multiple fallback strategies
-              RECREATION_SUCCESS=false
-              echo "$DEPENDABOT_COMMITS" | while IFS= read -r commit_sha; do
-                if [ "$RECREATION_SUCCESS" = "false" ]; then
-                  echo "🔄 Applying commit: $commit_sha"
-                  if git cherry-pick $commit_sha 2>/dev/null; then
-                    echo "✅ Applied dependency changes successfully"
-                    
-                    # Force push to trigger ALL webhooks (Netlify, etc.)
-                    git push --force origin force-$PR_BRANCH:$PR_BRANCH
-                    RECREATION_SUCCESS=true
-                    break
-                  else
-                    git cherry-pick --abort 2>/dev/null || true
-                    echo "⚠️ Cherry-pick failed, trying next commit..."
-                  fi
-                fi
-              done
-              
-              # Fallback 1: Force merge main into branch
-              if [ "$RECREATION_SUCCESS" = "false" ]; then
-                echo "🔥 Fallback 1: Force merging main into $PR_BRANCH"
-                gh api repos/:owner/:repo/merges \
-                  --method POST \
-                  --field base="$PR_BRANCH" \
-                  --field head="main" \
-                  --field commit_message="Auto-rebase: force merge main to resolve conflicts" \
-                  2>/dev/null && RECREATION_SUCCESS=true
-              fi
-              
-              # Fallback 2: Create empty trigger commit if all else fails
-              if [ "$RECREATION_SUCCESS" = "false" ]; then
-                echo "🚨 Fallback 2: Creating trigger commit to ensure Netlify deployment"
-                git checkout $PR_BRANCH 2>/dev/null || git checkout -B $PR_BRANCH main
-                
-                # Create trigger commit that will definitely trigger Netlify
-                TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-                echo "# Dependabot rebase trigger: $TIMESTAMP" >> .dependabot-rebase-trigger
-                git add .dependabot-rebase-trigger
-                git commit -m "trigger: Dependabot auto-rebase for Netlify preview deployment
-
-This commit ensures Netlify preview deployment is triggered.
-Original PR: #$PR_NUMBER
-Timestamp: $TIMESTAMP" --allow-empty
-                
-                git push --force origin $PR_BRANCH
-                RECREATION_SUCCESS=true
-              fi
-              
-              git checkout main
-              git branch -D force-$PR_BRANCH 2>/dev/null || true
-              
-              if [ "$RECREATION_SUCCESS" = "true" ]; then
-                echo "✅ PR #$PR_NUMBER: Successfully rebased and Netlify trigger guaranteed"
-              else
-                echo "❌ PR #$PR_NUMBER: All rebase strategies failed"
-              fi
-
-              # DOUBLE-ENSURE Netlify deployment trigger (redundant but guaranteed)
-              echo "🌐 DOUBLE-ENSURING Netlify preview deployment..."
-              git fetch origin $PR_BRANCH
-              git checkout $PR_BRANCH
-              
-              # Strategy 1: Empty commit to trigger webhooks
-              git commit --allow-empty -m "trigger: Guarantee Netlify preview deployment
-
-Automated trigger to ensure Netlify builds preview for PR #$PR_NUMBER
-This ensures developers always have preview links available.
-Timestamp: $(date +%Y%m%d-%H%M%S)"
-              
-              git push origin $PR_BRANCH
-              
-              # Strategy 2: File modification trigger (if empty commit isn't enough)
-              TRIGGER_FILE=".netlify-preview-trigger-$PR_NUMBER"
-              echo "# Netlify Preview Trigger for PR #$PR_NUMBER
-# Generated: $(date)
-# Purpose: Ensure Netlify preview deployment
-PR_NUMBER=$PR_NUMBER
-TRIGGER_TIME=$(date +%s)" > $TRIGGER_FILE
-              
-              git add $TRIGGER_FILE
-              git commit -m "trigger: Netlify preview file for PR #$PR_NUMBER" --allow-empty
-              git push origin $PR_BRANCH
-              
-              git checkout main
-
-              # Mark as ready for review (remove draft)
-              if [ "$IS_DRAFT" = "true" ]; then
-                echo "📝 Converting PR #$PR_NUMBER from draft to ready..."
-                gh pr ready "$PR_NUMBER" 2>/dev/null || echo "Already ready"
-              fi
-
-              echo "✅ PR #$PR_NUMBER is now forcefully clean and deployable"
-              echo ""
             done
 
-            echo "📊 AGGRESSIVE Dependabot automation completed:"
-            echo "   🔨 ALL PRs forcefully rebased from main (always current)"
-            echo "   🌐 DOUBLE Netlify preview triggers (empty commit + file trigger)"
-            echo "   📝 All PRs marked ready for review"
-            echo "   🎯 EVERY Dependabot PR guaranteed mergeable with preview links!"
-            echo "   💪 No manual intervention ever needed - fully automated!"
+            echo ""
+            echo "ℹ️ Dependabot auto-recreate strategy:"
+            echo "   • CONFLICTING → Automatic @dependabot recreate command"
+            echo "   • UNKNOWN → Automatic @dependabot recreate command (status refresh)"
+            echo "   • MERGEABLE → No action needed"
+            echo "   • Recreate triggers clean PRs + Netlify preview environments"
+            echo "   • All commands executed automatically - no manual intervention required"
           fi
 
-      - name: Forceful Rebase specific PR
+      - name: Rebase specific PR
         if: github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           PR_NUMBER="${{ github.event.inputs.pr_number }}"
-          echo "🔄 Forcefully rebasing specific PR #$PR_NUMBER"
+          echo "🔄 Rebasing specific PR #$PR_NUMBER"
 
           # Check if it's a Dependabot PR
           PR_AUTHOR=$(gh pr view "$PR_NUMBER" --json author --jq '.author.login')
-          PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
 
           if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            echo "📦 Dependabot PR - using aggressive trigger strategy..."
-            
-            # Simple and reliable: Just trigger Netlify with empty commits
-            git fetch origin $PR_BRANCH
-            git checkout $PR_BRANCH
-            
-            # Strategy 1: Empty commit to trigger all webhooks
-            git commit --allow-empty -m "trigger: Force Netlify preview for PR #$PR_NUMBER
-
-Automated rebase trigger to ensure Netlify preview deployment.
-Manual trigger requested for PR #$PR_NUMBER.
-Timestamp: $(date +%Y%m%d-%H%M%S)"
-            
-            git push origin $PR_BRANCH
-            
-            # Strategy 2: File trigger for extra assurance
-            echo "# Manual Netlify trigger for PR #$PR_NUMBER
-Generated: $(date)
-Purpose: Ensure preview deployment
-Manual trigger: true" > .manual-trigger-$PR_NUMBER
-            
-            git add .manual-trigger-$PR_NUMBER
-            git commit -m "trigger: Manual Netlify trigger for PR #$PR_NUMBER"
-            git push origin $PR_BRANCH
-            
-            git checkout main
-            echo "✅ Dependabot PR #$PR_NUMBER: Manual triggers sent for Netlify"
+            echo "📦 This is a Dependabot PR, using recreate command..."
+            gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
+            echo "✅ Recreate command sent (will trigger Netlify preview)"
           else
-            echo "👤 User PR - using GitHub merge API (safer)..."
-            
-            # Use API instead of local git operations for user PRs
-            echo "🔄 Attempting to merge main into user PR via API..."
-            if gh api repos/:owner/:repo/merges \
-              --method POST \
-              --field base="$PR_BRANCH" \
-              --field head="main" \
-              --field commit_message="Auto-merge: resolve conflicts with main branch"; then
-              echo "✅ Successfully merged main into PR #$PR_NUMBER"
+            # For other PRs, attempt direct rebase
+            PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
+
+            git fetch origin "$PR_BRANCH"
+            git checkout "$PR_BRANCH"
+
+            if git rebase origin/main; then
+              git push --force-with-lease origin "$PR_BRANCH"
+              echo "✅ Successfully rebased PR #$PR_NUMBER"
             else
-              echo "⚠️ API merge failed - PR #$PR_NUMBER may need manual intervention"
+              echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts"
+              git rebase --abort
+              exit 1
             fi
           fi
 
@@ -341,11 +139,6 @@ Manual trigger: true" > .manual-trigger-$PR_NUMBER
           else
             echo "Manually triggered for all PRs" >> $GITHUB_STEP_SUMMARY
           fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Release-Please PRs" >> $GITHUB_STEP_SUMMARY
-          RELEASE_COUNT=$(gh pr list --label "autorelease: pending" --json number --jq '. | length')
-          echo "Found $RELEASE_COUNT release-please PR(s)" >> $GITHUB_STEP_SUMMARY
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
