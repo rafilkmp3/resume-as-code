@@ -1,6 +1,6 @@
 {
   "name": "resume-as-code",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Rafael Sathler's resume generation system",
   "scripts": {
     "build": "node scripts/build.js",

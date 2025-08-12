@@ -176,9 +176,9 @@ npx playwright test --update-snapshots
 
 ```bash
 # Test with specific browser images
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:2.2.0
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-firefox:2.2.0
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-webkit:2.2.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:2.3.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-firefox:2.3.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-webkit:2.3.0
 ```
 
 #### Multi-Architecture Validation
@@ -334,14 +334,14 @@ make build-images  # Build all browser images
 
 ```bash
 docker run --platform linux/amd64 --rm \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:2.2.0
+  ghcr.io/rafilkmp3/resume-as-code-chromium:2.3.0
 ```
 
 #### ARM64 Testing (Mac Apple Silicon)
 
 ```bash
 docker run --platform linux/arm64 --rm \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:2.2.0
+  ghcr.io/rafilkmp3/resume-as-code-chromium:2.3.0
 ```
 
 ### Contributing to Docker Infrastructure
