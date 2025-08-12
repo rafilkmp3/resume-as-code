@@ -1,4 +1,4 @@
-.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal build-images build-base build-chromium build-firefox build-webkit monitor
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal monitor
 
 # Colors for output
 RED=\033[0;31m
@@ -43,11 +43,6 @@ help:
 	@echo ""
 	@echo "$(GREEN)🐳 Docker:$(NC)"
 	@echo "  $(CYAN)make docker-check$(NC)   - Check if Docker is running"
-	@echo "  $(CYAN)make build-images$(NC)   - Build all browser-specific images"
-	@echo "  $(CYAN)make build-base$(NC)     - Build base image only"
-	@echo "  $(CYAN)make build-chromium$(NC) - Build Chromium image only"
-	@echo "  $(CYAN)make build-firefox$(NC)  - Build Firefox image only"
-	@echo "  $(CYAN)make build-webkit$(NC)   - Build WebKit image only"
 	@echo ""
 	@echo "$(GREEN)🛠️  Utilities:$(NC)"
 	@echo "  $(CYAN)make status$(NC)         - Show project status and health check"
@@ -63,7 +58,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)⚡ Local GitHub Actions Testing (act):$(NC)"
 	@echo "  $(CYAN)make act-production$(NC)  - Test production workflow locally"
-	@echo "  $(CYAN)make act-docker$(NC)      - Test docker images workflow locally"
+	@echo "  $(CYAN)make act-release$(NC)     - Test release workflow locally"
 	@echo "  $(CYAN)make act-list$(NC)        - List all available workflows"
 	@echo "  $(CYAN)make act-check$(NC)       - Check act installation and setup"
 	@echo ""
@@ -433,40 +428,6 @@ build-and-push-production: docker-check
 	@docker push ghcr.io/rafilkmp3/resume-as-code:production
 	@echo "$(GREEN)✅ Production images pushed successfully!$(NC)"
 
-# Build all browser-specific Docker images
-build-images: docker-check build-base build-chromium build-firefox build-webkit
-	@echo "$(GREEN)🎉 All browser images built successfully!$(NC)"
-
-# Build base image with common dependencies and embedded hello world test
-build-base: docker-check
-	@echo "$(CYAN)🏗️ Building base image with embedded Hello World test...$(NC)"
-	@docker build --target golden-base -t resume-as-code:base .
-	@echo "$(GREEN)✅ Base image built successfully!$(NC)"
-
-# Build Chromium-specific image
-build-chromium: docker-check
-	@echo "$(CYAN)🏗️ Building Chromium image...$(NC)"
-	@docker build --target chromium -t resume-as-code:chromium .
-	@echo "$(GREEN)✅ Chromium image built successfully!$(NC)"
-	@echo "$(BLUE)🎭 Testing embedded Hello World test...$(NC)"
-	@docker run --rm resume-as-code:chromium npx playwright test tests/hello-world/hello-world.spec.js --project=desktop-chrome --reporter=line --config=playwright.config.docker.js || echo "$(YELLOW)⚠️ Hello World test needs Playwright config (non-blocking)$(NC)"
-
-# Build Firefox-specific image
-build-firefox: docker-check
-	@echo "$(CYAN)🏗️ Building Firefox image...$(NC)"
-	@docker build --target firefox -t resume-as-code:firefox .
-	@echo "$(GREEN)✅ Firefox image built successfully!$(NC)"
-	@echo "$(BLUE)🎭 Testing embedded Hello World test...$(NC)"
-	@docker run --rm resume-as-code:firefox npx playwright test tests/hello-world/hello-world.spec.js --project=desktop-firefox --reporter=line --config=playwright.config.docker.js || echo "$(YELLOW)⚠️ Hello World test needs Playwright config (non-blocking)$(NC)"
-
-# Build WebKit-specific image
-build-webkit: docker-check
-	@echo "$(CYAN)🏗️ Building WebKit image...$(NC)"
-	@docker build --target webkit -t resume-as-code:webkit .
-	@echo "$(GREEN)✅ WebKit image built successfully!$(NC)"
-	@echo "$(BLUE)🎭 Testing embedded Hello World test...$(NC)"
-	@docker run --rm resume-as-code:webkit npx playwright test tests/hello-world/hello-world.spec.js --project=desktop-webkit --reporter=line --config=playwright.config.docker.js || echo "$(YELLOW)⚠️ Hello World test needs Playwright config (non-blocking)$(NC)"
-
 # Run visual monitoring tests (non-blocking)
 monitor: docker-check
 	@echo "$(PURPLE)📸 Running visual monitoring...$(NC)"
@@ -510,11 +471,11 @@ act-production: act-check
 	@echo "$(YELLOW)⚠️  This will run the full production build locally$(NC)"
 	@act push $(ACT_FLAGS) --workflows .github/workflows/production.yml --verbose
 
-# Test docker images workflow locally
-act-docker: act-check
-	@echo "$(PURPLE)🐳 Testing Docker Images Pipeline locally with act...$(NC)"
-	@echo "$(YELLOW)⚠️  This will build Docker images locally$(NC)"
-	@act push $(ACT_FLAGS) --workflows .github/workflows/docker-images.yml --verbose
+# Test release workflow locally
+act-release: act-check
+	@echo "$(PURPLE)📦 Testing Release Please Pipeline locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This will test release automation locally$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/release-please.yml --verbose
 
 # Test workflow with dry-run (see what would happen without running)
 act-dry-run: act-check

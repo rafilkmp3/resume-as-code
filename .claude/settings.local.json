@@ -129,7 +129,8 @@
       "Bash(timeout 120 make build)",
       "Bash(act push:*)",
       "Bash(gh issue view:*)",
-      "Bash(./scripts/install-git-hooks.sh:*)"
+      "Bash(./scripts/install-git-hooks.sh:*)",
+      "Bash(gh release view:*)"
     ],
     "deny": []
   }

@@ -34,10 +34,7 @@
 | Workflow                   | Path                                      | Status    | Purpose                   |
 | -------------------------- | ----------------------------------------- | --------- | ------------------------- |
 | **Production Pipeline**    | `.github/workflows/production.yml`        | ✅ Active | Main deployment pipeline  |
-| **Staging CI/CD Pipeline** | `.github/workflows/ci-staging.yml`        | ✅ Active | Testing and validation    |
-| **Docker Images**          | `.github/workflows/docker-images.yml`     | ✅ Active | Container image builds    |
-| **Release Deployment**     | `.github/workflows/release-deploy.yml`    | ✅ Active | Release automation        |
-| **Visual Monitoring**      | `.github/workflows/visual-monitoring.yml` | ✅ Active | Visual regression testing |
+| **Release Please**         | `.github/workflows/release-please.yml`    | ✅ Active | Automated releases        |
 | **Dependabot Updates**     | `dynamic/dependabot/dependabot-updates`   | ✅ Active | Dependency management     |
 | **GitHub Pages**           | `dynamic/pages/pages-build-deployment`    | ✅ Active | Static site deployment    |
 
