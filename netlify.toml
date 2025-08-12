@@ -1,6 +1,6 @@
 [build]
   # Build command for resume generation with Puppeteer setup
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path /opt/netlify && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path /opt/netlify) make build-netlify"
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
 
   # Directory to publish (contains HTML + PDF + assets)
   publish = "dist"
@@ -15,7 +15,7 @@
 
 # Production deployment settings (main branch)
 [context.production]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path /opt/netlify && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path /opt/netlify) make build-netlify"
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
   publish = "dist"
 
   [context.production.environment]
@@ -24,7 +24,7 @@
 
 # Deploy Preview settings (for PRs)
 [context.deploy-preview]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path /opt/netlify && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path /opt/netlify) make build-netlify"
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
   publish = "dist"
 
   [context.deploy-preview.environment]
@@ -34,7 +34,7 @@
 
 # Branch deploy settings (feature branches)
 [context.branch-deploy]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path /opt/netlify && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path /opt/netlify) make build-netlify"
+  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
   publish = "dist"
 
 # Headers for security and performance
