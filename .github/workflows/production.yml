@@ -54,20 +54,54 @@ jobs:
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
       IS_EMERGENCY: ${{ github.event.inputs.deployment_mode == 'emergency' }}
       # GitHub Pages deployment environment variables
-      NETLIFY: false
-      NETLIFY_ENV: github-pages
-      REVIEW_ID: ${{ github.event.number || '' }}
-      HEAD: ${{ github.head_ref || github.ref_name }}
+      NETLIFY: 'false'
+      NETLIFY_ENV: 'github-pages'
+      REVIEW_ID: ''
+      HEAD: ${{ github.ref_name }}
       BRANCH: ${{ github.ref_name }}
-      CONTEXT: ${{ github.event_name == 'pull_request' && 'deploy-preview' || 'production' }}
-      DEPLOY_PRIME_URL: ${{ github.event_name == 'pull_request' && format('https://{0}.github.io/resume-as-code/pr-{1}', github.repository_owner, github.event.number) || format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
-      DEPLOY_URL: ${{ format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
-      URL: ${{ format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
+      CONTEXT: 'production'
+      DEPLOY_PRIME_URL: 'https://rafilkmp3.github.io/resume-as-code/'
+      DEPLOY_URL: 'https://rafilkmp3.github.io/resume-as-code/'
+      URL: 'https://rafilkmp3.github.io/resume-as-code/'
+      # Version and release information
+      NODE_ENV: 'production'
+      GITHUB_PAGES: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           lfs: true
+
+      - name: Calculate version and commit info
+        id: version-info
+        run: |
+          echo "🔍 Calculating version and commit information..."
+
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current-version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+
+          # Find the last release tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            # No tags found, count all commits
+            COMMITS_SINCE_RELEASE=$(git rev-list --count HEAD)
+            echo "📊 No previous releases found"
+            echo "📊 Total commits: ${COMMITS_SINCE_RELEASE}"
+          else
+            # Count commits since last tag
+            COMMITS_SINCE_RELEASE=$(git rev-list --count ${LAST_TAG}..HEAD)
+            echo "📊 Last release: ${LAST_TAG}"
+            echo "📊 Commits since release: ${COMMITS_SINCE_RELEASE}"
+          fi
+
+          echo "commits-since-release=${COMMITS_SINCE_RELEASE}" >> $GITHUB_OUTPUT
+
+          # Export for use in build
+          echo "APP_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
+          echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE}" >> $GITHUB_ENV
+          echo "LAST_RELEASE_TAG=${LAST_TAG}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

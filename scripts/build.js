@@ -166,13 +166,23 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // Update app version, environment and commit hash from package.json and CI environment
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-  const appVersion = packageJson.version;
+  const appVersion = process.env.APP_VERSION || packageJson.version;
   const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
   const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main' || process.env.GITHUB_ACTIONS;
   const environment = isProduction && buildBranch === 'main' ? 'production' : 'preview';
   const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
   const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
+  const commitsSinceRelease = process.env.COMMITS_SINCE_RELEASE || '0';
+  const lastReleaseTag = process.env.LAST_RELEASE_TAG || 'none';
   const buildTimestamp = new Date().toISOString();
+
+  console.log('📊 Version Information:');
+  console.log(`  App Version: ${appVersion}`);
+  console.log(`  Commits since release: ${commitsSinceRelease}`);
+  console.log(`  Last release tag: ${lastReleaseTag}`);
+  console.log(`  Environment: ${environment}`);
+  console.log(`  Build branch: ${buildBranch}`);
+  console.log(`  Commit: ${commitShort}`);
 
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
@@ -180,12 +190,15 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `const branchName = '${buildBranch}';`);
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
+  html = html.replace(/const commitsSinceRelease = '\d+';/, `const commitsSinceRelease = '${commitsSinceRelease}';`);
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/,
     `<span id="app-environment">${environment}</span>`);
   html = html.replace(/<span id="app-commit">[^<]*<\/span>/,
     `<span id="app-commit">${commitShort}</span>`);
+  html = html.replace(/<span id="commits-since-release">[^<]*<\/span>/,
+    `<span id="commits-since-release">${commitsSinceRelease}</span>`);
 
   // Update meta tags with build information
   html = html.replace(/(<meta name="build-commit" content=")[^"]*(")/,
