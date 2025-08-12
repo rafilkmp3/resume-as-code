@@ -37,9 +37,9 @@ COPY . .
 
 | Image                                             | Platforms                | Size   | Purpose               |
 | ------------------------------------------------- | ------------------------ | ------ | --------------------- |
-| `ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0` | linux/amd64, linux/arm64 | ~350MB | Chromium testing      |
-| `ghcr.io/rafilkmp3/resume-as-code-firefox:1.20.0`  | linux/amd64, linux/arm64 | ~400MB | Firefox testing       |
-| `ghcr.io/rafilkmp3/resume-as-code-webkit:1.20.0`   | linux/amd64, linux/arm64 | ~500MB | WebKit/Safari testing |
+| `ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0` | linux/amd64, linux/arm64 | ~350MB | Chromium testing      |
+| `ghcr.io/rafilkmp3/resume-as-code-firefox:1.21.0`  | linux/amd64, linux/arm64 | ~400MB | Firefox testing       |
+| `ghcr.io/rafilkmp3/resume-as-code-webkit:1.21.0`   | linux/amd64, linux/arm64 | ~500MB | WebKit/Safari testing |
 
 ### Image Tags
 
@@ -68,13 +68,13 @@ make docker-prod
 docker version --format '{{.Server.Arch}}'
 
 # Pull appropriate image (automatic architecture selection)
-docker pull ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
+docker pull ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0
 
 # Run development server
-docker run --rm -p 3000:3000 ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
+docker run --rm -p 3000:3000 ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0
 
 # Run with volume mount for development
-docker run --rm -p 3000:3000 -v "$(pwd):/workspace" ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
+docker run --rm -p 3000:3000 -v "$(pwd):/workspace" ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0
 ```
 
 ### Building Images Locally
@@ -101,7 +101,7 @@ Each image includes embedded "Hello World" tests that verify browser functionali
 
 ```bash
 # Run embedded hello world test
-docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
+docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0
 
 # Expected output:
 # 🧪 Running Hello World test for chromium
@@ -113,12 +113,12 @@ docker run --rm ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
 ```bash
 # Run your own tests
 docker run --rm -v "$(pwd):/workspace" \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0 \
+  ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0 \
   npx playwright test --project=desktop-chrome
 
 # Run specific test file
 docker run --rm -v "$(pwd):/workspace" \
-  ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0 \
+  ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0 \
   npx playwright test tests/e2e/theme-toggle.spec.js
 ```
 
@@ -205,7 +205,7 @@ PLAYWRIGHT_BROWSERS_PATH=/opt/playwright   # Browser binary location
 ```bash
 # Problem: Trying to run ARM64 image on AMD64 or vice versa
 # Solution: Use multi-arch manifest (pulls correct architecture automatically)
-docker pull ghcr.io/rafilkmp3/resume-as-code-chromium:1.20.0
+docker pull ghcr.io/rafilkmp3/resume-as-code-chromium:1.21.0
 ```
 
 #### Slow Build Times
