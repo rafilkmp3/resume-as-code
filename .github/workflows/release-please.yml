@@ -79,13 +79,13 @@ jobs:
 
       - name: Create versioned PDF asset
         run: |
-          # Create versioned PDF with release tag
-          cp dist/resume.pdf "resume-rafael-sathler-${{ needs.release-please.outputs.tag_name }}.pdf"
+          # Create versioned PDF with cleaner naming
+          cp dist/resume.pdf "rafael-sathler-${{ needs.release-please.outputs.tag_name }}.pdf"
 
       - name: Upload versioned PDF to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ needs.release-please.outputs.tag_name }} \
-            "resume-rafael-sathler-${{ needs.release-please.outputs.tag_name }}.pdf" \
+            "rafael-sathler-${{ needs.release-please.outputs.tag_name }}.pdf" \
             --clobber
