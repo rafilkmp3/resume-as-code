@@ -188,9 +188,25 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
   html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/,
     `const branchName = '${buildBranch}';`);
+  // Enhanced environment variable replacements for smart contextual linking
+  const buildContext = process.env.BUILD_CONTEXT || 'main';
+  const prNumber = process.env.PR_NUMBER || '';
+  const contextUrl = process.env.CONTEXT_URL || '';
+  const compareUrl = process.env.COMPARE_URL || '';
+  
+  console.log('🔗 Contextual linking information:');
+  console.log(`  Build context: ${buildContext}`);
+  console.log(`  PR number: ${prNumber}`);
+  console.log(`  Context URL: ${contextUrl}`);
+  console.log(`  Compare URL: ${compareUrl}`);
+
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
   html = html.replace(/const commitsSinceRelease = '\d+';/, `const commitsSinceRelease = '${commitsSinceRelease}';`);
+  html = html.replace(/const buildContext = '[^']*';/, `const buildContext = '${buildContext}';`);
+  html = html.replace(/const prNumber = '[^']*';/, `const prNumber = '${prNumber}';`);
+  html = html.replace(/const contextUrl = '[^']*';/, `const contextUrl = '${contextUrl}';`);
+  html = html.replace(/const compareUrl = '[^']*';/, `const compareUrl = '${compareUrl}';`);
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/,

@@ -103,6 +103,40 @@ jobs:
           echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE}" >> $GITHUB_ENV
           echo "LAST_RELEASE_TAG=${LAST_TAG}" >> $GITHUB_ENV
 
+      - name: Detect build context
+        id: context
+        run: |
+          echo "🔍 Detecting build context..."
+          
+          # Detect build context and generate appropriate URLs
+          REPO_URL="https://github.com/${{ github.repository }}"
+          
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "BUILD_CONTEXT=release" >> $GITHUB_ENV
+            echo "CONTEXT_URL=${{ github.event.release.html_url || format('{0}/releases/tag/{1}', env.REPO_URL, github.ref_name) }}" >> $GITHUB_ENV
+            echo "📊 Build context: Release"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "BUILD_CONTEXT=pr" >> $GITHUB_ENV
+            echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+            echo "CONTEXT_URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_ENV
+            echo "📊 Build context: Pull Request #${{ github.event.pull_request.number }}"
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
+            echo "CONTEXT_URL=${REPO_URL}/commits/main" >> $GITHUB_ENV
+            echo "📊 Build context: Main branch"
+          else
+            echo "BUILD_CONTEXT=branch" >> $GITHUB_ENV
+            echo "CONTEXT_URL=${REPO_URL}/tree/${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "📊 Build context: Branch ${{ github.ref_name }}"
+          fi
+          
+          # Generate compare URL for commits ahead
+          if [ -n "$LAST_RELEASE_TAG" ]; then
+            echo "COMPARE_URL=${REPO_URL}/compare/${LAST_RELEASE_TAG}...HEAD" >> $GITHUB_ENV
+          else
+            echo "COMPARE_URL=${REPO_URL}/commits/${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -161,6 +195,10 @@ jobs:
             --build-arg APP_VERSION=${APP_VERSION} \
             --build-arg COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE} \
             --build-arg LAST_RELEASE_TAG=${LAST_RELEASE_TAG} \
+            --build-arg BUILD_CONTEXT=${BUILD_CONTEXT} \
+            --build-arg PR_NUMBER=${PR_NUMBER} \
+            --build-arg CONTEXT_URL="${CONTEXT_URL}" \
+            --build-arg COMPARE_URL="${COMPARE_URL}" \
             --build-arg NODE_ENV=production \
             --build-arg GITHUB_PAGES=true \
             --build-arg NETLIFY=false \
@@ -200,6 +238,10 @@ jobs:
             --build-arg APP_VERSION=${APP_VERSION} \
             --build-arg COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE} \
             --build-arg LAST_RELEASE_TAG=${LAST_RELEASE_TAG} \
+            --build-arg BUILD_CONTEXT=${BUILD_CONTEXT} \
+            --build-arg PR_NUMBER=${PR_NUMBER} \
+            --build-arg CONTEXT_URL="${CONTEXT_URL}" \
+            --build-arg COMPARE_URL="${COMPARE_URL}" \
             --build-arg NODE_ENV=production \
             --build-arg GITHUB_PAGES=true \
             --build-arg NETLIFY=false \
