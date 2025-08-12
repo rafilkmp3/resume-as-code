@@ -13,8 +13,7 @@
         {"type": "perf", "section": "Performance Improvements", "hidden": false},
         {"type": "test", "section": "Tests", "hidden": true},
         {"type": "ci", "section": "Continuous Integration", "hidden": false}
-      ],
-      "release-as": "patch"
+      ]
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
