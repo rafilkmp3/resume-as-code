@@ -32,26 +32,40 @@ function getQRCodeURL() {
     console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES);
 
     // Netlify environment (check first as it has highest priority for previews)
-    if (process.env.NETLIFY === 'true') {
+    // Netlify sets NETLIFY=true for all deployments
+    if (process.env.NETLIFY === 'true' || process.env.NETLIFY_ENV) {
       // Use Netlify's DEPLOY_PRIME_URL if available (most reliable)
       if (process.env.DEPLOY_PRIME_URL) {
         console.log('🌐 Using DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
         return process.env.DEPLOY_PRIME_URL;
       }
 
-      const prNumber = process.env.REVIEW_ID; // Netlify sets this for PR previews
-      if (prNumber) {
-        const url = `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
-        console.log('🌐 Using PR preview URL:', url);
-        return url;
+      // Try DEPLOY_URL as fallback
+      if (process.env.DEPLOY_URL) {
+        console.log('🌐 Using DEPLOY_URL:', process.env.DEPLOY_URL);
+        return process.env.DEPLOY_URL;
       }
-      // Netlify branch deploy or production
-      const branchName = process.env.HEAD || process.env.BRANCH;
-      if (branchName && branchName !== 'main') {
-        const url = `https://${branchName}--resume-as-code.netlify.app`;
-        console.log('🌐 Using branch deploy URL:', url);
-        return url;
+
+      // Check for deploy preview context
+      if (process.env.CONTEXT === 'deploy-preview') {
+        const prNumber = process.env.REVIEW_ID;
+        if (prNumber) {
+          const url = `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
+          console.log('🌐 Using PR preview URL:', url);
+          return url;
+        }
       }
+
+      // Check for branch deploy context
+      if (process.env.CONTEXT === 'branch-deploy') {
+        const branchName = process.env.HEAD || process.env.BRANCH;
+        if (branchName && branchName !== 'main') {
+          const url = `https://${branchName}--resume-as-code.netlify.app`;
+          console.log('🌐 Using branch deploy URL:', url);
+          return url;
+        }
+      }
+
       // Netlify production
       const url = 'https://resume-as-code.netlify.app';
       console.log('🌐 Using Netlify production URL:', url);
