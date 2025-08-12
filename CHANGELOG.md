@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.4.0...resume-as-code-v3.5.0) (2025-08-12)
+
+
+### Features
+
+* aggressive Dependabot management with force recreation and daily automation ([5fc6c63](https://github.com/rafilkmp3/resume-as-code/commit/5fc6c6311e992bc3f42da87ba15b8179877c82e0))
+
+
+### Bug Fixes
+
+* enforce conventional commits format in Dependabot configuration ([bf57d15](https://github.com/rafilkmp3/resume-as-code/commit/bf57d15c34f96261c0bc0a5f742f9ef90e0b4c23))
+* resolve git identity configuration in auto-rebase workflow ([2c769ea](https://github.com/rafilkmp3/resume-as-code/commit/2c769eacffb265e76b4d8e4b607f4d9534aa41c2))
+* simplify auto-rebase workflow to resolve YAML syntax errors ([fd7d793](https://github.com/rafilkmp3/resume-as-code/commit/fd7d79326abf496389f52b89d5ca0baeaadf289c))
+
 ## [3.4.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.3.0...resume-as-code-v3.4.0) (2025-08-12)
 
 
