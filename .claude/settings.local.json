@@ -138,7 +138,8 @@
       "Bash(netlify link:*)",
       "Bash(netlify sites:list:*)",
       "Bash(netlify:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "WebFetch(domain:www.conventionalcommits.org)"
     ],
     "deny": []
   }
