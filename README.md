@@ -217,6 +217,7 @@ gh workflow list            # Available workflows
 - **Smart Caching**: 70% faster builds through intelligent caching
 - **Zero-Downtime**: Blue-green deployment strategy
 - **Quality Gates**: Comprehensive validation before deployment
+- **🌐 PR Preview Environment**: Automatic Netlify deployments with QR codes for every pull request
 
 ## 🎨 Key Features
 
