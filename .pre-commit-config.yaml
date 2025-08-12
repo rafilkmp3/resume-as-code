@@ -4,6 +4,7 @@
 
 repos:
   # Conventional Commits validation (configured for release-please compatibility)
+  # v4.2.0 supports emojis, unicode, and flexible formatting while maintaining conventional structure
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.2.0
     hooks:
