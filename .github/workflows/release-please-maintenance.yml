@@ -30,30 +30,71 @@ jobs:
         run: |
           echo "🔍 Checking for release-please PRs that need updates..."
 
-          # Find all open release-please PRs
-          RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number,title,headRefName,mergeable)
+          # Find all open release-please PRs with retry mechanism
+          RELEASE_PRS=""
+          for attempt in 1 2 3; do
+            if RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number,title,headRefName,mergeable 2>/dev/null); then
+              echo "✅ Successfully retrieved PR data (attempt $attempt)"
+              break
+            else
+              echo "⚠️ Failed to retrieve PR data (attempt $attempt)"
+              if [ $attempt -eq 3 ]; then
+                echo "❌ All PR retrieval attempts failed, workflow will exit gracefully"
+                echo "ℹ️ This is a temporary issue - workflow can be retried later"
+                exit 0
+              else
+                sleep $((attempt * 2))
+              fi
+            fi
+          done
 
-          if [ "$(echo "$RELEASE_PRS" | jq '. | length')" -eq 0 ]; then
+          # Validate JSON data before processing
+          if ! echo "$RELEASE_PRS" | jq . >/dev/null 2>&1; then
+            echo "❌ Invalid JSON data received from GitHub API, exiting gracefully"
+            exit 0
+          fi
+
+          PR_COUNT=$(echo "$RELEASE_PRS" | jq '. | length' 2>/dev/null || echo "0")
+          if [ "$PR_COUNT" -eq 0 ]; then
             echo "ℹ️ No release-please PRs found"
             exit 0
           fi
 
+          echo "📋 Found $PR_COUNT release-please PRs to process"
+
           echo "$RELEASE_PRS" | jq -r '.[] | @json' | while IFS= read -r pr_json; do
-            PR_NUMBER=$(echo "$pr_json" | jq -r '.number')
-            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
-            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
-            PR_MERGEABLE=$(echo "$pr_json" | jq -r '.mergeable')
+            # Extract PR data with validation
+            if ! PR_NUMBER=$(echo "$pr_json" | jq -r '.number' 2>/dev/null) || [ "$PR_NUMBER" = "null" ]; then
+              echo "⚠️ Skipping PR with invalid number data"
+              continue
+            fi
+            
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title' 2>/dev/null || echo "Unknown Title")
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName' 2>/dev/null || echo "unknown-branch")
+            PR_MERGEABLE=$(echo "$pr_json" | jq -r '.mergeable' 2>/dev/null || echo "UNKNOWN")
 
             echo "📋 Processing release PR #$PR_NUMBER: $PR_TITLE"
 
-            # Check if PR has merge conflicts
+            # Check if PR has merge conflicts with error handling
             if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
               echo "⚠️ PR #$PR_NUMBER has conflicts, needs manual intervention"
 
-              # Add a comment to notify about conflicts
-              gh pr comment "$PR_NUMBER" --body "🚨 Merge Conflicts Detected - This release PR has merge conflicts that need to be resolved manually."
-
-              echo "💬 Added conflict notification comment to PR #$PR_NUMBER"
+              # Add a comment to notify about conflicts (with retry)
+              COMMENT_SUCCESS=false
+              for comment_attempt in 1 2; do
+                if gh pr comment "$PR_NUMBER" --body "🚨 Merge Conflicts Detected - This release PR has merge conflicts that need to be resolved manually." 2>/dev/null; then
+                  echo "💬 Added conflict notification comment to PR #$PR_NUMBER"
+                  COMMENT_SUCCESS=true
+                  break
+                else
+                  echo "⚠️ Failed to add comment (attempt $comment_attempt)"
+                  sleep 2
+                fi
+              done
+              
+              if [ "$COMMENT_SUCCESS" = "false" ]; then
+                echo "❌ Could not add comment to PR #$PR_NUMBER, but continuing..."
+              fi
 
             elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
               echo "❓ PR #$PR_NUMBER merge status is unknown, will check again later"
@@ -62,17 +103,43 @@ jobs:
               echo "✅ PR #$PR_NUMBER is ready to merge (no conflicts)"
             fi
 
-            # Check if PR is stale (older than 7 days)
-            PR_CREATED=$(gh pr view "$PR_NUMBER" --json createdAt --jq '.createdAt')
-            PR_CREATED_TIMESTAMP=$(date -d "$PR_CREATED" +%s)
-            CURRENT_TIMESTAMP=$(date +%s)
-            DAYS_OLD=$(( (CURRENT_TIMESTAMP - PR_CREATED_TIMESTAMP) / 86400 ))
+            # Check if PR is stale (older than 7 days) with error handling
+            echo "🕒 Checking staleness of PR #$PR_NUMBER..."
+            if PR_CREATED=$(gh pr view "$PR_NUMBER" --json createdAt --jq '.createdAt' 2>/dev/null); then
+              if PR_CREATED_TIMESTAMP=$(date -d "$PR_CREATED" +%s 2>/dev/null); then
+                CURRENT_TIMESTAMP=$(date +%s)
+                DAYS_OLD=$(( (CURRENT_TIMESTAMP - PR_CREATED_TIMESTAMP) / 86400 ))
 
-            if [ "$DAYS_OLD" -gt 7 ]; then
-              echo "⏰ PR #$PR_NUMBER is $DAYS_OLD days old, adding stale notification"
+                if [ "$DAYS_OLD" -gt 7 ]; then
+                  echo "⏰ PR #$PR_NUMBER is $DAYS_OLD days old, adding stale notification"
 
-              gh pr comment "$PR_NUMBER" --body "📅 Stale Release PR - This release PR has been open for $DAYS_OLD days. Consider merging, closing, or waiting for more changes."
+                  # Add stale comment with retry
+                  STALE_COMMENT_SUCCESS=false
+                  for stale_attempt in 1 2; do
+                    if gh pr comment "$PR_NUMBER" --body "📅 Stale Release PR - This release PR has been open for $DAYS_OLD days. Consider merging, closing, or waiting for more changes." 2>/dev/null; then
+                      echo "💬 Added stale notification to PR #$PR_NUMBER"
+                      STALE_COMMENT_SUCCESS=true
+                      break
+                    else
+                      echo "⚠️ Failed to add stale comment (attempt $stale_attempt)"
+                      sleep 2
+                    fi
+                  done
+                  
+                  if [ "$STALE_COMMENT_SUCCESS" = "false" ]; then
+                    echo "❌ Could not add stale comment to PR #$PR_NUMBER, but continuing..."
+                  fi
+                else
+                  echo "✅ PR #$PR_NUMBER is recent ($DAYS_OLD days old)"
+                fi
+              else
+                echo "⚠️ Could not parse creation date for PR #$PR_NUMBER"
+              fi
+            else
+              echo "⚠️ Could not retrieve creation date for PR #$PR_NUMBER"
             fi
+
+            echo "✅ Finished processing PR #$PR_NUMBER"
           done
 
       - name: Trigger release-please if no open PRs
@@ -89,14 +156,56 @@ jobs:
             exit 0
           fi
 
-          # Check for commits since last release
-          COMMITS_SINCE_RELEASE=$(git rev-list --count "${LAST_RELEASE}..HEAD")
-          echo "📊 Found $COMMITS_SINCE_RELEASE commits since last release ($LAST_RELEASE)"
+          # Fetch tags with retry mechanism and comprehensive error handling
+          echo "🔄 Fetching tags and ensuring repository state..."
+          for attempt in 1 2 3; do
+            if git fetch --tags --prune 2>/dev/null; then
+              echo "✅ Successfully fetched tags (attempt $attempt)"
+              break
+            else
+              echo "⚠️ Failed to fetch tags (attempt $attempt)"
+              if [ $attempt -eq 3 ]; then
+                echo "❌ All fetch attempts failed, using local repository state"
+              else
+                sleep $((attempt * 2))
+              fi
+            fi
+          done
 
-          # Check if there's an open release PR
-          OPEN_RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number --jq '. | length')
+          # Verify tag exists locally before attempting comparison
+          if ! git tag -l | grep -q "^${LAST_RELEASE}$" 2>/dev/null; then
+            echo "⚠️ Release tag '$LAST_RELEASE' not found locally, skipping commit comparison"
+            echo "📊 Cannot count commits since last release (tag unavailable)"
+            COMMITS_SINCE_RELEASE="unknown"
+          else
+            # Check for commits since last release with enhanced error handling
+            COMMITS_SINCE_RELEASE=$(git rev-list --count "${LAST_RELEASE}..HEAD" 2>/dev/null || echo "0")
+            echo "📊 Found $COMMITS_SINCE_RELEASE commits since last release ($LAST_RELEASE)"
+          fi
 
-          if [ "$OPEN_RELEASE_PRS" -eq 0 ] && [ "$COMMITS_SINCE_RELEASE" -gt 0 ]; then
+          # Check if there's an open release PR with retry mechanism
+          echo "🔍 Checking for open release PRs..."
+          OPEN_RELEASE_PRS=""
+          for attempt in 1 2 3; do
+            if OPEN_RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number --jq '. | length' 2>/dev/null); then
+              echo "✅ Successfully retrieved PR count: $OPEN_RELEASE_PRS (attempt $attempt)"
+              break
+            else
+              echo "⚠️ Failed to retrieve PR list (attempt $attempt)"
+              if [ $attempt -eq 3 ]; then
+                echo "❌ All PR retrieval attempts failed, assuming 0 PRs"
+                OPEN_RELEASE_PRS="0"
+              else
+                sleep $((attempt * 2))
+              fi
+            fi
+          done
+
+          # Enhanced logic with resilient handling of unknown commit counts
+          if [ "$COMMITS_SINCE_RELEASE" = "unknown" ]; then
+            echo "⚠️ Cannot determine commit count, skipping automated decisions"
+            echo "ℹ️ Manual verification may be needed"
+          elif [ "$OPEN_RELEASE_PRS" -eq 0 ] && [ "$COMMITS_SINCE_RELEASE" -gt 0 ]; then
             echo "🚀 No open release PR found, but there are $COMMITS_SINCE_RELEASE new commits"
             echo "Release-please should create a new PR on the next qualifying commit"
           elif [ "$OPEN_RELEASE_PRS" -gt 0 ]; then
@@ -125,9 +234,29 @@ jobs:
             echo "**Last Release:** $RELEASE_TAG ($RELEASE_DATE)" >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Count commits since last release
+          # Count commits since last release with comprehensive error handling
           if [ -n "$LAST_RELEASE" ]; then
             RELEASE_TAG=$(echo "$LAST_RELEASE" | jq -r '.tagName')
-            COMMITS_COUNT=$(git rev-list --count "${RELEASE_TAG}..HEAD" 2>/dev/null || echo "0")
-            echo "**New Commits:** $COMMITS_COUNT since last release" >> $GITHUB_STEP_SUMMARY
+            
+            # Ensure tags are fetched with retry logic
+            echo "🔄 Ensuring tags are available for summary..."
+            FETCH_SUCCESS=false
+            for attempt in 1 2 3; do
+              if git fetch --tags --prune 2>/dev/null; then
+                FETCH_SUCCESS=true
+                break
+              else
+                echo "⚠️ Tag fetch attempt $attempt failed"
+                sleep $((attempt))
+              fi
+            done
+            
+            if [ "$FETCH_SUCCESS" = "true" ] && git tag -l | grep -q "^${RELEASE_TAG}$" 2>/dev/null; then
+              COMMITS_COUNT=$(git rev-list --count "${RELEASE_TAG}..HEAD" 2>/dev/null || echo "unknown")
+              echo "**New Commits:** $COMMITS_COUNT since last release" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "**New Commits:** Unable to determine (tag fetch failed)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "**New Commits:** No previous release found" >> $GITHUB_STEP_SUMMARY
           fi

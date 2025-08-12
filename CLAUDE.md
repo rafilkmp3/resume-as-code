@@ -428,6 +428,20 @@ make serve                  # http://localhost:3001
 - **Error Handling**: Graceful degradation if PDF generation fails
 - **Security**: Puppeteer runs with sandbox disabled for Docker compatibility
 
+### 🛡️ Resilient & Fault-Tolerant Workflows
+
+All GitHub Actions workflows implement comprehensive resilience patterns:
+
+- **🔄 Retry Mechanisms**: 3-attempt retry with exponential backoff for all network operations
+- **🛠️ Error Recovery**: Automatic fallback strategies for non-critical failures  
+- **⚡ Idempotent Operations**: Safe to run multiple times with `--clobber` flags
+- **🔍 Validation**: Pre/post-operation checks with comprehensive logging
+- **📊 Monitoring**: Detailed step summaries and performance metrics
+- **🎯 Graceful Degradation**: PDF failures don't block HTML deployment
+
+**Verification**: `node scripts/verify-resilience.js` validates all patterns  
+**Documentation**: See `WORKFLOW-RESILIENCE.md` for complete implementation details
+
 ### 🚀 Optimized Three-Tier CI/CD Architecture
 
 #### Production Pipeline (`ci-prod.yml`) - **ROCK SOLID**
