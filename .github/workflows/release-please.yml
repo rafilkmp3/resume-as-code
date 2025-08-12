@@ -57,7 +57,9 @@ jobs:
         run: npm ci
 
       - name: Build resume
-        run: make build
+        run: |
+          echo "🏗️ Building resume without docker-compose (CI-compatible)..."
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
