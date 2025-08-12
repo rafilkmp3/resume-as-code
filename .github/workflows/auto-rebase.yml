@@ -75,15 +75,15 @@ jobs:
             done
           fi
 
-      - name: Find and rebase Dependabot PRs
+      - name: Check Dependabot PRs status
         if: github.event_name == 'push' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Looking for Dependabot PRs to rebase..."
+          echo "🔍 Checking Dependabot PRs status..."
 
           # Find all open Dependabot PRs
-          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,headRefName --jq '.[] | @json')
+          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable --jq '.[] | @json')
 
           if [ -z "$DEPENDABOT_PRS" ]; then
             echo "ℹ️ No Dependabot PRs found"
@@ -92,17 +92,23 @@ jobs:
               PR_DATA=$(echo "$pr_json" | jq -r '.')
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
               PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+              PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
 
-              echo "🔄 Triggering rebase for Dependabot PR #$PR_NUMBER: $PR_TITLE"
+              echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
 
-              # For Dependabot PRs, we use a comment command to trigger rebase
-              # This is because Dependabot branches are protected
-              gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
-              echo "✅ Rebase command sent to PR #$PR_NUMBER"
-
-              # Wait a bit between rebases to avoid rate limiting
-              sleep 2
+              if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
+                echo "⚠️ PR #$PR_NUMBER has conflicts - Dependabot will auto-rebase with rebase-strategy: auto"
+              elif [ "$PR_MERGEABLE" = "MERGEABLE" ]; then
+                echo "✅ PR #$PR_NUMBER is up-to-date and ready"
+              else
+                echo "❓ PR #$PR_NUMBER status: $PR_MERGEABLE"
+              fi
             done
+
+            echo ""
+            echo "ℹ️ Dependabot PRs auto-rebase via dependabot.yml configuration:"
+            echo "   rebase-strategy: 'auto' handles rebasing automatically"
+            echo "   No manual intervention needed"
           fi
 
       - name: Rebase specific PR
@@ -161,4 +167,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
           DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
-          echo "Found $DEPENDABOT_COUNT Dependabot PR(s)" >> $GITHUB_STEP_SUMMARY
+          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) (auto-rebase via rebase-strategy)" >> $GITHUB_STEP_SUMMARY
