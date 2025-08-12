@@ -25,7 +25,7 @@ jobs:
         run: |
           SHORT_SHA="${HEAD_SHA:0:7}"
           SAFE_BRANCH_NAME="${BRANCH_NAME}"
-          DEPLOY_URL="https://deploy-preview-${PR_NUMBER}--magnificent-chimera-c0fbb4.netlify.app"
+          DEPLOY_URL="https://deploy-preview-${PR_NUMBER}--resume-as-code-rafilkmp3.netlify.app"
 
           {
             echo "## 🔍 PR Preview Environment"
@@ -68,7 +68,7 @@ jobs:
             const headSha = process.env.HEAD_SHA;
             const safeBranchName = process.env.BRANCH_NAME;
             const shortSha = headSha.substring(0, 7);
-            const deployUrl = `https://deploy-preview-${prNumber}--magnificent-chimera-c0fbb4.netlify.app`;
+            const deployUrl = `https://deploy-preview-${prNumber}--resume-as-code-rafilkmp3.netlify.app`;
 
             const commentBody = `## 🔍 PR Preview Environment
 
