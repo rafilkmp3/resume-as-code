@@ -1,0 +1,162 @@
+---
+name: Auto Rebase
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to rebase (optional)'
+        required: false
+        type: string
+
+jobs:
+  auto-rebase:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup GitHub CLI
+        run: |
+          gh auth setup-git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find and rebase release-please PRs
+        if: github.event_name == 'push' || !github.event.inputs.pr_number
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Looking for release-please PRs to rebase..."
+
+          # Find all open release-please PRs
+          RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number,title,headRefName --jq '.[] | @json')
+
+          if [ -z "$RELEASE_PRS" ]; then
+            echo "ℹ️ No release-please PRs found"
+          else
+            echo "$RELEASE_PRS" | while IFS= read -r pr_json; do
+              PR_DATA=$(echo "$pr_json" | jq -r '.')
+              PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
+              PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+              PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
+
+              echo "🔄 Rebasing release-please PR #$PR_NUMBER: $PR_TITLE"
+
+              # Check if PR needs rebasing
+              if gh pr view "$PR_NUMBER" --json mergeable --jq '.mergeable' | grep -q "CONFLICTING"; then
+                echo "⚠️ PR #$PR_NUMBER has conflicts, attempting rebase..."
+
+                # Checkout the PR branch
+                git fetch origin "$PR_BRANCH"
+                git checkout "$PR_BRANCH"
+
+                # Attempt rebase
+                if git rebase origin/main; then
+                  git push --force-with-lease origin "$PR_BRANCH"
+                  echo "✅ Successfully rebased PR #$PR_NUMBER"
+                else
+                  echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts"
+                  git rebase --abort
+                fi
+              else
+                echo "✅ PR #$PR_NUMBER is already up-to-date"
+              fi
+            done
+          fi
+
+      - name: Find and rebase Dependabot PRs
+        if: github.event_name == 'push' || !github.event.inputs.pr_number
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Looking for Dependabot PRs to rebase..."
+
+          # Find all open Dependabot PRs
+          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,headRefName --jq '.[] | @json')
+
+          if [ -z "$DEPENDABOT_PRS" ]; then
+            echo "ℹ️ No Dependabot PRs found"
+          else
+            echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
+              PR_DATA=$(echo "$pr_json" | jq -r '.')
+              PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
+              PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+
+              echo "🔄 Triggering rebase for Dependabot PR #$PR_NUMBER: $PR_TITLE"
+
+              # For Dependabot PRs, we use a comment command to trigger rebase
+              # This is because Dependabot branches are protected
+              gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
+              echo "✅ Rebase command sent to PR #$PR_NUMBER"
+
+              # Wait a bit between rebases to avoid rate limiting
+              sleep 2
+            done
+          fi
+
+      - name: Rebase specific PR
+        if: github.event.inputs.pr_number
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.inputs.pr_number }}"
+          echo "🔄 Rebasing specific PR #$PR_NUMBER"
+
+          # Check if it's a Dependabot PR
+          PR_AUTHOR=$(gh pr view "$PR_NUMBER" --json author --jq '.author.login')
+
+          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+            echo "📦 This is a Dependabot PR, using comment command..."
+            gh pr comment "$PR_NUMBER" --body "@dependabot rebase"
+            echo "✅ Rebase command sent"
+          else
+            # For other PRs, attempt direct rebase
+            PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
+
+            git fetch origin "$PR_BRANCH"
+            git checkout "$PR_BRANCH"
+
+            if git rebase origin/main; then
+              git push --force-with-lease origin "$PR_BRANCH"
+              echo "✅ Successfully rebased PR #$PR_NUMBER"
+            else
+              echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts"
+              git rebase --abort
+              exit 1
+            fi
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Auto-Rebase Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Triggered by push to main branch" >> $GITHUB_STEP_SUMMARY
+          elif [ -n "${{ github.event.inputs.pr_number }}" ]; then
+            echo "Manually triggered for PR #${{ github.event.inputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Manually triggered for all PRs" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release-Please PRs" >> $GITHUB_STEP_SUMMARY
+          RELEASE_COUNT=$(gh pr list --label "autorelease: pending" --json number --jq '. | length')
+          echo "Found $RELEASE_COUNT release-please PR(s)" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
+          DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
+          echo "Found $DEPENDABOT_COUNT Dependabot PR(s)" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,131 @@
+---
+name: Release Please Maintenance
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Run daily at 9 AM UTC to ensure release PRs stay current
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  maintain-release-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update release-please PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking for release-please PRs that need updates..."
+
+          # Find all open release-please PRs
+          RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number,title,headRefName,mergeable)
+
+          if [ "$(echo "$RELEASE_PRS" | jq '. | length')" -eq 0 ]; then
+            echo "ℹ️ No release-please PRs found"
+            exit 0
+          fi
+
+          echo "$RELEASE_PRS" | jq -r '.[] | @json' | while IFS= read -r pr_json; do
+            PR_NUMBER=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
+            PR_MERGEABLE=$(echo "$pr_json" | jq -r '.mergeable')
+
+            echo "📋 Processing release PR #$PR_NUMBER: $PR_TITLE"
+
+            # Check if PR has merge conflicts
+            if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
+              echo "⚠️ PR #$PR_NUMBER has conflicts, needs manual intervention"
+
+              # Add a comment to notify about conflicts
+              gh pr comment "$PR_NUMBER" --body "🚨 Merge Conflicts Detected - This release PR has merge conflicts that need to be resolved manually."
+
+              echo "💬 Added conflict notification comment to PR #$PR_NUMBER"
+
+            elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
+              echo "❓ PR #$PR_NUMBER merge status is unknown, will check again later"
+
+            else
+              echo "✅ PR #$PR_NUMBER is ready to merge (no conflicts)"
+            fi
+
+            # Check if PR is stale (older than 7 days)
+            PR_CREATED=$(gh pr view "$PR_NUMBER" --json createdAt --jq '.createdAt')
+            PR_CREATED_TIMESTAMP=$(date -d "$PR_CREATED" +%s)
+            CURRENT_TIMESTAMP=$(date +%s)
+            DAYS_OLD=$(( (CURRENT_TIMESTAMP - PR_CREATED_TIMESTAMP) / 86400 ))
+
+            if [ "$DAYS_OLD" -gt 7 ]; then
+              echo "⏰ PR #$PR_NUMBER is $DAYS_OLD days old, adding stale notification"
+
+              gh pr comment "$PR_NUMBER" --body "📅 Stale Release PR - This release PR has been open for $DAYS_OLD days. Consider merging, closing, or waiting for more changes."
+            fi
+          done
+
+      - name: Trigger release-please if no open PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking if release-please should be triggered..."
+
+          # Check if there are any commits since last release that would warrant a new release
+          LAST_RELEASE=$(gh release list --limit 1 --json tagName --jq '.[0].tagName // empty')
+
+          if [ -z "$LAST_RELEASE" ]; then
+            echo "ℹ️ No previous releases found"
+            exit 0
+          fi
+
+          # Check for commits since last release
+          COMMITS_SINCE_RELEASE=$(git rev-list --count "${LAST_RELEASE}..HEAD")
+          echo "📊 Found $COMMITS_SINCE_RELEASE commits since last release ($LAST_RELEASE)"
+
+          # Check if there's an open release PR
+          OPEN_RELEASE_PRS=$(gh pr list --label "autorelease: pending" --json number --jq '. | length')
+
+          if [ "$OPEN_RELEASE_PRS" -eq 0 ] && [ "$COMMITS_SINCE_RELEASE" -gt 0 ]; then
+            echo "🚀 No open release PR found, but there are $COMMITS_SINCE_RELEASE new commits"
+            echo "Release-please should create a new PR on the next qualifying commit"
+          elif [ "$OPEN_RELEASE_PRS" -gt 0 ]; then
+            echo "✅ Found $OPEN_RELEASE_PRS open release PR(s)"
+          else
+            echo "ℹ️ No new commits since last release"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Release Please Maintenance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count release PRs
+          RELEASE_COUNT=$(gh pr list --label "autorelease: pending" --json number --jq '. | length' 2>/dev/null || echo "0")
+          echo "**Release PRs:** $RELEASE_COUNT open" >> $GITHUB_STEP_SUMMARY
+
+          # Get last release info
+          LAST_RELEASE=$(gh release list --limit 1 --json tagName,publishedAt --jq '.[0] // empty' 2>/dev/null)
+          if [ -n "$LAST_RELEASE" ]; then
+            RELEASE_TAG=$(echo "$LAST_RELEASE" | jq -r '.tagName')
+            RELEASE_DATE=$(echo "$LAST_RELEASE" | jq -r '.publishedAt' | cut -d'T' -f1)
+            echo "**Last Release:** $RELEASE_TAG ($RELEASE_DATE)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Count commits since last release
+          if [ -n "$LAST_RELEASE" ]; then
+            RELEASE_TAG=$(echo "$LAST_RELEASE" | jq -r '.tagName')
+            COMMITS_COUNT=$(git rev-list --count "${RELEASE_TAG}..HEAD" 2>/dev/null || echo "0")
+            echo "**New Commits:** $COMMITS_COUNT since last release" >> $GITHUB_STEP_SUMMARY
+          fi

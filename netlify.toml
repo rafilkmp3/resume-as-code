@@ -8,6 +8,9 @@
   # Function directory (not used but required)
   functions = "netlify/functions"
 
+  # Ignore release-please branches to prevent unnecessary previews
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!CHANGELOG.md' ':!package.json' ':!package-lock.json' ':!.release-please-manifest.json' || [[ $BRANCH == release-please--* ]]"
+
   # Environment variables for build
   [build.environment]
     NODE_VERSION = "22"
