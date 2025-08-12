@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.0.1...resume-as-code-v3.1.0) (2025-08-12)
+
+
+### Features
+
+* add release please automation badge to readme ([c263c4b](https://github.com/rafilkmp3/resume-as-code/commit/c263c4bf57f6de902e00b5913b5a05063ece4111))
+* add Release Please automation badge to README ([#28](https://github.com/rafilkmp3/resume-as-code/issues/28)) ([6778bae](https://github.com/rafilkmp3/resume-as-code/commit/6778bae29108a076b24cab93080ec70100cca519))
+
+
+### Bug Fixes
+
+* replace make build with npm run build in release-please workflow ([dcae2e7](https://github.com/rafilkmp3/resume-as-code/commit/dcae2e728f29a04aab43d1255a9adf20ded461e2))
+
 ## [3.0.1](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.0.0...resume-as-code-v3.0.1) (2025-08-12)
 
 
