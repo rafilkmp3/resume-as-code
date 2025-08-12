@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.3.0...resume-as-code-v3.4.0) (2025-08-12)
+
+
+### Features
+
+* fully automated Dependabot PR rebasing ([53cd4e9](https://github.com/rafilkmp3/resume-as-code/commit/53cd4e9c1af3293b03c855aca0823e5bfb659b45))
+* resume-pipeline-bot GitHub App authentication ([13a746d](https://github.com/rafilkmp3/resume-as-code/commit/13a746d380032c35019673891ffb1b12b0712df8))
+* use [@dependabot](https://github.com/dependabot) recreate for automatic Netlify previews ([b756b7a](https://github.com/rafilkmp3/resume-as-code/commit/b756b7a3351584293f6d721a03167bcfd28043f4))
+
+
+### Continuous Integration
+
+* **deps:** bump actions/checkout from 4 to 5 ([65eef91](https://github.com/rafilkmp3/resume-as-code/commit/65eef911543f13404ac570fe41c62bb0f1b7ca40))
+* **deps:** bump actions/checkout from 4 to 5 ([#35](https://github.com/rafilkmp3/resume-as-code/issues/35)) ([bdc4e19](https://github.com/rafilkmp3/resume-as-code/commit/bdc4e19110e81d5f9b2c03b2c9214378b37e1804))
+
 ## [3.3.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.2.1...resume-as-code-v3.3.0) (2025-08-12)
 
 
