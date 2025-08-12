@@ -53,6 +53,16 @@ jobs:
       DOCKER_BUILDKIT: 1
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
       IS_EMERGENCY: ${{ github.event.inputs.deployment_mode == 'emergency' }}
+      # GitHub Pages deployment environment variables
+      NETLIFY: false
+      NETLIFY_ENV: github-pages
+      REVIEW_ID: ${{ github.event.number || '' }}
+      HEAD: ${{ github.head_ref || github.ref_name }}
+      BRANCH: ${{ github.ref_name }}
+      CONTEXT: ${{ github.event_name == 'pull_request' && 'deploy-preview' || 'production' }}
+      DEPLOY_PRIME_URL: ${{ github.event_name == 'pull_request' && format('https://{0}.github.io/resume-as-code/pr-{1}', github.repository_owner, github.event.number) || format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
+      DEPLOY_URL: ${{ format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
+      URL: ${{ format('https://{0}.github.io/resume-as-code/', github.repository_owner) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
