@@ -76,96 +76,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Conventional commit version check
+      - name: Conventional commit version check (disabled - managed by release-please)
         id: version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Checking if version bump is needed..."
-
-          if npm run version:auto 2>/dev/null; then
-            echo "bumped=true" >> $GITHUB_OUTPUT
-            NEW_VERSION=$(node -p "require('./package.json').version")
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "✅ Version bumped to: $NEW_VERSION"
-
-            # Automated tag creation to prevent manual errors
-            git push origin main
-            git push origin --tags
-
-            # Create GitHub Release with Screenshots
-            echo "🏷️ Creating GitHub Release for v$NEW_VERSION..."
-
-            # Generate release screenshots for DR documentation
-            echo "📸 Generating release screenshots..."
-            mkdir -p release-screenshots
-
-            # Quick screenshot generation (lightweight approach)
-            (
-              npm run build > /dev/null 2>&1 || echo "Build failed"
-              npx serve dist -l 3000 -s &
-              SERVER_PID=$!
-              sleep 8
-
-              # Desktop screenshot (1280x720)
-              node -e "
-                const { chromium } = require('playwright');
-                (async () => {
-                  try {
-                    const browser = await chromium.launch();
-                    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-                    await page.goto('http://localhost:3000');
-                    await page.waitForLoadState('networkidle');
-                    await page.screenshot({ path: 'release-screenshots/desktop-v$NEW_VERSION.png', fullPage: true });
-                    await browser.close();
-                    console.log('✅ Desktop screenshot generated');
-                  } catch (error) {
-                    console.log('❌ Desktop screenshot failed:', error.message);
-                  }
-                })();
-              " || echo "Desktop screenshot failed"
-
-              # Mobile screenshot (430x932)
-              node -e "
-                const { chromium } = require('playwright');
-                (async () => {
-                  try {
-                    const browser = await chromium.launch();
-                    const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
-                    await page.goto('http://localhost:3000');
-                    await page.waitForLoadState('networkidle');
-                    await page.screenshot({ path: 'release-screenshots/mobile-v$NEW_VERSION.png', fullPage: true });
-                    await browser.close();
-                    console.log('✅ Mobile screenshot generated');
-                  } catch (error) {
-                    console.log('❌ Mobile screenshot failed:', error.message);
-                  }
-                })();
-              " || echo "Mobile screenshot failed"
-
-              kill $SERVER_PID 2>/dev/null || true
-              sleep 2
-            ) || echo "Screenshot generation failed (non-blocking)"
-
-            # Create release with screenshots if available, fallback without
-            if ls release-screenshots/*.png 1> /dev/null 2>&1; then
-              echo "📋 Creating release with screenshots..."
-              gh release create "v$NEW_VERSION" \
-                --title "Release v$NEW_VERSION" \
-                --generate-notes \
-                --latest \
-                release-screenshots/*.png
-            else
-              echo "📋 Creating release without screenshots..."
-              gh release create "v$NEW_VERSION" \
-                --title "Release v$NEW_VERSION" \
-                --generate-notes \
-                --latest
-            fi
-          else
-            echo "bumped=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No version bump needed"
-          fi
+          echo "🔍 Version management handled by release-please"
+          echo "bumped=false" >> $GITHUB_OUTPUT
+          echo "ℹ️ Version bumping disabled - release-please manages all versioning"
+          echo "📋 Production deployment will proceed without version changes"
 
   # Unified build job (handles both normal and emergency modes)
   build:
