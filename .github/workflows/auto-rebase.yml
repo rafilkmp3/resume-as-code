@@ -20,22 +20,29 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup GitHub CLI
         run: |
           gh auth setup-git
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Find and rebase release-please PRs
         if: github.event_name == 'push' || !github.event.inputs.pr_number
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "🔍 Looking for release-please PRs to rebase..."
 
@@ -78,7 +85,7 @@ jobs:
       - name: Auto-rebase Dependabot PRs
         if: github.event_name == 'push' || !github.event.inputs.pr_number
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "🔍 Checking and auto-rebasing Dependabot PRs..."
 
@@ -123,7 +130,7 @@ jobs:
       - name: Rebase specific PR
         if: github.event.inputs.pr_number
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           PR_NUMBER="${{ github.event.inputs.pr_number }}"
           echo "🔄 Rebasing specific PR #$PR_NUMBER"
@@ -155,7 +162,7 @@ jobs:
       - name: Summary
         if: always()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "## 📊 Auto-Rebase Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
