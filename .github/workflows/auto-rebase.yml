@@ -39,7 +39,7 @@ jobs:
       - name: Setup GitHub CLI and Git Config
         run: |
           gh auth setup-git
-
+          
           # Configure git identity for commits
           git config --global user.name "resume-pipeline-bot[bot]"
           git config --global user.email "noreply@github.com"
@@ -47,49 +47,106 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Auto-rebase Dependabot PRs
-        if: github.event_name == 'push' || !github.event.inputs.pr_number
+      - name: Aggressive Dependabot Management
+        if: github.event_name == 'push' || github.event_name == 'schedule' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "🔍 Checking and auto-rebasing Dependabot PRs..."
+          echo "🚨 AGGRESSIVE Dependabot PR management - force recreate outdated/invalid PRs..."
 
-          # Find all open Dependabot PRs
-          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable --jq '.[] | @json')
+          # Find all open Dependabot PRs with extended info
+          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json')
 
           if [ -z "$DEPENDABOT_PRS" ]; then
             echo "ℹ️ No Dependabot PRs found"
           else
+            RECREATED_COUNT=0
+            CLOSED_COUNT=0
+            
             echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
               PR_DATA=$(echo "$pr_json" | jq -r '.')
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
               PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
               PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
-
+              PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
+              PR_CREATED=$(echo "$PR_DATA" | jq -r '.createdAt')
+              
+              echo ""
               echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
+              echo "   Branch: $PR_BRANCH"
+              echo "   Status: $PR_MERGEABLE"
+              echo "   Created: $PR_CREATED"
+
+              # Check if PR has invalid conventional commit format
+              INVALID_COMMIT_FORMAT=false
+              LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
+              
+              if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
+                echo "❌ PR #$PR_NUMBER has INVALID conventional commit format: $LATEST_COMMIT_MSG"
+                INVALID_COMMIT_FORMAT=true
+              fi
+
+              # Calculate PR age in days
+              if command -v date >/dev/null 2>&1; then
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                  # macOS date command
+                  PR_AGE_DAYS=$(( ( $(date +%s) - $(date -j -f "%Y-%m-%dT%H:%M:%SZ" "${PR_CREATED}" +%s) ) / 86400 ))
+                else
+                  # Linux date command
+                  PR_AGE_DAYS=$(( ( $(date +%s) - $(date -d "${PR_CREATED}" +%s) ) / 86400 ))
+                fi
+              else
+                PR_AGE_DAYS=0
+              fi
+              
+              echo "   Age: ${PR_AGE_DAYS} days"
+
+              # AGGRESSIVE STRATEGY: Force close and recreate PRs that are:
+              # 1. CONFLICTING
+              # 2. UNKNOWN status  
+              # 3. Have invalid conventional commit format
+              # 4. Are older than 7 days
+              SHOULD_FORCE_RECREATE=false
+              REASON=""
 
               if [ "$PR_MERGEABLE" = "CONFLICTING" ]; then
-                echo "⚠️ PR #$PR_NUMBER has conflicts - triggering automatic recreate..."
-                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
-                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
-              elif [ "$PR_MERGEABLE" = "MERGEABLE" ]; then
-                echo "✅ PR #$PR_NUMBER is up-to-date and ready"
+                SHOULD_FORCE_RECREATE=true
+                REASON="has merge conflicts"
               elif [ "$PR_MERGEABLE" = "UNKNOWN" ]; then
-                echo "❓ PR #$PR_NUMBER status is UNKNOWN - triggering recreate to refresh..."
-                gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
-                echo "✅ Recreate command sent for PR #$PR_NUMBER (will trigger Netlify preview)"
+                SHOULD_FORCE_RECREATE=true
+                REASON="has unknown merge status"
+              elif [ "$INVALID_COMMIT_FORMAT" = true ]; then
+                SHOULD_FORCE_RECREATE=true
+                REASON="has invalid conventional commit format"
+              elif [ "$PR_AGE_DAYS" -gt 7 ]; then
+                SHOULD_FORCE_RECREATE=true
+                REASON="is older than 7 days (${PR_AGE_DAYS} days)"
+              fi
+
+              if [ "$SHOULD_FORCE_RECREATE" = true ]; then
+                echo "🔥 FORCE RECREATING PR #$PR_NUMBER because it $REASON"
+                
+                # Strategy: Close the PR and let Dependabot automatically recreate it
+                # This is more reliable than @dependabot recreate comments
+                echo "   1. Closing PR #$PR_NUMBER to trigger automatic recreation..."
+                gh pr close "$PR_NUMBER" --comment "🤖 Auto-closing this PR because it $REASON. Dependabot will automatically recreate it with the latest changes and correct format."
+                
+                echo "   2. Waiting 5 seconds for Dependabot to detect closure..."
+                sleep 5
+                
+                echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
+                CLOSED_COUNT=$((CLOSED_COUNT + 1))
               else
-                echo "❓ PR #$PR_NUMBER status: $PR_MERGEABLE"
+                echo "✅ PR #$PR_NUMBER is current and valid (${PR_AGE_DAYS} days old)"
               fi
             done
 
             echo ""
-            echo "ℹ️ Dependabot auto-recreate strategy:"
-            echo "   • CONFLICTING → Automatic @dependabot recreate command"
-            echo "   • UNKNOWN → Automatic @dependabot recreate command (status refresh)"
-            echo "   • MERGEABLE → No action needed"
-            echo "   • Recreate triggers clean PRs + Netlify preview environments"
-            echo "   • All commands executed automatically - no manual intervention required"
+            echo "📊 AGGRESSIVE Management Results:"
+            echo "   🔥 PRs force-closed for recreation: $CLOSED_COUNT"
+            echo "   📝 Reasons: conflicts, unknown status, invalid commit format, or >7 days old"
+            echo "   🤖 Dependabot will automatically recreate closed PRs with latest format"
+            echo "   ⚡ Next run: Daily at 9 AM UTC or on every push to main"
           fi
 
       - name: Rebase specific PR
@@ -98,17 +155,40 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           PR_NUMBER="${{ github.event.inputs.pr_number }}"
-          echo "🔄 Rebasing specific PR #$PR_NUMBER"
+          echo "🔄 Handling specific PR #$PR_NUMBER"
 
           # Check if it's a Dependabot PR
           PR_AUTHOR=$(gh pr view "$PR_NUMBER" --json author --jq '.author.login')
 
           if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            echo "📦 This is a Dependabot PR, using recreate command..."
-            gh pr comment "$PR_NUMBER" --body "@dependabot recreate"
-            echo "✅ Recreate command sent (will trigger Netlify preview)"
+            echo "📦 This is a Dependabot PR - applying aggressive recreation strategy..."
+            
+            # Get PR details
+            PR_DATA=$(gh pr view "$PR_NUMBER" --json title,mergeable,commits,createdAt)
+            PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+            PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
+            LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
+            
+            echo "   Title: $PR_TITLE"
+            echo "   Status: $PR_MERGEABLE"
+            echo "   Latest commit: $LATEST_COMMIT_MSG"
+            
+            # Check for invalid format
+            INVALID_FORMAT=false
+            if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
+              INVALID_FORMAT=true
+            fi
+            
+            if [ "$PR_MERGEABLE" = "CONFLICTING" ] || [ "$PR_MERGEABLE" = "UNKNOWN" ] || [ "$INVALID_FORMAT" = true ]; then
+              echo "🔥 Force closing PR #$PR_NUMBER for recreation..."
+              gh pr close "$PR_NUMBER" --comment "🤖 Manual trigger: Force-closing this PR for recreation with latest format and no conflicts."
+              echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
+            else
+              echo "✅ PR #$PR_NUMBER looks good, no action needed"
+            fi
           else
             # For other PRs, attempt direct rebase
+            echo "👤 Non-Dependabot PR - attempting direct rebase..."
             PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
 
             git fetch origin "$PR_BRANCH"
@@ -133,14 +213,25 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event_name }}" = "push" ]; then
-            echo "Triggered by push to main branch" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Push to main branch" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "**Trigger**: Scheduled daily execution (9 AM UTC)" >> $GITHUB_STEP_SUMMARY
           elif [ -n "${{ github.event.inputs.pr_number }}" ]; then
-            echo "Manually triggered for PR #${{ github.event.inputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Manual execution for PR #${{ github.event.inputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
           else
-            echo "Manually triggered for all PRs" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Manual execution for all PRs" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Dependabot PRs" >> $GITHUB_STEP_SUMMARY
+          echo "### 🤖 Dependabot Management Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "- **CONFLICTING PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
+          echo "- **UNKNOWN status PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
+          echo "- **Invalid commit format**: Force-closed for recreation with correct format" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stale PRs (>7 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- **Valid PRs**: Left unchanged" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
-          echo "Found $DEPENDABOT_COUNT Dependabot PR(s) - **automatic recreate** for CONFLICTING/UNKNOWN status (triggers Netlify previews)" >> $GITHUB_STEP_SUMMARY
+          echo "**Current Dependabot PRs**: $DEPENDABOT_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔄 **Next execution**: Daily at 9 AM UTC or on push to main" >> $GITHUB_STEP_SUMMARY
