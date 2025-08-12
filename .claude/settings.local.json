@@ -127,7 +127,9 @@
       "Bash(npm run template:build:*)",
       "Bash(ln:*)",
       "Bash(timeout 120 make build)",
-      "Bash(act push:*)"
+      "Bash(act push:*)",
+      "Bash(gh issue view:*)",
+      "Bash(./scripts/install-git-hooks.sh:*)"
     ],
     "deny": []
   }

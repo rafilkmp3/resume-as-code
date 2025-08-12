@@ -63,6 +63,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies for screenshot generation
+        run: |
+          # Install minimal dependencies needed for screenshot generation
+          npm ci --prefer-offline --no-audit
+          npx playwright install chromium --with-deps
 
       - name: Configure Git
         run: |
