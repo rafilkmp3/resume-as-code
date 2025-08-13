@@ -1,0 +1,226 @@
+---
+name: Shared Deployment Status
+
+# This reusable workflow updates PR comments and provides deployment status
+# Called by other workflows to maintain consistent deployment communication
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: false
+        type: string
+        description: 'PR number to update (auto-detected if not provided)'
+      deployment_status:
+        required: true
+        type: string
+        description: 'Deployment status (building, success, failure, ready)'
+      deployment_url:
+        required: false
+        type: string
+        description: 'Deployment URL if available'
+      deployment_environment:
+        required: true
+        type: string
+        description: 'Deployment environment (production, preview)'
+      commit_sha:
+        required: false
+        type: string
+        description: 'Commit SHA (auto-detected if not provided)'
+      additional_info:
+        required: false
+        type: string
+        description: 'Additional deployment information'
+      build_duration:
+        required: false
+        type: string
+        description: 'Build duration if available'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-deployment-status:
+    name: Update Deployment Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Detect PR and Commit Info
+        id: detect
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Auto-detect PR number from current context
+          PR_NUMBER="${{ inputs.pr_number }}"
+          COMMIT_SHA="${{ inputs.commit_sha || github.sha }}"
+
+          if [ -z "$PR_NUMBER" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          fi
+
+          # Try to find PR from commit SHA if not provided
+          if [ -z "$PR_NUMBER" ]; then
+            echo "🔍 Searching for PR associated with commit $COMMIT_SHA..."
+            PR_SEARCH=$(gh pr list --search "$COMMIT_SHA" --state open --json number --jq '.[0].number // empty' || echo "")
+            if [ -n "$PR_SEARCH" ]; then
+              PR_NUMBER="$PR_SEARCH"
+              echo "✅ Found PR #$PR_NUMBER for commit $COMMIT_SHA"
+            fi
+          fi
+
+          # Get commit details
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          COMMIT_MESSAGE=$(git log --format="%s" -n 1 "$COMMIT_SHA" 2>/dev/null || echo "Unknown commit")
+          COMMIT_AUTHOR=$(git log --format="%an" -n 1 "$COMMIT_SHA" 2>/dev/null || echo "Unknown author")
+
+          echo "pr_number=${PR_NUMBER:-none}" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+
+          echo "📋 Deployment Status Update:"
+          echo "  PR: ${PR_NUMBER:-none}"
+          echo "  Commit: $SHORT_SHA"
+          echo "  Status: ${{ inputs.deployment_status }}"
+          echo "  Environment: ${{ inputs.deployment_environment }}"
+
+      - name: Update PR Comment
+        if: steps.detect.outputs.pr_number != 'none'
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.detect.outputs.pr_number }}
+          DEPLOYMENT_STATUS: ${{ inputs.deployment_status }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+          DEPLOYMENT_ENV: ${{ inputs.deployment_environment }}
+          SHORT_SHA: ${{ steps.detect.outputs.short_sha }}
+          COMMIT_MESSAGE: ${{ steps.detect.outputs.commit_message }}
+          COMMIT_AUTHOR: ${{ steps.detect.outputs.commit_author }}
+          BUILD_DURATION: ${{ inputs.build_duration }}
+          ADDITIONAL_INFO: ${{ inputs.additional_info }}
+        with:
+          script: |
+            const prNumber = process.env.PR_NUMBER;
+            const status = process.env.DEPLOYMENT_STATUS;
+            const deployUrl = process.env.DEPLOYMENT_URL;
+            const environment = process.env.DEPLOYMENT_ENV;
+            const shortSha = process.env.SHORT_SHA;
+            const commitMessage = process.env.COMMIT_MESSAGE;
+            const commitAuthor = process.env.COMMIT_AUTHOR;
+            const buildDuration = process.env.BUILD_DURATION;
+            const additionalInfo = process.env.ADDITIONAL_INFO;
+
+            const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+
+            // Status emoji mapping
+            const statusEmoji = {
+              'building': '⚡',
+              'success': '✅',
+              'failure': '❌',
+              'ready': '🚀'
+            };
+
+            const emoji = statusEmoji[status] || '📊';
+            const envName = environment === 'production' ? 'Production' : 'Preview';
+
+            // Build status line
+            let statusLine = `**Status**: ${emoji} **${status.toUpperCase()}**`;
+            if (status === 'building') {
+              statusLine += ' - Build in progress...';
+            } else if (status === 'ready' && deployUrl) {
+              statusLine += ` - [View ${envName}](${deployUrl})`;
+            }
+
+            // Build deployment info section
+            let deploymentInfo = `### 📋 ${envName} Deployment\n\n`;
+            deploymentInfo += `- ${statusLine}\n`;
+            deploymentInfo += `- **Commit**: [\`${shortSha}\`](${context.payload.repository.html_url}/commit/${context.payload.repository.default_branch ? context.payload.repository.default_branch : 'main'})\n`;
+            deploymentInfo += `- **Author**: ${commitAuthor}\n`;
+            deploymentInfo += `- **Message**: ${commitMessage}\n`;
+            deploymentInfo += `- **Updated**: ${timestamp}\n`;
+
+            if (buildDuration) {
+              deploymentInfo += `- **Build Time**: ${buildDuration}\n`;
+            }
+
+            if (deployUrl && status === 'ready') {
+              deploymentInfo += `\n### 🔗 ${envName} Links\n\n`;
+              if (environment === 'preview') {
+                deploymentInfo += `| Preview | URL |\n`;
+                deploymentInfo += `|---------|-----|\n`;
+                deploymentInfo += `| 🌐 **Live Preview** | [${deployUrl}](${deployUrl}) |\n`;
+                deploymentInfo += `| 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume.pdf) |\n`;
+                deploymentInfo += `| 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-print.pdf) |\n`;
+                deploymentInfo += `| 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-ats.pdf) |\n`;
+              } else {
+                deploymentInfo += `- 🌐 **Live Site**: [${deployUrl}](${deployUrl})\n`;
+                deploymentInfo += `- 📄 **PDF Downloads**: Available at live site\n`;
+              }
+            }
+
+            if (additionalInfo) {
+              deploymentInfo += `\n### 📊 Additional Info\n${additionalInfo}\n`;
+            }
+
+            // Find existing deployment status comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const deploymentComment = comments.data.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              (comment.body.includes(`### 📋 ${envName} Deployment`) ||
+               comment.body.includes('## 📊 Deployment Status'))
+            );
+
+            const fullCommentBody = `## 📊 Deployment Status\n\n${deploymentInfo}\n\n---\n*🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*`;
+
+            if (deploymentComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: deploymentComment.id,
+                body: fullCommentBody,
+              });
+              console.log(`✅ Updated deployment status comment for PR #${prNumber}`);
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: fullCommentBody,
+              });
+              console.log(`✅ Created deployment status comment for PR #${prNumber}`);
+            }
+
+      - name: Generate Step Summary
+        if: always()
+        run: |
+          echo "## 📊 Deployment Status Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ inputs.deployment_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.deployment_environment }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.detect.outputs.pr_number }}" != "none" ]; then
+            echo "**PR**: #${{ steps.detect.outputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Action**: Updated PR comment" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**PR**: None found (not a PR context)" >> $GITHUB_STEP_SUMMARY
+            echo "**Action**: No PR comment update needed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "**Commit**: ${{ steps.detect.outputs.short_sha }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ inputs.deployment_url }}" ]; then
+            echo "**URL**: ${{ inputs.deployment_url }}" >> $GITHUB_STEP_SUMMARY
+          fi

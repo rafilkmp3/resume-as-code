@@ -50,7 +50,7 @@ jobs:
           echo "🔍 Validating required secrets for Netlify deployment..." # pragma: allowlist secret
 
           # Check if NETLIFY_AUTH_TOKEN exists
-          if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ]; then
+          if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ]; then  # pragma: allowlist secret
             echo "❌ ERROR: NETLIFY_AUTH_TOKEN secret is missing"
             echo "📋 To fix this:"
             echo "1. Go to https://app.netlify.com/user/applications#personal-access-tokens"
@@ -63,7 +63,7 @@ jobs:
           fi
 
           # Check if NETLIFY_SITE_ID exists
-          if [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then
+          if [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then  # pragma: allowlist secret
             echo "❌ ERROR: NETLIFY_SITE_ID secret is missing"
             echo "📋 To fix this:"
             echo "1. Go to your Netlify site settings"
@@ -92,8 +92,8 @@ jobs:
 
       - name: Test Netlify CLI functionality
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}  # pragma: allowlist secret
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}  # pragma: allowlist secret
         timeout-minutes: 2
         uses: South-Paw/action-netlify-cli@v2
         with:
@@ -168,14 +168,24 @@ jobs:
           echo "📁 Preview build artifacts:"
           ls -la dist/
 
+      - name: Start build timer
+        run: echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
+
       - name: Deploy to Netlify
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}  # pragma: allowlist secret
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}  # pragma: allowlist secret
           PR_NUMBER: ${{ github.event.pull_request.number }}
         uses: South-Paw/action-netlify-cli@v2
         with:
           args: deploy --json --dir=dist --alias=deploy-preview-${{ env.PR_NUMBER }}
+
+      - name: Calculate build duration
+        if: always()
+        run: |
+          BUILD_END=$(date +%s)
+          BUILD_DURATION=$((BUILD_END - BUILD_START))
+          echo "BUILD_DURATION=${BUILD_DURATION}s" >> $GITHUB_ENV
 
       - name: Upload build artifacts
         env:
@@ -307,6 +317,23 @@ jobs:
               console.log('Created new PR preview comment');
             }
 
+  update-deployment-status:
+    name: Update PR Deployment Status
+    needs: build-and-deploy
+    if: github.event.action != 'closed'
+    uses: ./.github/workflows/shared-deployment-status.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      deployment_status: ${{ needs.build-and-deploy.result == 'success' && 'ready' || 'failure' }}
+      deployment_environment: 'preview'
+      deployment_url: ${{ needs.build-and-deploy.result == 'success' && format('https://deploy-preview-{0}--resume-as-code.netlify.app', github.event.pull_request.number) || '' }}
+      commit_sha: ${{ github.event.pull_request.head.sha }}
+      additional_info: ${{ needs.build-and-deploy.result == 'failure' && 'Deployment failed. Check the logs for details.' || '' }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
   cleanup-on-merge:
     name: Cleanup Preview Comment
     runs-on: ubuntu-latest
@@ -328,14 +355,14 @@ jobs:
 
             const previewComment = comments.data.find(comment =>
               comment.user.login === 'github-actions[bot]' &&
-              comment.body.includes('## 🔍 PR Preview Environment')
+              comment.body.includes('## 📊 Deployment Status')
             );
 
             if (previewComment) {
               const status = isMerged ? '✅ **Merged**' : '❌ **Closed**';
               const updatedBody = previewComment.body.replace(
-                '- **Deploy Status**: ⏳ Building...',
-                `- **Deploy Status**: ${status} - Preview environment deactivated`
+                /- \*\*Status\*\*: .*/,
+                `- **Status**: ${status} - Preview environment deactivated`
               );
 
               await github.rest.issues.updateComment({
@@ -346,5 +373,5 @@ jobs:
               });
 
               const action = isMerged ? 'merged' : 'closed';
-              console.log(`Updated preview comment for ${action} PR`);
+              console.log(`Updated deployment status comment for ${action} PR`);
             }
