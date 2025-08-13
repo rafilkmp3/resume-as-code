@@ -1508,27 +1508,27 @@
         }
 
         .social-link:hover {
-            background: var(--color-accent-primary);
-            /* Intelligent contrast-based text color */
-            color: var(--social-hover-text-color, #ffffff) !important;
             border-color: var(--color-accent-primary);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+            transition: all 0.2s ease;
         }
 
-        /* Light theme: ensure dark text on light accent backgrounds */
+        /* Light theme: dark hover background with light text for maximum contrast */
         [data-theme="light"] .social-link:hover,
         .light-mode .social-link:hover,
         body:not(.dark-mode) .social-link:hover {
-            --social-hover-text-color: #ffffff;
+            background: #1a1a1a !important;
+            color: #ffffff !important;
         }
 
-        /* Dark theme: ensure light text on dark accent backgrounds */
+        /* Dark theme: light hover background with dark text for maximum contrast */
         [data-theme="dark"] .social-link:hover {
-            --social-hover-text-color: #ffffff;
+            background: #f0f0f0 !important;
+            color: #1a1a1a !important;
         }
 
-        /* Enhanced Contact Icons with Liquid Glass Effect */
+        /* Enhanced Contact Icons with Liquid Glass Effect - Better Centering */
         .contact-icon {
             position: relative;
             background: linear-gradient(135deg,
@@ -1537,8 +1537,13 @@
             border: 1px solid rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.2);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
+            padding: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
         }
 
         .contact-icon:hover {
@@ -1546,12 +1551,14 @@
                 rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.2),
                 rgba(var(--color-accent-secondary-rgb, 156, 39, 176), 0.1));
             border-color: rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.4);
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.05);
             box-shadow: 0 8px 25px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.15);
         }
 
         .contact-icon svg {
-            transition: all 0.3s ease;
+            width: 24px;
+            height: 24px;
+            transition: all 0.2s ease;
         }
 
         .contact-icon:hover svg {
