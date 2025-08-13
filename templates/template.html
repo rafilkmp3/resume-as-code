@@ -94,12 +94,12 @@
         if (versionElement) versionElement.textContent = appVersion;
         if (environmentElement) environmentElement.textContent = environment;
         if (commitElement) commitElement.textContent = commitHash;
-        
+
         // Handle commits ahead display with smart contextual linking
         if (commitsSinceReleaseElement && commitsAheadContainer) {
           const commits = parseInt(commitsSinceRelease) || 0;
           commitsSinceReleaseElement.textContent = commits;
-          
+
           // Smart display logic based on build context
           if (buildContext === 'release') {
             // Hide commits counter for releases
@@ -109,7 +109,7 @@
             commitsAheadContainer.style.display = 'none';
           } else {
             commitsAheadContainer.style.display = 'inline';
-            
+
             // Add context-aware styling and linking
             switch(buildContext) {
               case 'pr':
@@ -1366,12 +1366,7 @@
             color: #e5e7eb;
         }
 
-        .social-link:hover {
-            background: var(--color-accent-primary);
-            color: white !important;
-            border-color: var(--color-accent-primary);
-            transform: translateY(-1px);
-        }
+        /* Removed duplicate - using enhanced version below */
 
         .resume-actions {
             display: flex;
@@ -1421,6 +1416,410 @@
             border-color: var(--color-accent-primary);
         }
 
+        /* PDF Download Dropdown Styles */
+        .pdf-download-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pdf-dropdown-btn {
+            position: relative;
+        }
+
+        .dropdown-arrow {
+            margin-left: 0.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .pdf-dropdown-btn[aria-expanded="true"] .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .pdf-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            min-width: 280px;
+            overflow: hidden;
+        }
+
+        .pdf-dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .pdf-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            text-decoration: none;
+            color: var(--color-text);
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--color-border-subtle);
+        }
+
+        .pdf-option:last-child {
+            border-bottom: none;
+        }
+
+        .pdf-option:hover {
+            background: var(--color-background-secondary);
+            color: var(--color-accent-primary);
+        }
+
+        .pdf-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .pdf-details {
+            flex: 1;
+        }
+
+        .pdf-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .pdf-desc {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            line-height: 1.3;
+        }
+
+        /* Enhanced Social Link Hover with Proper Contrast */
+        .social-link {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link:hover {
+            background: var(--color-accent-primary);
+            /* Intelligent contrast-based text color */
+            color: var(--social-hover-text-color, #ffffff) !important;
+            border-color: var(--color-accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+        }
+
+        /* Light theme: ensure dark text on light accent backgrounds */
+        [data-theme="light"] .social-link:hover,
+        .light-mode .social-link:hover,
+        body:not(.dark-mode) .social-link:hover {
+            --social-hover-text-color: #ffffff;
+        }
+
+        /* Dark theme: ensure light text on dark accent backgrounds */
+        [data-theme="dark"] .social-link:hover {
+            --social-hover-text-color: #ffffff;
+        }
+
+        /* Enhanced Contact Icons with Liquid Glass Effect */
+        .contact-icon {
+            position: relative;
+            background: linear-gradient(135deg,
+                rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.1),
+                rgba(var(--color-accent-secondary-rgb, 156, 39, 176), 0.05));
+            border: 1px solid rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact-icon:hover {
+            background: linear-gradient(135deg,
+                rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.2),
+                rgba(var(--color-accent-secondary-rgb, 156, 39, 176), 0.1));
+            border-color: rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.15);
+        }
+
+        .contact-icon svg {
+            transition: all 0.3s ease;
+        }
+
+        .contact-icon:hover svg {
+            color: var(--color-accent-primary);
+            transform: scale(1.1);
+        }
+
+        /* Fix Experience Date Separator Consistency */
+        .date-separator {
+            margin: 0 0.5rem;
+            color: var(--color-text-tertiary);
+            font-weight: 300;
+        }
+
+        /* ========================================
+           iOS 2026 LIQUID GLASS CONTACT & CONNECT SECTION
+           ======================================== */
+
+        /* CSS Custom Properties for Liquid Glass Design System */
+        :root {
+            /* Light Theme Liquid Glass Variables */
+            --liquid-glass-bg: hsla(0, 0%, 100%, 0.15);
+            --liquid-glass-bg-hover: hsla(0, 0%, 100%, 0.25);
+            --liquid-glass-border: hsla(0, 0%, 100%, 0.2);
+            --liquid-glass-border-hover: hsla(0, 0%, 100%, 0.4);
+            --liquid-glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.1);
+            --liquid-glass-shadow-hover: 0 12px 48px 0 hsla(0, 0%, 0%, 0.15);
+            --liquid-glass-blur: 16px;
+            --liquid-text-vital: hsla(240, 6%, 10%, 1);
+            --liquid-text-supporting: hsla(240, 6%, 10%, 0.7);
+            --liquid-text-decorative: hsla(240, 6%, 10%, 0.4);
+        }
+
+        /* Dark Theme Liquid Glass Variables */
+        [data-theme="dark"] {
+            --liquid-glass-bg: hsla(240, 4%, 15%, 0.15);
+            --liquid-glass-bg-hover: hsla(240, 4%, 15%, 0.25);
+            --liquid-glass-border: hsla(0, 0%, 100%, 0.1);
+            --liquid-glass-border-hover: hsla(0, 0%, 100%, 0.2);
+            --liquid-glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.3);
+            --liquid-glass-shadow-hover: 0 12px 48px 0 hsla(0, 0%, 0%, 0.4);
+            --liquid-text-vital: hsla(0, 0%, 100%, 1);
+            --liquid-text-supporting: hsla(0, 0%, 100%, 0.7);
+            --liquid-text-decorative: hsla(0, 0%, 100%, 0.4);
+        }
+
+        /* Liquid Glass Contact Grid */
+        .liquid-contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        /* Liquid Glass Contact Cards */
+        .liquid-contact-card {
+            display: block;
+            text-decoration: none;
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--liquid-glass-border);
+            background: var(--liquid-glass-bg);
+            box-shadow: var(--liquid-glass-shadow);
+
+            /* The iOS 2026 liquid glass magic */
+            backdrop-filter: blur(var(--liquid-glass-blur));
+            -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+
+            /* Smooth transitions for iOS-like feel */
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translateZ(0);
+            will-change: transform, background, box-shadow;
+        }
+
+        /* Liquid Glass Hover States */
+        .liquid-contact-card:hover {
+            background: var(--liquid-glass-bg-hover);
+            border-color: var(--liquid-glass-border-hover);
+            box-shadow: var(--liquid-glass-shadow-hover);
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        /* Focus states for accessibility */
+        .liquid-contact-card:focus-visible {
+            outline: 2px solid var(--color-accent-primary);
+            outline-offset: 4px;
+        }
+
+        /* Liquid Glass Card Content */
+        .liquid-card-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Liquid Glass Icons */
+        .liquid-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg,
+                var(--liquid-glass-bg-hover),
+                var(--liquid-glass-bg));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .liquid-icon img,
+        .liquid-icon svg {
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .liquid-icon svg {
+            color: var(--liquid-text-vital);
+        }
+
+        /* Icon hover effects */
+        .liquid-contact-card:hover .liquid-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: linear-gradient(135deg,
+                var(--color-accent-primary)20,
+                var(--color-accent-secondary)10);
+        }
+
+        .liquid-contact-card:hover .liquid-icon img,
+        .liquid-contact-card:hover .liquid-icon svg {
+            transform: scale(1.1);
+        }
+
+        /* Liquid Glass Text */
+        .liquid-text h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--liquid-text-vital);
+            transition: color 0.3s ease;
+        }
+
+        .liquid-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--liquid-text-supporting);
+            transition: color 0.3s ease;
+        }
+
+        /* Enhanced hover text effects */
+        .liquid-contact-card:hover .liquid-text h3 {
+            color: var(--color-accent-primary);
+        }
+
+        .liquid-contact-card:hover .liquid-text p {
+            color: var(--liquid-text-vital);
+        }
+
+        /* Liquid Glass Action Bar */
+        .liquid-action-bar {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 20px;
+            background: var(--liquid-glass-bg);
+            backdrop-filter: blur(var(--liquid-glass-blur));
+            -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+            border: 1px solid var(--liquid-glass-border);
+            box-shadow: var(--liquid-glass-shadow);
+        }
+
+        .liquid-action-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Liquid Glass Action Buttons */
+        .liquid-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Primary liquid action button */
+        .liquid-primary {
+            background: linear-gradient(135deg,
+                var(--color-accent-primary),
+                var(--color-accent-secondary));
+            color: white;
+            box-shadow: 0 4px 16px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+        }
+
+        .liquid-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.4);
+        }
+
+        /* Secondary liquid action button */
+        .liquid-secondary {
+            background: var(--liquid-glass-bg-hover);
+            color: var(--liquid-text-vital);
+            border-color: var(--liquid-glass-border);
+        }
+
+        .liquid-secondary:hover {
+            background: var(--liquid-glass-border-hover);
+            border-color: var(--color-accent-primary);
+            color: var(--color-accent-primary);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        /* Responsive Design for Liquid Glass */
+        @media (max-width: 768px) {
+            .liquid-contact-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .liquid-contact-card {
+                padding: 1.25rem;
+            }
+
+            .liquid-action-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .liquid-action-btn {
+                justify-content: center;
+            }
+        }
+
+        /* Light theme specific adjustments for better contrast */
+        [data-theme="light"] .liquid-contact-card,
+        .light-mode .liquid-contact-card,
+        body:not(.dark-mode) .liquid-contact-card {
+            background: hsla(0, 0%, 100%, 0.4);
+            border-color: hsla(0, 0%, 0%, 0.08);
+        }
+
+        [data-theme="light"] .liquid-contact-card:hover,
+        .light-mode .liquid-contact-card:hover,
+        body:not(.dark-mode) .liquid-contact-card:hover {
+            background: hsla(0, 0%, 100%, 0.6);
+            border-color: hsla(0, 0%, 0%, 0.12);
+            box-shadow: 0 12px 48px 0 hsla(0, 0%, 0%, 0.08);
+        }
+
+        [data-theme="light"] .liquid-action-bar,
+        .light-mode .liquid-action-bar,
+        body:not(.dark-mode) .liquid-action-bar {
+            background: hsla(0, 0%, 100%, 0.4);
+            border-color: hsla(0, 0%, 0%, 0.08);
+        }
+
         /* Comprehensive Responsive Design System */
 
         /* Mobile First: 320px - 767px */
@@ -1448,9 +1847,8 @@
             }
 
             .section h2::after {
-                left: -1rem;
-                right: -1rem;
-                width: calc(100% + 2rem);
+                left: 0;
+                width: 100%;
             }
 
             .social-links {
@@ -1500,9 +1898,8 @@
             }
 
             .section h2::after {
-                left: -1.25rem;
-                right: -1.5rem;
-                width: calc(100% + 2.75rem);
+                left: 0;
+                width: 100%;
             }
         }
 
@@ -1820,9 +2217,8 @@
             content: '';
             position: absolute;
             bottom: -2px;
-            left: -1.5rem; /* Extend beyond the left padding */
-            right: -2rem; /* Extend to the right edge */
-            width: calc(100% + 3.5rem); /* Full width across container */
+            left: 0; /* Start from text */
+            width: 100%; /* Only underline the text */
             height: 2px;
             background: linear-gradient(90deg,
                 var(--color-interactive-hover) 0%,
@@ -3173,6 +3569,7 @@
             .load-more-container, .load-more-btn,
             #load-more-btn, #load-more-projects-btn, #load-more-education-btn, #load-more-skills-btn,
             .skills-counter, .education-counter,
+            .availability-status,
             .no-print { display: none !important; }
 
             /* Show ALL content in print - no pagination */
@@ -3528,12 +3925,14 @@
 
             .skill-tag {
                 color: #000 !important;
+                background: #f5f5f5 !important;
+                border: 1px solid #ddd !important;
                 font-size: 9pt;
                 margin: 0 3pt 1pt 0;
                 display: inline;
-                padding: 0;
-                border: none;
-                background: none;
+                padding: 1pt 4pt;
+                border-radius: 3pt;
+                font-weight: 500;
             }
 
             .skill-tag:after {
@@ -4410,25 +4809,42 @@
         <header class="header">
             {{#if profileImageOptimization}}
             <picture class="profile-photo-container">
-                <!-- Responsive JPEG images for all browsers -->
+                <!-- Modern WebP images for browsers that support it -->
+                {{#if profileImageOptimization.primaryWebP}}
+                <source
+                    srcset="{{profileImageOptimization.primaryWebP}}"
+                    type="image/webp"
+                    media="(min-width: 768px)">
+                {{/if}}
+                {{#if profileImageOptimization.mobileWebP}}
+                <source
+                    srcset="{{profileImageOptimization.mobileWebP}}"
+                    type="image/webp"
+                    media="(max-width: 767px)">
+                {{/if}}
+                <!-- JPEG fallback for all browsers -->
+                {{#if profileImageOptimization.primaryJPEG}}
                 <source
                     srcset="{{profileImageOptimization.primaryJPEG}}"
                     type="image/jpeg"
                     media="(min-width: 768px)">
+                {{/if}}
+                {{#if profileImageOptimization.mobileJPEG}}
                 <source
-                    srcset="{{profileImageOptimization.primaryJPEG}}"
+                    srcset="{{profileImageOptimization.mobileJPEG}}"
                     type="image/jpeg"
                     media="(max-width: 767px)">
+                {{/if}}
 
                 <!-- Default fallback image -->
                 <img
-                    src="{{profileImageOptimization.primaryJPEG}}"
+                    src="{{#if profileImageOptimization.mobileJPEG}}{{profileImageOptimization.mobileJPEG}}{{else}}{{profileImageOptimization.primaryJPEG}}{{/if}}"
                     alt="{{basics.name}}"
                     class="profile-photo"
                     loading="eager"
                     decoding="async"
-                    width="150"
-                    height="150">
+                    width="120"
+                    height="120">
             </picture>
             {{else}}
             {{#if basics.image}}
@@ -4551,12 +4967,41 @@
 
                         <!-- Resume download and share actions -->
                         <div class="resume-actions no-print">
-                            <a href="./resume.pdf" class="action-btn primary-btn" download="Rafael_Sathler_Resume.pdf" aria-label="Download PDF resume">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                                </svg>
-                                <span>Download PDF</span>
-                            </a>
+                            <!-- Multi-PDF Download Dropdown -->
+                            <div class="pdf-download-wrapper">
+                                <button class="action-btn primary-btn pdf-dropdown-btn" id="pdfDropdownBtn" aria-label="Download PDF resume" aria-expanded="false" aria-haspopup="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                    </svg>
+                                    <span>Download PDF</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="dropdown-arrow">
+                                        <path d="M7 10l5 5 5-5z"/>
+                                    </svg>
+                                </button>
+                                <div class="pdf-dropdown-menu" id="pdfDropdownMenu" role="menu" aria-labelledby="pdfDropdownBtn">
+                                    <a href="./resume.pdf" class="pdf-option" download="Rafael_Sathler_Resume_Screen.pdf" role="menuitem" aria-label="Download Screen-Optimized PDF">
+                                        <div class="pdf-icon">📱</div>
+                                        <div class="pdf-details">
+                                            <div class="pdf-name">Screen-Optimized</div>
+                                            <div class="pdf-desc">Best for online sharing • ~4.5MB</div>
+                                        </div>
+                                    </a>
+                                    <a href="./resume-print.pdf" class="pdf-option" download="Rafael_Sathler_Resume_Print.pdf" role="menuitem" aria-label="Download Print-Optimized PDF">
+                                        <div class="pdf-icon">🖨️</div>
+                                        <div class="pdf-details">
+                                            <div class="pdf-name">Print-Optimized</div>
+                                            <div class="pdf-desc">Perfect for physical printing • ~4.6MB</div>
+                                        </div>
+                                    </a>
+                                    <a href="./resume-ats.pdf" class="pdf-option" download="Rafael_Sathler_Resume_ATS.pdf" role="menuitem" aria-label="Download ATS-Optimized PDF">
+                                        <div class="pdf-icon">🤖</div>
+                                        <div class="pdf-details">
+                                            <div class="pdf-name">ATS-Optimized</div>
+                                            <div class="pdf-desc">Text-focused for job applications • ~865KB</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
                             <button class="action-btn secondary-btn" id="share-qr-btn" aria-label="Share resume QR code">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92S19.61 16.08 18 16.08z"/>
@@ -4583,7 +5028,7 @@
                                 <div class="work-date">
                                     <span class="date-range">
                                         <span class="date-start">{{startDate}}</span>
-                                        <span class="date-separator">—</span>
+                                        <span class="date-separator">•</span>
                                         <span class="date-end">{{#if endDate}}{{endDate}}{{else}}Present{{/if}}</span>
                                     </span>
                                 </div>
@@ -4659,7 +5104,7 @@
                             <div class="work-date">
                                 <div class="date-range">
                                     <span class="start-date">{{startDate}}</span>
-                                    <span class="date-separator">—</span>
+                                    <span class="date-separator">•</span>
                                     <span class="end-date">{{endDate}}</span>
                                 </div>
                             </div>
@@ -4746,7 +5191,7 @@
             <canvas id="print-qr-code" class="print-qr-code" width="100" height="100"></canvas>
             <p class="print-qr-text">
                 <strong>View online version:</strong><br>
-                rafilkmp3.github.io/resume-as-code
+                {{#if qrCodeUrl}}{{qrCodeUrl}}{{else}}{{basics.url}}{{/if}}
             </p>
         </div>
 
@@ -4926,43 +5371,142 @@
             window.print = printResume;
         }
 
-        // Enhanced PDF Download with Mobile Sharing for all versions
+        // Enhanced PDF Dropdown with Multiple Download Options
         function enhancePDFDownload() {
-            const pdfLinks = document.querySelectorAll('.pdf-link');
-            if (!pdfLinks.length) return;
+            const dropdownBtn = document.getElementById('pdfDropdownBtn');
+            const dropdownMenu = document.getElementById('pdfDropdownMenu');
+            const pdfOptions = document.querySelectorAll('.pdf-option');
 
-            pdfLinks.forEach(link => {
-                // Check if device supports native sharing
-                if (navigator.share && window.innerWidth <= 768) {
-                    link.addEventListener('click', async (e) => {
-                        e.preventDefault();
+            if (!dropdownBtn || !dropdownMenu) return;
 
-                        try {
-                            const pdfUrl = `${window.location.origin}${window.location.pathname.replace('/index.html', '')}${link.getAttribute('href')}`;
-                            const pdfType = link.textContent;
+            // Toggle dropdown visibility
+            function toggleDropdown(show) {
+                const isShowing = show !== undefined ? show : !dropdownMenu.classList.contains('show');
 
-                            await navigator.share({
-                                title: `Rafael Sathler - Resume (${pdfType})`,
-                                text: `Check out Rafael's ${pdfType.toLowerCase()}-optimized resume`,
-                                url: pdfUrl
-                            });
-                        } catch (error) {
-                            // If sharing fails, fall back to regular download
-                            console.log('Share failed, falling back to download');
-                            window.open(link.getAttribute('href'), '_blank');
-                        }
-                    });
+                if (isShowing) {
+                    dropdownMenu.classList.add('show');
+                    dropdownBtn.setAttribute('aria-expanded', 'true');
+                } else {
+                    dropdownMenu.classList.remove('show');
+                    dropdownBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
 
-                    // Add visual feedback for mobile
-                    link.addEventListener('touchstart', () => {
-                        link.style.transform = 'scale(0.95)';
-                    });
+            // Dropdown button click handler
+            dropdownBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleDropdown();
+            });
 
-                    link.addEventListener('touchend', () => {
-                        link.style.transform = 'scale(1)';
-                    });
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    toggleDropdown(false);
                 }
             });
+
+            // Close dropdown on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    toggleDropdown(false);
+                    dropdownBtn.focus();
+                }
+            });
+
+            // Handle PDF option clicks
+            pdfOptions.forEach((option, index) => {
+                // Enhanced click tracking with PDF type
+                option.addEventListener('click', (e) => {
+                    const pdfName = option.querySelector('.pdf-name').textContent;
+
+                    // Analytics tracking if available
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'pdf_download', {
+                            event_category: 'download',
+                            event_label: pdfName,
+                            value: 1
+                        });
+                    }
+
+                    // Check if device supports native sharing on mobile
+                    if (navigator.share && window.innerWidth <= 768) {
+                        e.preventDefault();
+
+                        const pdfUrl = `${window.location.origin}${window.location.pathname.replace('/index.html', '')}${option.getAttribute('href')}`;
+                        const description = option.querySelector('.pdf-desc').textContent;
+
+                        navigator.share({
+                            title: `Rafael Sathler - Resume (${pdfName})`,
+                            text: `Check out Rafael's ${description}`,
+                            url: pdfUrl
+                        }).catch(() => {
+                            // Fallback to regular download
+                            window.open(option.getAttribute('href'), '_blank');
+                        });
+                    }
+
+                    // Close dropdown after selection
+                    setTimeout(() => toggleDropdown(false), 150);
+                });
+
+                // Keyboard navigation
+                option.addEventListener('keydown', (e) => {
+                    switch (e.key) {
+                        case 'Enter':
+                        case ' ':
+                            e.preventDefault();
+                            option.click();
+                            break;
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            const next = pdfOptions[index + 1] || pdfOptions[0];
+                            next.focus();
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            const prev = pdfOptions[index - 1] || pdfOptions[pdfOptions.length - 1];
+                            prev.focus();
+                            break;
+                    }
+                });
+
+                // Mobile touch feedback
+                option.addEventListener('touchstart', () => {
+                    option.style.transform = 'scale(0.98)';
+                });
+
+                option.addEventListener('touchend', () => {
+                    option.style.transform = 'scale(1)';
+                });
+            });
+
+            // Check PDF availability on load (graceful fallback for missing PDFs)
+            checkPDFAvailability();
+        }
+
+        // Check if PDF files exist and disable unavailable options
+        async function checkPDFAvailability() {
+            const pdfOptions = document.querySelectorAll('.pdf-option');
+
+            for (const option of pdfOptions) {
+                const href = option.getAttribute('href');
+                try {
+                    const response = await fetch(href, { method: 'HEAD' });
+                    if (!response.ok) {
+                        option.style.opacity = '0.5';
+                        option.style.pointerEvents = 'none';
+                        option.setAttribute('aria-disabled', 'true');
+                        const desc = option.querySelector('.pdf-desc');
+                        desc.textContent = 'Not available in this build';
+                    }
+                } catch (error) {
+                    // PDF not available
+                    option.style.opacity = '0.5';
+                    option.style.pointerEvents = 'none';
+                    option.setAttribute('aria-disabled', 'true');
+                }
+            }
         }
 
         // Initialize PDF download enhancement
@@ -6043,6 +6587,10 @@
             const qrCopyBtn = document.getElementById('qr-copy-btn');
             const qrDownloadBtn = document.getElementById('qr-download-btn');
             const qrCodeImage = document.getElementById('qr-code-image');
+
+            // Generate QR code immediately for PDF generation
+            const resumeURL = '{{qrCodeUrl}}' || '{{basics.url}}' || window.location.href;
+            generateQRCodeOnDemand(resumeURL);
             // Function to open QR modal and generate QR code dynamically
             async function openQrModal() {
                 qrModal.style.display = 'flex';

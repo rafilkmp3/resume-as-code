@@ -99,25 +99,55 @@ jobs:
           VALIDATION_FAILED=false
           INVALID_COMMITS=""
           VALID_COMMITS=""
+          DETAILED_ERRORS=""
 
           while IFS='|' read -r hash message; do
             echo ""
             echo "🔍 Checking: $message"
 
-            if echo "$message" | npx commitlint --config commitlint.config.js; then
+            # Capture detailed error output
+            ERROR_OUTPUT=$(echo "$message" | npx commitlint --config commitlint.config.js 2>&1) || COMMIT_FAILED=true
+
+            if [ -z "$COMMIT_FAILED" ]; then
               echo "✅ Valid: $message"
               VALID_COMMITS="$VALID_COMMITS\n- ✅ \`$message\`"
             else
               echo "❌ Invalid: $message"
+              echo "📋 Error details: $ERROR_OUTPUT"
               VALIDATION_FAILED=true
-              INVALID_COMMITS="$INVALID_COMMITS\n- ❌ \`$message\`"
+
+              # Extract specific rule violations for AI-friendly messages
+              RULE_DETAILS=""
+              if echo "$ERROR_OUTPUT" | grep -q "subject-case"; then
+                RULE_DETAILS="$RULE_DETAILS\n  🔧 **Rule**: subject-case - Subject must be lowercase\n  📖 **Fix**: Change \`Fix Bug\` to \`fix bug\`\n  🔗 **Reference**: https://commitlint.js.org/#/reference-rules?id=subject-case"
+              fi
+              if echo "$ERROR_OUTPUT" | grep -q "type-enum"; then
+                RULE_DETAILS="$RULE_DETAILS\n  🔧 **Rule**: type-enum - Invalid commit type\n  📖 **Fix**: Use feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert\n  🔗 **Reference**: https://commitlint.js.org/#/reference-rules?id=type-enum"
+              fi
+              if echo "$ERROR_OUTPUT" | grep -q "subject-empty"; then
+                RULE_DETAILS="$RULE_DETAILS\n  🔧 **Rule**: subject-empty - Subject cannot be empty\n  📖 **Fix**: Add description after colon: \`feat: add new feature\`\n  🔗 **Reference**: https://commitlint.js.org/#/reference-rules?id=subject-empty"
+              fi
+              if echo "$ERROR_OUTPUT" | grep -q "header-max-length"; then
+                RULE_DETAILS="$RULE_DETAILS\n  🔧 **Rule**: header-max-length - Header too long (max 100 chars)\n  📖 **Fix**: Shorten commit message to under 100 characters\n  🔗 **Reference**: https://commitlint.js.org/#/reference-rules?id=header-max-length"
+              fi
+
+              INVALID_COMMITS="$INVALID_COMMITS\n- ❌ \`$message\`$RULE_DETAILS"
+              DETAILED_ERRORS="$DETAILED_ERRORS\n\n**Commit**: \`$message\`\n$RULE_DETAILS"
             fi
+            unset COMMIT_FAILED
           done < commits.txt
 
           echo ""
           echo "📊 Validation Summary:"
           echo "Valid commits: $(echo -e "$VALID_COMMITS" | grep -c '✅' || echo 0)"
           echo "Invalid commits: $(echo -e "$INVALID_COMMITS" | grep -c '❌' || echo 0)"
+
+          # Save detailed errors for PR comment
+          {
+            echo "DETAILED_ERRORS<<EOF"
+            echo -e "$DETAILED_ERRORS"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
           # Save results for comment
           {
@@ -177,10 +207,16 @@ jobs:
             `;
 
             if (validationFailed) {
+              const detailedErrors = process.env.DETAILED_ERRORS || '';
+
               commentBody += `### ❌ Invalid Commits
 
             The following commits do NOT follow conventional commits format:
             ${invalidCommits}
+
+            ### 🤖 AI-Friendly Error Details
+
+            ${detailedErrors}
 
             ### 📋 Required Format
 
@@ -192,23 +228,40 @@ jobs:
 
             **Valid types**: \`feat\`, \`fix\`, \`chore\`, \`docs\`, \`style\`, \`refactor\`, \`perf\`, \`test\`, \`ci\`, \`build\`, \`revert\`
 
-            **Examples**:
+            **Examples** (note lowercase subjects):
             - \`feat: add new resume section for certifications\`
-            - \`fix: resolve QR code URL mismatch in preview environments\`
+            - \`fix: resolve qr code url mismatch in preview environments\`
             - \`chore(deps): bump playwright from 1.40.0 to 1.41.0\`
-            - \`docs: update API documentation\`
+            - \`docs: update api documentation\`
 
-            ### 🔧 How to Fix
+            ### 🔧 Quick Fix Commands
 
-            1. **Rewrite commit messages** using \`git rebase -i\` to edit commit messages
-            2. **Or squash commits** into properly formatted conventional commits
-            3. **Force push** the corrected commits
-
+            **Option 1: Amend last commit**
             \`\`\`bash
-            # Example: Rewrite last commit message
-            git commit --amend -m "feat: describe your feature properly"
+            git commit --amend -m "feat: your description here (lowercase)"
             git push --force-with-lease
             \`\`\`
+
+            **Option 2: Interactive rebase for multiple commits**
+            \`\`\`bash
+            git rebase -i HEAD~2  # Adjust number for commits to fix
+            # Change 'pick' to 'reword' for commits to fix
+            # Save and edit each commit message
+            git push --force-with-lease
+            \`\`\`
+
+            **Option 3: Squash all commits into one**
+            \`\`\`bash
+            git reset --soft HEAD~2  # Adjust number for commits to squash
+            git commit -m "feat: descriptive commit message here"
+            git push --force-with-lease
+            \`\`\`
+
+            ### 📚 Documentation Links
+
+            - 📖 [Conventional Commits Specification](https://www.conventionalcommits.org/)
+            - 🔧 [Commitlint Rules Reference](https://commitlint.js.org/#/reference-rules)
+            - 🎯 [Project CLAUDE.md Guidelines](https://github.com/rafilkmp3/resume-as-code/blob/main/CLAUDE.md#-conventional-commits-implementation)
 
             `;
             } else {
@@ -279,10 +332,21 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Invalid commits found**: This PR contains commits that do not follow conventional commits format." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Required Action" >> $GITHUB_STEP_SUMMARY
-            echo "1. Fix commit messages using \`git rebase -i\` or \`git commit --amend\`" >> $GITHUB_STEP_SUMMARY
-            echo "2. Force push the corrected commits" >> $GITHUB_STEP_SUMMARY
-            echo "3. Re-run this check" >> $GITHUB_STEP_SUMMARY
+            echo "### 🤖 AI-Friendly Error Details" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo -e "${{ env.DETAILED_ERRORS }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Quick Fix Commands" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Most common fix (lowercase subject)**:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "git commit --amend -m \"feat: your description here (lowercase)\"" >> $GITHUB_STEP_SUMMARY
+            echo "git push --force-with-lease" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📚 References" >> $GITHUB_STEP_SUMMARY
+            echo "- [Conventional Commits](https://www.conventionalcommits.org/)" >> $GITHUB_STEP_SUMMARY
+            echo "- [Commitlint Rules](https://commitlint.js.org/#/reference-rules)" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Conventional Commits Validation Passed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

@@ -44,16 +44,37 @@ async function generateResponsiveImages(sourceImagePath, outputDir, options = {}
   };
 
   try {
-    const sourceImage = sharp(sourceImagePath);
-    const metadata = await sourceImage.metadata();
+    // Add better error handling for Sharp image format compatibility
+    let sourceImage;
+    let metadata;
+
+    try {
+      sourceImage = sharp(sourceImagePath);
+      metadata = await sourceImage.metadata();
+    } catch (formatError) {
+      console.log(`⚠️ Sharp format error: ${formatError.message}`);
+      console.log(`🔄 Attempting image format conversion for compatibility...`);
+
+      // Try to force read as JPEG and convert
+      sourceImage = sharp(sourceImagePath, { failOnError: false })
+        .jpeg({ quality: 95 });
+      metadata = await sourceImage.metadata();
+
+      if (!metadata.width || !metadata.height) {
+        throw new Error(`Unable to read image dimensions from ${sourceImagePath}`);
+      }
+    }
+    // Get actual file size since Sharp metadata.size might be undefined
+    const sourceStats = fs.statSync(sourceImagePath);
+
     results.metadata = {
       width: metadata.width,
       height: metadata.height,
       format: metadata.format,
-      size: metadata.size
+      size: sourceStats.size
     };
 
-    console.log(`📏 Source: ${metadata.width}x${metadata.height}, ${metadata.format}, ${Math.round(metadata.size / 1024)}KB`);
+    console.log(`📏 Source: ${metadata.width}x${metadata.height}, ${metadata.format}, ${Math.round(sourceStats.size / 1024)}KB`);
 
     // Generate each responsive size
     for (const [sizeName, dimensions] of Object.entries(RESPONSIVE_SIZES)) {

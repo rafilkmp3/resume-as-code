@@ -1,0 +1,253 @@
+/* ========================================
+   iOS 2026 LIQUID GLASS CONTACT & CONNECT SECTION
+   ======================================== */
+
+/* CSS Custom Properties for Liquid Glass Design System */
+:root {
+    /* Light Theme Liquid Glass Variables */
+    --liquid-glass-bg: hsla(0, 0%, 100%, 0.15);
+    --liquid-glass-bg-hover: hsla(0, 0%, 100%, 0.25);
+    --liquid-glass-border: hsla(0, 0%, 100%, 0.2);
+    --liquid-glass-border-hover: hsla(0, 0%, 100%, 0.4);
+    --liquid-glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.1);
+    --liquid-glass-shadow-hover: 0 12px 48px 0 hsla(0, 0%, 0%, 0.15);
+    --liquid-glass-blur: 16px;
+    --liquid-text-vital: hsla(240, 6%, 10%, 1);
+    --liquid-text-supporting: hsla(240, 6%, 10%, 0.7);
+    --liquid-text-decorative: hsla(240, 6%, 10%, 0.4);
+}
+
+/* Dark Theme Liquid Glass Variables */
+[data-theme="dark"] {
+    --liquid-glass-bg: hsla(240, 4%, 15%, 0.15);
+    --liquid-glass-bg-hover: hsla(240, 4%, 15%, 0.25);
+    --liquid-glass-border: hsla(0, 0%, 100%, 0.1);
+    --liquid-glass-border-hover: hsla(0, 0%, 100%, 0.2);
+    --liquid-glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.3);
+    --liquid-glass-shadow-hover: 0 12px 48px 0 hsla(0, 0%, 0%, 0.4);
+    --liquid-text-vital: hsla(0, 0%, 100%, 1);
+    --liquid-text-supporting: hsla(0, 0%, 100%, 0.7);
+    --liquid-text-decorative: hsla(0, 0%, 100%, 0.4);
+}
+
+/* Liquid Glass Contact Grid */
+.liquid-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+/* Liquid Glass Contact Cards */
+.liquid-contact-card {
+    display: block;
+    text-decoration: none;
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--liquid-glass-border);
+    background: var(--liquid-glass-bg);
+    box-shadow: var(--liquid-glass-shadow);
+
+    /* The iOS 2026 liquid glass magic */
+    backdrop-filter: blur(var(--liquid-glass-blur));
+    -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+
+    /* Smooth transitions for iOS-like feel */
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateZ(0);
+    will-change: transform, background, box-shadow;
+}
+
+/* Liquid Glass Hover States */
+.liquid-contact-card:hover {
+    background: var(--liquid-glass-bg-hover);
+    border-color: var(--liquid-glass-border-hover);
+    box-shadow: var(--liquid-glass-shadow-hover);
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Focus states for accessibility */
+.liquid-contact-card:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 4px;
+}
+
+/* Liquid Glass Card Content */
+.liquid-card-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Liquid Glass Icons */
+.liquid-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+        var(--liquid-glass-bg-hover),
+        var(--liquid-glass-bg));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.liquid-icon img,
+.liquid-icon svg {
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+}
+
+.liquid-icon svg {
+    color: var(--liquid-text-vital);
+}
+
+/* Icon hover effects */
+.liquid-contact-card:hover .liquid-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg,
+        var(--color-accent-primary)20,
+        var(--color-accent-secondary)10);
+}
+
+.liquid-contact-card:hover .liquid-icon img,
+.liquid-contact-card:hover .liquid-icon svg {
+    transform: scale(1.1);
+}
+
+/* Liquid Glass Text */
+.liquid-text h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--liquid-text-vital);
+    transition: color 0.3s ease;
+}
+
+.liquid-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--liquid-text-supporting);
+    transition: color 0.3s ease;
+}
+
+/* Enhanced hover text effects */
+.liquid-contact-card:hover .liquid-text h3 {
+    color: var(--color-accent-primary);
+}
+
+.liquid-contact-card:hover .liquid-text p {
+    color: var(--liquid-text-vital);
+}
+
+/* Liquid Glass Action Bar */
+.liquid-action-bar {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--liquid-glass-bg);
+    backdrop-filter: blur(var(--liquid-glass-blur));
+    -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+    border: 1px solid var(--liquid-glass-border);
+    box-shadow: var(--liquid-glass-shadow);
+}
+
+.liquid-action-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Liquid Glass Action Buttons */
+.liquid-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Primary liquid action button */
+.liquid-primary {
+    background: linear-gradient(135deg,
+        var(--color-accent-primary),
+        var(--color-accent-secondary));
+    color: white;
+    box-shadow: 0 4px 16px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.3);
+}
+
+.liquid-primary:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(var(--color-accent-primary-rgb, 33, 150, 243), 0.4);
+}
+
+/* Secondary liquid action button */
+.liquid-secondary {
+    background: var(--liquid-glass-bg-hover);
+    color: var(--liquid-text-vital);
+    border-color: var(--liquid-glass-border);
+}
+
+.liquid-secondary:hover {
+    background: var(--liquid-glass-border-hover);
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Responsive Design for Liquid Glass */
+@media (max-width: 768px) {
+    .liquid-contact-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .liquid-contact-card {
+        padding: 1.25rem;
+    }
+
+    .liquid-action-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .liquid-action-btn {
+        justify-content: center;
+    }
+}
+
+/* Light theme specific adjustments for better contrast */
+[data-theme="light"] .liquid-contact-card,
+.light-mode .liquid-contact-card,
+body:not(.dark-mode) .liquid-contact-card {
+    background: hsla(0, 0%, 100%, 0.4);
+    border-color: hsla(0, 0%, 0%, 0.08);
+}
+
+[data-theme="light"] .liquid-contact-card:hover,
+.light-mode .liquid-contact-card:hover,
+body:not(.dark-mode) .liquid-contact-card:hover {
+    background: hsla(0, 0%, 100%, 0.6);
+    border-color: hsla(0, 0%, 0%, 0.12);
+    box-shadow: 0 12px 48px 0 hsla(0, 0%, 0%, 0.08);
+}
+
+[data-theme="light"] .liquid-action-bar,
+.light-mode .liquid-action-bar,
+body:not(.dark-mode) .liquid-action-bar {
+    background: hsla(0, 0%, 100%, 0.4);
+    border-color: hsla(0, 0%, 0%, 0.08);
+}

@@ -71,7 +71,6 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          lfs: true
 
       - name: Calculate version and commit info
         id: version-info
@@ -107,10 +106,10 @@ jobs:
         id: context
         run: |
           echo "🔍 Detecting build context..."
-          
+
           # Detect build context and generate appropriate URLs
           REPO_URL="https://github.com/${{ github.repository }}"
-          
+
           if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "BUILD_CONTEXT=release" >> $GITHUB_ENV
             echo "CONTEXT_URL=${{ github.event.release.html_url || format('{0}/releases/tag/{1}', env.REPO_URL, github.ref_name) }}" >> $GITHUB_ENV
@@ -129,7 +128,7 @@ jobs:
             echo "CONTEXT_URL=${REPO_URL}/tree/${{ github.ref_name }}" >> $GITHUB_ENV
             echo "📊 Build context: Branch ${{ github.ref_name }}"
           fi
-          
+
           # Generate compare URL for commits ahead
           if [ -n "$LAST_RELEASE_TAG" ]; then
             echo "COMPARE_URL=${REPO_URL}/compare/${LAST_RELEASE_TAG}...HEAD" >> $GITHUB_ENV

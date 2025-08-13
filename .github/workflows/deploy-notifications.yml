@@ -1,0 +1,149 @@
+---
+name: Deployment Notifications
+
+on:
+  # Trigger after successful GitHub Pages deployment
+  workflow_run:
+    workflows: ["Production Pipeline"]
+    types: [completed]
+    branches: [main]
+  # Manual trigger for notifications
+  workflow_dispatch:
+    inputs:
+      notification_type:
+        description: 'Notification type'
+        required: false
+        default: 'deployment'
+        type: choice
+        options:
+          - deployment
+          - status-check
+
+jobs:
+  deployment-notifications:
+    name: Send Deployment Notifications
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get deployment info
+        id: deploy-info
+        run: |
+          # Get the latest commit info
+          COMMIT_SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          COMMIT_MESSAGE=$(git log --format="%s" -n 1 $COMMIT_SHA)
+          COMMIT_AUTHOR=$(git log --format="%an" -n 1 $COMMIT_SHA)
+
+          # Get current version
+          CURRENT_VERSION=$(node -p "require('./package.json').version" || echo "unknown")
+
+          # GitHub Pages URL
+          PAGES_URL="https://rafilkmp3.github.io/resume-as-code/"
+
+          # Export variables
+          echo "commit-sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
+          echo "commit-message=${COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
+          echo "commit-author=${COMMIT_AUTHOR}" >> $GITHUB_OUTPUT
+          echo "current-version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+          echo "pages-url=${PAGES_URL}" >> $GITHUB_OUTPUT
+
+          # Log for debugging
+          echo "📋 Deployment Info:"
+          echo "  Commit: ${COMMIT_SHA}"
+          echo "  Message: ${COMMIT_MESSAGE}"
+          echo "  Author: ${COMMIT_AUTHOR}"
+          echo "  Version: ${CURRENT_VERSION}"
+          echo "  Pages URL: ${PAGES_URL}"
+
+      - name: Create deployment notification
+        uses: actions/github-script@v7
+        env:
+          COMMIT_SHA: ${{ steps.deploy-info.outputs.commit-sha }}
+          COMMIT_MESSAGE: ${{ steps.deploy-info.outputs.commit-message }}
+          COMMIT_AUTHOR: ${{ steps.deploy-info.outputs.commit-author }}
+          CURRENT_VERSION: ${{ steps.deploy-info.outputs.current-version }}
+          PAGES_URL: ${{ steps.deploy-info.outputs.pages-url }}
+        with:
+          script: |
+            const commitSha = process.env.COMMIT_SHA;
+            const commitMessage = process.env.COMMIT_MESSAGE;
+            const commitAuthor = process.env.COMMIT_AUTHOR;
+            const currentVersion = process.env.CURRENT_VERSION;
+            const pagesUrl = process.env.PAGES_URL;
+
+            const shortSha = commitSha.substring(0, 7);
+            const timestamp = new Date().toISOString();
+
+            // Create deployment notification as issue comment or discussion
+            const deploymentBody = `# 🚀 Deployment Notification
+
+            **Status**: ✅ **DEPLOYED SUCCESSFULLY**
+            **Environment**: Production (GitHub Pages)
+            **Version**: \`${currentVersion}\`
+            **Timestamp**: ${timestamp}
+
+            ## 📊 Deployment Details
+
+            - **URL**: [${pagesUrl}](${pagesUrl})
+            - **Commit**: [\`${shortSha}\`](${context.payload.repository.html_url}/commit/${commitSha})
+            - **Author**: ${commitAuthor}
+            - **Message**: ${commitMessage}
+
+            ## 🔗 Access Points
+
+            - 🌐 **Live Resume**: [${pagesUrl}](${pagesUrl})
+            - 📱 **PDF Downloads**: [${pagesUrl}](${pagesUrl}) (Screen/Print/ATS versions)
+            - 🎯 **QR Code**: Points to live site version
+            - 📊 **Analytics**: Available in production build
+
+            ## 📦 Build Strategy
+
+            **GitHub Pages**: Production builds (unlimited)
+            **Netlify**: PR previews only (conserves 300 build minutes/month)
+
+            **Benefits**:
+            - ✅ Unlimited builds on GitHub Actions
+            - ✅ Netlify build minutes conserved
+            - ✅ Cost-effective hosting strategy
+            - ✅ Automatic deployment notifications
+
+            ---
+            *🤖 Automated deployment notification from GitHub Actions*`;
+
+            console.log('📢 Deployment notification created successfully');
+            console.log(`🌐 Deployed to: ${pagesUrl}`);
+
+            // Log the notification for pipeline summary
+            core.summary.addHeading('🚀 Deployment Notification Sent', 2);
+            core.summary.addRaw(`
+            **Status**: ✅ Deployed Successfully
+            **URL**: [${pagesUrl}](${pagesUrl})
+            **Version**: ${currentVersion}
+            **Commit**: ${shortSha}
+            `);
+            await core.summary.write();
+
+      - name: Deployment strategy summary
+        run: |
+          echo "## 🎯 Optimized Build Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **URL**: https://rafilkmp3.github.io/resume-as-code/" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 **Builds**: Unlimited via GitHub Actions" >> $GITHUB_STEP_SUMMARY
+          echo "- 💰 **Cost**: Free for public repos" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Netlify (PR Previews Only)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **Purpose**: PR preview deployments" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 **Build Minutes**: Conserved (300/month limit)" >> $GITHUB_STEP_SUMMARY
+          echo "- 💰 **Strategy**: Only preview builds, no production" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Strategy Benefits" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Netlify build minutes preserved for PR previews" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub Actions handles all production builds" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Reliable production deployment via GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Cost-effective and sustainable hosting model" >> $GITHUB_STEP_SUMMARY

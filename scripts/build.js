@@ -2,11 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const Handlebars = require('handlebars');
-// const sharp = require('sharp'); // Removed for multi-arch compatibility
 const { copyRecursive } = require('./utils/fs-utils');
-// Use simple optimization for now (Canvas not working in GitHub Actions)
-// TODO: Fix Canvas dependencies in Docker for production optimization
-const { optimizeProfileImageForResume } = require('./utils/image-optimization-simple');
+// Use proper Sharp-based optimization with WebP + JPEG support
+const { optimizeProfileImageForResume } = require('./utils/image-optimization');
 
 console.log('🏗️  Building resume...');
 
@@ -20,16 +18,16 @@ function getQRCodeURL() {
   try {
     // Debug: Log all relevant environment variables for troubleshooting
     console.log('🔍 Environment Debug Info:');
-    console.log('  NETLIFY:', process.env.NETLIFY);
-    console.log('  REVIEW_ID:', process.env.REVIEW_ID);
-    console.log('  HEAD:', process.env.HEAD);
-    console.log('  BRANCH:', process.env.BRANCH);
-    console.log('  CONTEXT:', process.env.CONTEXT);
-    console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
-    console.log('  DEPLOY_URL:', process.env.DEPLOY_URL);
-    console.log('  URL:', process.env.URL);
-    console.log('  NODE_ENV:', process.env.NODE_ENV);
-    console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES);
+    console.log('  NETLIFY:', process.env.NETLIFY || 'false');
+    console.log('  REVIEW_ID:', process.env.REVIEW_ID || process.env.PR_NUMBER || 'none');
+    console.log('  HEAD:', process.env.HEAD || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
+    console.log('  BRANCH:', process.env.BRANCH || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
+    console.log('  CONTEXT:', process.env.CONTEXT || (process.env.NETLIFY ? 'deploy-preview' : 'local'));
+    console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL || 'none');
+    console.log('  DEPLOY_URL:', process.env.DEPLOY_URL || 'none');
+    console.log('  URL:', process.env.URL || 'none');
+    console.log('  NODE_ENV:', process.env.NODE_ENV || 'development');
+    console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES || 'false');
 
     // Netlify environment (check first as it has highest priority for previews)
     // Netlify sets NETLIFY=true for all deployments
@@ -115,7 +113,16 @@ function getMacLanIP() {
 
 // DRY Profile Image Optimization using utility
 async function optimizeProfileImage(imagePath, resumeData, options = {}) {
-  return optimizeProfileImageForResume(imagePath, './dist/assets/images');
+  try {
+    return await optimizeProfileImageForResume(imagePath, {
+      isDraft: options.mode === 'draft' || process.env.BUILD_MODE === 'draft',
+      outputDir: './dist/assets/images'
+    });
+  } catch (error) {
+    console.error('❌ Image optimization failed, continuing build without optimization:', error.message);
+    console.log('💡 Build will continue with original image file');
+    return null; // Return null so template uses fallback image
+  }
 }
 
 // Generate HTML from template and data
@@ -164,25 +171,57 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   let html = template(enhancedResumeData);
   console.log('✅ Template generated successfully with dynamic QR code support!');
 
-  // Update app version, environment and commit hash from package.json and CI environment
+  // Enhanced environment detection for smart preview configuration
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   const appVersion = process.env.APP_VERSION || packageJson.version;
-  const buildBranch = process.env.GITHUB_REF_NAME || process.env.BRANCH || 'main';
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.GITHUB_REF_NAME === 'main' || process.env.GITHUB_ACTIONS;
-  const environment = isProduction && buildBranch === 'main' ? 'production' : 'preview';
+  const buildBranch = process.env.GITHUB_REF_NAME || process.env.HEAD || process.env.BRANCH || 'main';
+
+  // Smart environment detection
+  const isNetlifyPreview = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'deploy-preview';
+  const isNetlifyBranch = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'branch-deploy';
+  const isGitHubPages = process.env.GITHUB_PAGES === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  const isProduction = (buildBranch === 'main' && !isNetlifyPreview) || process.env.NODE_ENV === 'production';
+
+  // Environment classification with detailed context
+  let environment, environmentDetails;
+  if (isNetlifyPreview) {
+    environment = 'netlify-preview';
+    environmentDetails = `Netlify PR Preview (#${process.env.REVIEW_ID || 'unknown'})`;
+  } else if (isNetlifyBranch) {
+    environment = 'netlify-branch';
+    environmentDetails = `Netlify Branch Deploy (${buildBranch})`;
+  } else if (isGitHubPages && buildBranch === 'main') {
+    environment = 'production';
+    environmentDetails = 'GitHub Pages Production';
+  } else if (isGitHubPages) {
+    environment = 'github-preview';
+    environmentDetails = `GitHub Actions Build (${buildBranch})`;
+  } else {
+    environment = 'development';
+    environmentDetails = 'Local Development';
+  }
+
   const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
   const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
   const commitsSinceRelease = process.env.COMMITS_SINCE_RELEASE || '0';
   const lastReleaseTag = process.env.LAST_RELEASE_TAG || 'none';
   const buildTimestamp = new Date().toISOString();
 
-  console.log('📊 Version Information:');
+  // PR-specific information for preview environments
+  const prNumber = process.env.REVIEW_ID || process.env.PR_NUMBER || '';
+  const deployUrl = process.env.DEPLOY_PRIME_URL || process.env.DEPLOY_URL || qrCodeUrl;
+
+  console.log('📊 Enhanced Version Information:');
   console.log(`  App Version: ${appVersion}`);
+  console.log(`  Environment: ${environment} (${environmentDetails})`);
+  console.log(`  Build Branch: ${buildBranch}`);
+  console.log(`  Deploy URL: ${deployUrl}`);
+  console.log(`  Commit: ${commitShort}`);
   console.log(`  Commits since release: ${commitsSinceRelease}`);
   console.log(`  Last release tag: ${lastReleaseTag}`);
-  console.log(`  Environment: ${environment}`);
-  console.log(`  Build branch: ${buildBranch}`);
-  console.log(`  Commit: ${commitShort}`);
+  if (prNumber) {
+    console.log(`  PR Number: #${prNumber}`);
+  }
 
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
@@ -190,10 +229,9 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `const branchName = '${buildBranch}';`);
   // Enhanced environment variable replacements for smart contextual linking
   const buildContext = process.env.BUILD_CONTEXT || 'main';
-  const prNumber = process.env.PR_NUMBER || '';
   const contextUrl = process.env.CONTEXT_URL || '';
   const compareUrl = process.env.COMPARE_URL || '';
-  
+
   console.log('🔗 Contextual linking information:');
   console.log(`  Build context: ${buildContext}`);
   console.log(`  PR number: ${prNumber}`);
@@ -390,16 +428,16 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
       .fade-in-section { opacity: 1 !important; transform: none !important; }
       .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
 
-      /* Reduce excessive spacing in main content */
+      /* Aggressively reduce spacing to minimize pages */
       .main-content {
-        padding: 1rem !important;
-        gap: 1rem !important;
+        padding: 0.5rem !important;
+        gap: 0.25rem !important;
         min-height: auto !important;
       }
 
       .section {
-        margin-bottom: 1rem !important;
-        page-break-inside: avoid;
+        margin-bottom: 0.5rem !important;
+        page-break-inside: auto !important; /* Allow breaking for compactness */
       }
 
       .container {
@@ -407,13 +445,41 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
         padding: 0 !important;
       }
 
-      /* Make sections more compact */
+      /* Ultra-compact sections */
       .left-column, .right-column {
-        gap: 1rem !important;
+        gap: 0.25rem !important;
       }
 
-      .work-item, .project-item {
-        margin-bottom: 1rem !important;
+      .work-item, .project-item, .education-item {
+        margin-bottom: 0.5rem !important;
+        padding: 0.25rem !important;
+      }
+
+      /* Compact text and reduce line heights */
+      h1, h2, h3, h4, h5, h6 {
+        margin: 0.25rem 0 !important;
+        line-height: 1.1 !important;
+      }
+
+      p, li {
+        margin: 0.125rem 0 !important;
+        line-height: 1.2 !important;
+      }
+
+      /* Hide web-only elements to save space */
+      .pdf-dropdown-wrapper, .pdf-dropdown-menu, .action-buttons,
+      .qr-modal, .no-print, .dark-toggle, .load-more-container,
+      .load-more-btn, .experience-counter, .experience-controls,
+      .skills-counter, .education-counter { display: none !important; }
+
+      /* Ensure profile photo is visible and properly sized */
+      .profile-photo {
+        display: block !important;
+        width: 120px !important;
+        height: 120px !important;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        margin: 0 auto 0.5rem !important;
       }
     `
   });
@@ -479,8 +545,10 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
         * { -webkit-print-color-adjust: exact !important; }
         body {
           background: white !important;
-          font-size: 11pt !important;
-          line-height: 1.3 !important;
+          font-size: 10pt !important;
+          line-height: 1.15 !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
         .header {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
@@ -495,9 +563,9 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
           margin-bottom: 8pt !important;
           color: #2c3e50 !important;
         }
-        .experience-item, .project-item {
-          margin-bottom: 10pt !important;
-          page-break-inside: avoid !important;
+        .experience-item, .project-item, .education-item {
+          margin-bottom: 6pt !important;
+          page-break-inside: auto !important; /* Allow breaking for compactness */
         }
         .contact-info {
           font-size: 10pt !important;
@@ -505,6 +573,22 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
         /* Enhanced contrast for printing */
         p, li, span { color: #000 !important; }
         .subtitle { font-size: 12pt !important; }
+
+        /* Hide web-only elements but keep profile photo */
+        .pdf-dropdown-wrapper, .pdf-dropdown-menu, .action-buttons,
+        .qr-modal, .no-print, .dark-toggle, .load-more-container,
+        .load-more-btn, .experience-counter, .experience-controls,
+        .skills-counter, .education-counter { display: none !important; }
+
+        /* Ensure profile photo is visible and properly sized for print */
+        .profile-photo {
+          display: block !important;
+          width: 100px !important;
+          height: 100px !important;
+          border-radius: 50% !important;
+          object-fit: cover !important;
+          margin: 0 auto 0.5rem !important;
+        }
       }
     `
   });
@@ -517,7 +601,7 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
     printBackground: true,
     preferCSSPageSize: true,
     displayHeaderFooter: false,
-    margin: { top: '12mm', bottom: '12mm', left: '12mm', right: '12mm' },
+    margin: { top: '8mm', bottom: '8mm', left: '10mm', right: '10mm' },
     scale: 1.0,
     tagged: true,
     title: `${resumeData.basics.name} - Resume (Print-Optimized)`,
@@ -592,9 +676,9 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         }
         body {
           font-family: 'Times New Roman', serif !important;
-          font-size: 10pt !important;
-          line-height: 1.15 !important;
-          margin: 8pt !important;
+          font-size: 9pt !important;
+          line-height: 1.1 !important;
+          margin: 6pt !important;
           padding: 0 !important;
         }
         .header {
@@ -636,10 +720,10 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
           color: #000 !important;
         }
         .experience-item, .project-item, .education-item {
-          margin: 2pt 0 !important;
-          page-break-inside: avoid !important;
-          page-break-before: avoid !important;
-          page-break-after: avoid !important;
+          margin: 1pt 0 !important;
+          page-break-inside: auto !important; /* Allow breaking for maximum compactness */
+          page-break-before: auto !important;
+          page-break-after: auto !important;
         }
         .experience-title, .project-name, .education-degree {
           font-weight: bold !important;
@@ -657,10 +741,11 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
         ul, ol { margin: 5pt 0 !important; }
         li { margin: 2pt 0 !important; color: #000 !important; }
 
-        /* Hide visual elements for ATS */
+        /* Hide visual elements for ATS (profile photo hidden only in ATS) */
         .profile-photo, .parallax-bg, .dark-toggle, .controls, .links,
         .fade-in-section::before, .gradient-text, .print-only,
-        .print-qr-section, .pdf-download-group { display: none !important; }
+        .print-qr-section, .pdf-download-group, .pdf-dropdown-wrapper,
+        .pdf-dropdown-menu, .action-buttons, .qr-modal, .no-print { display: none !important; }
 
         /* Ensure all text is black and readable */
         p, span, div, li, td, th, h2, h3, h4, h5, h6 {
@@ -726,7 +811,7 @@ async function generateATSOptimizedPDF(browser, filePath, resumeData) {
     printBackground: false, // Disable backgrounds for ATS
     preferCSSPageSize: true,
     displayHeaderFooter: false,
-    margin: { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' },
+    margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' },
     scale: 1.0,
     tagged: true,
     title: `${resumeData.basics.name} - Resume (ATS-Optimized)`,

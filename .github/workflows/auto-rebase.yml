@@ -39,7 +39,7 @@ jobs:
       - name: Setup GitHub CLI and Git Config
         run: |
           gh auth setup-git
-          
+
           # Configure git identity for commits
           git config --global user.name "resume-pipeline-bot[bot]"
           git config --global user.email "noreply@github.com"
@@ -62,7 +62,7 @@ jobs:
           else
             RECREATED_COUNT=0
             CLOSED_COUNT=0
-            
+
             echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
               PR_DATA=$(echo "$pr_json" | jq -r '.')
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
@@ -70,7 +70,7 @@ jobs:
               PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
               PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
               PR_CREATED=$(echo "$PR_DATA" | jq -r '.createdAt')
-              
+
               echo ""
               echo "📦 Dependabot PR #$PR_NUMBER: $PR_TITLE"
               echo "   Branch: $PR_BRANCH"
@@ -80,7 +80,7 @@ jobs:
               # Check if PR has invalid conventional commit format
               INVALID_COMMIT_FORMAT=false
               LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
-              
+
               if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
                 echo "❌ PR #$PR_NUMBER has INVALID conventional commit format: $LATEST_COMMIT_MSG"
                 INVALID_COMMIT_FORMAT=true
@@ -98,12 +98,12 @@ jobs:
               else
                 PR_AGE_DAYS=0
               fi
-              
+
               echo "   Age: ${PR_AGE_DAYS} days"
 
               # AGGRESSIVE STRATEGY: Force close and recreate PRs that are:
               # 1. CONFLICTING
-              # 2. UNKNOWN status  
+              # 2. UNKNOWN status
               # 3. Have invalid conventional commit format
               # 4. Are older than 7 days
               SHOULD_FORCE_RECREATE=false
@@ -125,15 +125,15 @@ jobs:
 
               if [ "$SHOULD_FORCE_RECREATE" = true ]; then
                 echo "🔥 FORCE RECREATING PR #$PR_NUMBER because it $REASON"
-                
+
                 # Strategy: Close the PR and let Dependabot automatically recreate it
                 # This is more reliable than @dependabot recreate comments
                 echo "   1. Closing PR #$PR_NUMBER to trigger automatic recreation..."
                 gh pr close "$PR_NUMBER" --comment "🤖 Auto-closing this PR because it $REASON. Dependabot will automatically recreate it with the latest changes and correct format."
-                
+
                 echo "   2. Waiting 5 seconds for Dependabot to detect closure..."
                 sleep 5
-                
+
                 echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
                 CLOSED_COUNT=$((CLOSED_COUNT + 1))
               else
@@ -162,23 +162,23 @@ jobs:
 
           if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
             echo "📦 This is a Dependabot PR - applying aggressive recreation strategy..."
-            
+
             # Get PR details
             PR_DATA=$(gh pr view "$PR_NUMBER" --json title,mergeable,commits,createdAt)
             PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
             PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
             LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
-            
+
             echo "   Title: $PR_TITLE"
             echo "   Status: $PR_MERGEABLE"
             echo "   Latest commit: $LATEST_COMMIT_MSG"
-            
+
             # Check for invalid format
             INVALID_FORMAT=false
             if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
               INVALID_FORMAT=true
             fi
-            
+
             if [ "$PR_MERGEABLE" = "CONFLICTING" ] || [ "$PR_MERGEABLE" = "UNKNOWN" ] || [ "$INVALID_FORMAT" = true ]; then
               echo "🔥 Force closing PR #$PR_NUMBER for recreation..."
               gh pr close "$PR_NUMBER" --comment "🤖 Manual trigger: Force-closing this PR for recreation with latest format and no conflicts."
@@ -230,7 +230,7 @@ jobs:
           echo "- **Stale PRs (>7 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
           echo "- **Valid PRs**: Left unchanged" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
           echo "**Current Dependabot PRs**: $DEPENDABOT_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

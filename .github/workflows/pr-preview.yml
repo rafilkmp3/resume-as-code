@@ -10,11 +10,188 @@ concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+  packages: write
+  id-token: write
+
 jobs:
+  build-and-deploy:
+    name: Build & Deploy Preview
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+    timeout-minutes: 15
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+      # Preview environment variables
+      NETLIFY: 'true'
+      NETLIFY_ENV: 'deploy-preview'
+      REVIEW_ID: ${{ github.event.pull_request.number }}
+      HEAD: ${{ github.event.pull_request.head.ref }}
+      BRANCH: ${{ github.event.pull_request.head.ref }}
+      CONTEXT: 'deploy-preview'
+      DEPLOY_PRIME_URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
+      DEPLOY_URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
+      URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
+      NODE_ENV: 'preview'
+      GITHUB_PAGES: 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate Required Secrets  # pragma: allowlist secret
+        timeout-minutes: 1
+        run: |
+          echo "🔍 Validating required secrets for Netlify deployment..." # pragma: allowlist secret
+
+          # Check if NETLIFY_AUTH_TOKEN exists
+          if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ]; then
+            echo "❌ ERROR: NETLIFY_AUTH_TOKEN secret is missing"
+            echo "📋 To fix this:"
+            echo "1. Go to https://app.netlify.com/user/applications#personal-access-tokens"
+            echo "2. Create a new personal access token"
+            echo "3. Add it as NETLIFY_AUTH_TOKEN secret in GitHub repository settings"
+            echo "4. URL: https://github.com/${{ github.repository }}/settings/secrets/actions" # pragma: allowlist secret
+            missing_secrets=true
+          else
+            echo "✅ NETLIFY_AUTH_TOKEN secret found"
+          fi
+
+          # Check if NETLIFY_SITE_ID exists
+          if [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then
+            echo "❌ ERROR: NETLIFY_SITE_ID secret is missing"
+            echo "📋 To fix this:"
+            echo "1. Go to your Netlify site settings"
+            echo "2. Find Site ID in Site Settings > General > Site Information"
+            echo "3. Add it as NETLIFY_SITE_ID secret in GitHub repository settings"
+            echo "4. URL: https://github.com/${{ github.repository }}/settings/secrets/actions" # pragma: allowlist secret
+            missing_secrets=true
+          else
+            echo "✅ NETLIFY_SITE_ID secret found"
+          fi
+
+          # Fail if any secrets are missing
+          if [ "$missing_secrets" = "true" ]; then
+            echo ""
+            echo "🚨 Cannot proceed with Netlify deployment - required secrets missing" # pragma: allowlist secret
+            echo "💡 Alternative: Remove Netlify deployment from workflow if not needed"
+            exit 1
+          fi
+
+          echo "🎉 All required secrets exist - now testing functionality..." # pragma: allowlist secret
+
+      - name: Setup Node.js for Netlify CLI test
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test Netlify CLI functionality
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 2
+        uses: South-Paw/action-netlify-cli@v2
+        with:
+          args: status --json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Log in to Container Registry for cache
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-preview-${{ hashFiles('package*.json', 'docker/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Preview with Docker
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          echo "🏗️ Building preview for PR #${PR_NUMBER}"
+          docker buildx build \
+            --file docker/Dockerfile \
+            --target builder \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA="${HEAD_SHA}" \
+            --build-arg GITHUB_REF_NAME="${HEAD_REF}" \
+            --build-arg APP_VERSION="preview-${PR_NUMBER}" \
+            --build-arg BUILD_CONTEXT=pr \
+            --build-arg PR_NUMBER="${PR_NUMBER}" \
+            --build-arg NODE_ENV=preview \
+            --build-arg NETLIFY=true \
+            --build-arg NETLIFY_ENV=deploy-preview \
+            --build-arg CONTEXT=deploy-preview \
+            --build-arg DEPLOY_URL="${DEPLOY_URL}" \
+            --build-arg DEPLOY_PRIME_URL="${DEPLOY_PRIME_URL}" \
+            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --tag "resume:preview-${PR_NUMBER}" \
+            --load \
+            .
+
+          # Update cache atomically
+          if [[ -d "/tmp/.buildx-cache-new" ]]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
+
+      - name: Extract build artifacts
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:preview-${PR_NUMBER}" sh -c "cp -r /app/dist/* /tmp/dist/"
+          echo "📁 Preview build artifacts:"
+          ls -la dist/
+
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        uses: South-Paw/action-netlify-cli@v2
+        with:
+          args: deploy --json --dir=dist --alias=deploy-preview-${{ env.PR_NUMBER }}
+
+      - name: Upload build artifacts
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          path: dist/
+          retention-days: 7
+
   preview-info:
     name: PR Preview Information
     runs-on: ubuntu-latest
     if: github.event.action != 'closed'
+    needs: build-and-deploy
 
     steps:
       - name: Generate PR Preview Summary
@@ -33,15 +210,15 @@ jobs:
             echo "| Resource | URL |"
             echo "|----------|-----|"
             echo "| 🌐 **Live Preview** | [View Preview](${DEPLOY_URL}) |"
-            echo "| 📄 **Screen PDF** | [Screen PDF](${DEPLOY_URL}/resume-rafael-sathler-screen.pdf) |"
-            echo "| 🖨️ **Print PDF** | [Print PDF](${DEPLOY_URL}/resume-rafael-sathler-print.pdf) |"
-            echo "| 🤖 **ATS PDF** | [ATS PDF](${DEPLOY_URL}/resume-rafael-sathler-ats.pdf) |"
+            echo "| 📄 **Screen PDF** | [Screen PDF](${DEPLOY_URL}/resume.pdf) |"
+            echo "| 🖨️ **Print PDF** | [Print PDF](${DEPLOY_URL}/resume-print.pdf) |"
+            echo "| 🤖 **ATS PDF** | [ATS PDF](${DEPLOY_URL}/resume-ats.pdf) |"
             echo ""
             echo "### 📋 Build Information"
             echo "- **PR Number**: #${PR_NUMBER}"
             echo "- **Branch**: \`${SAFE_BRANCH_NAME}\`"
             echo "- **Commit**: \`${SHORT_SHA}\`"
-            echo "- **Deploy Status**: ⏳ Building (Preview ready in 3-5 minutes)"
+            echo "- **Deploy Status**: ✅ **Ready** - GitHub Actions built & deployed to Netlify"
             echo ""
             echo "### 🧪 Quality Assurance Checklist"
             echo "- [ ] Desktop display validation"
@@ -75,17 +252,17 @@ jobs:
             | Preview | URL |
             |---------|-----|
             | 🌐 **Live Preview** | [${deployUrl}](${deployUrl}) |
-            | 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume-rafael-sathler-screen.pdf) |
-            | 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-rafael-sathler-print.pdf) |
-            | 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-rafael-sathler-ats.pdf) |
+            | 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume.pdf) |
+            | 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-print.pdf) |
+            | 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-ats.pdf) |
 
             ### 📋 Preview Details
             - **PR**: #${prNumber}
             - **Branch**: \`${safeBranchName}\`
             - **Commit**: \`${shortSha}\`
-            - **Deploy Status**: ⏳ Building...
+            - **Deploy Status**: ✅ **Ready** - Built by GitHub Actions & deployed to Netlify
 
-            > **Note**: Preview environment will be available within 3-5 minutes.
+            > **Note**: Preview environment is now live! PDFs include QR codes pointing to this preview URL.
 
             ### 🧪 Testing Checklist
             - [ ] Resume displays correctly on desktop
