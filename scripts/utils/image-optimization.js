@@ -1,6 +1,14 @@
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+
+// Conditionally require Sharp - graceful fallback for development
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (error) {
+  console.log('ℹ️  Sharp not available - image optimization disabled in development mode');
+  sharp = null;
+}
 
 /**
  * Profile Image Optimization Utility
@@ -24,6 +32,12 @@ const RESPONSIVE_SIZES = {
  */
 async function generateResponsiveImages(sourceImagePath, outputDir, options = {}) {
   const { isDraft = false, generateWebP = true, generateJPEG = true } = options;
+
+  // If Sharp is not available, return null (graceful fallback)
+  if (!sharp) {
+    console.log('⚠️  Image optimization skipped - Sharp not available');
+    return null;
+  }
 
   console.log(`🖼️  Generating circular responsive images from: ${path.basename(sourceImagePath)}`);
 
@@ -194,6 +208,12 @@ function generateTemplateData(imageResults) {
  */
 async function optimizeProfileImageForResume(sourceImagePath, options = {}) {
   const { isDraft = false, outputDir = './dist/assets/images' } = options;
+
+  // If Sharp is not available, return null gracefully
+  if (!sharp) {
+    console.log('ℹ️  Profile image optimization skipped in development mode');
+    return null;
+  }
 
   try {
     const imageResults = await generateResponsiveImages(sourceImagePath, outputDir, {
