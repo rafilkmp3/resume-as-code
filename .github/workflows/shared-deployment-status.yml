@@ -130,7 +130,7 @@ jobs:
           echo "  Status: $INPUT_DEPLOYMENT_STATUS"
           echo "  Environment: $INPUT_DEPLOYMENT_ENV"
 
-      - name: Update PR Comment
+      - name: Update PR Comment (Atlantis-style)
         if: steps.detect.outputs.pr_number != 'none'
         uses: actions/github-script@v7
         env:
@@ -218,38 +218,56 @@ jobs:
               deploymentInfo += `\n### 📊 Additional Info\n${additionalInfo}\n`;
             }
 
-            // Find existing deployment status comment
+            // 🚀 ATLANTIS-STYLE COMMENT MANAGEMENT
+            // Step 1: Get all comments from the PR
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
 
-            const deploymentComment = comments.data.find(comment =>
-              comment.user.login === 'github-actions[bot]' &&
-              (comment.body.includes(`### 📋 ${envName} Deployment`) ||
-               comment.body.includes('## 📊 Deployment Status'))
+            // Step 2: Find ALL deployment status comments (previous and current environment)
+            const deploymentComments = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' && (
+                comment.body.includes('## 📊 Deployment Status') ||
+                comment.body.includes('## 🔍 PR Preview Environment') ||
+                comment.body.includes('## 🚀 Production Deployment')
+              )
             );
 
-            const fullCommentBody = `## 📊 Deployment Status\n\n${deploymentInfo}\n\n---\n*🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*`;
+            // Step 3: Hide/minimize ALL previous deployment comments (Atlantis behavior)
+            let hiddenCount = 0;
+            for (const oldComment of deploymentComments) {
+              try {
+                // Add "outdated" marker to hide previous comments
+                const outdatedBody = `<details>\n<summary>🔒 <strong>Outdated Deployment Status</strong> - Click to expand</summary>\n\n${oldComment.body}\n\n---\n*⚠️ This deployment status has been superseded by a newer update.*\n</details>`;
 
-            if (deploymentComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: deploymentComment.id,
-                body: fullCommentBody,
-              });
-              console.log(`✅ Updated deployment status comment for PR #${prNumber}`);
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: fullCommentBody,
-              });
-              console.log(`✅ Created deployment status comment for PR #${prNumber}`);
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize comment ${oldComment.id}: ${error.message}`);
+              }
             }
+
+            console.log(`🔒 Minimized ${hiddenCount} previous deployment status comments (Atlantis-style)`);
+
+            // Step 4: Create new deployment status comment (always fresh, never update)
+            const fullCommentBody = `## 📊 Deployment Status\n\n${deploymentInfo}\n\n---\n*🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*\n\n<!-- atlantis-style-deployment-${environment}-${Date.now()} -->`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: fullCommentBody,
+            });
+
+            console.log(`✅ Created fresh deployment status comment for PR #${prNumber} (${hiddenCount} old comments minimized)`);
+            console.log(`🎯 Atlantis-style management: Only latest deployment status visible, previous comments collapsed`)
 
       - name: Generate Step Summary
         if: always()

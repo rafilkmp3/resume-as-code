@@ -243,7 +243,7 @@ jobs:
             echo "> 💡 **Tip**: Preview environment automatically updates when you push new commits"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Add PR Preview Comment
+      - name: Add PR Preview Comment (Atlantis-style)
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -256,6 +256,19 @@ jobs:
             const safeBranchName = process.env.BRANCH_NAME;
             const shortSha = headSha.substring(0, 7);
             const deployUrl = `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
+
+            // Generate timestamp for BRT + UTC
+            const utcTime = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+            const brtTime = new Date().toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }).replace(',', '') + ' BRT';
+            const timestamp = `${brtTime} (${utcTime})`;
 
             const commentBody = `## 🔍 PR Preview Environment
 
@@ -271,6 +284,7 @@ jobs:
             - **Branch**: \`${safeBranchName}\`
             - **Commit**: \`${shortSha}\`
             - **Deploy Status**: ✅ **Ready** - Built by GitHub Actions & deployed to Netlify
+            - **Updated**: ${timestamp}
 
             > **Note**: Preview environment is now live! PDFs include QR codes pointing to this preview URL.
 
@@ -285,37 +299,53 @@ jobs:
             - [ ] No console errors
 
             ---
-            *This preview will update automatically when you push new commits.*`;
+            *🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*
 
-            // Check if we already have a preview comment
+            <!-- atlantis-style-preview-${Date.now()} -->`;
+
+            // 🚀 ATLANTIS-STYLE COMMENT MANAGEMENT FOR PREVIEW COMMENTS
+            // Get all comments and find preview environment comments
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
 
-            const existingComment = comments.data.find(comment =>
+            const previewComments = comments.data.filter(comment =>
               comment.user.login === 'github-actions[bot]' &&
               comment.body.includes('## 🔍 PR Preview Environment')
             );
 
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existingComment.id,
-                body: commentBody,
-              });
-              console.log('Updated existing PR preview comment');
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: commentBody,
-              });
-              console.log('Created new PR preview comment');
+            // Hide/minimize ALL previous preview comments (Atlantis behavior)
+            let hiddenCount = 0;
+            for (const oldComment of previewComments) {
+              try {
+                const outdatedBody = `<details>\n<summary>🔒 <strong>Outdated Preview Environment</strong> - Click to expand</summary>\n\n${oldComment.body}\n\n---\n*⚠️ This preview environment status has been superseded by a newer deployment.*\n</details>`;
+
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize preview comment ${oldComment.id}: ${error.message}`);
+              }
             }
+
+            console.log(`🔒 Minimized ${hiddenCount} previous preview environment comments (Atlantis-style)`);
+
+            // Always create a fresh comment (never update)
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody,
+            });
+
+            console.log(`✅ Created fresh PR preview comment for PR #${prNumber} (${hiddenCount} old comments minimized)`);
+            console.log(`🎯 Atlantis-style management: Only latest preview environment visible, previous comments collapsed`);
 
   update-deployment-status:
     name: Update PR Deployment Status
