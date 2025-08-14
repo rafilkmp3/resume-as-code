@@ -36,33 +36,104 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Setup GitHub CLI and Git Config
+      - name: Setup GitHub CLI and Git Config  
         run: |
           gh auth setup-git
 
-          # Configure git identity for commits
+          # Configure git identity and settings for commits
           git config --global user.name "resume-pipeline-bot[bot]"
           git config --global user.email "noreply@github.com"
           git config --global init.defaultBranch main
+          
+          # Suppress git hints to reduce warnings
+          git config --global advice.defaultBranchName false
+          git config --global advice.detachedHead false
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Aggressive Dependabot Management
+      - name: Resilient Dependabot Management with Circuit Breaker
         if: github.event_name == 'push' || github.event_name == 'schedule' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "🚨 AGGRESSIVE Dependabot PR management - force recreate outdated/invalid PRs..."
+          echo "🛡️ Resilient Dependabot PR management with exponential backoff and circuit breaker..."
+          
+          # Circuit breaker and retry configuration
+          MAX_ATTEMPTS=5
+          BASE_DELAY=3
+          CIRCUIT_BREAKER_THRESHOLD=3
+          CONSECUTIVE_FAILURES=0
+          TOTAL_PROCESSED=0
+          SUCCESSFUL_OPERATIONS=0
+          
+          # GitHub API health check with retry
+          echo "🔍 Checking GitHub API health..."
+          API_HEALTHY=false
+          for health_attempt in 1 2 3; do
+            if timeout 10 gh api /rate_limit >/dev/null 2>&1; then
+              API_HEALTHY=true
+              echo "✅ GitHub API responding normally"
+              break
+            else
+              echo "⚠️ GitHub API health check failed (attempt $health_attempt/3)"
+              if [ $health_attempt -lt 3 ]; then
+                sleep $((health_attempt * 2))
+              fi
+            fi
+          done
+          
+          if [ "$API_HEALTHY" = "false" ]; then
+            echo "🚨 GitHub API appears unhealthy, implementing extended delays and reduced batch sizes"
+            MAX_ATTEMPTS=3
+            BASE_DELAY=10
+          fi
 
-          # Find all open Dependabot PRs with extended info
-          DEPENDABOT_PRS=$(gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json')
+          # Resilient PR list retrieval with exponential backoff
+          echo "🔍 Retrieving Dependabot PRs with resilient retry logic..."
+          DEPENDABOT_PRS=""
+          
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            echo "📡 Fetching PR list (attempt $attempt/$MAX_ATTEMPTS)..."
+            
+            # Calculate exponential backoff delay
+            if [ $attempt -gt 1 ]; then
+              DELAY=$((BASE_DELAY * (1 << (attempt - 2))))
+              if [ $DELAY -gt 60 ]; then DELAY=60; fi
+              echo "⏱️ Waiting ${DELAY} seconds (exponential backoff)..."
+              sleep $DELAY
+            fi
+            
+            # Circuit breaker check
+            if [ $CONSECUTIVE_FAILURES -ge $CIRCUIT_BREAKER_THRESHOLD ]; then
+              echo "🔌 Circuit breaker activated - cooling period (30s)..."
+              sleep 30
+              CONSECUTIVE_FAILURES=0
+            fi
+            
+            # Attempt to fetch PRs with timeout
+            if timeout 30 gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json' > /tmp/pr_list.txt 2>/dev/null; then
+              DEPENDABOT_PRS=$(cat /tmp/pr_list.txt)
+              echo "✅ Successfully retrieved Dependabot PRs on attempt $attempt"
+              CONSECUTIVE_FAILURES=0
+              break
+            else
+              echo "❌ Failed to retrieve PR list (attempt $attempt)"
+              CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
+              
+              if [ $attempt -eq $MAX_ATTEMPTS ]; then
+                echo "🚨 All attempts to retrieve PR list failed - enabling graceful degradation"
+                echo "::warning::Auto-rebase could not retrieve PR list after $MAX_ATTEMPTS attempts"
+              fi
+            fi
+          done
 
           if [ -z "$DEPENDABOT_PRS" ]; then
-            echo "ℹ️ No Dependabot PRs found"
+            echo "ℹ️ No Dependabot PRs found or retrieval failed"
           else
             RECREATED_COUNT=0
             CLOSED_COUNT=0
-
+            
+            # Process each PR with individual resilience
             echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
               PR_DATA=$(echo "$pr_json" | jq -r '.')
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
@@ -125,53 +196,130 @@ jobs:
 
               if [ "$SHOULD_FORCE_RECREATE" = true ]; then
                 echo "🔥 FORCE RECREATING PR #$PR_NUMBER because it $REASON"
-
-                # Strategy: Close the PR and let Dependabot automatically recreate it
-                # This is more reliable than @dependabot recreate comments
-                echo "   1. Closing PR #$PR_NUMBER to trigger automatic recreation..."
-                gh pr close "$PR_NUMBER" --comment "🤖 Auto-closing this PR because it $REASON. Dependabot will automatically recreate it with the latest changes and correct format."
-
-                echo "   2. Waiting 5 seconds for Dependabot to detect closure..."
-                sleep 5
-
-                echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
-                CLOSED_COUNT=$((CLOSED_COUNT + 1))
+                
+                # Resilient PR closure with retry logic
+                CLOSE_SUCCESS=false
+                for close_attempt in 1 2 3; do
+                  echo "   🔄 Closing PR #$PR_NUMBER (attempt $close_attempt/3)..."
+                  
+                  if timeout 15 gh pr close "$PR_NUMBER" --comment "🤖 Auto-closing this PR because it $REASON. Dependabot will automatically recreate it with the latest changes and correct format." 2>/dev/null; then
+                    echo "   ✅ Successfully closed PR #$PR_NUMBER on attempt $close_attempt"
+                    CLOSE_SUCCESS=true
+                    SUCCESSFUL_OPERATIONS=$((SUCCESSFUL_OPERATIONS + 1))
+                    break
+                  else
+                    echo "   ❌ Failed to close PR #$PR_NUMBER (attempt $close_attempt)"
+                    if [ $close_attempt -lt 3 ]; then
+                      echo "   🔄 Retrying in $((close_attempt * 3)) seconds..."
+                      sleep $((close_attempt * 3))
+                    fi
+                  fi
+                done
+                
+                if [ "$CLOSE_SUCCESS" = "true" ]; then
+                  echo "   2. Waiting 5 seconds for Dependabot to detect closure..."
+                  sleep 5
+                  echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
+                  CLOSED_COUNT=$((CLOSED_COUNT + 1))
+                else
+                  echo "   ⚠️ Failed to close PR #$PR_NUMBER after 3 attempts - will try next run"
+                  echo "::warning::Failed to close PR #$PR_NUMBER during auto-rebase"
+                fi
               else
                 echo "✅ PR #$PR_NUMBER is current and valid (${PR_AGE_DAYS} days old)"
+                SUCCESSFUL_OPERATIONS=$((SUCCESSFUL_OPERATIONS + 1))
+              fi
+              
+              TOTAL_PROCESSED=$((TOTAL_PROCESSED + 1))
+              
+              # Rate limiting protection - pause between PR operations
+              if [ $((TOTAL_PROCESSED % 3)) -eq 0 ]; then
+                echo "🔄 Rate limiting pause (2s) after processing $TOTAL_PROCESSED PRs..."
+                sleep 2
               fi
             done
 
             echo ""
-            echo "📊 AGGRESSIVE Management Results:"
+            echo "📊 Resilient Management Results:"
+            echo "   📈 Total PRs processed: $TOTAL_PROCESSED"
+            echo "   ✅ Successful operations: $SUCCESSFUL_OPERATIONS"
             echo "   🔥 PRs force-closed for recreation: $CLOSED_COUNT"
-            echo "   📝 Reasons: conflicts, unknown status, invalid commit format, or >7 days old"
-            echo "   🤖 Dependabot will automatically recreate closed PRs with latest format"
-            echo "   ⚡ Next run: Daily at 9 AM UTC or on every push to main"
+            echo "   📝 Success rate: $((SUCCESSFUL_OPERATIONS * 100 / (TOTAL_PROCESSED > 0 ? TOTAL_PROCESSED : 1)))%"
+            echo "   🛡️ Circuit breaker activations: $((CONSECUTIVE_FAILURES >= CIRCUIT_BREAKER_THRESHOLD ? 1 : 0))"
+            echo "   🌐 GitHub API status: $([ "$API_HEALTHY" = "true" ] && echo "Healthy ✅" || echo "Degraded ⚠️")"
+            echo ""
+            echo "🔧 Management Strategy Applied:"
+            echo "   • CONFLICTING PRs: Force-closed for automatic recreation"
+            echo "   • UNKNOWN status PRs: Force-closed for automatic recreation"  
+            echo "   • Invalid commit format: Force-closed for recreation with correct format"
+            echo "   • Stale PRs (>7 days): Force-closed for recreation with latest dependencies"
+            echo "   • Valid PRs: Left unchanged"
+            echo ""
+            echo "⚡ Next execution: Daily at 9 AM UTC or on every push to main"
+            echo "🛡️ Resilience: Exponential backoff, circuit breaker, and graceful degradation enabled"
+            
+            # Cleanup temporary files
+            rm -f /tmp/pr_list.txt
           fi
 
-      - name: Rebase specific PR
+      - name: Resilient Specific PR Rebase
         if: github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           PR_NUMBER="${{ github.event.inputs.pr_number }}"
-          echo "🔄 Handling specific PR #$PR_NUMBER"
-
-          # Check if it's a Dependabot PR
-          PR_AUTHOR=$(gh pr view "$PR_NUMBER" --json author --jq '.author.login')
+          echo "🛡️ Resilient handling of specific PR #$PR_NUMBER"
+          
+          # Resilient PR information retrieval
+          PR_AUTHOR=""
+          for attempt in 1 2 3; do
+            echo "🔍 Retrieving PR #$PR_NUMBER information (attempt $attempt/3)..."
+            
+            if PR_AUTHOR=$(timeout 15 gh pr view "$PR_NUMBER" --json author --jq '.author.login' 2>/dev/null); then
+              echo "✅ Successfully retrieved PR author: $PR_AUTHOR"
+              break
+            else
+              echo "⚠️ Failed to retrieve PR information (attempt $attempt)"
+              if [ $attempt -lt 3 ]; then
+                sleep $((attempt * 2))
+              else
+                echo "🚨 Could not retrieve PR #$PR_NUMBER information after 3 attempts"
+                echo "::error::Unable to process PR #$PR_NUMBER - API may be temporarily unavailable"
+                exit 1
+              fi
+            fi
+          done
 
           if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            echo "📦 This is a Dependabot PR - applying aggressive recreation strategy..."
+            echo "📦 This is a Dependabot PR - applying resilient recreation strategy..."
 
-            # Get PR details
-            PR_DATA=$(gh pr view "$PR_NUMBER" --json title,mergeable,commits,createdAt)
+            # Resilient PR details retrieval
+            PR_DATA=""
+            for data_attempt in 1 2 3; do
+              echo "📋 Retrieving PR details (attempt $data_attempt/3)..."
+              
+              if PR_DATA=$(timeout 20 gh pr view "$PR_NUMBER" --json title,mergeable,commits,createdAt 2>/dev/null); then
+                echo "✅ Successfully retrieved PR details"
+                break
+              else
+                echo "⚠️ Failed to retrieve PR details (attempt $data_attempt)"
+                if [ $data_attempt -lt 3 ]; then
+                  sleep $((data_attempt * 3))
+                else
+                  echo "🚨 Could not retrieve PR details after 3 attempts"
+                  echo "::warning::Unable to analyze PR #$PR_NUMBER details - skipping recreation check"
+                  exit 0
+                fi
+              fi
+            done
+            
             PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
             PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
             LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
 
-            echo "   Title: $PR_TITLE"
-            echo "   Status: $PR_MERGEABLE"
-            echo "   Latest commit: $LATEST_COMMIT_MSG"
+            echo "   📄 Title: $PR_TITLE"
+            echo "   📊 Status: $PR_MERGEABLE"
+            echo "   💬 Latest commit: $LATEST_COMMIT_MSG"
 
             # Check for invalid format
             INVALID_FORMAT=false
@@ -181,35 +329,136 @@ jobs:
 
             if [ "$PR_MERGEABLE" = "CONFLICTING" ] || [ "$PR_MERGEABLE" = "UNKNOWN" ] || [ "$INVALID_FORMAT" = true ]; then
               echo "🔥 Force closing PR #$PR_NUMBER for recreation..."
-              gh pr close "$PR_NUMBER" --comment "🤖 Manual trigger: Force-closing this PR for recreation with latest format and no conflicts."
-              echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
+              
+              # Resilient PR closure
+              CLOSE_SUCCESS=false
+              for close_attempt in 1 2 3; do
+                echo "🔄 Closing PR #$PR_NUMBER (attempt $close_attempt/3)..."
+                
+                if timeout 15 gh pr close "$PR_NUMBER" --comment "🤖 Manual trigger: Force-closing this PR for recreation with latest format and no conflicts." 2>/dev/null; then
+                  echo "✅ Successfully closed PR #$PR_NUMBER on attempt $close_attempt"
+                  CLOSE_SUCCESS=true
+                  break
+                else
+                  echo "❌ Failed to close PR #$PR_NUMBER (attempt $close_attempt)"
+                  if [ $close_attempt -lt 3 ]; then
+                    sleep $((close_attempt * 2))
+                  fi
+                fi
+              done
+              
+              if [ "$CLOSE_SUCCESS" = "true" ]; then
+                echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
+              else
+                echo "⚠️ Failed to close PR #$PR_NUMBER after 3 attempts"
+                echo "::warning::Manual intervention may be required for PR #$PR_NUMBER"
+              fi
             else
               echo "✅ PR #$PR_NUMBER looks good, no action needed"
             fi
           else
-            # For other PRs, attempt direct rebase
-            echo "👤 Non-Dependabot PR - attempting direct rebase..."
-            PR_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
+            # For other PRs, attempt resilient direct rebase
+            echo "👤 Non-Dependabot PR - attempting resilient direct rebase..."
+            
+            # Resilient branch name retrieval
+            PR_BRANCH=""
+            for branch_attempt in 1 2 3; do
+              echo "🌿 Retrieving branch name (attempt $branch_attempt/3)..."
+              
+              if PR_BRANCH=$(timeout 10 gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName' 2>/dev/null); then
+                echo "✅ Successfully retrieved branch: $PR_BRANCH"
+                break
+              else
+                echo "⚠️ Failed to retrieve branch name (attempt $branch_attempt)"
+                if [ $branch_attempt -lt 3 ]; then
+                  sleep $((branch_attempt * 2))
+                else
+                  echo "🚨 Could not retrieve branch name after 3 attempts"
+                  echo "::error::Unable to determine branch for PR #$PR_NUMBER"
+                  exit 1
+                fi
+              fi
+            done
 
-            git fetch origin "$PR_BRANCH"
-            git checkout "$PR_BRANCH"
+            # Resilient git operations with comprehensive error handling
+            echo "🔄 Performing resilient git rebase operations..."
+            
+            # Fetch with retry
+            FETCH_SUCCESS=false
+            for fetch_attempt in 1 2 3; do
+              echo "📥 Fetching branch $PR_BRANCH (attempt $fetch_attempt/3)..."
+              
+              if timeout 30 git fetch origin "$PR_BRANCH" 2>/dev/null; then
+                echo "✅ Successfully fetched $PR_BRANCH"
+                FETCH_SUCCESS=true
+                break
+              else
+                echo "❌ Failed to fetch $PR_BRANCH (attempt $fetch_attempt)"
+                if [ $fetch_attempt -lt 3 ]; then
+                  sleep $((fetch_attempt * 3))
+                fi
+              fi
+            done
+            
+            if [ "$FETCH_SUCCESS" = "false" ]; then
+              echo "🚨 Failed to fetch branch after 3 attempts"
+              echo "::error::Unable to fetch branch $PR_BRANCH for PR #$PR_NUMBER"
+              exit 1
+            fi
 
-            if git rebase origin/main; then
-              git push --force-with-lease origin "$PR_BRANCH"
-              echo "✅ Successfully rebased PR #$PR_NUMBER"
+            # Checkout with error handling
+            if git checkout "$PR_BRANCH" 2>/dev/null; then
+              echo "✅ Successfully checked out $PR_BRANCH"
             else
-              echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts"
-              git rebase --abort
+              echo "❌ Failed to checkout $PR_BRANCH"
+              echo "::error::Unable to checkout branch for PR #$PR_NUMBER"
+              exit 1
+            fi
+
+            # Rebase with enhanced error handling
+            echo "🔄 Attempting rebase onto main..."
+            if timeout 120 git rebase origin/main 2>/dev/null; then
+              echo "✅ Rebase successful, pushing changes..."
+              
+              # Push with retry logic
+              PUSH_SUCCESS=false
+              for push_attempt in 1 2 3; do
+                echo "📤 Pushing rebased branch (attempt $push_attempt/3)..."
+                
+                if timeout 30 git push --force-with-lease origin "$PR_BRANCH" 2>/dev/null; then
+                  echo "✅ Successfully pushed rebased changes"
+                  PUSH_SUCCESS=true
+                  break
+                else
+                  echo "❌ Failed to push changes (attempt $push_attempt)"
+                  if [ $push_attempt -lt 3 ]; then
+                    sleep $((push_attempt * 2))
+                  fi
+                fi
+              done
+              
+              if [ "$PUSH_SUCCESS" = "true" ]; then
+                echo "✅ Successfully rebased PR #$PR_NUMBER"
+              else
+                echo "⚠️ Rebase succeeded but failed to push after 3 attempts"
+                echo "::warning::PR #$PR_NUMBER was rebased but changes could not be pushed"
+                exit 1
+              fi
+            else
+              echo "❌ Failed to rebase PR #$PR_NUMBER due to conflicts or timeout"
+              echo "🔄 Aborting rebase to clean state..."
+              git rebase --abort 2>/dev/null || true
+              echo "::error::Rebase failed for PR #$PR_NUMBER - manual intervention required"
               exit 1
             fi
           fi
 
-      - name: Summary
+      - name: Resilience Summary
         if: always()
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "## 📊 Auto-Rebase Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🛡️ Resilient Auto-Rebase Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event_name }}" = "push" ]; then
@@ -223,6 +472,13 @@ jobs:
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🛡️ Resilient Management Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Exponential Backoff**: 3-60s delays with circuit breaker protection" >> $GITHUB_STEP_SUMMARY
+          echo "- **Circuit Breaker**: Activates after 3 consecutive failures (30s cooling)" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Health Checks**: Pre-operation GitHub API validation" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timeout Protection**: All operations time-bounded (10-120s)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Graceful Degradation**: Continues with reduced functionality on failures" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🤖 Dependabot Management Strategy" >> $GITHUB_STEP_SUMMARY
           echo "- **CONFLICTING PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
           echo "- **UNKNOWN status PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
@@ -231,7 +487,9 @@ jobs:
           echo "- **Valid PRs**: Left unchanged" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          DEPENDABOT_COUNT=$(gh pr list --author "dependabot[bot]" --json number --jq '. | length')
+          # Resilient dependabot count with fallback
+          DEPENDABOT_COUNT=$(timeout 10 gh pr list --author "dependabot[bot]" --json number --jq '. | length' 2>/dev/null || echo "Unknown")
           echo "**Current Dependabot PRs**: $DEPENDABOT_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔄 **Next execution**: Daily at 9 AM UTC or on push to main" >> $GITHUB_STEP_SUMMARY
+          echo "🛡️ **Resilience Features**: Exponential backoff, circuit breaker, API health monitoring" >> $GITHUB_STEP_SUMMARY
