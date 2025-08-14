@@ -71,6 +71,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          
+      - name: Configure Git for CI
+        run: |
+          # Configure git to suppress warnings and use consistent defaults
+          git config --global init.defaultBranch main
+          git config --global advice.defaultBranchName false
+          git config --global advice.detachedHead false
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "noreply@github.com"
 
       - name: Calculate version and commit info
         id: version-info
@@ -140,6 +149,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          
+      - name: Configure Node.js for CI
+        run: |
+          # Suppress Node.js deprecation warnings to reduce CI log noise
+          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> $GITHUB_ENV
+          echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
 
       - name: Emergency deployment notice
         if: env.IS_EMERGENCY == 'true'
@@ -287,6 +302,18 @@ jobs:
         continue-on-error: true
         with:
           lfs: true
+          
+      - name: Configure Git and Node.js for CI
+        continue-on-error: true
+        run: |
+          # Configure git to suppress warnings
+          git config --global init.defaultBranch main
+          git config --global advice.defaultBranchName false
+          git config --global advice.detachedHead false
+          
+          # Suppress Node.js deprecation warnings
+          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> $GITHUB_ENV
+          echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
