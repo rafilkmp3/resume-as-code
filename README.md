@@ -212,6 +212,9 @@ git push                    # Trigger production pipeline
 gh run list --limit 5       # Monitor workflow runs
 gh run watch                # Real-time pipeline monitoring
 gh workflow list            # Available workflows
+
+# Dependabot automation
+gh workflow run 'Auto Rebase' --ref main  # Force all Dependabot PRs mergeable
 ```
 
 ### **Platform Engineering Features**
@@ -222,6 +225,30 @@ gh workflow list            # Available workflows
 - **Zero-Downtime**: Blue-green deployment strategy
 - **Quality Gates**: Comprehensive validation before deployment
 - **🌐 PR Preview Environment**: Automatic Netlify deployments with QR codes for every pull request
+- **🤖 Forceful Dependabot Management**: Idempotent automation ensuring all dependency PRs are "always ready to merge" with preview deployments
+
+### **🤖 Automated Dependency Management** ✨
+
+**Forceful Dependabot Management** - Zero manual intervention required:
+
+- **Philosophy**: All bot PRs are disposable - we can be forceful and idempotent
+- **Daily Automation**: Scheduled at 9 AM UTC to keep all PRs current with main
+- **Conflict Resolution**: Force recreate branches from main + dependency changes
+- **Preview Guarantees**: Every Dependabot PR has Netlify preview deployment
+- **Reusability**: Simple GitHub App setup (4 steps) vs complex PAT management
+
+```bash
+# Manual trigger for immediate results
+gh workflow run 'Auto Rebase' --ref main
+
+# Result: ALL Dependabot PRs become "always ready to merge" with previews
+```
+
+**Setup for other repositories:**
+1. Create GitHub App: `https://github.com/settings/apps/new`
+2. Grant permissions: `contents:write`, `pull-requests:write`, `metadata:read`
+3. Install app on repository
+4. Add secrets: `APP_ID` and `PRIVATE_KEY` # pragma: allowlist secret
 
 ### **Enhanced Pre-commit Hooks** ✨
 

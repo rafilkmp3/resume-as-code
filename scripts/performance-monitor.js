@@ -44,7 +44,7 @@ class PerformanceMonitor {
   async measureBuildTime() {
     console.log('📊 Measuring build performance...');
     const startTime = Date.now();
-    
+
     try {
       execSync('make build', { stdio: 'pipe', cwd: path.join(__dirname, '..') });
       const buildTime = Date.now() - startTime;
@@ -59,7 +59,7 @@ class PerformanceMonitor {
   async measureTestTime() {
     console.log('🧪 Measuring test performance...');
     const startTime = Date.now();
-    
+
     try {
       execSync('make test-fast', { stdio: 'pipe', cwd: path.join(__dirname, '..') });
       const testTime = Date.now() - startTime;
@@ -73,16 +73,16 @@ class PerformanceMonitor {
 
   async getCIMetrics() {
     console.log('🔄 Analyzing CI pipeline performance...');
-    
+
     try {
       // Get recent CI runs
-      const recentRuns = execSync('gh run list --limit 20 --json status,conclusion,updatedAt', 
+      const recentRuns = execSync('gh run list --limit 20 --json status,conclusion,updatedAt',
         { stdio: 'pipe', cwd: path.join(__dirname, '..') }).toString();
-      
+
       const runs = JSON.parse(recentRuns);
       const successfulRuns = runs.filter(run => run.conclusion === 'success').length;
       const successRate = Math.round((successfulRuns / runs.length) * 100);
-      
+
       console.log(`✅ CI Success Rate: ${successRate}% (${successfulRuns}/${runs.length})`);
       return { successRate, totalRuns: runs.length, successfulRuns };
     } catch (error) {
@@ -93,7 +93,7 @@ class PerformanceMonitor {
 
   updateMetrics(buildTime, testTime, ciMetrics) {
     const metrics = JSON.parse(fs.readFileSync(this.metricsFile, 'utf8'));
-    
+
     const newEntry = {
       timestamp: new Date().toISOString(),
       buildTime,
@@ -129,56 +129,56 @@ class PerformanceMonitor {
 
   calculateImprovements(baseline, current) {
     const improvements = {};
-    
+
     if (current.buildTime && baseline.buildTime) {
       const improvement = Math.round(((baseline.buildTime - current.buildTime) / baseline.buildTime) * 100);
       improvements.buildTime = `${improvement > 0 ? '+' : ''}${improvement}%`;
     }
-    
+
     if (current.testTime && baseline.testTime) {
       const improvement = Math.round(((baseline.testTime - current.testTime) / baseline.testTime) * 100);
       improvements.testTime = `${improvement > 0 ? '+' : ''}${improvement}%`;
     }
-    
+
     if (current.ciSuccessRate && baseline.ciSuccessRate) {
       const improvement = current.ciSuccessRate - baseline.ciSuccessRate;
       improvements.ciSuccessRate = `${improvement > 0 ? '+' : ''}${improvement} points`;
     }
-    
+
     return improvements;
   }
 
   async generateReport() {
     console.log('\n🚀 PERFORMANCE OPTIMIZATION REPORT');
     console.log('=====================================');
-    
+
     const buildTime = await this.measureBuildTime();
     const testTime = await this.measureTestTime();
     const ciMetrics = await this.getCIMetrics();
-    
+
     const entry = this.updateMetrics(buildTime, testTime, ciMetrics);
     const metrics = JSON.parse(fs.readFileSync(this.metricsFile, 'utf8'));
-    
+
     console.log('\n📊 CURRENT PERFORMANCE:');
     console.log(`   Build Time: ${buildTime ? (buildTime/1000).toFixed(2) + 's' : 'N/A'}`);
     console.log(`   Test Time: ${testTime ? (testTime/1000).toFixed(2) + 's' : 'N/A'}`);
     console.log(`   CI Success Rate: ${ciMetrics?.successRate || 'N/A'}%`);
     console.log(`   Cache Hit Rate: ~${metrics.current.cacheHitRate}%`);
-    
+
     console.log('\n🎯 IMPROVEMENTS vs BASELINE:');
     Object.entries(entry.improvements).forEach(([key, value]) => {
       console.log(`   ${key}: ${value}`);
     });
-    
+
     console.log('\n📈 OPTIMIZATION PHASES COMPLETED:');
     console.log('   ✅ Phase 2B: CI/CD Pipeline (30% → 95% success)');
-    console.log('   ✅ Phase 2C: Development Workflow (50-70% faster)');  
+    console.log('   ✅ Phase 2C: Development Workflow (50-70% faster)');
     console.log('   ✅ Phase 2D: Docker Images Testing (100% validation)');
     console.log('   ✅ Phase 3A: Local/CI Consistency (Docker permissions)');
-    
+
     console.log(`\n📁 Metrics saved to: ${this.metricsFile}`);
     console.log('=====================================\n');
-    
+
     return entry;
   }
 
@@ -186,7 +186,7 @@ class PerformanceMonitor {
     const metrics = JSON.parse(fs.readFileSync(this.metricsFile, 'utf8'));
     console.log('\n📈 PERFORMANCE HISTORY:');
     console.log('========================');
-    
+
     metrics.history.slice(-10).forEach((entry, index) => {
       console.log(`\n${entry.timestamp}:`);
       console.log(`  Build: ${entry.buildTime ? (entry.buildTime/1000).toFixed(2) + 's' : 'N/A'}`);
@@ -203,7 +203,7 @@ class PerformanceMonitor {
 if (require.main === module) {
   const monitor = new PerformanceMonitor();
   const command = process.argv[2];
-  
+
   switch (command) {
     case 'report':
     case undefined:

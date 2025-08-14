@@ -29,7 +29,7 @@ class DevTools {
   healthCheck() {
     log('🏥 Development Environment Health Check', 'cyan');
     console.log('==========================================');
-    
+
     const checks = [
       { name: 'Docker Status', check: () => this.checkDocker() },
       { name: 'Node.js Version', check: () => this.checkNode() },
@@ -53,7 +53,7 @@ class DevTools {
   analyzePerformance() {
     log('⚡ Performance Analysis', 'cyan');
     console.log('======================');
-    
+
     try {
       // Build timing
       const buildStart = Date.now();
@@ -64,14 +64,14 @@ class DevTools {
 
       // File sizes
       this.analyzeBuildOutput();
-      
+
       // Test timing
       const testStart = Date.now();
       log('🔄 Running fast tests...', 'yellow');
       execSync('timeout 60s make test-fast', { stdio: 'pipe' });
       const testTime = Date.now() - testStart;
       log(`🧪 Fast Tests: ${(testTime/1000).toFixed(2)}s`, 'blue');
-      
+
     } catch (error) {
       log(`⚠️ Performance analysis incomplete: ${error.message}`, 'yellow');
     }
@@ -105,7 +105,7 @@ class DevTools {
   // Clean development environment
   cleanDev() {
     log('🧹 Cleaning development environment...', 'cyan');
-    
+
     const cleanupItems = [
       { path: 'dist', type: 'directory' },
       { path: 'coverage', type: 'directory' },
@@ -153,11 +153,11 @@ class DevTools {
     const packagePath = path.join(this.projectRoot, 'package.json');
     const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
     const nodeModulesExists = fs.existsSync(path.join(this.projectRoot, 'node_modules'));
-    
+
     if (!nodeModulesExists) {
       throw new Error('node_modules not found - run npm install');
     }
-    
+
     const depCount = Object.keys(pkg.dependencies || {}).length;
     const devDepCount = Object.keys(pkg.devDependencies || {}).length;
     return `${depCount} prod + ${devDepCount} dev dependencies`;
@@ -175,7 +175,7 @@ class DevTools {
       'Makefile',
     ];
 
-    const missing = requiredFiles.filter(file => 
+    const missing = requiredFiles.filter(file =>
       !fs.existsSync(path.join(this.projectRoot, file))
     );
 
@@ -196,7 +196,7 @@ class DevTools {
 
       const status = execSync('git status --porcelain', { encoding: 'utf8' });
       const changes = status.trim().split('\n').filter(line => line.trim());
-      
+
       if (changes.length === 0) {
         return 'Clean working directory';
       } else {
@@ -233,7 +233,7 @@ class DevTools {
       log('1. Installing dependencies...', 'yellow');
       execSync('npm install', { stdio: 'inherit' });
 
-      log('2. Building initial version...', 'yellow');  
+      log('2. Building initial version...', 'yellow');
       execSync('make build', { stdio: 'inherit' });
 
       log('3. Running health check...', 'yellow');
@@ -243,7 +243,7 @@ class DevTools {
       log('🎉 Development environment ready!', 'green');
       log('Next steps:', 'cyan');
       log('  • make dev     - Start development server', 'blue');
-      log('  • make test-fast - Run quick tests', 'blue');  
+      log('  • make test-fast - Run quick tests', 'blue');
       log('  • make status  - Show project status', 'blue');
 
     } catch (error) {

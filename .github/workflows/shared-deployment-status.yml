@@ -1,0 +1,292 @@
+---
+name: Shared Deployment Status
+
+# This reusable workflow updates PR comments and provides deployment status
+# Called by other workflows to maintain consistent deployment communication
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: false
+        type: string
+        description: 'PR number to update (auto-detected if not provided)'
+      deployment_status:
+        required: true
+        type: string
+        description: 'Deployment status (building, success, failure, ready)'
+      deployment_url:
+        required: false
+        type: string
+        description: 'Deployment URL if available'
+      deployment_environment:
+        required: true
+        type: string
+        description: 'Deployment environment (production, preview)'
+      commit_sha:
+        required: false
+        type: string
+        description: 'Commit SHA (auto-detected if not provided)'
+      additional_info:
+        required: false
+        type: string
+        description: 'Additional deployment information'
+      build_duration:
+        required: false
+        type: string
+        description: 'Build duration if available'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-deployment-status:
+    name: Update Deployment Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Need full history for commit info
+
+      - name: Detect PR and Commit Info
+        id: detect
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_PR_NUMBER: ${{ inputs.pr_number }}
+          INPUT_COMMIT_SHA: ${{ inputs.commit_sha }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          INPUT_DEPLOYMENT_STATUS: ${{ inputs.deployment_status }}
+          INPUT_DEPLOYMENT_ENV: ${{ inputs.deployment_environment }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          # Auto-detect PR number from current context using environment variables
+          PR_NUMBER="$INPUT_PR_NUMBER"
+          COMMIT_SHA="${INPUT_COMMIT_SHA:-$GITHUB_SHA}"
+
+          # PR number will be auto-detected from git search if not provided
+
+          # Try to find PR from commit SHA if not provided
+          if [ -z "$PR_NUMBER" ]; then
+            echo "🔍 Searching for PR associated with commit $COMMIT_SHA..."
+            PR_SEARCH=$(gh pr list --search "$COMMIT_SHA" --state open --json number --jq '.[0].number // empty' || echo "")
+            if [ -n "$PR_SEARCH" ]; then
+              PR_NUMBER="$PR_SEARCH"
+              echo "✅ Found PR #$PR_NUMBER for commit $COMMIT_SHA"
+            fi
+          fi
+
+          # Get commit details with better fallbacks
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+
+          # Try to get commit info from git, with multiple fallback strategies
+          COMMIT_MESSAGE=""
+          COMMIT_AUTHOR=""
+
+          if git rev-parse --verify "$COMMIT_SHA" >/dev/null 2>&1; then
+            COMMIT_MESSAGE=$(git log --format="%s" -n 1 "$COMMIT_SHA" 2>/dev/null || echo "")
+            COMMIT_AUTHOR=$(git log --format="%an" -n 1 "$COMMIT_SHA" 2>/dev/null || echo "")
+            echo "✅ Found commit info from git log for $COMMIT_SHA"
+          else
+            # Fallback: try with HEAD if specific SHA is not available
+            echo "⚠️ Commit $COMMIT_SHA not found, trying HEAD..."
+            COMMIT_MESSAGE=$(git log --format="%s" -n 1 HEAD 2>/dev/null || echo "")
+            COMMIT_AUTHOR=$(git log --format="%an" -n 1 HEAD 2>/dev/null || echo "")
+          fi
+
+          # Final fallbacks with safe defaults
+          if [ -z "$COMMIT_MESSAGE" ] || [ "$COMMIT_MESSAGE" = "" ]; then
+            COMMIT_MESSAGE="Recent deployment"
+            echo "📝 Using fallback commit message: $COMMIT_MESSAGE"
+          fi
+
+          if [ -z "$COMMIT_AUTHOR" ] || [ "$COMMIT_AUTHOR" = "" ]; then
+            if [ -n "$GITHUB_ACTOR" ]; then
+              COMMIT_AUTHOR="$GITHUB_ACTOR"
+            else
+              COMMIT_AUTHOR="GitHub Actions"
+            fi
+            echo "👤 Using fallback commit author: $COMMIT_AUTHOR"
+          fi
+
+          # Output results
+          echo "pr_number=${PR_NUMBER:-none}" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+
+          echo "📋 Deployment Status Update:"
+          echo "  PR: ${PR_NUMBER:-none}"
+          echo "  Commit SHA: $COMMIT_SHA"
+          echo "  Short SHA: $SHORT_SHA"
+          echo "  Commit Message: $COMMIT_MESSAGE"
+          echo "  Commit Author: $COMMIT_AUTHOR"
+          echo "  Status: $INPUT_DEPLOYMENT_STATUS"
+          echo "  Environment: $INPUT_DEPLOYMENT_ENV"
+
+      - name: Update PR Comment (Atlantis-style)
+        if: steps.detect.outputs.pr_number != 'none'
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.detect.outputs.pr_number }}
+          DEPLOYMENT_STATUS: ${{ inputs.deployment_status }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+          DEPLOYMENT_ENV: ${{ inputs.deployment_environment }}
+          SHORT_SHA: ${{ steps.detect.outputs.short_sha }}
+          COMMIT_MESSAGE: ${{ steps.detect.outputs.commit_message }}
+          COMMIT_AUTHOR: ${{ steps.detect.outputs.commit_author }}
+          BUILD_DURATION: ${{ inputs.build_duration }}
+          ADDITIONAL_INFO: ${{ inputs.additional_info }}
+        with:
+          script: |
+            const prNumber = process.env.PR_NUMBER;
+            const status = process.env.DEPLOYMENT_STATUS;
+            const deployUrl = process.env.DEPLOYMENT_URL;
+            const environment = process.env.DEPLOYMENT_ENV;
+            const shortSha = process.env.SHORT_SHA;
+            const commitMessage = process.env.COMMIT_MESSAGE;
+            const commitAuthor = process.env.COMMIT_AUTHOR;
+            const buildDuration = process.env.BUILD_DURATION;
+            const additionalInfo = process.env.ADDITIONAL_INFO;
+
+            // Generate timestamps for both UTC and BRT (Brasília Time)
+            const utcTime = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+            const brtTime = new Date().toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }).replace(',', '') + ' BRT';
+            const timestamp = `${brtTime} (${utcTime})`;
+
+            // Status emoji mapping
+            const statusEmoji = {
+              'building': '⚡',
+              'success': '✅',
+              'failure': '❌',
+              'ready': '🚀'
+            };
+
+            const emoji = statusEmoji[status] || '📊';
+            const envName = environment === 'production' ? 'Production' : 'Preview';
+
+            // Build status line
+            let statusLine = `**Status**: ${emoji} **${status.toUpperCase()}**`;
+            if (status === 'building') {
+              statusLine += ' - Build in progress...';
+            } else if (status === 'ready' && deployUrl) {
+              statusLine += ` - [View ${envName}](${deployUrl})`;
+            }
+
+            // Build deployment info section
+            let deploymentInfo = `### 📋 ${envName} Deployment\n\n`;
+            deploymentInfo += `- ${statusLine}\n`;
+            deploymentInfo += `- **Commit**: [\`${shortSha}\`](${context.payload.repository.html_url}/commit/${context.payload.repository.default_branch ? context.payload.repository.default_branch : 'main'})\n`;
+            deploymentInfo += `- **Author**: ${commitAuthor}\n`;
+            deploymentInfo += `- **Message**: ${commitMessage}\n`;
+            deploymentInfo += `- **Updated**: ${timestamp}\n`;
+
+            if (buildDuration) {
+              deploymentInfo += `- **Build Time**: ${buildDuration}\n`;
+            }
+
+            if (deployUrl && status === 'ready') {
+              deploymentInfo += `\n### 🔗 ${envName} Links\n\n`;
+              if (environment === 'preview') {
+                deploymentInfo += `| Preview | URL |\n`;
+                deploymentInfo += `|---------|-----|\n`;
+                deploymentInfo += `| 🌐 **Live Preview** | [${deployUrl}](${deployUrl}) |\n`;
+                deploymentInfo += `| 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume.pdf) |\n`;
+                deploymentInfo += `| 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-print.pdf) |\n`;
+                deploymentInfo += `| 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-ats.pdf) |\n`;
+              } else {
+                deploymentInfo += `- 🌐 **Live Site**: [${deployUrl}](${deployUrl})\n`;
+                deploymentInfo += `- 📄 **PDF Downloads**: Available at live site\n`;
+              }
+            }
+
+            if (additionalInfo) {
+              deploymentInfo += `\n### 📊 Additional Info\n${additionalInfo}\n`;
+            }
+
+            // 🚀 ATLANTIS-STYLE COMMENT MANAGEMENT
+            // Step 1: Get all comments from the PR
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            // Step 2: Find ALL deployment status comments (previous and current environment)
+            const deploymentComments = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' && (
+                comment.body.includes('## 📊 Deployment Status') ||
+                comment.body.includes('## 🔍 PR Preview Environment') ||
+                comment.body.includes('## 🚀 Production Deployment')
+              )
+            );
+
+            // Step 3: Hide/minimize ALL previous deployment comments (Atlantis behavior)
+            let hiddenCount = 0;
+            for (const oldComment of deploymentComments) {
+              try {
+                // Add "outdated" marker to hide previous comments
+                const outdatedBody = `<details>\n<summary>🔒 <strong>Outdated Deployment Status</strong> - Click to expand</summary>\n\n${oldComment.body}\n\n---\n*⚠️ This deployment status has been superseded by a newer update.*\n</details>`;
+
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize comment ${oldComment.id}: ${error.message}`);
+              }
+            }
+
+            console.log(`🔒 Minimized ${hiddenCount} previous deployment status comments (Atlantis-style)`);
+
+            // Step 4: Create new deployment status comment (always fresh, never update)
+            const fullCommentBody = `## 📊 Deployment Status\n\n${deploymentInfo}\n\n---\n*🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*\n\n<!-- atlantis-style-deployment-${environment}-${Date.now()} -->`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: fullCommentBody,
+            });
+
+            console.log(`✅ Created fresh deployment status comment for PR #${prNumber} (${hiddenCount} old comments minimized)`);
+            console.log(`🎯 Atlantis-style management: Only latest deployment status visible, previous comments collapsed`)
+
+      - name: Generate Step Summary
+        if: always()
+        run: |
+          echo "## 📊 Deployment Status Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ inputs.deployment_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.deployment_environment }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.detect.outputs.pr_number }}" != "none" ]; then
+            echo "**PR**: #${{ steps.detect.outputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Action**: Updated PR comment" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**PR**: None found (not a PR context)" >> $GITHUB_STEP_SUMMARY
+            echo "**Action**: No PR comment update needed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "**Commit**: ${{ steps.detect.outputs.short_sha }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ inputs.deployment_url }}" ]; then
+            echo "**URL**: ${{ inputs.deployment_url }}" >> $GITHUB_STEP_SUMMARY
+          fi

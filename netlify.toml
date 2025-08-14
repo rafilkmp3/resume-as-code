@@ -1,43 +1,54 @@
+# 🎯 NETLIFY CONFIGURATION - OPTIMIZED FOR BUILD MINUTES CONSERVATION
+#
+# Strategy:
+# - 🚀 GitHub Pages: Production builds (unlimited)
+# - 📱 Netlify: PR previews only (conserves 300 build minutes/month)
+# - 🎯 Benefits: Cost-effective, reliable, consistent artifacts
+#
+# Build Allocation:
+# - Production (main): GitHub Pages ✅
+# - PR Previews: Netlify ✅
+# - Branch Deploys: DISABLED (saves minutes) ❌
+# - Random Pushes: DISABLED (saves minutes) ❌
+
 [build]
-  # Build command for resume generation with Puppeteer setup
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+  # GitHub Actions handles ALL builds - Netlify just serves static files
+  # NO BUILD COMMAND - skip builds entirely
 
-  # Directory to publish (contains HTML + PDF + assets)
+  # Directory to publish (contains HTML + PDF + assets from GitHub Actions)
   publish = "dist"
 
-  # Function directory (not used but required)
-  functions = "netlify/functions"
+  # Ignore ALL builds - GitHub Actions handles everything
+  ignore = "true"
 
-  # Ignore release-please branches to prevent unnecessary previews
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!CHANGELOG.md' ':!package.json' ':!package-lock.json' ':!.release-please-manifest.json' || [[ $BRANCH == release-please--* ]]"
-
-  # Environment variables for build
+  # Environment variables (not used since we skip builds)
   [build.environment]
-    NODE_VERSION = "22"
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+    GITHUB_ACTIONS_BUILD = "true"
+    NETLIFY_BUILD_DISABLED = "true"
 
-# Production deployment settings (main branch)
+# Production deployment DISABLED - GitHub Pages handles production
+# This saves Netlify build minutes (300/month limit)
 [context.production]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
-  publish = "dist"
+  ignore = "true"  # Always skip production builds
 
   [context.production.environment]
     NODE_ENV = "production"
-    GITHUB_PAGES = "false"
+    GITHUB_PAGES = "true"
+    NETLIFY_PRODUCTION_DISABLED = "true"
 
-# Deploy Preview settings (for PRs)
+# Deploy Preview settings (for PRs) - NO BUILDS, just serve files from GitHub Actions
 [context.deploy-preview]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
   publish = "dist"
+  ignore = "true"
 
   [context.deploy-preview.environment]
-    NODE_ENV = "preview"
-    GITHUB_PAGES = "false"
-    PREVIEW_MODE = "true"
+    GITHUB_ACTIONS_BUILD = "true"
+    NETLIFY_BUILD_DISABLED = "true"
 
-# Branch deploy settings (feature branches)
+# Branch deploy settings DISABLED - Only PR previews allowed
+# This saves build minutes for random branch pushes
 [context.branch-deploy]
-  command = "npm ci && npx @puppeteer/browsers install chrome@stable --path ./netlify-browsers && PUPPETEER_EXECUTABLE_PATH=$(npx @puppeteer/browsers path chrome@stable --path ./netlify-browsers) make build-netlify"
+  ignore = "true"  # Always skip branch deploys
   publish = "dist"
 
 # Headers for security and performance

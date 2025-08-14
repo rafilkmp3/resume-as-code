@@ -7,7 +7,7 @@ const createSimpleServer = require('./utils/server-utils');
 
 const PORT = 3000;
 const LIVERELOAD_PORT = 35729;
-const WATCH_FILES = ['templates/template.html', 'resume-data.json', 'assets/**/*'];
+const WATCH_FILES = ['templates/template.html', 'components/**/*', 'resume-data.json', 'assets/**/*'];
 
 let isBuilding = false;
 

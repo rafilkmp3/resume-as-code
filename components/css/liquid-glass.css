@@ -1,0 +1,1217 @@
+/* ========================================
+   APPLE iOS 2026 LIQUID GLASS SYSTEM - WWDC 2025 STANDARD
+   Three-Layer Architecture with Real-Time Environmental Adaptation
+   ======================================== */
+
+/* SF Pro Typography System - Apple's Official Font Stack */
+:root {
+    /* SF Pro Typography with Optical Sizing */
+    --sf-font-display: -apple-system, "SF Pro Display", BlinkMacSystemFont, system-ui, sans-serif;
+    --sf-font-text: -apple-system, "SF Pro Text", BlinkMacSystemFont, system-ui, sans-serif;
+    --sf-font-mono: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+
+    /* 8-Point Grid System - Apple Standard */
+    --grid-unit: 8px;
+    --spacing-xs: calc(var(--grid-unit) * 1); /* 8px */
+    --spacing-sm: calc(var(--grid-unit) * 2); /* 16px */
+    --spacing-md: calc(var(--grid-unit) * 3); /* 24px */
+    --spacing-lg: calc(var(--grid-unit) * 4); /* 32px */
+    --spacing-xl: calc(var(--grid-unit) * 6); /* 48px */
+    --spacing-xxl: calc(var(--grid-unit) * 8); /* 64px */
+
+    /* Three-Layer Liquid Glass Material System */
+    /* Layer 1: Highlight (Specular Reflection) */
+    --glass-highlight: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.1) 75%,
+        rgba(255, 255, 255, 0.4) 100%);
+    --glass-highlight-hover: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.4) 25%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        rgba(255, 255, 255, 0.6) 100%);
+
+    /* Layer 2: Shadow (Depth and Dimensionality) */
+    --glass-shadow-light:
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 16px 64px rgba(0, 0, 0, 0.05);
+    --glass-shadow-hover-light:
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 32px 128px rgba(0, 0, 0, 0.08);
+    --glass-shadow-dark:
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        0 16px 64px rgba(0, 0, 0, 0.2);
+    --glass-shadow-hover-dark:
+        0 2px 6px rgba(0, 0, 0, 0.35),
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 32px 128px rgba(0, 0, 0, 0.25);
+
+    /* Layer 3: Illumination (Environmental Light Adaptation) */
+    --glass-illumination-light: rgba(255, 255, 255, 0.9);
+    --glass-illumination-dark: rgba(24, 24, 27, 0.9);
+    --glass-border-light: rgba(255, 255, 255, 0.3);
+    --glass-border-dark: rgba(255, 255, 255, 0.1);
+
+    /* Advanced Backdrop Filter with Cross-Browser Support */
+    --glass-blur-primary: blur(20px) saturate(1.8) brightness(1.1);
+    --glass-blur-secondary: blur(16px) saturate(1.6) brightness(1.05);
+    --glass-blur-tertiary: blur(12px) saturate(1.4) brightness(1.02);
+
+    /* Typography Scale with SF Pro Optical Sizing */
+    --text-title-1: 2.125rem; /* 34px - SF Display */
+    --text-title-2: 1.75rem;  /* 28px - SF Display */
+    --text-title-3: 1.375rem; /* 22px - SF Display */
+    --text-headline: 1.0625rem; /* 17px - SF Text */
+    --text-body: 1rem;        /* 16px - SF Text */
+    --text-callout: 0.9375rem; /* 15px - SF Text */
+    --text-subheadline: 0.9375rem; /* 15px - SF Text */
+    --text-footnote: 0.8125rem; /* 13px - SF Text */
+    --text-caption-1: 0.75rem; /* 12px - SF Text */
+    --text-caption-2: 0.6875rem; /* 11px - SF Text */
+
+    /* Contrast Ratios - WCAG 2.1 AA Compliant (4.5:1) */
+    --text-primary-light: rgba(0, 0, 0, 0.9);
+    --text-secondary-light: rgba(0, 0, 0, 0.7);
+    --text-tertiary-light: rgba(0, 0, 0, 0.5);
+    --text-primary-dark: rgba(255, 255, 255, 0.9);
+    --text-secondary-dark: rgba(255, 255, 255, 0.7);
+    --text-tertiary-dark: rgba(255, 255, 255, 0.5);
+
+    /* Environmental Adaptation Variables */
+    --ambient-light: 1.0;
+    --content-adaptation: 1.0;
+    --motion-preference: 1.0;
+    --transparency-preference: 1.0;
+}
+
+/* Dark Theme Environmental Adaptation */
+[data-theme="dark"] {
+    --glass-highlight: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.05) 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.03) 75%,
+        rgba(255, 255, 255, 0.1) 100%);
+    --glass-highlight-hover: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.03) 50%,
+        rgba(255, 255, 255, 0.05) 75%,
+        rgba(255, 255, 255, 0.15) 100%);
+}
+
+/* User Preference Support - Accessibility First */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --motion-preference: 0.1;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    :root {
+        --transparency-preference: 0.3;
+        --glass-blur-primary: blur(4px) saturate(1.1) brightness(1.02);
+        --glass-blur-secondary: blur(3px) saturate(1.05) brightness(1.01);
+        --glass-blur-tertiary: blur(2px) saturate(1.02) brightness(1.005);
+    }
+}
+
+/* Three-Layer Liquid Glass Container */
+.liquid-glass-container {
+    position: relative;
+    isolation: isolate;
+    transform-style: preserve-3d;
+}
+
+/* Layer 1: Highlight Layer (Specular Reflection) */
+.liquid-glass-highlight {
+    position: absolute;
+    inset: 0;
+    background: var(--glass-highlight);
+    border-radius: inherit;
+    opacity: calc(0.8 * var(--transparency-preference));
+    transition: all calc(0.4s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.liquid-glass-container:hover .liquid-glass-highlight {
+    background: var(--glass-highlight-hover);
+    opacity: calc(1.0 * var(--transparency-preference));
+}
+
+/* Layer 2: Shadow Layer (Depth and Dimensionality) */
+.liquid-glass-shadow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--glass-shadow-light);
+    transition: all calc(0.4s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    z-index: 1;
+}
+
+[data-theme="dark"] .liquid-glass-shadow {
+    box-shadow: var(--glass-shadow-dark);
+}
+
+.liquid-glass-container:hover .liquid-glass-shadow {
+    box-shadow: var(--glass-shadow-hover-light);
+    transform: translateZ(calc(4px * var(--motion-preference)));
+}
+
+[data-theme="dark"] .liquid-glass-container:hover .liquid-glass-shadow {
+    box-shadow: var(--glass-shadow-hover-dark);
+}
+
+/* Layer 3: Illumination Layer (Environmental Adaptation) */
+.liquid-glass-illumination {
+    position: relative;
+    background: var(--glass-illumination-light);
+    border: 0.5px solid var(--glass-border-light);
+    border-radius: inherit;
+    backdrop-filter: var(--glass-blur-primary);
+    -webkit-backdrop-filter: var(--glass-blur-primary);
+    transition: all calc(0.4s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 2;
+
+    /* Ensure proper contrast maintenance */
+    color: var(--text-primary-light);
+}
+
+[data-theme="dark"] .liquid-glass-illumination {
+    background: var(--glass-illumination-dark);
+    border-color: var(--glass-border-dark);
+    color: var(--text-primary-dark);
+}
+
+.liquid-glass-container:hover .liquid-glass-illumination {
+    backdrop-filter: var(--glass-blur-secondary);
+    -webkit-backdrop-filter: var(--glass-blur-secondary);
+    transform: translateY(calc(-2px * var(--motion-preference)))
+               scale(calc(1 + 0.02 * var(--motion-preference)));
+}
+
+/* SF Pro Typography Implementation */
+.sf-display {
+    font-family: var(--sf-font-display);
+    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.sf-text {
+    font-family: var(--sf-font-text);
+    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contact Icons - App Icon Treatment */
+.liquid-contact-icon {
+    --icon-size: var(--spacing-xxl); /* 64px */
+
+    position: relative;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    border-radius: calc(var(--icon-size) * 0.25); /* iOS app icon radius */
+    overflow: hidden;
+    transition: all calc(0.3s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+}
+
+.liquid-contact-icon .liquid-glass-illumination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.liquid-contact-icon svg {
+    width: calc(var(--icon-size) * 0.5); /* 32px */
+    height: calc(var(--icon-size) * 0.5);
+    color: var(--color-accent-primary);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    transition: all calc(0.3s * var(--motion-preference)) ease;
+}
+
+.liquid-contact-icon:hover svg {
+    transform: scale(calc(1 + 0.1 * var(--motion-preference)));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+/* Contact Grid Implementation */
+.liquid-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Contact Card Implementation */
+.liquid-contact-card {
+    --card-padding: var(--spacing-md);
+    --card-radius: var(--spacing-md);
+
+    display: flex;
+    align-items: center;
+    /* REMOVED: gap property - spacing handled by inner .liquid-card-content */
+    padding: var(--card-padding);
+    border-radius: var(--card-radius);
+    text-decoration: none;
+    transition: all calc(0.3s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+
+    /* Apply three-layer liquid glass material */
+    background: var(--glass-highlight);
+    backdrop-filter: var(--glass-blur-primary);
+    -webkit-backdrop-filter: var(--glass-blur-primary);
+    border: 1px solid var(--glass-border-light);
+    box-shadow: var(--glass-shadow-light);
+}
+
+/* Button-specific reset to match anchor styling */
+button.liquid-contact-card {
+    border: 1px solid var(--glass-border-light); /* Override button border */
+    background: var(--glass-highlight); /* Ensure consistent background */
+    font-family: inherit; /* Inherit font family */
+    font-size: inherit; /* Inherit font size */
+    line-height: inherit; /* Inherit line height */
+    margin: 0; /* Reset default margin */
+    padding: var(--card-padding); /* Consistent padding */
+}
+
+.liquid-card-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+    min-height: var(--spacing-xxl); /* Ensure consistent card heights */
+}
+
+.liquid-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacing-xxl); /* 64px */
+    height: var(--spacing-xxl); /* 64px */
+    border-radius: calc(var(--spacing-xxl) * 0.25); /* iOS app icon radius */
+    background: var(--glass-illumination-light);
+    backdrop-filter: var(--glass-blur-secondary);
+    -webkit-backdrop-filter: var(--glass-blur-secondary);
+    border: 1px solid var(--glass-border-light);
+    flex-shrink: 0; /* Prevent icon container from shrinking */
+}
+
+/* Icon SVGs styling with theme-aware colors */
+.liquid-icon svg {
+    width: calc(var(--spacing-xxl) * 0.5); /* 32px - consistent sizing */
+    height: calc(var(--spacing-xxl) * 0.5);
+    color: var(--text-primary-light); /* Theme-aware color */
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    transition: all calc(0.3s * var(--motion-preference)) ease;
+    flex-shrink: 0;
+}
+
+/* Dark theme SVG colors */
+[data-theme="dark"] .liquid-icon svg {
+    color: var(--text-primary-dark);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.liquid-text {
+    flex: 1;
+    min-width: 0; /* Prevent flex overflow */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.liquid-text h3 {
+    font-size: var(--text-headline);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0 0 calc(var(--spacing-xs) * 0.25) 0; /* Tighter spacing */
+    color: var(--text-primary-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.liquid-text p {
+    font-size: var(--text-callout);
+    font-weight: 400;
+    line-height: 1.3;
+    margin: 0;
+    color: var(--text-secondary-light);
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dark theme support for liquid glass cards */
+[data-theme="dark"] .liquid-contact-card {
+    background: var(--glass-highlight);
+    border: 1px solid var(--glass-border-dark);
+    box-shadow: var(--glass-shadow-dark);
+}
+
+[data-theme="dark"] .liquid-icon {
+    background: var(--glass-illumination-dark);
+    border: 1px solid var(--glass-border-dark);
+}
+
+[data-theme="dark"] .liquid-text h3 {
+    color: var(--text-primary-dark);
+}
+
+[data-theme="dark"] .liquid-text p {
+    color: var(--text-primary-dark);
+    opacity: 0.9;
+}
+
+/* QR Code Enhanced Overlay System - First Position Special Treatment */
+#share-qr-btn {
+    position: relative;
+    overflow: hidden;
+    /* Ensure QR code has same default border as other cards */
+    border: 1px solid var(--glass-border-light) !important;
+}
+
+[data-theme="dark"] #share-qr-btn {
+    border: 1px solid var(--glass-border-dark) !important;
+}
+
+#share-qr-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+        rgba(37, 99, 235, 0.1) 0%,
+        rgba(147, 51, 234, 0.05) 50%,
+        rgba(37, 99, 235, 0.1) 100%);
+    opacity: 0;
+    transition: opacity calc(0.3s * var(--motion-preference)) ease;
+    border-radius: var(--card-radius);
+    pointer-events: none;
+}
+
+#share-qr-btn:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced glass effect for QR code on hover */
+#share-qr-btn:hover {
+    background: var(--glass-highlight-hover);
+    box-shadow:
+        var(--glass-shadow-hover-light),
+        0 0 32px rgba(37, 99, 235, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: var(--color-accent-primary);
+    transform: translateY(-3px) scale(1.03);
+}
+
+
+[data-theme="dark"] #share-qr-btn:hover {
+    box-shadow:
+        var(--glass-shadow-hover-dark),
+        0 0 32px rgba(147, 51, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* QR Code icon special animation */
+#share-qr-btn:hover .liquid-icon {
+    transform: scale(1.15) rotate(2deg);
+}
+
+#share-qr-btn:hover .liquid-icon svg {
+    filter: drop-shadow(0 2px 8px rgba(37, 99, 235, 0.3));
+}
+
+/* Enhanced contrast for QR Code button in dark mode */
+[data-theme="dark"] #share-qr-btn .liquid-text h3 {
+    color: #ffffff;
+    font-weight: 600;
+    opacity: 1;
+}
+
+[data-theme="dark"] #share-qr-btn .liquid-text p {
+    color: rgba(255, 255, 255, 0.95);
+    opacity: 1;
+    font-weight: 500;
+}
+
+/* Fix QR Code icon visibility in dark mode */
+[data-theme="dark"] #share-qr-btn .liquid-icon svg {
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* Removed previous failed fix - root cause was double gap properties */
+
+/* Hover states for liquid glass cards */
+.liquid-contact-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: var(--glass-highlight-hover);
+    box-shadow: var(--glass-shadow-hover-light);
+    border-color: var(--color-accent-primary);
+}
+
+[data-theme="dark"] .liquid-contact-card:hover {
+    box-shadow: var(--glass-shadow-hover-dark);
+}
+
+.liquid-contact-card:hover .liquid-icon {
+    transform: scale(1.1);
+}
+
+.liquid-contact-card:hover .liquid-text h3 {
+    color: var(--color-accent-primary);
+}
+
+.liquid-contact-card .liquid-contact-text {
+    flex: 1;
+    min-width: 0; /* Prevent flex overflow */
+}
+
+.liquid-contact-card .liquid-contact-title {
+    font-size: var(--text-headline);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0 0 calc(var(--spacing-xs) * 0.5) 0;
+    color: var(--text-primary-light);
+}
+
+[data-theme="dark"] .liquid-contact-card .liquid-contact-title {
+    color: var(--text-primary-dark);
+}
+
+.liquid-contact-card .liquid-contact-subtitle {
+    font-size: var(--text-subheadline);
+    font-weight: 400;
+    line-height: 1.3;
+    margin: 0;
+    color: var(--text-secondary-light);
+}
+
+[data-theme="dark"] .liquid-contact-card .liquid-contact-subtitle {
+    color: var(--text-secondary-dark);
+}
+
+/* Focus States - Accessibility Excellence */
+.liquid-glass-container:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 4px;
+    border-radius: calc(var(--card-radius) + 4px);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .liquid-glass-illumination {
+        background: rgba(255, 255, 255, 0.95);
+        border-width: 2px;
+    }
+
+    [data-theme="dark"] .liquid-glass-illumination {
+        background: rgba(0, 0, 0, 0.95);
+    }
+
+    .liquid-contact-card .liquid-contact-title {
+        color: var(--text-primary-light);
+        font-weight: 700;
+    }
+
+    [data-theme="dark"] .liquid-contact-card .liquid-contact-title {
+        color: var(--text-primary-dark);
+    }
+}
+
+/* Enhanced Responsive Design with consistent alignment */
+@media (max-width: 768px) {
+    .liquid-contact-card {
+        --card-padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+
+    .liquid-icon {
+        width: calc(var(--spacing-xxl) * 0.875); /* 56px */
+        height: calc(var(--spacing-xxl) * 0.875);
+    }
+
+    .liquid-icon svg {
+        width: calc(var(--spacing-xxl) * 0.4375); /* 28px */
+        height: calc(var(--spacing-xxl) * 0.4375);
+    }
+
+    .liquid-text h3 {
+        font-size: var(--text-body);
+        white-space: normal; /* Allow wrapping on smaller screens */
+    }
+
+    .liquid-text p {
+        font-size: var(--text-callout);
+        white-space: normal; /* Allow wrapping on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .liquid-contact-card {
+        --card-padding: var(--spacing-sm);
+        gap: calc(var(--spacing-sm) * 0.75); /* Tighter spacing on mobile */
+    }
+
+    .liquid-icon {
+        width: calc(var(--spacing-xxl) * 0.75); /* 48px */
+        height: calc(var(--spacing-xxl) * 0.75);
+    }
+
+    .liquid-icon svg {
+        width: calc(var(--spacing-xxl) * 0.375); /* 24px */
+        height: calc(var(--spacing-xxl) * 0.375);
+    }
+
+    .liquid-text h3 {
+        font-size: var(--text-callout);
+    }
+
+    .liquid-text p {
+        font-size: var(--text-footnote);
+    }
+}
+
+/* Performance Optimizations */
+.liquid-glass-container * {
+    transform: translateZ(0);
+    will-change: auto;
+}
+
+.liquid-glass-container:hover * {
+    will-change: transform, background, box-shadow, backdrop-filter;
+}
+
+/* Liquid Glass Action Buttons */
+.liquid-action-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+}
+
+.liquid-action-group {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.liquid-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: calc(var(--spacing-lg) * 0.75); /* 24px */
+    text-decoration: none;
+    font-family: var(--sf-font-text);
+    font-size: var(--text-body);
+    font-weight: 500;
+    transition: all calc(0.3s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    border: none;
+    position: relative;
+    overflow: hidden;
+
+    /* Apply liquid glass effect */
+    background: var(--glass-highlight);
+    backdrop-filter: var(--glass-blur-primary);
+    -webkit-backdrop-filter: var(--glass-blur-primary);
+    border: 1px solid var(--glass-border-light);
+    box-shadow: var(--glass-shadow-light);
+}
+
+.liquid-action-btn.liquid-primary {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.9) 0%,
+        rgba(99, 102, 241, 0.8) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.liquid-action-btn.liquid-secondary {
+    background: var(--glass-illumination-light);
+    color: var(--text-primary-light);
+    border-color: var(--glass-border-light);
+}
+
+[data-theme="dark"] .liquid-action-btn {
+    border-color: var(--glass-border-dark);
+    box-shadow: var(--glass-shadow-dark);
+}
+
+[data-theme="dark"] .liquid-action-btn.liquid-primary {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.8) 0%,
+        rgba(99, 102, 241, 0.7) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .liquid-action-btn.liquid-secondary {
+    background: var(--glass-illumination-dark);
+    color: var(--text-primary-dark);
+    border-color: var(--glass-border-dark);
+}
+
+.liquid-action-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--glass-shadow-hover-light);
+    backdrop-filter: var(--glass-blur-secondary);
+    -webkit-backdrop-filter: var(--glass-blur-secondary);
+}
+
+[data-theme="dark"] .liquid-action-btn:hover {
+    box-shadow: var(--glass-shadow-hover-dark);
+}
+
+.liquid-action-btn.liquid-primary:hover {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 1.0) 0%,
+        rgba(99, 102, 241, 0.9) 100%);
+}
+
+[data-theme="dark"] .liquid-action-btn.liquid-primary:hover {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.9) 0%,
+        rgba(99, 102, 241, 0.8) 100%);
+}
+
+.liquid-action-btn svg {
+    width: 18px;
+    height: 18px;
+    transition: transform calc(0.3s * var(--motion-preference)) ease;
+}
+
+.liquid-action-btn:hover svg {
+    transform: scale(1.1);
+}
+
+/* Advanced Liquid Glass QR Modal - iOS 2026 Enhanced */
+.qr-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    /* Enhanced backdrop for light mode */
+    background: linear-gradient(135deg,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: blur(12px) saturate(1.2) brightness(0.8);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2) brightness(0.8);
+    transition: all calc(0.4s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Dramatic dark mode backdrop enhancement */
+[data-theme="dark"] .qr-modal {
+    background: linear-gradient(135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(12, 12, 14, 0.8) 25%,
+        rgba(24, 24, 27, 0.85) 50%,
+        rgba(0, 0, 0, 0.9) 100%);
+    backdrop-filter: blur(20px) saturate(1.8) brightness(0.4) contrast(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(0.4) contrast(1.2);
+}
+
+.qr-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: backdropFadeIn calc(0.5s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.qr-modal-content {
+    border-radius: calc(var(--spacing-lg) * 1.5); /* 36px for more modern feel */
+    max-width: 480px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: auto;
+    position: relative;
+
+    /* Multi-layer shadow system for depth */
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 32px 64px rgba(0, 0, 0, 0.15);
+
+    animation: modalSlideUp calc(0.6s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+    transform-origin: center bottom;
+}
+
+/* Enhanced dark mode modal content */
+[data-theme="dark"] .qr-modal-content {
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        0 12px 40px rgba(0, 0, 0, 0.3),
+        0 24px 80px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.qr-modal-inner {
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    position: relative;
+
+    /* Enhanced liquid glass with gradient overlay */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.9) 50%,
+        rgba(255, 255, 255, 0.85) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(1.4) brightness(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4) brightness(1.1);
+
+    /* Subtle inner glow for depth */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Stunning dark mode modal inner with multiple gradient layers */
+[data-theme="dark"] .qr-modal-inner {
+    background: linear-gradient(135deg,
+        rgba(24, 24, 27, 0.95) 0%,
+        rgba(18, 18, 21, 0.9) 25%,
+        rgba(24, 24, 27, 0.92) 50%,
+        rgba(12, 12, 14, 0.88) 75%,
+        rgba(24, 24, 27, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(24px) saturate(1.6) brightness(0.8) contrast(1.1);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6) brightness(0.8) contrast(1.1);
+
+    /* Multi-layer inner lighting effects */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        inset 1px 0 0 rgba(255, 255, 255, 0.05),
+        inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.qr-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.qr-modal-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.qr-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacing-xxl);
+    height: var(--spacing-xxl);
+    border-radius: calc(var(--spacing-xxl) * 0.3); /* More rounded for modern iOS feel */
+
+    /* Enhanced gradient background with depth */
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.9) 0%,
+        rgba(99, 102, 241, 0.8) 50%,
+        rgba(139, 69, 193, 0.7) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.95);
+
+    /* Professional shadow system */
+    box-shadow:
+        0 2px 8px rgba(59, 130, 246, 0.3),
+        0 4px 16px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+    transition: all calc(0.3s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+[data-theme="dark"] .qr-title-icon {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.8) 0%,
+        rgba(99, 102, 241, 0.7) 50%,
+        rgba(139, 69, 193, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* Enhanced dark mode glow effects */
+    box-shadow:
+        0 2px 12px rgba(59, 130, 246, 0.4),
+        0 4px 24px rgba(59, 130, 246, 0.3),
+        0 8px 32px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.qr-modal-title h3 {
+    font-size: var(--text-title-3);
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary-light);
+}
+
+[data-theme="dark"] .qr-modal-title h3 {
+    color: var(--text-primary-dark);
+}
+
+.qr-modal-close {
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Sophisticated liquid glass close button */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.4) 100%);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    color: rgba(0, 0, 0, 0.7);
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+    transition: all calc(0.3s * var(--motion-preference)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+[data-theme="dark"] .qr-modal-close {
+    background: linear-gradient(135deg,
+        rgba(24, 24, 27, 0.8) 0%,
+        rgba(18, 18, 21, 0.6) 50%,
+        rgba(12, 12, 14, 0.4) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+
+    box-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.3),
+        0 4px 24px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.qr-modal-close:hover {
+    transform: scale(1.08) translateY(-1px);
+
+    /* Enhanced hover states */
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.9) 0%,
+        rgba(99, 102, 241, 0.8) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(59, 130, 246, 0.3);
+
+    box-shadow:
+        0 4px 16px rgba(59, 130, 246, 0.3),
+        0 8px 32px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .qr-modal-close:hover {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.8) 0%,
+        rgba(99, 102, 241, 0.7) 100%);
+
+    box-shadow:
+        0 4px 20px rgba(59, 130, 246, 0.4),
+        0 8px 40px rgba(59, 130, 246, 0.3),
+        0 16px 64px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.qr-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.qr-code-container {
+    border-radius: calc(var(--spacing-md) * 1.5); /* 36px */
+    padding: var(--spacing-lg);
+
+    /* Sophisticated container with depth */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.5) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px) saturate(1.1);
+    -webkit-backdrop-filter: blur(8px) saturate(1.1);
+
+    box-shadow:
+        0 2px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .qr-code-container {
+    background: linear-gradient(135deg,
+        rgba(18, 18, 21, 0.8) 0%,
+        rgba(12, 12, 14, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    box-shadow:
+        0 2px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.qr-code-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.qr-code-large {
+    border-radius: calc(var(--spacing-sm) * 1.5); /* 24px */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 250, 252, 0.95) 100%);
+    padding: var(--spacing-md);
+
+    /* Premium shadow for QR code */
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.08),
+        0 8px 48px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+    transition: all calc(0.3s * var(--motion-preference)) ease;
+}
+
+.qr-code-large:hover {
+    transform: scale(1.02);
+    box-shadow:
+        0 6px 32px rgba(0, 0, 0, 0.1),
+        0 12px 64px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.qr-code-url {
+    font-size: var(--text-headline);
+    font-weight: 500;
+    color: var(--color-accent-primary);
+    text-align: center;
+    word-break: break-all;
+    padding: calc(var(--spacing-sm) * 1.5) var(--spacing-lg);
+    margin-top: var(--spacing-md);
+
+    /* Premium URL container styling */
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.08) 0%,
+        rgba(99, 102, 241, 0.05) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: calc(var(--spacing-sm) * 1.5);
+
+    box-shadow:
+        0 2px 12px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .qr-code-url {
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.15) 0%,
+        rgba(99, 102, 241, 0.1) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: rgba(59, 130, 246, 0.9);
+
+    box-shadow:
+        0 2px 16px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.qr-code-description {
+    font-size: var(--text-callout);
+    color: var(--text-secondary-light);
+    text-align: center;
+    margin: 0;
+    opacity: 0.8;
+}
+
+[data-theme="dark"] .qr-code-description {
+    color: var(--text-secondary-dark);
+}
+
+.qr-modal-footer {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* Advanced iOS-Style Animations */
+@keyframes backdropFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(12px) saturate(1.2) brightness(0.8);
+        -webkit-backdrop-filter: blur(12px) saturate(1.2) brightness(0.8);
+    }
+}
+
+/* Dark mode backdrop animation */
+[data-theme="dark"] .qr-modal.show {
+    animation: backdropFadeInDark calc(0.5s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes backdropFadeInDark {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(20px) saturate(1.8) brightness(0.4) contrast(1.2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(0.4) contrast(1.2);
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(80px) scale(0.9) rotateX(10deg);
+        filter: blur(4px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(20px) scale(0.95) rotateX(2deg);
+        filter: blur(2px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0deg);
+        filter: blur(0px);
+    }
+}
+
+/* Enhanced slide out animation */
+@keyframes modalSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0deg);
+        filter: blur(0px);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateY(-20px) scale(0.98) rotateX(-2deg);
+        filter: blur(1px);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.92) rotateX(-8deg);
+        filter: blur(3px);
+    }
+}
+
+/* Smooth close animation */
+.qr-modal.closing {
+    animation: backdropFadeOut calc(0.4s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.qr-modal.closing .qr-modal-content {
+    animation: modalSlideOut calc(0.4s * var(--motion-preference)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes backdropFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    @keyframes modalSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes backdropFadeIn,
+    @keyframes backdropFadeInDark {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
+
+/* Responsive modal */
+@media (max-width: 480px) {
+    .qr-modal-inner {
+        padding: var(--spacing-lg);
+        gap: var(--spacing-md);
+    }
+
+    .qr-modal-footer {
+        flex-direction: column;
+    }
+}
+
+/* Print Styles - Remove Effects for Print */
+@media print {
+    .qr-modal {
+        display: none !important;
+    }
+
+    .liquid-glass-highlight,
+    .liquid-glass-shadow {
+        display: none;
+    }
+
+    .liquid-glass-illumination {
+        background: white;
+        border: 1px solid #ccc;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .liquid-action-bar {
+        display: none;
+    }
+}
