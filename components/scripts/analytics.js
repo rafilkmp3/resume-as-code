@@ -9,6 +9,7 @@
             // Function to open QR modal and generate QR code dynamically
             async function openQrModal() {
                 qrModal.style.display = 'flex';
+                qrModal.classList.add('show'); // Enable enhanced animations
                 document.body.style.overflow = 'hidden';
 
                 // Generate QR code dynamically when modal opens (much more efficient!)
@@ -118,10 +119,15 @@
             // Event listener for QR modal opening
             shareQrBtn?.addEventListener('click', openQrModal);
 
-            // Close QR modal
+            // Close QR modal with enhanced animations
             function closeQRModal() {
-                qrModal.style.display = 'none';
+                qrModal.classList.remove('show'); // Trigger enhanced close animation
                 document.body.style.overflow = 'auto';
+
+                // Hide modal after animation completes
+                setTimeout(() => {
+                    qrModal.style.display = 'none';
+                }, 400); // Match animation duration
             }
 
             qrModalClose?.addEventListener('click', closeQRModal);
@@ -201,7 +207,7 @@
 
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && qrModal.style.display === 'flex') {
+                if (e.key === 'Escape' && qrModal.classList.contains('show')) {
                     closeQRModal();
                 }
             });

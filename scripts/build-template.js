@@ -15,16 +15,25 @@ console.log('🧩 Assembling template.html from components...');
 try {
     // Read all component files
     const headComponent = fs.readFileSync('components/head.html', 'utf8');
-    const cssComponent = fs.readFileSync('components/styles/main.css', 'utf8');
+    const mainCSS = fs.readFileSync('components/styles/main.css', 'utf8');
+    const liquidGlassCSS = fs.readFileSync('components/css/liquid-glass.css', 'utf8');
     const bodyComponent = fs.readFileSync('components/body.html', 'utf8');
     const mainJS = fs.readFileSync('components/scripts/main.js', 'utf8');
     const themeJS = fs.readFileSync('components/scripts/theme-toggle.js', 'utf8');
     const analyticsJS = fs.readFileSync('components/scripts/analytics.js', 'utf8');
 
+    // Combine all CSS components
+    const allCSS = `${mainCSS}
+
+/* ========================================
+   LIQUID GLASS SYSTEM - COMPONENTS
+   ======================================== */
+${liquidGlassCSS}`;
+
     // Assemble the complete template
     const assembledTemplate = `${headComponent}
     <style>
-${cssComponent}
+${allCSS}
     </style>
 ${bodyComponent.replace('</head>', '').replace('<body>', '').replace('</body>', '').replace('</html>', '')}
 
@@ -49,7 +58,8 @@ ${analyticsJS}
     console.log('✅ Template assembled successfully!');
     console.log('📊 Component Statistics:');
     console.log(`   Head: ${headComponent.split('\n').length} lines`);
-    console.log(`   CSS: ${cssComponent.split('\n').length} lines`);
+    console.log(`   Main CSS: ${mainCSS.split('\n').length} lines`);
+    console.log(`   Liquid Glass CSS: ${liquidGlassCSS.split('\n').length} lines`);
     console.log(`   Body: ${bodyComponent.split('\n').length} lines`);
     console.log(`   Main JS: ${mainJS.split('\n').length} lines`);
     console.log(`   Theme JS: ${themeJS.split('\n').length} lines`);

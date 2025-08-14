@@ -492,8 +492,8 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
     printBackground: true,
     preferCSSPageSize: true,
     displayHeaderFooter: false,
-    margin: { top: '0', bottom: '0', left: '0', right: '0' },
-    scale: 0.95,
+    margin: { top: '2mm', bottom: '2mm', left: '2mm', right: '2mm' },
+    scale: 0.98,
     tagged: true,
     title: `${resumeData.basics.name} - Resume (Screen-Optimized)`,
     author: resumeData.basics.name,
@@ -546,7 +546,7 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
         body {
           background: white !important;
           font-size: 10pt !important;
-          line-height: 1.15 !important;
+          line-height: 1.2 !important;
           margin: 0 !important;
           padding: 0 !important;
         }
@@ -556,16 +556,19 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
           color: white !important;
           print-color-adjust: exact !important;
         }
-        .section-title {
+        .section-title, h2 {
           font-size: 14pt !important;
           font-weight: bold !important;
-          margin-top: 12pt !important;
-          margin-bottom: 8pt !important;
+          margin-top: 10pt !important;
+          margin-bottom: 6pt !important;
           color: #2c3e50 !important;
         }
         .experience-item, .project-item, .education-item {
-          margin-bottom: 6pt !important;
-          page-break-inside: auto !important; /* Allow breaking for compactness */
+          margin-bottom: 4pt !important;
+          page-break-inside: avoid !important; /* Prevent breaking experience entries */
+        }
+        .work-header {
+          page-break-after: avoid !important; /* Keep headers with content */
         }
         .contact-info {
           font-size: 10pt !important;
@@ -589,6 +592,18 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
           object-fit: cover !important;
           margin: 0 auto 0.5rem !important;
         }
+        /* Professional page break rules */
+        .section {
+          page-break-inside: avoid !important;
+        }
+        .work-item:last-child {
+          page-break-after: auto !important;
+        }
+        /* QR code optimization for print */
+        .print-qr-code {
+          width: 80px !important;
+          height: 80px !important;
+        }
       }
     `
   });
@@ -601,7 +616,7 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
     printBackground: true,
     preferCSSPageSize: true,
     displayHeaderFooter: false,
-    margin: { top: '8mm', bottom: '8mm', left: '10mm', right: '10mm' },
+    margin: { top: '6mm', bottom: '6mm', left: '8mm', right: '8mm' },
     scale: 1.0,
     tagged: true,
     title: `${resumeData.basics.name} - Resume (Print-Optimized)`,
@@ -833,6 +848,26 @@ async function build(options = {}) {
   const isProduction = mode === 'production';
 
   console.log(`🏗️  Starting ${isDraft ? 'DRAFT' : 'PRODUCTION'} build...`);
+
+  // Step 1: Build template from components
+  console.log('🧩 Building template from components...');
+  const { exec } = require('child_process');
+  await new Promise((resolve, reject) => {
+    exec('npm run template:build', (error, stdout, stderr) => {
+      if (error) {
+        console.error('❌ Template build failed:', error.message);
+        reject(error);
+      } else {
+        console.log(stdout);
+        // Activate the new template
+        if (fs.existsSync('template.html.new')) {
+          fs.renameSync('template.html.new', 'templates/template.html');
+          console.log('✅ Component-based template activated');
+        }
+        resolve();
+      }
+    });
+  });
 
   const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
 

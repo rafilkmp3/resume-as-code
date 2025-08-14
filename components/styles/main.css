@@ -928,15 +928,16 @@
         [data-theme="light"] .theme-toggle .sun-icon { display: none; }
         [data-theme="light"] .theme-toggle .moon-icon { display: block; }
 
-        /* Modern Contact Section with Liquid Glass Effect */
-        .contact-grid {
+        /* DEPRECATED: Legacy Contact Section - replaced by liquid-contact-grid system */
+        .legacy-contact-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .contact-card {
+        /* DEPRECATED: Old contact-card style - replaced by liquid-contact-card system */
+        .legacy-contact-card {
             display: flex;
             align-items: center;
             gap: 1.25rem;
@@ -956,10 +957,10 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        /* Theme-specific glass backgrounds */
-        [data-theme="light"] .contact-card,
-        .light-mode .contact-card,
-        body:not(.dark-mode) .contact-card {
+        /* DEPRECATED: Theme-specific glass backgrounds - replaced by liquid glass system */
+        [data-theme="light"] .legacy-contact-card,
+        .light-mode .legacy-contact-card,
+        body:not(.dark-mode) .legacy-contact-card {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -970,7 +971,7 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
 
-        [data-theme="dark"] .contact-card {
+        [data-theme="dark"] .legacy-contact-card {
             background: rgba(17, 24, 39, 0.3);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -981,7 +982,7 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        .contact-card::before {
+        .legacy-contact-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -997,7 +998,7 @@
             pointer-events: none;
         }
 
-        .contact-card:hover {
+        .legacy-contact-card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow:
                 0 20px 40px rgba(59, 130, 246, 0.15),
@@ -1006,22 +1007,23 @@
             border-color: rgba(59, 130, 246, 0.4);
         }
 
-        .contact-card:hover::before {
+        .legacy-contact-card:hover::before {
             opacity: 1;
         }
 
-        [data-theme="light"] .contact-card:hover,
-        .light-mode .contact-card:hover,
-        body:not(.dark-mode) .contact-card:hover {
+        [data-theme="light"] .legacy-contact-card:hover,
+        .light-mode .legacy-contact-card:hover,
+        body:not(.dark-mode) .legacy-contact-card:hover {
             box-shadow:
                 0 20px 40px rgba(59, 130, 246, 0.12),
                 0 4px 20px rgba(0, 0, 0, 0.06),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
         }
 
+        /* Contact icons now use liquid glass system for perfect size consistency */
         .contact-icon {
-            font-size: 1.75rem;
-            min-width: 2.5rem;
+            /* Removed conflicting font-size - using liquid glass 64px system for ALL icons */
+            min-width: var(--spacing-xxl); /* 64px - matching liquid glass icons */
             text-align: center;
             color: var(--color-text-muted);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1029,7 +1031,7 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
-        .contact-card:hover .contact-icon {
+        .legacy-contact-card:hover .contact-icon {
             color: var(--color-accent-primary);
             opacity: 1;
             transform: scale(1.15) rotate(5deg);
@@ -1091,8 +1093,10 @@
         .social-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
+            gap: 1rem; /* Increased from 0.5rem for better breathing room */
+            justify-content: space-between; /* Better space utilization vs center */
+            max-width: 600px; /* Prevent over-stretching on very wide screens */
+            margin: 0 auto; /* Keep centered within container */
         }
 
         .social-link {
@@ -1108,7 +1112,9 @@
             font-size: var(--font-size-sm);
             font-weight: 500;
             transition: all 0.2s ease;
-            min-width: 100px;
+            flex: 1; /* Responsive width that utilizes available space */
+            min-width: 120px; /* Slightly larger minimum for better proportion */
+            max-width: 180px; /* Prevent over-stretching */
             justify-content: center;
         }
 
@@ -1187,13 +1193,13 @@
 
         /* Mobile First: 320px - 767px */
         @media (max-width: 767px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
                 margin-bottom: 1.5rem;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 1.25rem;
                 backdrop-filter: blur(15px);
                 -webkit-backdrop-filter: blur(15px);
@@ -1205,8 +1211,8 @@
             }
 
             .contact-icon svg {
-                width: 24px !important;
-                height: 24px !important;
+                width: 32px !important; /* Standardized to liquid glass system */
+                height: 32px !important; /* Perfect consistency across all screen sizes */
             }
 
             .section h2::after {
@@ -1239,13 +1245,13 @@
 
         /* Tablet Portrait: 768px - 1023px */
         @media (min-width: 768px) and (max-width: 1023px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1.25rem;
                 margin-bottom: 1.75rem;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 1.4rem;
                 backdrop-filter: blur(18px);
                 -webkit-backdrop-filter: blur(18px);
@@ -1257,8 +1263,8 @@
             }
 
             .contact-icon svg {
-                width: 26px !important;
-                height: 26px !important;
+                width: 32px !important; /* Standardized to liquid glass system */
+                height: 32px !important; /* Perfect consistency across all screen sizes */
             }
 
             .section h2::after {
@@ -1270,13 +1276,13 @@
 
         /* Small Desktop: 1024px - 1365px */
         @media (min-width: 1024px) and (max-width: 1365px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
                 gap: 1.4rem;
                 margin-bottom: 2rem;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 1.45rem;
                 backdrop-filter: blur(20px);
                 -webkit-backdrop-filter: blur(20px);
@@ -1288,14 +1294,14 @@
             }
 
             .contact-icon svg {
-                width: 27px !important;
-                height: 27px !important;
+                width: 32px !important; /* Standardized to liquid glass system */
+                height: 32px !important; /* Perfect consistency across all screen sizes */
             }
         }
 
         /* Standard Desktop 16:9 Optimized: 1366px - 1919px */
         @media (min-width: 1366px) and (max-width: 1919px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 1.6rem;
                 margin-bottom: 2.25rem;
@@ -1304,7 +1310,7 @@
                 margin-right: auto;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 1.6rem;
                 backdrop-filter: blur(22px);
                 -webkit-backdrop-filter: blur(22px);
@@ -1316,8 +1322,8 @@
             }
 
             .contact-icon svg {
-                width: 29px !important;
-                height: 29px !important;
+                width: 32px !important; /* Standardized to liquid glass system */
+                height: 32px !important; /* Perfect consistency across all screen sizes */
             }
 
             .section h2 {
@@ -1328,7 +1334,7 @@
 
         /* Large Desktop & 4K: 1920px+ */
         @media (min-width: 1920px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 2rem;
                 margin-bottom: 2.5rem;
@@ -1337,7 +1343,7 @@
                 margin-right: auto;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 1.8rem;
                 backdrop-filter: blur(25px);
                 -webkit-backdrop-filter: blur(25px);
@@ -1361,13 +1367,13 @@
 
         /* Ultra-wide displays: 2560px+ */
         @media (min-width: 2560px) {
-            .contact-grid {
+            .legacy-contact-grid {
                 grid-template-columns: repeat(4, 1fr);
                 max-width: 1600px;
                 gap: 2.25rem;
             }
 
-            .contact-card {
+            .legacy-contact-card {
                 padding: 2rem;
             }
 
@@ -1377,14 +1383,14 @@
             }
 
             .contact-icon svg {
-                width: 36px !important;
-                height: 36px !important;
+                width: 32px !important; /* Standardized to liquid glass system */
+                height: 32px !important; /* Perfect consistency across all screen sizes */
             }
         }
 
         /* High DPI / Retina Display Optimizations */
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .contact-card {
+            .legacy-contact-card {
                 /* Enhanced blur for retina displays */
                 backdrop-filter: blur(25px);
                 -webkit-backdrop-filter: blur(25px);
@@ -1398,8 +1404,8 @@
 
         /* Dark Theme Responsive Adjustments */
         @media (prefers-color-scheme: dark) {
-            [data-theme="dark"] .contact-card,
-            .dark-mode .contact-card {
+            [data-theme="dark"] .legacy-contact-card,
+            .dark-mode .legacy-contact-card {
                 backdrop-filter: blur(30px);
                 -webkit-backdrop-filter: blur(30px);
             }
@@ -1407,9 +1413,9 @@
 
         /* Light Theme Responsive Adjustments */
         @media (prefers-color-scheme: light) {
-            [data-theme="light"] .contact-card,
-            .light-mode .contact-card,
-            body:not(.dark-mode) .contact-card {
+            [data-theme="light"] .legacy-contact-card,
+            .light-mode .legacy-contact-card,
+            body:not(.dark-mode) .legacy-contact-card {
                 backdrop-filter: blur(35px);
                 -webkit-backdrop-filter: blur(35px);
             }

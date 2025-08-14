@@ -100,7 +100,9 @@
                         <a href="mailto:{{basics.email}}" class="liquid-contact-card" aria-label="Send email">
                             <div class="liquid-card-content">
                                 <div class="liquid-icon">
-                                    <img src="https://cdn.simpleicons.org/gmail/FF0000" alt="Email" width="24" height="24">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.887.716-1.615 1.615-1.615L12 12.208l10.385-8.366A1.615 1.615 0 0 1 24 5.457z"/>
+                                    </svg>
                                 </div>
                                 <div class="liquid-text">
                                     <h3>Email</h3>
@@ -108,6 +110,63 @@
                                 </div>
                             </div>
                         </a>
+
+                        <!-- Calendar Card -->
+                        {{#each basics.profiles}}
+                        {{#if (eq network "Calendly")}}
+                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="Schedule meeting">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M6 2c-.55 0-1 .45-1 1v1H3c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1h-2V3c0-.55-.45-1-1-1s-1 .45-1 1v1H7V3c0-.55-.45-1-1-1zM3 8h18v12H3V8zm2 2v2h2v-2H5zm4 0v2h2v-2H9zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM5 14v2h2v-2H5zm4 0v2h2v-2H9zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>Schedule</h3>
+                                    <p>Book a meeting</p>
+                                </div>
+                            </div>
+                        </a>
+                        {{/if}}
+                        {{/each}}
+
+                        <!-- GitHub Card -->
+                        {{#each basics.profiles}}
+                        {{#if (eq network "GitHub")}}
+                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385c.6.105.825-.255.825-.57c0-.285-.015-1.23-.015-2.235c-3.015.555-3.795-.735-4.035-1.41c-.135-.345-.72-1.41-1.23-1.695c-.42-.225-1.02-.78-.015-.795c.945-.015 1.62.87 1.845 1.23c1.08 1.815 2.805 1.305 3.495.99c.105-.78.42-1.305.765-1.605c-2.67-.3-5.46-1.335-5.46-5.925c0-1.305.465-2.385 1.23-3.225c-.12-.3-.54-1.53.12-3.18c0 0 1.005-.315 3.3 1.23c.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23c.66 1.65.24 2.88.12 3.18c.765.84 1.23 1.905 1.23 3.225c0 4.605-2.805 5.625-5.475 5.925c.435.375.81 1.095.81 2.22c0 1.605-.015 2.895-.015 3.3c0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>GitHub</h3>
+                                    <p>Open source projects</p>
+                                </div>
+                            </div>
+                        </a>
+                        {{/if}}
+                        {{/each}}
+
+                        <!-- LinkedIn Card -->
+                        {{#each basics.profiles}}
+                        {{#if (eq network "LinkedIn")}}
+                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>LinkedIn</h3>
+                                    <p>Professional Network</p>
+                                </div>
+                            </div>
+                        </a>
+                        {{/if}}
+                        {{/each}}
 
                         <!-- Phone Card -->
                         <a href="tel:{{basics.phone}}" class="liquid-contact-card" aria-label="Call phone">
@@ -124,91 +183,85 @@
                             </div>
                         </a>
 
-                        <!-- LinkedIn Card -->
-                        {{#each basics.profiles}}
-                        {{#if (eq network "LinkedIn")}}
-                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
-                            <div class="liquid-card-content">
-                                <div class="liquid-icon">
-                                    <img src="https://cdn.simpleicons.org/linkedin/0A66C2" alt="LinkedIn" width="24" height="24">
-                                </div>
-                                <div class="liquid-text">
-                                    <h3>LinkedIn</h3>
-                                    <p>Professional Network</p>
-                                </div>
-                            </div>
-                        </a>
-                        {{/if}}
-                        {{/each}}
-
-                        <!-- GitHub Card -->
-                        {{#each basics.profiles}}
-                        {{#if (eq network "GitHub")}}
-                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
-                            <div class="liquid-card-content">
-                                <div class="liquid-icon">
-                                    <img src="https://cdn.simpleicons.org/github/181717" alt="GitHub" width="24" height="24">
-                                </div>
-                                <div class="liquid-text">
-                                    <h3>GitHub</h3>
-                                    <p>Code Repository</p>
-                                </div>
-                            </div>
-                        </a>
-                        {{/if}}
-                        {{/each}}
-
                         <!-- WhatsApp Card -->
                         {{#each basics.profiles}}
                         {{#if (eq network "WhatsApp")}}
                         <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp contact">
                             <div class="liquid-card-content">
                                 <div class="liquid-icon">
-                                    <img src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp" width="24" height="24">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.488"/>
+                                    </svg>
                                 </div>
                                 <div class="liquid-text">
                                     <h3>WhatsApp</h3>
-                                    <p>Quick Message</p>
+                                    <p>Direct message</p>
                                 </div>
                             </div>
                         </a>
                         {{/if}}
                         {{/each}}
 
-                        <!-- Calendar Card -->
-                        {{#each basics.profiles}}
-                        {{#if (eq network "Calendly")}}
-                        <a href="{{url}}" class="liquid-contact-card" target="_blank" rel="noopener noreferrer" aria-label="Schedule meeting">
+                        <!-- Screen-Optimized PDF Card -->
+                        <a href="./resume.pdf" class="liquid-contact-card no-print" target="_blank" rel="noopener noreferrer" aria-label="View screen-optimized PDF resume">
                             <div class="liquid-card-content">
                                 <div class="liquid-icon">
-                                    <img src="https://cdn.simpleicons.org/calendly/006BFF" alt="Calendar" width="24" height="24">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M3 4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h7v-2H3V6h18v10h-7v2h7c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H3zm9 12l-4-4 4-4z"/>
+                                    </svg>
                                 </div>
                                 <div class="liquid-text">
-                                    <h3>Schedule</h3>
-                                    <p>Book a Meeting</p>
+                                    <h3>Screen PDF</h3>
+                                    <p>Digital viewing</p>
                                 </div>
                             </div>
                         </a>
-                        {{/if}}
-                        {{/each}}
-                    </div>
 
-                    <!-- Liquid Glass Action Bar -->
-                    <div class="liquid-action-bar no-print">
-                        <div class="liquid-action-group">
-                            <a href="./resume.pdf" class="liquid-action-btn liquid-primary" download="Rafael_Sathler_Resume.pdf" aria-label="Download PDF resume">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                                </svg>
-                                <span>Download PDF</span>
-                            </a>
-                            <button class="liquid-action-btn liquid-secondary" id="share-qr-btn" aria-label="Share resume QR code">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92S19.61 16.08 18 16.08z"/>
-                                </svg>
-                                <span>Share</span>
-                            </button>
-                        </div>
+                        <!-- ATS-Optimized PDF Card -->
+                        <a href="./resume-ats.pdf" class="liquid-contact-card no-print" target="_blank" rel="noopener noreferrer" aria-label="View ATS-optimized PDF resume">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>ATS PDF</h3>
+                                    <p>ATS friendly</p>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Print-Optimized PDF Card -->
+                        <a href="./resume-print.pdf" class="liquid-contact-card no-print" target="_blank" rel="noopener noreferrer" aria-label="View print-optimized PDF resume">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>Print PDF</h3>
+                                    <p>Physical printing</p>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- QR Code Card -->
+                        <button class="liquid-contact-card no-print" id="share-qr-btn" aria-label="Show QR code">
+                            <div class="liquid-card-content">
+                                <div class="liquid-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 13h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 19h2v2h-2zM19 17h2v2h-2z"/>
+                                    </svg>
+                                </div>
+                                <div class="liquid-text">
+                                    <h3>Share QR</h3>
+                                    <p>Quick access</p>
+                                </div>
+                            </div>
+                        </button>
                     </div>
                 </section>
 
@@ -304,7 +357,7 @@
                             <div class="work-date">
                                 <div class="date-range">
                                     <span class="start-date">{{startDate}}</span>
-                                    <span class="date-separator">—</span>
+                                    <span class="date-separator">•</span>
                                     <span class="end-date">{{endDate}}</span>
                                 </div>
                             </div>
@@ -422,25 +475,52 @@
         </footer>
     </div>
 
-    <!-- QR Code Modal -->
+    <!-- Liquid Glass QR Code Modal -->
     <div id="qr-modal" class="qr-modal">
-        <div class="qr-modal-content">
-            <div class="qr-modal-header">
-                <h3>Share Resume</h3>
-                <button id="qr-modal-close" class="qr-modal-close" aria-label="Close QR code modal">×</button>
-            </div>
-            <div class="qr-modal-body">
-                <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
-                <div class="qr-code-url">{{basics.url}}</div>
-                <p class="qr-code-description">Scan to access resume online or share this URL</p>
-            </div>
-            <div class="qr-modal-footer">
-                <button id="qr-copy-btn" class="qr-copy-btn">
-                    📋 Copy URL
-                </button>
-                <button id="qr-download-btn" class="qr-download-btn">
-                    💾 Download QR
-                </button>
+        <div class="qr-modal-content liquid-glass-container">
+            <div class="liquid-glass-highlight"></div>
+            <div class="liquid-glass-shadow"></div>
+            <div class="liquid-glass-illumination qr-modal-inner">
+                <div class="qr-modal-header">
+                    <div class="qr-modal-title">
+                        <div class="qr-title-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 13h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 19h2v2h-2zM19 17h2v2h-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="sf-display">Resume QR Code</h3>
+                    </div>
+                    <button id="qr-modal-close" class="qr-modal-close liquid-glass-container" aria-label="Close QR code modal">
+                        <div class="liquid-glass-highlight"></div>
+                        <div class="liquid-glass-shadow"></div>
+                        <div class="liquid-glass-illumination">×</div>
+                    </button>
+                </div>
+                <div class="qr-modal-body">
+                    <div class="qr-code-container liquid-glass-container">
+                        <div class="liquid-glass-highlight"></div>
+                        <div class="liquid-glass-shadow"></div>
+                        <div class="liquid-glass-illumination qr-code-inner">
+                            <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="qr-code-url sf-text">{{basics.url}}</div>
+                    <p class="qr-code-description sf-text">Scan to access resume online</p>
+                </div>
+                <div class="qr-modal-footer">
+                    <button id="qr-copy-btn" class="liquid-action-btn liquid-secondary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                        Copy URL
+                    </button>
+                    <button id="qr-download-btn" class="liquid-action-btn liquid-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Download QR
+                    </button>
+                </div>
             </div>
         </div>
     </div>
