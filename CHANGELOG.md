@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.5.0...resume-as-code-v3.6.0) (2025-08-14)
+
+
+### Features
+
+* comprehensive github workflows improvement and automatic pr comment updates ([25bc8a8](https://github.com/rafilkmp3/resume-as-code/commit/25bc8a8f4600fb465aa0eba8ccac4ac8b9345aa6))
+* comprehensive PDF optimization and UI/UX fixes ([#38](https://github.com/rafilkmp3/resume-as-code/issues/38)) ([49312f3](https://github.com/rafilkmp3/resume-as-code/commit/49312f34dd09aa3d4b838b489d2da631c9a20086))
+* comprehensive ui/ux fixes and ios 2026 liquid glass design implementation ([5f888cd](https://github.com/rafilkmp3/resume-as-code/commit/5f888cdc70db4152dca9316cf6edf966e07dde7e))
+* comprehensive ui/ux improvements with liquid glass design and pdf optimization ([cd60b43](https://github.com/rafilkmp3/resume-as-code/commit/cd60b439949d494c439507637acae6647382912b))
+* comprehensive workflow resilience and warning elimination ([3668fd4](https://github.com/rafilkmp3/resume-as-code/commit/3668fd4b54f94751af86ccf57f7d6324108515c3))
+* comprehensive workflow resilience and warning elimination ([#39](https://github.com/rafilkmp3/resume-as-code/issues/39)) ([a9cf65d](https://github.com/rafilkmp3/resume-as-code/commit/a9cf65d7d5f7064a6077bd68b523d2347aba9bed))
+* implement atlantis-style comment management for pr workflows ([843ca07](https://github.com/rafilkmp3/resume-as-code/commit/843ca07fe1a799989fe892d0fd5d693625aecb50))
+
+
+### Bug Fixes
+
+* add codeql workflow with proper permissions ([05c4166](https://github.com/rafilkmp3/resume-as-code/commit/05c4166a67480f773c4908a3f28f4f76c629a3a3))
+* complete actionlint security compliance for deployment status workflow ([ab6c8ba](https://github.com/rafilkmp3/resume-as-code/commit/ab6c8bafe0147c07dd14489974cd82a77e3958e7))
+* make sharp module optional for development mode compatibility ([6018cdd](https://github.com/rafilkmp3/resume-as-code/commit/6018cdd2f81067f16203e880b4e53d8116060d8c))
+* remove custom codeql workflow to resolve default setup conflict ([2a767f4](https://github.com/rafilkmp3/resume-as-code/commit/2a767f459062bd245fbbde961db463a984d92984))
+* resolve social link hover contrast and improve contact icon centering ([bd532eb](https://github.com/rafilkmp3/resume-as-code/commit/bd532eb339d158fd2b4c62879532baaadbd7dbf7))
+
+
+### Continuous Integration
+
+* trigger conventional commits validation ([5f63390](https://github.com/rafilkmp3/resume-as-code/commit/5f63390f17c47b66bab93528a212d4d78795f521))
+
 ## [3.5.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.4.0...resume-as-code-v3.5.0) (2025-08-12)
 
 
