@@ -118,6 +118,64 @@ async function optimizeProfileImage(imagePath, resumeData, options = {}) {
   }
 }
 
+// Generate optimized QR code image files for reliable PDF embedding (like optimized images)
+async function generateQRCodeImages(url) {
+  try {
+    const QRCode = require('qrcode');
+    const fs = require('fs');
+    const sharp = require('sharp');
+    
+    // Ensure assets/images directory exists
+    const imagesDir = './dist/assets/images';
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+    }
+
+    const results = {};
+    const qrConfigs = [
+      { name: 'modal', size: 120, filename: 'qr-code-modal.png' },
+      { name: 'print', size: 80, filename: 'qr-code-print.png' }
+    ];
+
+    for (const config of qrConfigs) {
+      // Generate QR code as buffer (high quality)
+      const qrBuffer = await QRCode.toBuffer(url, {
+        width: config.size,
+        height: config.size,
+        margin: 1,
+        color: {
+          dark: '#2563eb',
+          light: '#FFFFFF'
+        },
+        type: 'png'
+      });
+
+      // Generate optimized PNG (PNG is more efficient for QR codes than WebP)
+      const pngPath = path.join(imagesDir, config.filename);
+      const pngOutput = await sharp(qrBuffer)
+        .png({ 
+          quality: 90,
+          compressionLevel: 9,
+          adaptiveFiltering: true,
+          palette: true  // Use palette mode for better compression on simple images
+        })
+        .toFile(pngPath);
+
+      const pngSizeKB = Math.round(pngOutput.size / 1024 * 10) / 10;
+      console.log(`   ✅ ${config.name} QR: ${pngSizeKB}KB PNG (${config.size}x${config.size}) - optimized for QR patterns`);
+      
+      results[`${config.name}Path`] = `assets/images/${config.filename}`;
+    }
+
+    console.log(`✅ Optimized QR codes generated for: ${url}`);
+    
+    return results;
+  } catch (error) {
+    console.warn('❌ QR code generation failed:', error.message);
+    return null;
+  }
+}
+
 // Generate HTML from template and data
 async function generateHTML(resumeData, templatePath, options = {}) {
   const isDraft = options.mode === 'draft' || process.env.BUILD_MODE === 'draft';
@@ -147,18 +205,24 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     resumeData.basics.image = 'assets/images/profile-mobile.jpg';
   }
 
-  // QR codes are now generated dynamically in the browser (much more efficient!)
-  // No need to embed 2.9KB base64 data in HTML anymore
-
-  // Enhance resume data with optimized images and QR code URL
+  // Generate QR codes at build time for reliable PDF embedding
   const qrCodeUrl = getQRCodeURL();
+  console.log(`📱 QR Code URL: ${qrCodeUrl}`);
+  
+  let qrCodeImages = null;
+  if (!isDraft) {
+    console.log('🔗 Generating QR code images for reliable PDF embedding...');
+    qrCodeImages = await generateQRCodeImages(qrCodeUrl);
+  }
+
+  // Enhance resume data with optimized images and QR code image paths
   const enhancedResumeData = {
     ...resumeData,
     profileImageOptimization,
-    qrCodeUrl: qrCodeUrl
+    qrCodeUrl: qrCodeUrl,
+    qrCodeModalImage: qrCodeImages?.modalPath || null,
+    qrCodePrintImage: qrCodeImages?.printPath || null
   };
-
-  console.log(`📱 QR Code URL: ${qrCodeUrl}`);
 
   // Generate HTML (QR codes will be generated dynamically in browser)
   let html = template(enhancedResumeData);
@@ -371,6 +435,11 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
 
+  // Wait for any QR codes to load from pre-generated base64 data
+  await page.waitForSelector('#print-qr-code', { timeout: 2000 }).catch(() => {
+    console.log('ℹ️  QR code element not found, continuing PDF generation');
+  });
+
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
     // Force light mode for PDF
@@ -393,6 +462,19 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
 
   // Set screen media type for full visual experience
   await page.emulateMediaType('screen');
+
+  // Suppress all console output during PDF generation to prevent text appearing in PDF
+  await page.evaluateOnNewDocument(() => {
+    const originalConsole = window.console;
+    window.console = {
+      ...originalConsole,
+      log: () => {},
+      warn: () => {},
+      error: () => {},
+      info: () => {},
+      debug: () => {}
+    };
+  });
 
   // Inject CSS to optimize for screen viewing with proper light mode and better spacing
   await page.addStyleTag({
@@ -510,6 +592,11 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
 
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // Wait for any QR codes to load from pre-generated base64 data
+  await page.waitForSelector('#print-qr-code', { timeout: 2000 }).catch(() => {
+    console.log('ℹ️  QR code element not found, continuing PDF generation');
+  });
 
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
