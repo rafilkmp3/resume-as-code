@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.6.0...resume-as-code-v3.6.1) (2025-08-15)
+
+
+### Bug Fixes
+
+* remove flawed dependabot management and redundant workflows ([00ec404](https://github.com/rafilkmp3/resume-as-code/commit/00ec404e7d9913aa24a798fc2575b01ad053f6a0))
+
+
+### Miscellaneous
+
+* remove unused hadolint configuration ([c29327b](https://github.com/rafilkmp3/resume-as-code/commit/c29327b8a669d913d07d968ba4fafc9a762b397f))
+* streamline pre-commit configuration and remove legacy pre-commit infrastructure ([0054d46](https://github.com/rafilkmp3/resume-as-code/commit/0054d46d8798c1f6e9c260f5e08051978024ce29))
+
 ## [3.6.0](https://github.com/rafilkmp3/resume-as-code/compare/resume-as-code-v3.5.0...resume-as-code-v3.6.0) (2025-08-14)
 
 
