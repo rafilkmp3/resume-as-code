@@ -4,11 +4,36 @@ name: 🎯 Performance & Quality Monitoring
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   schedule:
     # Run performance monitoring daily
     - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      run_all_tests:
+        description: 'Run all performance tests (full monitoring suite)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: performance-${{ github.ref }}
@@ -23,7 +48,7 @@ jobs:
   lighthouse-ci:
     name: 🚀 Lighthouse CI Performance
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -76,7 +101,7 @@ jobs:
   bundle-analysis:
     name: 📦 Bundle Size Analysis
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.inputs.run_all_tests == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -100,6 +125,7 @@ jobs:
   accessibility-audit:
     name: ♿ Accessibility Audit
     runs-on: ubuntu-latest
+    if: github.event.inputs.run_all_tests == 'true' || github.event_name == 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -145,7 +171,7 @@ jobs:
   core-web-vitals:
     name: 📊 Core Web Vitals
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v5

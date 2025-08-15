@@ -6,9 +6,22 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'package*.json'
+      - '.github/workflows/**'
+      - 'docker/**'
+      - 'Dockerfile*'
+      - 'scripts/**'
   schedule:
     # Run security scans daily at 2 AM UTC
     - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_full_security_suite:
+        description: 'Run full security scanning suite'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: security-${{ github.ref }}
@@ -72,7 +85,7 @@ jobs:
   container-security:
     name: 🐳 Container Security Scan
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (github.event.inputs.run_full_security_suite == 'true' || contains(github.event.head_commit.message, 'docker') || contains(github.event.head_commit.message, 'container'))
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -97,6 +110,7 @@ jobs:
   infrastructure-scan:
     name: 🏗️ Infrastructure Security Scan
     runs-on: ubuntu-latest
+    if: github.event.inputs.run_full_security_suite == 'true' || github.event_name == 'schedule' || contains(github.event.head_commit.message, 'infrastructure') || contains(github.event.head_commit.message, 'github-actions')
     steps:
       - name: Checkout
         uses: actions/checkout@v5
