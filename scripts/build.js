@@ -547,6 +547,21 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
       .load-more-btn, .experience-counter, .experience-controls,
       .skills-counter, .education-counter { display: none !important; }
 
+      /* Show QR code section for Screen PDF */
+      .print-qr-section {
+        display: block !important;
+        text-align: center !important;
+        margin-top: 1rem !important;
+        padding: 0.5rem !important;
+        page-break-inside: avoid !important;
+      }
+      .print-qr-code {
+        width: 80px !important;
+        height: 80px !important;
+        margin: 0 auto !important;
+        display: block !important;
+      }
+
       /* Ensure profile photo is visible and properly sized */
       .profile-photo {
         display: block !important;
@@ -680,9 +695,18 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
           page-break-after: auto !important;
         }
         /* QR code optimization for print */
+        .print-qr-section {
+          display: block !important;
+          text-align: center !important;
+          margin-top: 1rem !important;
+          padding: 0.5rem !important;
+          page-break-inside: avoid !important;
+        }
         .print-qr-code {
           width: 80px !important;
           height: 80px !important;
+          margin: 0 auto !important;
+          display: block !important;
         }
       }
     `
