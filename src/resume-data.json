@@ -13,7 +13,10 @@
       "region": "Brazil"
     },
     "nationality": "Brazilian",
-    "languages": ["Portuguese", "English"],
+    "languages": [
+      "Portuguese",
+      "English"
+    ],
     "profiles": [
       {
         "network": "LinkedIn",
@@ -254,7 +257,13 @@
     {
       "name": "☁️ Cloud Platforms & IaC",
       "level": "Expert",
-      "keywords": ["AWS", "GCP", "Terraform", "Ansible", "Helm"],
+      "keywords": [
+        "AWS",
+        "GCP",
+        "Terraform",
+        "Ansible",
+        "Helm"
+      ],
       "links": {
         "AWS": "https://aws.amazon.com/",
         "GCP": "https://cloud.google.com/",
@@ -334,7 +343,15 @@
     {
       "name": "💻 Programming & Scripting",
       "level": "Advanced",
-      "keywords": ["Python", "Bash", "Go", "JavaScript", "YAML", "HCL", "SQL"],
+      "keywords": [
+        "Python",
+        "Bash",
+        "Go",
+        "JavaScript",
+        "YAML",
+        "HCL",
+        "SQL"
+      ],
       "links": {
         "Python": "https://www.python.org/",
         "Bash": "https://www.gnu.org/software/bash/",
