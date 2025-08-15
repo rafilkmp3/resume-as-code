@@ -20,7 +20,7 @@ jobs:
   build-and-deploy:
     name: Build & Deploy Preview
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
     env:
       DOCKER_BUILDKIT: 1
@@ -213,7 +213,7 @@ jobs:
   preview-info:
     name: PR Preview Information
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     needs: build-and-deploy
 
     steps:
@@ -363,7 +363,7 @@ jobs:
   update-deployment-status:
     name: Update PR Deployment Status
     needs: build-and-deploy
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     uses: ./.github/workflows/shared-deployment-status.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
