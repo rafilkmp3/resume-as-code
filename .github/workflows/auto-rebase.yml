@@ -152,7 +152,9 @@ jobs:
               INVALID_COMMIT_FORMAT=false
               LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
 
-              if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
+              # Note: Dependabot uses proper conventional commit format: chore(deps):, chore(deps-dev):, ci:
+              # Only flag truly invalid patterns, not proper Dependabot commits
+              if [[ "$LATEST_COMMIT_MSG" =~ ^[a-z]+$ ]] || [[ "$LATEST_COMMIT_MSG" =~ ^[A-Z] ]] || [[ ! "$LATEST_COMMIT_MSG" =~ ^[a-z]+(\([a-z-]+\))?:\ .+ ]]; then
                 echo "❌ PR #$PR_NUMBER has INVALID conventional commit format: $LATEST_COMMIT_MSG"
                 INVALID_COMMIT_FORMAT=true
               fi
@@ -189,9 +191,9 @@ jobs:
               elif [ "$INVALID_COMMIT_FORMAT" = true ]; then
                 SHOULD_FORCE_RECREATE=true
                 REASON="has invalid conventional commit format"
-              elif [ "$PR_AGE_DAYS" -gt 7 ]; then
+              elif [ "$PR_AGE_DAYS" -gt 21 ]; then
                 SHOULD_FORCE_RECREATE=true
-                REASON="is older than 7 days (${PR_AGE_DAYS} days)"
+                REASON="is older than 21 days (${PR_AGE_DAYS} days)"
               fi
 
               if [ "$SHOULD_FORCE_RECREATE" = true ]; then
@@ -252,7 +254,7 @@ jobs:
             echo "   • CONFLICTING PRs: Force-closed for automatic recreation"
             echo "   • UNKNOWN status PRs: Force-closed for automatic recreation"  
             echo "   • Invalid commit format: Force-closed for recreation with correct format"
-            echo "   • Stale PRs (>7 days): Force-closed for recreation with latest dependencies"
+            echo "   • Stale PRs (>21 days): Force-closed for recreation with latest dependencies"
             echo "   • Valid PRs: Left unchanged"
             echo ""
             echo "⚡ Next execution: Daily at 9 AM UTC or on every push to main"
@@ -323,7 +325,9 @@ jobs:
 
             # Check for invalid format
             INVALID_FORMAT=false
-            if [[ "$LATEST_COMMIT_MSG" =~ ^deps\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-dev\( ]] || [[ "$LATEST_COMMIT_MSG" =~ ^deps-docker\( ]]; then
+            # Note: Dependabot uses proper conventional commit format: chore(deps):, chore(deps-dev):, ci:
+            # Only flag truly invalid patterns, not proper Dependabot commits
+            if [[ "$LATEST_COMMIT_MSG" =~ ^[a-z]+$ ]] || [[ "$LATEST_COMMIT_MSG" =~ ^[A-Z] ]] || [[ ! "$LATEST_COMMIT_MSG" =~ ^[a-z]+(\([a-z-]+\))?:\ .+ ]]; then
               INVALID_FORMAT=true
             fi
 
@@ -483,7 +487,7 @@ jobs:
           echo "- **CONFLICTING PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
           echo "- **UNKNOWN status PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
           echo "- **Invalid commit format**: Force-closed for recreation with correct format" >> $GITHUB_STEP_SUMMARY
-          echo "- **Stale PRs (>7 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stale PRs (>21 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
           echo "- **Valid PRs**: Left unchanged" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
