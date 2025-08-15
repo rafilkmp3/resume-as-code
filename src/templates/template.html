@@ -5989,7 +5989,7 @@ button.liquid-contact-card {
                             <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
                         </div>
                     </div>
-                    <div class="qr-code-url sf-text">{{basics.url}}</div>
+                    <div class="qr-code-url sf-text">{{qrCodeUrl}}</div>
                     <p class="qr-code-description sf-text">Scan to access resume online</p>
                 </div>
                 <div class="qr-modal-footer">
@@ -7257,7 +7257,7 @@ button.liquid-contact-card {
                 document.body.style.overflow = 'hidden';
 
                 // Generate QR code dynamically when modal opens (much more efficient!)
-                const resumeURL = '{{basics.url}}' || window.location.href;
+                const resumeURL = '{{qrCodeUrl}}' || window.location.href;
                 await generateQRCodeOnDemand(resumeURL);
 
                 // Analytics tracking
