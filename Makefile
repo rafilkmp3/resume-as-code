@@ -319,13 +319,13 @@ status:
 	else \
 		echo "  $(YELLOW)⚠️  Profile Image: Missing$(NC)"; \
 	fi
-	@if [ -f "resume-data.json" ]; then \
-		echo "  $(GREEN)✅ Resume Data: resume-data.json$(NC)"; \
+	@if [ -f "src/resume-data.json" ]; then \
+		echo "  $(GREEN)✅ Resume Data: src/resume-data.json$(NC)"; \
 	else \
 		echo "  $(RED)❌ Resume Data: Missing$(NC)"; \
 	fi
-	@if [ -f "templates/template.html" ]; then \
-		echo "  $(GREEN)✅ Template: templates/template.html$(NC)"; \
+	@if [ -f "src/templates/template.html" ]; then \
+		echo "  $(GREEN)✅ Template: src/templates/template.html$(NC)"; \
 	else \
 		echo "  $(RED)❌ Template: Missing$(NC)"; \
 	fi
