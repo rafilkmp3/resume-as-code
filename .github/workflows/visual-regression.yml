@@ -406,11 +406,7 @@ jobs:
             echo "Found screenshot: $SCREENSHOT"
             
             # Create optimized version - reduce quality and size for PR comments
-            convert "$SCREENSHOT" \
-              -resize 800x600> \
-              -quality 70 \
-              -strip \
-              ./visual-evidence/optimized-preview.jpg
+            convert "$SCREENSHOT" -resize 800x600\> -quality 70 -strip ./visual-evidence/optimized-preview.jpg
             
             # Check file size
             ORIGINAL_SIZE=$(stat -c%s "$SCREENSHOT" 2>/dev/null || stat -f%z "$SCREENSHOT")
