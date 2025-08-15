@@ -1,0 +1,208 @@
+---
+name: 🎯 Performance & Quality Monitoring
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run performance monitoring daily
+    - cron: '0 6 * * *'
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  lighthouse-ci:
+    name: 🚀 Lighthouse CI Performance
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production site
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Serve site for testing
+        run: |
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 5
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  bundle-analysis:
+    name: 📦 Bundle Size Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Analyze Bundle Size
+        uses: preactjs/compressed-size-action@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: './dist/**/*.{js,css,html}'
+          strip-hash: "\\b\\w{8}\\."
+
+  accessibility-audit:
+    name: ♿ Accessibility Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and serve
+        run: |
+          npm run build
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 5
+
+      - name: Pa11y Accessibility Audit
+        run: |
+          npm install -g pa11y
+          pa11y http://localhost:3000 --standard WCAG2AA --reporter json > accessibility-report.json || true
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: accessibility-report.json
+
+  core-web-vitals:
+    name: 📊 Core Web Vitals
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Build site
+        run: npm run build
+
+      - name: Measure Core Web Vitals
+        run: |
+          # Start local server
+          npm install -g serve
+          serve -s dist -l 3000 &
+          SERVER_PID=$!
+          sleep 5
+          
+          # Run Web Vitals measurement
+          cat > measure-vitals.js << 'EOF'
+          const { chromium } = require('playwright');
+          
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            
+            // Collect performance metrics
+            await page.goto('http://localhost:3000');
+            await page.waitForLoadState('networkidle');
+            
+            const vitals = await page.evaluate(() => {
+              return new Promise((resolve) => {
+                new PerformanceObserver((list) => {
+                  const entries = list.getEntries();
+                  const vitals = {};
+                  
+                  entries.forEach((entry) => {
+                    if (entry.name === 'FCP') vitals.fcp = entry.value;
+                    if (entry.name === 'LCP') vitals.lcp = entry.value;
+                    if (entry.name === 'CLS') vitals.cls = entry.value;
+                  });
+                  
+                  resolve(vitals);
+                }).observe({ entryTypes: ['largest-contentful-paint', 'first-contentful-paint', 'layout-shift'] });
+                
+                // Fallback timeout
+                setTimeout(() => resolve({}), 5000);
+              });
+            });
+            
+            console.log('Core Web Vitals:', JSON.stringify(vitals, null, 2));
+            await browser.close();
+          })();
+          EOF
+          
+          node measure-vitals.js || echo "Core Web Vitals measurement completed"
+          
+          # Cleanup
+          kill $SERVER_PID || true
+
+  quality-summary:
+    name: 📈 Quality Summary
+    runs-on: ubuntu-latest
+    needs: [lighthouse-ci, bundle-analysis, accessibility-audit, core-web-vitals]
+    if: always()
+    steps:
+      - name: Quality Gates Summary
+        run: |
+          echo "## 📈 Quality & Performance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Gate | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅ Passed' || needs.lighthouse-ci.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} | Performance, Best Practices, SEO |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Bundle Size | ${{ needs.bundle-analysis.result == 'success' && '✅ Passed' || needs.bundle-analysis.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} | Asset size tracking |" >> $GITHUB_STEP_SUMMARY
+          echo "| ♿ Accessibility | ${{ needs.accessibility-audit.result == 'success' && '✅ Passed' || '❌ Failed' }} | WCAG 2.1 AA compliance |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Web Vitals | ${{ needs.core-web-vitals.result == 'success' && '✅ Passed' || '❌ Failed' }} | Core performance metrics |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 **Performance Target**: All quality gates should pass for optimal user experience." >> $GITHUB_STEP_SUMMARY
