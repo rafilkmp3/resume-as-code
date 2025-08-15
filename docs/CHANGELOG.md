@@ -6,6 +6,6 @@ All notable changes to this project will be documented in this file.
 
 ## Recent Changes
 
-- feat: comprehensive infrastructure improvements - repository reorganization + release-please optimization (#42) (3a3a3a2)
+- fix: workflow improvements - concurrency groups and netlify optional deployment (8b29c57)
 
-*Last updated: 2025-08-15 06:02:17 BRT*
+*Last updated: 2025-08-15 06:17:34 BRT*
