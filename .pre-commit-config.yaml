@@ -31,10 +31,10 @@ repos:
         args:
           [
             '-c',
-            'npx ajv-cli validate -s resume-schema.json -d resume-data.json && echo "✅ resume-data passes validation"',
+            'npx ajv-cli validate -s config/resume-schema.json -d src/resume-data.json && echo "✅ resume-data passes validation"',
           ]
         language: system
-        files: resume-data\.json$
+        files: src/resume-data\.json$
         pass_filenames: false
 
   # npm audit (security without being annoying)

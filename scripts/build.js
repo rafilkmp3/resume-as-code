@@ -861,7 +861,7 @@ async function build(options = {}) {
         console.log(stdout);
         // Activate the new template
         if (fs.existsSync('template.html.new')) {
-          fs.renameSync('template.html.new', 'templates/template.html');
+          fs.renameSync('template.html.new', 'src/templates/template.html');
           console.log('✅ Component-based template activated');
         }
         resolve();
@@ -869,10 +869,10 @@ async function build(options = {}) {
     });
   });
 
-  const resumeData = JSON.parse(fs.readFileSync('./resume-data.json', 'utf8'));
+  const resumeData = JSON.parse(fs.readFileSync('./src/resume-data.json', 'utf8'));
 
   // Always run core build steps
-  await generateHTML(resumeData, './templates/template.html', { mode });
+  await generateHTML(resumeData, './src/templates/template.html', { mode });
 
   // Skip expensive PDF operations in draft mode (but keep QR code)
   if (isDraft) {

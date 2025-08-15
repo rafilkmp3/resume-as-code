@@ -1,0 +1,83 @@
+---
+name: 🧹 Stale Issues & PRs Management
+
+on:
+  schedule:
+    # Run daily at 1 AM UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: 🗂️ Stale Issues & PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stale Issue & PR Management
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Issue configuration
+          stale-issue-message: |
+            👋 This issue has been automatically marked as stale because it has not had recent activity.
+            
+            **Next Steps**:
+            - Add more details or context to keep it active
+            - Close if no longer relevant
+            - Assign to someone if work is planned
+            
+            It will be closed in 7 days if no further activity occurs. Thank you for your contributions! 🙏
+          
+          close-issue-message: |
+            🔒 This issue has been automatically closed due to inactivity.
+            
+            **Reopening**: If you believe this issue is still relevant, please:
+            - Add a comment with current context
+            - Reference any related work or discussions
+            - Provide steps to reproduce (for bugs)
+            
+            Thank you for your understanding! 💙
+          
+          # PR configuration  
+          stale-pr-message: |
+            👋 This pull request has been automatically marked as stale because it has not had recent activity.
+            
+            **Next Steps**:
+            - Rebase against the latest main branch
+            - Address any review feedback
+            - Add a comment with current status
+            
+            It will be closed in 7 days if no further activity occurs. Thank you for your contributions! 🙏
+          
+          close-pr-message: |
+            🔒 This pull request has been automatically closed due to inactivity.
+            
+            **Reopening**: If you'd like to continue this work, please:
+            - Open a new PR with updated changes
+            - Reference this PR in the description
+            - Ensure all tests are passing
+            
+            Thank you for your contributions! 💙
+          
+          # Timing configuration
+          days-before-stale: 30
+          days-before-close: 7
+          
+          # Label configuration
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          exempt-issue-labels: 'pinned,security,enhancement'
+          exempt-pr-labels: 'pinned,security,work-in-progress'
+          
+          # Processing limits
+          operations-per-run: 30
+          
+          # Activity detection
+          remove-stale-when-updated: true
+          
+          # Debugging
+          debug-only: false

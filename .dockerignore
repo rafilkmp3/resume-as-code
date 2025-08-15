@@ -156,8 +156,6 @@ docs/screenshots/
 !yarn.lock
 !config/
 !Makefile
-!resume-data.json
-!templates/
 !src/
 !assets/images/
 !scripts/build.js

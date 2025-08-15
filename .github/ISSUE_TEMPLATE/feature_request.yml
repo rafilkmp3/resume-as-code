@@ -1,0 +1,157 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "✨ [Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! 🎉
+        
+        Please help us understand your request by filling out this form.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: This is not a bug report (use the bug template instead)
+          required: true
+        - label: I have read the documentation
+          required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: ✨ Feature Description
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Describe the feature in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: 🎯 Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Describe the problem you're trying to solve:
+        - Is your feature request related to a problem?
+        - What's the current limitation?
+        - Who would benefit from this feature?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: |
+        Describe your proposed solution:
+        - How should it work?
+        - What should the user experience be like?
+        - Any specific implementation ideas?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Describe any alternative solutions or features you've considered
+      placeholder: |
+        What alternatives have you considered?
+        - Other approaches to solve the same problem
+        - Existing workarounds
+        - Why this solution is preferred
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 🏷️ Feature Type
+      description: What type of feature is this?
+      options:
+        - UI/UX Enhancement
+        - New Content Section
+        - Performance Improvement
+        - Accessibility Feature
+        - Build System Enhancement
+        - Documentation Improvement
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📈 Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my use case
+        - Critical - Blocking my usage
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🔧 Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple - Small change or addition
+        - Medium - Moderate development effort
+        - Complex - Significant development effort
+        - Unknown - Not sure
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 📋 Use Cases
+      description: Describe specific use cases for this feature
+      placeholder: |
+        Provide concrete examples of how this feature would be used:
+        - User scenario 1
+        - User scenario 2
+        - etc.
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: How would you know this feature is complete?
+      placeholder: |
+        Define what "done" looks like:
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 Mockups/Examples
+      description: If applicable, add mockups, sketches, or examples
+      placeholder: Drag and drop images here or paste links to examples
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Add any other context, references, or examples
+      placeholder: |
+        Any additional information:
+        - Related issues or discussions
+        - External references or examples
+        - Technical considerations
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        Thank you for your feature request! We'll review it and respond as soon as possible. 🚀

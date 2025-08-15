@@ -1,0 +1,340 @@
+# 🤖 Probot Configuration - Advanced GitHub App Automation
+# Enterprise-grade bot behaviors for repository management
+# Optimized for Rio de Janeiro (BRT) timezone workflows
+
+# 🏷️ Auto-assign labels based on file patterns and conventional commits
+autolabeler:
+  enable: true
+  rules:
+    # Conventional commit type mapping
+    'type: feature':
+      - 'feat:'
+      - 'feature:'
+    'type: bugfix':
+      - 'fix:'
+      - 'bug:'
+    'type: documentation':
+      - 'docs:'
+      - 'documentation:'
+    'type: maintenance':
+      - 'chore:'
+      - 'maintenance:'
+    'type: ci/cd':
+      - 'ci:'
+      - 'workflow:'
+    'type: styling':
+      - 'style:'
+      - 'format:'
+    'type: performance':
+      - 'perf:'
+      - 'performance:'
+    'type: refactoring':
+      - 'refactor:'
+    'type: testing':
+      - 'test:'
+    
+    # File-based classification
+    'area: frontend':
+      - '**/*.html'
+      - '**/*.css'
+      - 'src/templates/**'
+    'area: backend':
+      - 'scripts/**'
+      - 'server/**'
+    'area: ci/cd':
+      - '.github/workflows/**'
+      - '.github/actions/**'
+    'area: documentation':
+      - '**/*.md'
+      - 'docs/**'
+    'area: dependencies':
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/dependabot.yml'
+    'area: docker':
+      - '**/Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+    
+    # Size classification
+    'size: small':
+      files: '1..3'
+    'size: medium':
+      files: '4..10'
+    'size: large':
+      files: '11..50'
+    'size: huge':
+      files: '51..'
+
+# 🔄 Auto-merge configuration for trusted bots
+automerge:
+  enable: true
+  rules:
+    # Dependabot auto-merge for minor/patch updates
+    - author: 'dependabot[bot]'
+      title: 'chore(deps): bump *'
+      checks: 'required'
+      merge_method: 'squash'
+      delay: 300  # 5 minutes delay for checks to complete
+      
+    # GitHub Actions auto-merge for patch updates  
+    - author: 'github-actions[bot]'
+      title: 'ci: *'
+      checks: 'required'
+      merge_method: 'squash'
+      delay: 180  # 3 minutes delay
+      
+    # Release-please auto-merge
+    - author: 'github-actions[bot]'
+      title: 'chore(release): *'
+      checks: 'required'
+      merge_method: 'merge'  # Preserve release history
+      delay: 600  # 10 minutes for thorough validation
+
+# 📝 Auto-comment on specific events
+autocomment:
+  enable: true
+  templates:
+    # Welcome new contributors
+    first_time_contributor: |
+      ## 🎉 Welcome to Resume as Code!
+      
+      Thank you for your first contribution! 🚀
+      
+      ### 📋 Checklist for your PR:
+      - [ ] Follows [conventional commit](https://www.conventionalcommits.org/) format
+      - [ ] Includes appropriate tests if applicable
+      - [ ] Documentation updated if needed
+      - [ ] PR description explains the changes
+      
+      ### 🚀 What happens next:
+      - Automated checks will run (CodeQL, tests, build validation)
+      - A maintainer will review your changes
+      - Once approved, your contribution will be merged! 
+      
+      Thank you for helping improve this project! 🙏
+      
+      *Posted at {{ now | date: "%Y-%m-%d %H:%M:%S" }} BRT*
+    
+    # Large PR warning
+    large_pr: |
+      ## 📏 Large PR Detected
+      
+      This PR modifies **{{ pr.changed_files }}** files with **{{ pr.additions }}** additions and **{{ pr.deletions }}** deletions.
+      
+      ### 🔍 Consider:
+      - Breaking this into smaller, focused PRs
+      - Adding detailed description explaining the scope
+      - Ensuring comprehensive test coverage
+      - Requesting additional reviewers for complex changes
+      
+      Large PRs take longer to review and merge. Consider splitting if possible! 🎯
+    
+    # Stale PR reminder
+    stale_pr: |
+      ## ⏰ Stale PR Reminder
+      
+      This PR has been inactive for 7+ days.
+      
+      ### 🔄 Next steps:
+      - **Rebase** if there are conflicts with main
+      - **Address feedback** from reviewers  
+      - **Request review** if ready to merge
+      - **Close** if no longer needed
+      
+      PRs inactive for 14+ days will be automatically closed.
+      
+      *Reminder sent at {{ now | date: "%Y-%m-%d %H:%M:%S" }} BRT*
+
+# 🎯 Intelligent PR assignment
+assignment:
+  enable: true
+  rules:
+    # Auto-assign based on file patterns
+    'scripts/**':
+      - 'rafilkmp3'
+    '.github/**':
+      - 'rafilkmp3'
+    'src/**':
+      - 'rafilkmp3'
+    'docs/**':
+      - 'rafilkmp3'
+    
+    # Fallback assignment
+    '*':
+      - 'rafilkmp3'
+
+# 🚫 Branch protection rules
+branch_protection:
+  enable: true
+  rules:
+    main:
+      required_status_checks:
+        strict: true
+        contexts:
+          - 'Conventional Commits'
+          - 'Build'
+          - 'Tests'
+      enforce_admins: false
+      required_pull_request_reviews:
+        required_approving_review_count: 0  # Personal project
+        dismiss_stale_reviews: false
+        require_code_owner_reviews: false
+      restrictions: null
+
+# 📊 Issue and PR templates auto-population
+templates:
+  enable: true
+  issue_template: |
+    **Describe the issue:**
+    
+    
+    **Steps to reproduce:**
+    1. 
+    2. 
+    3. 
+    
+    **Expected behavior:**
+    
+    
+    **Additional context:**
+    
+    
+    ---
+    *Issue created at {{ now | date: "%Y-%m-%d %H:%M:%S" }} BRT*
+  
+  pr_template: |
+    ## 📝 Description
+    
+    Brief description of changes...
+    
+    ## 🔗 Related Issues
+    
+    Closes #issue_number
+    
+    ## 🧪 Testing
+    
+    - [ ] Build passes
+    - [ ] Tests pass
+    - [ ] Manual testing completed
+    
+    ## 📸 Screenshots (if applicable)
+    
+    
+    ## ✅ Checklist
+    
+    - [ ] Conventional commit format used
+    - [ ] Documentation updated
+    - [ ] Tests added/updated
+    - [ ] Ready for review
+    
+    ---
+    *PR created at {{ now | date: "%Y-%m-%d %H:%M:%S" }} BRT*
+
+# 🔔 Notification preferences optimized for BRT
+notifications:
+  timezone: 'America/Sao_Paulo'
+  quiet_hours:
+    start: '22:00'  # 10 PM BRT
+    end: '07:00'    # 7 AM BRT
+  working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+  
+# 🎨 Custom commands for maintainers
+commands:
+  enable: true
+  commands:
+    # Quick rerun of failed checks
+    '/rerun':
+      description: 'Rerun failed CI checks'
+      action: 'rerun_failed_checks'
+    
+    # Manual label assignment
+    '/label <labels>':
+      description: 'Add labels to issue/PR'
+      action: 'add_labels'
+    
+    # Quick merge for maintainers
+    '/merge':
+      description: 'Merge PR after checks pass'
+      action: 'auto_merge'
+      permissions: ['admin', 'maintain']
+    
+    # Release preparation
+    '/release':
+      description: 'Prepare for release'
+      action: 'prepare_release'
+      permissions: ['admin']
+
+# 🚀 Advanced automation features
+advanced:
+  # Auto-update PR descriptions with checklist completion
+  smart_descriptions: true
+  
+  # Automatically request reviews based on CODEOWNERS
+  auto_review_requests: true
+  
+  # Link related issues and PRs automatically
+  smart_linking: true
+  
+  # Performance budget warnings
+  performance_budgets:
+    bundle_size_mb: 1
+    build_time_minutes: 5
+    test_time_minutes: 10
+
+# 📈 Analytics and insights
+analytics:
+  enable: true
+  metrics:
+    - 'pr_merge_time'
+    - 'issue_resolution_time'
+    - 'contributor_activity'
+    - 'automation_efficiency'
+  
+  reporting:
+    frequency: 'weekly'
+    day: 'sunday'
+    time: '09:00'  # 9 AM BRT
+    format: 'markdown'
+
+# 🔒 Security and compliance
+security:
+  # Scan for secrets in PRs
+  secret_scanning: true
+  
+  # Validate dependency licenses
+  license_compliance: true
+  
+  # Check for security advisories
+  vulnerability_alerts: true
+  
+  # Enforce branch protection
+  enforce_protection: true
+
+# 🌟 ENTERPRISE GITHUB APP CONFIGURATION SUMMARY
+#
+# 🤖 Advanced Bot Behaviors:
+# - Intelligent auto-labeling based on files and commits
+# - Smart auto-merge for trusted bots with delays
+# - Contextual auto-comments for different scenarios
+# - Automated PR assignment and branch protection
+#
+# 📅 BRT Timezone Optimization:
+# - Quiet hours: 10 PM - 7 AM BRT
+# - Working days: Monday - Friday
+# - Weekly analytics: Sunday 9 AM BRT
+# - All timestamps in Brazil timezone
+#
+# 🎯 Enterprise Features:
+# - Performance budget monitoring
+# - Security scanning and compliance
+# - Advanced analytics and reporting
+# - Custom maintainer commands
+# - Smart linking and descriptions
+#
+# 💡 Benefits:
+# - Reduces manual repository management overhead
+# - Ensures consistent labeling and organization
+# - Automates routine tasks with intelligent delays
+# - Provides comprehensive automation insights
+# - Optimized for Brazilian developer workflow

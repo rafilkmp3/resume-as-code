@@ -225,8 +225,10 @@ This is a **resume generation system** built with infrastructure-as-code princip
 │   └── *.spec.js         # Playwright E2E tests
 ├── assets/               # Static assets (images, etc.)
 ├── dist/                 # Build output (HTML, PDF, assets)
-├── resume-data.json      # Resume content data
-├── template.html         # Handlebars template
+├── src/
+│   ├── resume-data.json  # Resume content data
+│   └── templates/
+│       └── template.html # Handlebars template
 └── Makefile             # Developer experience automation
 ```
 
