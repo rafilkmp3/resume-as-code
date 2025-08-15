@@ -390,26 +390,52 @@ jobs:
           name: visual-evidence-quick
           path: ./visual-evidence
       
+      - name: Install image optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+      
+      - name: Optimize and compress screenshot
+        run: |
+          # Find the screenshot
+          SCREENSHOT=$(find ./visual-evidence -name "*.png" | head -1)
+          
+          if [ -n "$SCREENSHOT" ]; then
+            echo "Found screenshot: $SCREENSHOT"
+            
+            # Create optimized version - reduce quality and size for PR comments
+            convert "$SCREENSHOT" \
+              -resize 800x600> \
+              -quality 70 \
+              -strip \
+              ./visual-evidence/optimized-preview.jpg
+            
+            # Check file size
+            ORIGINAL_SIZE=$(stat -c%s "$SCREENSHOT" 2>/dev/null || stat -f%z "$SCREENSHOT")
+            OPTIMIZED_SIZE=$(stat -c%s ./visual-evidence/optimized-preview.jpg 2>/dev/null || stat -f%z ./visual-evidence/optimized-preview.jpg)
+            
+            echo "Original size: $ORIGINAL_SIZE bytes"
+            echo "Optimized size: $OPTIMIZED_SIZE bytes"
+            echo "SCREENSHOT_PATH=$SCREENSHOT" >> $GITHUB_ENV
+            echo "OPTIMIZED_SIZE=$OPTIMIZED_SIZE" >> $GITHUB_ENV
+          else
+            echo "No screenshot found"
+            echo "SCREENSHOT_PATH=" >> $GITHUB_ENV
+          fi
+      
       - name: Post visual evidence to PR
         uses: actions/github-script@v7
+        env:
+          SCREENSHOT_PATH: ${{ env.SCREENSHOT_PATH }}
+          OPTIMIZED_SIZE: ${{ env.OPTIMIZED_SIZE }}
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
             
             const prNumber = context.payload.pull_request.number;
-            
-            // Find the first screenshot to post
-            const evidenceDir = './visual-evidence';
-            let screenshotPath = null;
-            
-            if (fs.existsSync(evidenceDir)) {
-              const files = fs.readdirSync(evidenceDir, { recursive: true });
-              screenshotPath = files.find(file => 
-                file.endsWith('.png') && 
-                (file.includes('desktop') || file.includes('chromium'))
-              );
-            }
+            const screenshotPath = process.env.SCREENSHOT_PATH;
+            const optimizedSize = parseInt(process.env.OPTIMIZED_SIZE || '0');
             
             let commentBody = `## 📸 Visual Regression Test Results
             
@@ -417,27 +443,57 @@ jobs:
             
             `;
             
-            if (screenshotPath) {
-              const fullPath = path.join(evidenceDir, screenshotPath);
-              const imageBuffer = fs.readFileSync(fullPath);
-              const imageBase64 = imageBuffer.toString('base64');
-              
-              commentBody += `### Screenshot Preview
-              
-              ![Visual Test Result](data:image/png;base64,${imageBase64})
-              
-              `;
+            // Only embed image if optimized version is small enough (< 40KB base64 ≈ 30KB file)
+            if (screenshotPath && optimizedSize > 0 && optimizedSize < 30000) {
+              try {
+                const optimizedPath = './visual-evidence/optimized-preview.jpg';
+                if (fs.existsSync(optimizedPath)) {
+                  const imageBuffer = fs.readFileSync(optimizedPath);
+                  const imageBase64 = imageBuffer.toString('base64');
+                  
+                  // Double-check base64 size (GitHub limit is 65536 chars total)
+                  if (imageBase64.length < 40000) {
+                    commentBody += `### 📸 Screenshot Preview
+            
+            ![Visual Test Result](data:image/jpeg;base64,${imageBase64})
+            
+            *Optimized for PR comment (${Math.round(optimizedSize/1024)}KB)*
+            
+            `;
+                  } else {
+                    commentBody += `### 📸 Screenshot Available
+            
+            Screenshot too large for inline display. Download the artifact below for full resolution.
+            
+            `;
+                  }
+                }
+              } catch (error) {
+                console.log('Error processing screenshot:', error.message);
+                commentBody += `### 📸 Screenshot Available
+            
+            Screenshot processing error. Download the artifact below for full resolution.
+            
+            `;
+              }
+            } else {
+              commentBody += `### 📸 Screenshot Available
+            
+            Screenshot available in artifact (size: ${Math.round(optimizedSize/1024)}KB). Download below for full resolution.
+            
+            `;
             }
             
             commentBody += `### 📊 Test Summary
             
             - ✅ **Browser**: Chromium (Latest)
-            - ✅ **Viewport**: Desktop (1280x720)  
+            - ✅ **Viewport**: Desktop (1920x1080)  
             - ✅ **Theme**: Light Mode
             - 📁 **Full Evidence**: Download \`visual-evidence-quick\` artifact
+            - 🔗 **Workflow**: [View Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
             
             ---
-            *Visual regression test completed successfully. Download the full artifact for detailed analysis.*`;
+            *Visual regression test completed successfully. Download the artifact for full resolution screenshots.*`;
             
             // Check if we already have a visual regression comment
             const comments = await github.rest.issues.listComments({
