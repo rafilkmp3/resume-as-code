@@ -40,7 +40,7 @@ jobs:
         run: npm audit --audit-level=moderate
 
       - name: OSV Scanner (Google)
-        uses: google/osv-scanner-action@v1
+        uses: google/osv-scanner-action@v2.0.0
         with:
           scan-args: |-
             -r
@@ -74,7 +74,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t resume-security-scan:${{ github.sha }} .
+          docker build -f docker/Dockerfile -t resume-security-scan:${{ github.sha }} .
 
       - name: Trivy Container Scan
         uses: aquasecurity/trivy-action@master

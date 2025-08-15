@@ -48,14 +48,30 @@ jobs:
         run: |
           npm install -g serve
           serve -s dist -l 3000 &
-          sleep 5
+          SERVER_PID=$!
+          echo "Started server with PID: $SERVER_PID"
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
+          
+          # Final verification
+          curl -f http://localhost:3000 || (echo "❌ Server failed to start" && exit 1)
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
+          artifactName: lighthouse-results
 
   bundle-analysis:
     name: 📦 Bundle Size Analysis
@@ -102,7 +118,18 @@ jobs:
           npm run build
           npm install -g serve
           serve -s dist -l 3000 &
-          sleep 5
+          SERVER_PID=$!
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
 
       - name: Pa11y Accessibility Audit
         run: |
@@ -144,7 +171,17 @@ jobs:
           npm install -g serve
           serve -s dist -l 3000 &
           SERVER_PID=$!
-          sleep 5
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
           
           # Run Web Vitals measurement
           cat > measure-vitals.js << 'EOF'
