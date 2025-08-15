@@ -39,13 +39,18 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=moderate
 
-      - name: OSV Scanner (Google)
-        uses: google/osv-scanner-action@v2.0.0
-        with:
-          scan-args: |-
-            -r
-            --skip-git
-            ./
+  osv-scanner:
+    name: 🔎 OSV Security Scanner
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.1
+    with:
+      scan-args: |-
+        -r
+        --skip-git
+        ./
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
   secret-scan:
     name: 🔐 Secret Detection
@@ -115,7 +120,7 @@ jobs:
   security-summary:
     name: 📊 Security Summary
     runs-on: ubuntu-latest
-    needs: [dependency-security, secret-scan, container-security, infrastructure-scan]
+    needs: [dependency-security, osv-scanner, secret-scan, container-security, infrastructure-scan]
     if: always()
     steps:
       - name: Security Summary
@@ -124,7 +129,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Scan Type | Status | Details |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Dependencies | ${{ needs.dependency-security.result == 'success' && '✅ Passed' || '❌ Failed' }} | NPM audit + OSV Scanner |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Dependencies | ${{ needs.dependency-security.result == 'success' && '✅ Passed' || '❌ Failed' }} | NPM audit |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔎 OSV Scanner | ${{ needs.osv-scanner.result == 'success' && '✅ Passed' || '❌ Failed' }} | Google OSV vulnerability database |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔐 Secrets | ${{ needs.secret-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} | TruffleHog Scanner |" >> $GITHUB_STEP_SUMMARY
           echo "| 🐳 Container | ${{ needs.container-security.result == 'success' && '✅ Passed' || '❌ Failed' }} | Trivy Security Scanner |" >> $GITHUB_STEP_SUMMARY
           echo "| 🏗️ Infrastructure | ${{ needs.infrastructure-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} | Checkov Policy Scanner |" >> $GITHUB_STEP_SUMMARY

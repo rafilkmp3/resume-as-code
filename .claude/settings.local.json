@@ -211,7 +211,8 @@
       "Bash(do if ! grep -q \"concurrency:\" \"$f\")",
       "Bash(then echo \"$f\")",
       "Bash(fi)",
-      "Bash(done)"
+      "Bash(done)",
+      "WebFetch(domain:google.github.io)"
     ],
     "deny": []
   }
