@@ -2,9 +2,9 @@
 name: Deployment Notifications
 
 on:
-  # Trigger after successful GitHub Pages deployment
+  # Trigger after successful Netlify staging deployment
   workflow_run:
-    workflows: ["Production Pipeline"]
+    workflows: ["Staging Pipeline"]
     types: [completed]
     branches: [main]
   # Manual trigger for notifications
@@ -46,15 +46,15 @@ jobs:
           # Get current version
           CURRENT_VERSION=$(node -p "require('./package.json').version" || echo "unknown")
 
-          # GitHub Pages URL
-          PAGES_URL="https://rafilkmp3.github.io/resume-as-code/"
+          # Netlify Staging URL
+          STAGING_URL="https://resume-as-code.netlify.app/"
 
           # Export variables
           echo "commit-sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
           echo "commit-message=${COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
           echo "commit-author=${COMMIT_AUTHOR}" >> $GITHUB_OUTPUT
           echo "current-version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
-          echo "pages-url=${PAGES_URL}" >> $GITHUB_OUTPUT
+          echo "staging-url=${STAGING_URL}" >> $GITHUB_OUTPUT
 
           # Log for debugging
           echo "📋 Deployment Info:"
@@ -62,7 +62,7 @@ jobs:
           echo "  Message: ${COMMIT_MESSAGE}"
           echo "  Author: ${COMMIT_AUTHOR}"
           echo "  Version: ${CURRENT_VERSION}"
-          echo "  Pages URL: ${PAGES_URL}"
+          echo "  Staging URL: ${STAGING_URL}"
 
       - name: Create deployment notification
         uses: actions/github-script@v7
@@ -71,83 +71,88 @@ jobs:
           COMMIT_MESSAGE: ${{ steps.deploy-info.outputs.commit-message }}
           COMMIT_AUTHOR: ${{ steps.deploy-info.outputs.commit-author }}
           CURRENT_VERSION: ${{ steps.deploy-info.outputs.current-version }}
-          PAGES_URL: ${{ steps.deploy-info.outputs.pages-url }}
+          STAGING_URL: ${{ steps.deploy-info.outputs.staging-url }}
         with:
           script: |
             const commitSha = process.env.COMMIT_SHA;
             const commitMessage = process.env.COMMIT_MESSAGE;
             const commitAuthor = process.env.COMMIT_AUTHOR;
             const currentVersion = process.env.CURRENT_VERSION;
-            const pagesUrl = process.env.PAGES_URL;
+            const stagingUrl = process.env.STAGING_URL;
 
             const shortSha = commitSha.substring(0, 7);
             const timestamp = new Date().toISOString();
 
-            // Create deployment notification as issue comment or discussion
-            const deploymentBody = `# 🚀 Deployment Notification
+            // Create staging deployment notification
+            const deploymentBody = `# 🚀 Staging Deployment Notification
 
-            **Status**: ✅ **DEPLOYED SUCCESSFULLY**
-            **Environment**: Production (GitHub Pages)
+            **Status**: ✅ **DEPLOYED TO STAGING**
+            **Environment**: Staging (Netlify)
             **Version**: \`${currentVersion}\`
             **Timestamp**: ${timestamp}
 
-            ## 📊 Deployment Details
+            ## 📊 Staging Deployment Details
 
-            - **URL**: [${pagesUrl}](${pagesUrl})
+            - **URL**: [${stagingUrl}](${stagingUrl})
             - **Commit**: [\`${shortSha}\`](${context.payload.repository.html_url}/commit/${commitSha})
             - **Author**: ${commitAuthor}
             - **Message**: ${commitMessage}
 
-            ## 🔗 Access Points
+            ## 🔗 Staging Access Points
 
-            - 🌐 **Live Resume**: [${pagesUrl}](${pagesUrl})
-            - 📱 **PDF Downloads**: [${pagesUrl}](${pagesUrl}) (Screen/Print/ATS versions)
-            - 🎯 **QR Code**: Points to live site version
-            - 📊 **Analytics**: Available in production build
+            - 🌐 **Staging Site**: [${stagingUrl}](${stagingUrl})
+            - 📱 **PDF Downloads**: [${stagingUrl}](${stagingUrl}) (Screen/Print/ATS versions)
+            - 🎯 **QR Code**: Points to staging environment
+            - 🧪 **Testing**: Ready for validation before production release
 
-            ## 📦 Build Strategy
+            ## 📦 Three-Tier Deployment Pipeline
 
-            **GitHub Pages**: Production builds (unlimited)
-            **Netlify**: PR previews only (conserves 300 build minutes/month)
+            **🔀 PR Preview**: Netlify deploy previews for pull requests
+            **🚀 Staging**: Netlify main site for staging validation
+            **🌟 Production**: GitHub Pages for final production releases
 
-            **Benefits**:
-            - ✅ Unlimited builds on GitHub Actions
-            - ✅ Netlify build minutes conserved
-            - ✅ Cost-effective hosting strategy
-            - ✅ Automatic deployment notifications
+            **Current Status**:
+            - ✅ Main branch changes deployed to staging
+            - 🔄 Ready for testing and validation
+            - 📋 Create release to deploy to production
 
             ---
-            *🤖 Automated deployment notification from GitHub Actions*`;
+            *🤖 Automated staging notification from GitHub Actions*`;
 
-            console.log('📢 Deployment notification created successfully');
-            console.log(`🌐 Deployed to: ${pagesUrl}`);
+            console.log('📢 Staging deployment notification created successfully');
+            console.log(`🌐 Deployed to staging: ${stagingUrl}`);
 
             // Log the notification for pipeline summary
-            core.summary.addHeading('🚀 Deployment Notification Sent', 2);
+            core.summary.addHeading('🚀 Staging Deployment Notification Sent', 2);
             core.summary.addRaw(`
-            **Status**: ✅ Deployed Successfully
-            **URL**: [${pagesUrl}](${pagesUrl})
+            **Status**: ✅ Deployed to Staging
+            **URL**: [${stagingUrl}](${stagingUrl})
             **Version**: ${currentVersion}
             **Commit**: ${shortSha}
             `);
             await core.summary.write();
 
-      - name: Deployment strategy summary
+      - name: Three-tier deployment strategy summary
         run: |
-          echo "## 🎯 Optimized Build Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Three-Tier Deployment Pipeline" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔀 PR Preview (Netlify)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **Purpose**: Pull request preview deployments" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 **URL Pattern**: deploy-preview-[PR]--resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Trigger**: Opening/updating pull requests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Staging (Netlify)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **URL**: https://resume-as-code.netlify.app/" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Trigger**: Merge to main branch" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 **Purpose**: Staging validation before production" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌟 Production (GitHub Pages)" >> $GITHUB_STEP_SUMMARY
           echo "- 🚀 **URL**: https://rafilkmp3.github.io/resume-as-code/" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 **Trigger**: Published releases" >> $GITHUB_STEP_SUMMARY
           echo "- 📦 **Builds**: Unlimited via GitHub Actions" >> $GITHUB_STEP_SUMMARY
-          echo "- 💰 **Cost**: Free for public repos" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Netlify (PR Previews Only)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 **Purpose**: PR preview deployments" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 **Build Minutes**: Conserved (300/month limit)" >> $GITHUB_STEP_SUMMARY
-          echo "- 💰 **Strategy**: Only preview builds, no production" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Strategy Benefits" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Netlify build minutes preserved for PR previews" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GitHub Actions handles all production builds" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Reliable production deployment via GitHub Pages" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Cost-effective and sustainable hosting model" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Pipeline Benefits" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Complete testing pipeline: PR → Staging → Production" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Netlify build minutes optimized (preview + staging only)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Production reliability via GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Automated release management with release-please" >> $GITHUB_STEP_SUMMARY
