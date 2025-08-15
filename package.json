@@ -34,7 +34,7 @@
     "@google-analytics/data": "^5.2.0",
     "canvas": "^3.1.2",
     "handlebars": "^4.7.8",
-    "puppeteer": "^24.16.0",
+    "puppeteer": "^24.16.2",
     "qrcode": "^1.5.4",
     "sharp": "^0.34.3"
   },
