@@ -7,6 +7,10 @@ on:
     - cron: '0 1 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: stale-management
+  cancel-in-progress: true
+
 permissions:
   issues: write
   pull-requests: write

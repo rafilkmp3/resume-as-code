@@ -19,6 +19,10 @@ on:
           - deployment
           - status-check
 
+concurrency:
+  group: deploy-notifications-${{ github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   deployment-notifications:
     name: Send Deployment Notifications

@@ -16,8 +16,8 @@ updates:
     open-pull-requests-limit: 4
     rebase-strategy: 'auto'
     commit-message:
-      prefix: 'chore(deps):'
-      prefix-development: 'chore(deps-dev):'
+      prefix: 'chore'
+      prefix-development: 'chore'
       include: 'scope'
     reviewers:
       - 'rafilkmp3'
