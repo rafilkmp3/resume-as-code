@@ -23,24 +23,17 @@ function getQRCodeURL() {
     console.log('  HEAD:', process.env.HEAD || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
     console.log('  BRANCH:', process.env.BRANCH || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
     console.log('  CONTEXT:', process.env.CONTEXT || (process.env.NETLIFY ? 'deploy-preview' : 'local'));
-    console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL || 'none');
     console.log('  DEPLOY_URL:', process.env.DEPLOY_URL || 'none');
     console.log('  URL:', process.env.URL || 'none');
     console.log('  NODE_ENV:', process.env.NODE_ENV || 'development');
     console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES || 'false');
 
     // Netlify environment (check first as it has highest priority for previews)
-    // Netlify sets NETLIFY=true for all deployments
+    // Since we build in GitHub Actions, we set DEPLOY_URL directly
     if (process.env.NETLIFY === 'true' || process.env.NETLIFY_ENV) {
-      // Use Netlify's DEPLOY_PRIME_URL if available (most reliable)
-      if (process.env.DEPLOY_PRIME_URL) {
-        console.log('🌐 Using DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
-        return process.env.DEPLOY_PRIME_URL;
-      }
-
-      // Try DEPLOY_URL as fallback
+      // Use GitHub Actions-provided DEPLOY_URL
       if (process.env.DEPLOY_URL) {
-        console.log('🌐 Using DEPLOY_URL:', process.env.DEPLOY_URL);
+        console.log('🌐 Using GitHub Actions DEPLOY_URL:', process.env.DEPLOY_URL);
         return process.env.DEPLOY_URL;
       }
 
@@ -209,7 +202,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // PR-specific information for preview environments
   const prNumber = process.env.REVIEW_ID || process.env.PR_NUMBER || '';
-  const deployUrl = process.env.DEPLOY_PRIME_URL || process.env.DEPLOY_URL || qrCodeUrl;
+  const deployUrl = process.env.DEPLOY_URL || qrCodeUrl;
 
   console.log('📊 Enhanced Version Information:');
   console.log(`  App Version: ${appVersion}`);

@@ -32,9 +32,7 @@ jobs:
       HEAD: ${{ github.event.pull_request.head.ref }}
       BRANCH: ${{ github.event.pull_request.head.ref }}
       CONTEXT: 'deploy-preview'
-      DEPLOY_PRIME_URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
       DEPLOY_URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
-      URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
       NODE_ENV: 'preview'
       GITHUB_PAGES: 'false'
 
@@ -125,7 +123,6 @@ jobs:
             --build-arg NETLIFY_ENV=deploy-preview \
             --build-arg CONTEXT=deploy-preview \
             --build-arg DEPLOY_URL="${DEPLOY_URL}" \
-            --build-arg DEPLOY_PRIME_URL="${DEPLOY_PRIME_URL}" \
             --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \

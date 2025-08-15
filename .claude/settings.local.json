@@ -212,7 +212,8 @@
       "Bash(then echo \"$f\")",
       "Bash(fi)",
       "Bash(done)",
-      "WebFetch(domain:google.github.io)"
+      "WebFetch(domain:google.github.io)",
+      "Bash(gh pr edit:*)"
     ],
     "deny": []
   }
