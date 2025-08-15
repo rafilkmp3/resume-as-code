@@ -16,6 +16,12 @@
 [![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
 [![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
 
+# Resume as Code
+
+[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
+[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
+[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
+
 # 🚀 Resume as Code
 
 **Modern Resume Generation System with Enterprise-Grade CI/CD Pipeline**
