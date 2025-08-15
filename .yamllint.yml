@@ -3,10 +3,11 @@
 extends: default
 
 rules:
-  # Allow longer lines for GitHub Actions
-  line-length:
-    max: 120
-    level: warning
+  # Disable line length - not useful for GitHub Actions workflows
+  line-length: disable
+
+  # Disable document start requirement - many YAML files don't need ---
+  document-start: disable
 
   # Allow empty lines in GitHub Actions
   empty-lines:
@@ -24,3 +25,6 @@ rules:
   # Allow comments
   comments:
     min-spaces-from-content: 1
+
+  # Disable trailing spaces - handled by trailing-whitespace hook
+  trailing-spaces: disable

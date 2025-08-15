@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Setup GitHub CLI and Git Config  
+      - name: Setup GitHub CLI and Git Config
         run: |
           gh auth setup-git
 
@@ -44,7 +44,7 @@ jobs:
           git config --global user.name "resume-pipeline-bot[bot]"
           git config --global user.email "noreply@github.com"
           git config --global init.defaultBranch main
-          
+
           # Suppress git hints to reduce warnings
           git config --global advice.defaultBranchName false
           git config --global advice.detachedHead false
@@ -57,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "🛡️ Resilient Dependabot PR management with exponential backoff and circuit breaker..."
-          
+
           # Circuit breaker and retry configuration
           MAX_ATTEMPTS=5
           BASE_DELAY=3
@@ -65,7 +65,7 @@ jobs:
           CONSECUTIVE_FAILURES=0
           TOTAL_PROCESSED=0
           SUCCESSFUL_OPERATIONS=0
-          
+
           # GitHub API health check with retry
           echo "🔍 Checking GitHub API health..."
           API_HEALTHY=false
@@ -81,7 +81,7 @@ jobs:
               fi
             fi
           done
-          
+
           if [ "$API_HEALTHY" = "false" ]; then
             echo "🚨 GitHub API appears unhealthy, implementing extended delays and reduced batch sizes"
             MAX_ATTEMPTS=3
@@ -91,10 +91,10 @@ jobs:
           # Resilient PR list retrieval with exponential backoff
           echo "🔍 Retrieving Dependabot PRs with resilient retry logic..."
           DEPENDABOT_PRS=""
-          
+
           for attempt in $(seq 1 $MAX_ATTEMPTS); do
             echo "📡 Fetching PR list (attempt $attempt/$MAX_ATTEMPTS)..."
-            
+
             # Calculate exponential backoff delay
             if [ $attempt -gt 1 ]; then
               DELAY=$((BASE_DELAY * (1 << (attempt - 2))))
@@ -102,14 +102,14 @@ jobs:
               echo "⏱️ Waiting ${DELAY} seconds (exponential backoff)..."
               sleep $DELAY
             fi
-            
+
             # Circuit breaker check
             if [ $CONSECUTIVE_FAILURES -ge $CIRCUIT_BREAKER_THRESHOLD ]; then
               echo "🔌 Circuit breaker activated - cooling period (30s)..."
               sleep 30
               CONSECUTIVE_FAILURES=0
             fi
-            
+
             # Attempt to fetch PRs with timeout
             if timeout 30 gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json' > /tmp/pr_list.txt 2>/dev/null; then
               DEPENDABOT_PRS=$(cat /tmp/pr_list.txt)
@@ -119,7 +119,7 @@ jobs:
             else
               echo "❌ Failed to retrieve PR list (attempt $attempt)"
               CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
-              
+
               if [ $attempt -eq $MAX_ATTEMPTS ]; then
                 echo "🚨 All attempts to retrieve PR list failed - enabling graceful degradation"
                 echo "::warning::Auto-rebase could not retrieve PR list after $MAX_ATTEMPTS attempts"
@@ -132,7 +132,7 @@ jobs:
           else
             RECREATED_COUNT=0
             CLOSED_COUNT=0
-            
+
             # Process each PR with individual resilience
             echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
               PR_DATA=$(echo "$pr_json" | jq -r '.')
@@ -198,12 +198,12 @@ jobs:
 
               if [ "$SHOULD_FORCE_RECREATE" = true ]; then
                 echo "🔥 FORCE RECREATING PR #$PR_NUMBER because it $REASON"
-                
+
                 # Resilient PR closure with retry logic
                 CLOSE_SUCCESS=false
                 for close_attempt in 1 2 3; do
                   echo "   🔄 Closing PR #$PR_NUMBER (attempt $close_attempt/3)..."
-                  
+
                   if timeout 15 gh pr close "$PR_NUMBER" --comment "🤖 Auto-closing this PR because it $REASON. Dependabot will automatically recreate it with the latest changes and correct format." 2>/dev/null; then
                     echo "   ✅ Successfully closed PR #$PR_NUMBER on attempt $close_attempt"
                     CLOSE_SUCCESS=true
@@ -217,7 +217,7 @@ jobs:
                     fi
                   fi
                 done
-                
+
                 if [ "$CLOSE_SUCCESS" = "true" ]; then
                   echo "   2. Waiting 5 seconds for Dependabot to detect closure..."
                   sleep 5
@@ -231,9 +231,9 @@ jobs:
                 echo "✅ PR #$PR_NUMBER is current and valid (${PR_AGE_DAYS} days old)"
                 SUCCESSFUL_OPERATIONS=$((SUCCESSFUL_OPERATIONS + 1))
               fi
-              
+
               TOTAL_PROCESSED=$((TOTAL_PROCESSED + 1))
-              
+
               # Rate limiting protection - pause between PR operations
               if [ $((TOTAL_PROCESSED % 3)) -eq 0 ]; then
                 echo "🔄 Rate limiting pause (2s) after processing $TOTAL_PROCESSED PRs..."
@@ -252,14 +252,14 @@ jobs:
             echo ""
             echo "🔧 Management Strategy Applied:"
             echo "   • CONFLICTING PRs: Force-closed for automatic recreation"
-            echo "   • UNKNOWN status PRs: Force-closed for automatic recreation"  
+            echo "   • UNKNOWN status PRs: Force-closed for automatic recreation"
             echo "   • Invalid commit format: Force-closed for recreation with correct format"
             echo "   • Stale PRs (>21 days): Force-closed for recreation with latest dependencies"
             echo "   • Valid PRs: Left unchanged"
             echo ""
             echo "⚡ Next execution: Daily at 9 AM UTC or on every push to main"
             echo "🛡️ Resilience: Exponential backoff, circuit breaker, and graceful degradation enabled"
-            
+
             # Cleanup temporary files
             rm -f /tmp/pr_list.txt
           fi
@@ -271,12 +271,12 @@ jobs:
         run: |
           PR_NUMBER="${{ github.event.inputs.pr_number }}"
           echo "🛡️ Resilient handling of specific PR #$PR_NUMBER"
-          
+
           # Resilient PR information retrieval
           PR_AUTHOR=""
           for attempt in 1 2 3; do
             echo "🔍 Retrieving PR #$PR_NUMBER information (attempt $attempt/3)..."
-            
+
             if PR_AUTHOR=$(timeout 15 gh pr view "$PR_NUMBER" --json author --jq '.author.login' 2>/dev/null); then
               echo "✅ Successfully retrieved PR author: $PR_AUTHOR"
               break
@@ -299,7 +299,7 @@ jobs:
             PR_DATA=""
             for data_attempt in 1 2 3; do
               echo "📋 Retrieving PR details (attempt $data_attempt/3)..."
-              
+
               if PR_DATA=$(timeout 20 gh pr view "$PR_NUMBER" --json title,mergeable,commits,createdAt 2>/dev/null); then
                 echo "✅ Successfully retrieved PR details"
                 break
@@ -314,7 +314,7 @@ jobs:
                 fi
               fi
             done
-            
+
             PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
             PR_MERGEABLE=$(echo "$PR_DATA" | jq -r '.mergeable')
             LATEST_COMMIT_MSG=$(echo "$PR_DATA" | jq -r '.commits[-1].messageHeadline // empty')
@@ -333,12 +333,12 @@ jobs:
 
             if [ "$PR_MERGEABLE" = "CONFLICTING" ] || [ "$PR_MERGEABLE" = "UNKNOWN" ] || [ "$INVALID_FORMAT" = true ]; then
               echo "🔥 Force closing PR #$PR_NUMBER for recreation..."
-              
+
               # Resilient PR closure
               CLOSE_SUCCESS=false
               for close_attempt in 1 2 3; do
                 echo "🔄 Closing PR #$PR_NUMBER (attempt $close_attempt/3)..."
-                
+
                 if timeout 15 gh pr close "$PR_NUMBER" --comment "🤖 Manual trigger: Force-closing this PR for recreation with latest format and no conflicts." 2>/dev/null; then
                   echo "✅ Successfully closed PR #$PR_NUMBER on attempt $close_attempt"
                   CLOSE_SUCCESS=true
@@ -350,7 +350,7 @@ jobs:
                   fi
                 fi
               done
-              
+
               if [ "$CLOSE_SUCCESS" = "true" ]; then
                 echo "✅ PR #$PR_NUMBER closed - Dependabot will recreate automatically"
               else
@@ -363,12 +363,12 @@ jobs:
           else
             # For other PRs, attempt resilient direct rebase
             echo "👤 Non-Dependabot PR - attempting resilient direct rebase..."
-            
+
             # Resilient branch name retrieval
             PR_BRANCH=""
             for branch_attempt in 1 2 3; do
               echo "🌿 Retrieving branch name (attempt $branch_attempt/3)..."
-              
+
               if PR_BRANCH=$(timeout 10 gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName' 2>/dev/null); then
                 echo "✅ Successfully retrieved branch: $PR_BRANCH"
                 break
@@ -386,12 +386,12 @@ jobs:
 
             # Resilient git operations with comprehensive error handling
             echo "🔄 Performing resilient git rebase operations..."
-            
+
             # Fetch with retry
             FETCH_SUCCESS=false
             for fetch_attempt in 1 2 3; do
               echo "📥 Fetching branch $PR_BRANCH (attempt $fetch_attempt/3)..."
-              
+
               if timeout 30 git fetch origin "$PR_BRANCH" 2>/dev/null; then
                 echo "✅ Successfully fetched $PR_BRANCH"
                 FETCH_SUCCESS=true
@@ -403,7 +403,7 @@ jobs:
                 fi
               fi
             done
-            
+
             if [ "$FETCH_SUCCESS" = "false" ]; then
               echo "🚨 Failed to fetch branch after 3 attempts"
               echo "::error::Unable to fetch branch $PR_BRANCH for PR #$PR_NUMBER"
@@ -423,12 +423,12 @@ jobs:
             echo "🔄 Attempting rebase onto main..."
             if timeout 120 git rebase origin/main 2>/dev/null; then
               echo "✅ Rebase successful, pushing changes..."
-              
+
               # Push with retry logic
               PUSH_SUCCESS=false
               for push_attempt in 1 2 3; do
                 echo "📤 Pushing rebased branch (attempt $push_attempt/3)..."
-                
+
                 if timeout 30 git push --force-with-lease origin "$PR_BRANCH" 2>/dev/null; then
                   echo "✅ Successfully pushed rebased changes"
                   PUSH_SUCCESS=true
@@ -440,7 +440,7 @@ jobs:
                   fi
                 fi
               done
-              
+
               if [ "$PUSH_SUCCESS" = "true" ]; then
                 echo "✅ Successfully rebased PR #$PR_NUMBER"
               else

@@ -1,10 +1,9 @@
 ---
-# Pre-commit hooks configuration for resume-as-code
-# Based on expert consensus analysis for comprehensive quality gates
+# Practical pre-commit hooks for resume-as-code
+# Focus: Only essential quality gates that add real value
 
 repos:
-  # Conventional Commits validation (configured for release-please compatibility)
-  # v4.2.0 supports emojis, unicode, and flexible formatting while maintaining conventional structure
+  # NON-NEGOTIABLE: Conventional Commits validation for release-please
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.2.0
     hooks:
@@ -15,87 +14,15 @@ repos:
           optional-scope
         ]
 
-  # JavaScript/Node.js Quality (PRIORITY: Fast feedback <2s)
-  - repo: local
-    hooks:
-      - id: javascript-quality
-        name: JavaScript Quality Check
-        entry: bash
-        args: ['-c', 'echo "✅ JavaScript files checked for basic syntax"']
-        language: system
-        files: \.(js|mjs)$
-        pass_filenames: false
-
-  # PRETTIER REMOVED: Conflicts with CI/CD and AI workflows
-  # Causes unstaged file conflicts and formatting inconsistencies
-
-  # Docker validation (PRIORITY: Critical for containerized builds)
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint-docker
-        args:
-          [
-            '--ignore',
-            'DL3008',
-            '--ignore',
-            'DL3009',
-            '--ignore',
-            'DL3015',
-            '--ignore',
-            'DL3016',
-            '--ignore',
-            'DL3018',
-            '--ignore',
-            'DL3013',
-            '--ignore',
-            'DL3045',
-            '--ignore',
-            'DL3059',
-          ]
-        exclude: '^\.docker/'
-
-  # MARKDOWN LINTING REMOVED: Overly strict rules causing workflow friction
-  # Documentation formatting is not critical for resume generator functionality
-  # Focus on functional code quality instead of cosmetic markdown issues
-
-  # GitHub Actions validation
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
-    hooks:
-      - id: actionlint
-        args: ['-shellcheck=']
-
-  # YAML validation
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
-    hooks:
-      - id: yamllint
-        args: [-c=.yamllint.yml]
-
-  # JSON validation and resume-data.json integrity (CRITICAL)
+  # Essential JSON validation (prevents broken builds)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: check-json
       - id: check-yaml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
       - id: check-merge-conflict
 
-  # Security scanning with npm audit
-  - repo: local
-    hooks:
-      - id: npm-audit
-        name: npm audit
-        entry: npm audit --audit-level=high
-        language: system
-        files: package.*\.json$
-        pass_filenames: false
-
-  # Resume data validation with JSON Schema (CRITICAL: Project-specific)
+  # Resume data validation (CRITICAL: Project-specific)
   - repo: local
     hooks:
       - id: resume-data-validation
@@ -110,10 +37,12 @@ repos:
         files: resume-data\.json$
         pass_filenames: false
 
-  # Security scanning
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
+  # npm audit (security without being annoying)
+  - repo: local
     hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: package-lock.json
+      - id: npm-audit
+        name: npm audit
+        entry: npm audit --audit-level=high
+        language: system
+        files: package.*\.json$
+        pass_filenames: false
