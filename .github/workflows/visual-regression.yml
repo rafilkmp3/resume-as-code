@@ -405,20 +405,38 @@ jobs:
           if [ -n "$SCREENSHOT" ]; then
             echo "Found screenshot: $SCREENSHOT"
             
-            # Create optimized version - reduce quality and size for PR comments
-            convert "$SCREENSHOT" -resize 800x600\> -quality 70 -strip ./visual-evidence/optimized-preview.jpg
+            # Create optimized version with proper JPEG format for GitHub compatibility
+            convert "$SCREENSHOT" \
+              -resize 600x400\> \
+              -quality 60 \
+              -strip \
+              -colorspace sRGB \
+              -sampling-factor 4:2:0 \
+              ./visual-evidence/optimized-preview.jpg
             
-            # Check file size
-            ORIGINAL_SIZE=$(stat -c%s "$SCREENSHOT" 2>/dev/null || stat -f%z "$SCREENSHOT")
-            OPTIMIZED_SIZE=$(stat -c%s ./visual-evidence/optimized-preview.jpg 2>/dev/null || stat -f%z ./visual-evidence/optimized-preview.jpg)
-            
-            echo "Original size: $ORIGINAL_SIZE bytes"
-            echo "Optimized size: $OPTIMIZED_SIZE bytes"
-            echo "SCREENSHOT_PATH=$SCREENSHOT" >> $GITHUB_ENV
-            echo "OPTIMIZED_SIZE=$OPTIMIZED_SIZE" >> $GITHUB_ENV
+            # Verify the created file
+            if [ -f "./visual-evidence/optimized-preview.jpg" ]; then
+              # Check file format and size
+              ORIGINAL_SIZE=$(stat -c%s "$SCREENSHOT" 2>/dev/null || stat -f%z "$SCREENSHOT")
+              OPTIMIZED_SIZE=$(stat -c%s ./visual-evidence/optimized-preview.jpg 2>/dev/null || stat -f%z ./visual-evidence/optimized-preview.jpg)
+              
+              echo "Original size: $ORIGINAL_SIZE bytes"
+              echo "Optimized size: $OPTIMIZED_SIZE bytes"
+              
+              # Verify it's a valid JPEG
+              file ./visual-evidence/optimized-preview.jpg
+              
+              echo "SCREENSHOT_PATH=$SCREENSHOT" >> $GITHUB_ENV
+              echo "OPTIMIZED_SIZE=$OPTIMIZED_SIZE" >> $GITHUB_ENV
+            else
+              echo "❌ Failed to create optimized image"
+              echo "SCREENSHOT_PATH=" >> $GITHUB_ENV
+              echo "OPTIMIZED_SIZE=0" >> $GITHUB_ENV
+            fi
           else
             echo "No screenshot found"
             echo "SCREENSHOT_PATH=" >> $GITHUB_ENV
+            echo "OPTIMIZED_SIZE=0" >> $GITHUB_ENV
           fi
       
       - name: Post visual evidence to PR
@@ -441,36 +459,60 @@ jobs:
             
             `;
             
-            // Only embed image if optimized version is small enough (< 40KB base64 ≈ 30KB file)
-            if (screenshotPath && optimizedSize > 0 && optimizedSize < 30000) {
+            // Only embed image if optimized version is small enough for GitHub comments
+            if (screenshotPath && optimizedSize > 0 && optimizedSize < 25000) {
               try {
                 const optimizedPath = './visual-evidence/optimized-preview.jpg';
                 if (fs.existsSync(optimizedPath)) {
                   const imageBuffer = fs.readFileSync(optimizedPath);
                   const imageBase64 = imageBuffer.toString('base64');
                   
-                  // Double-check base64 size (GitHub limit is 65536 chars total)
-                  if (imageBase64.length < 40000) {
-                    commentBody += `### 📸 Screenshot Preview
+                  console.log(`Image file size: ${optimizedSize} bytes`);
+                  console.log(`Base64 length: ${imageBase64.length} characters`);
+                  
+                  // GitHub comment limit is 65536 chars total - be very conservative
+                  // Base64 encoding increases size by ~33%, so 25KB file ≈ 33KB base64
+                  if (imageBase64.length < 35000 && imageBase64.length > 100) {
+                    // Validate base64 starts correctly for JPEG
+                    if (imageBase64.startsWith('/9j/') || imageBase64.startsWith('iVBOR')) {
+                      commentBody += `### 📸 Screenshot Preview
             
             ![Visual Test Result](data:image/jpeg;base64,${imageBase64})
             
-            *Optimized for PR comment (${Math.round(optimizedSize/1024)}KB)*
+            *Optimized for PR comment (${Math.round(optimizedSize/1024)}KB, ${Math.round(imageBase64.length/1024)}KB base64)*
             
             `;
+                      console.log('✅ Successfully embedded optimized image in PR comment');
+                    } else {
+                      console.log('❌ Invalid base64 image format detected');
+                      commentBody += `### 📸 Screenshot Available
+            
+            Screenshot format validation failed. Download the artifact below for full resolution.
+            
+            `;
+                    }
                   } else {
+                    console.log(`❌ Base64 too large: ${imageBase64.length} chars (limit: 35000)`);
                     commentBody += `### 📸 Screenshot Available
             
-            Screenshot too large for inline display. Download the artifact below for full resolution.
+            Screenshot too large for inline display (${Math.round(imageBase64.length/1024)}KB base64). Download the artifact below for full resolution.
             
             `;
                   }
+                } else {
+                  console.log('❌ Optimized image file not found');
+                  commentBody += `### 📸 Screenshot Available
+            
+            Optimized image not found. Download the artifact below for full resolution.
+            
+            `;
                 }
               } catch (error) {
-                console.log('Error processing screenshot:', error.message);
+                console.log('❌ Error processing screenshot:', error.message);
+                console.log('Error stack:', error.stack);
                 commentBody += `### 📸 Screenshot Available
             
-            Screenshot processing error. Download the artifact below for full resolution.
+            Screenshot processing error: ${error.message}. Download the artifact below for full resolution.
             
             `;
               }
