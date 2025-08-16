@@ -378,7 +378,7 @@ jobs:
           path: accessibility-reports/
           retention-days: 30
 
-  # Post visual evidence to PR comments
+  # Post visual evidence to PR comments - simple approach without base64 complexity
   post-visual-evidence:
     name: 📸 Post Visual Evidence to PR
     runs-on: ubuntu-latest
@@ -392,175 +392,37 @@ jobs:
           name: visual-evidence-quick
           path: ./visual-evidence
       
-      - name: Install image optimization tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick
-      
-      - name: Optimize and compress screenshot
-        run: |
-          # Find the screenshot
-          SCREENSHOT=$(find ./visual-evidence -name "*.png" | head -1)
-          
-          if [ -n "$SCREENSHOT" ]; then
-            echo "Found screenshot: $SCREENSHOT"
-            
-            # Create optimized version with proper JPEG format for GitHub compatibility
-            convert "$SCREENSHOT" \
-              -resize 600x400\> \
-              -quality 60 \
-              -strip \
-              -colorspace sRGB \
-              -sampling-factor 4:2:0 \
-              ./visual-evidence/optimized-preview.jpg
-            
-            # Verify the created file
-            if [ -f "./visual-evidence/optimized-preview.jpg" ]; then
-              # Check file format and size
-              ORIGINAL_SIZE=$(stat -c%s "$SCREENSHOT" 2>/dev/null || stat -f%z "$SCREENSHOT")
-              OPTIMIZED_SIZE=$(stat -c%s ./visual-evidence/optimized-preview.jpg 2>/dev/null || stat -f%z ./visual-evidence/optimized-preview.jpg)
-              
-              echo "Original size: $ORIGINAL_SIZE bytes"
-              echo "Optimized size: $OPTIMIZED_SIZE bytes"
-              
-              # Verify it's a valid JPEG
-              file ./visual-evidence/optimized-preview.jpg
-              
-              echo "SCREENSHOT_PATH=$SCREENSHOT" >> $GITHUB_ENV
-              echo "OPTIMIZED_SIZE=$OPTIMIZED_SIZE" >> $GITHUB_ENV
-            else
-              echo "❌ Failed to create optimized image"
-              echo "SCREENSHOT_PATH=" >> $GITHUB_ENV
-              echo "OPTIMIZED_SIZE=0" >> $GITHUB_ENV
-            fi
-          else
-            echo "No screenshot found"
-            echo "SCREENSHOT_PATH=" >> $GITHUB_ENV
-            echo "OPTIMIZED_SIZE=0" >> $GITHUB_ENV
-          fi
-      
-      - name: Post visual evidence to PR
-        uses: actions/github-script@v7
-        env:
-          SCREENSHOT_PATH: ${{ env.SCREENSHOT_PATH }}
-          OPTIMIZED_SIZE: ${{ env.OPTIMIZED_SIZE }}
+      - name: Create simple PR comment with artifact reference
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            
-            const prNumber = context.payload.pull_request.number;
-            const screenshotPath = process.env.SCREENSHOT_PATH;
-            const optimizedSize = parseInt(process.env.OPTIMIZED_SIZE || '0');
-            
-            let commentBody = `## 📸 Visual Regression Test Results
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: |
+            ## 📸 Visual Regression Test Results
             
             **Quick Visual Test**: Chromium Desktop Light Mode
             
-            `;
+            ### 📸 Screenshot Available
             
-            // Only embed image if optimized version is small enough for GitHub comments
-            if (screenshotPath && optimizedSize > 0 && optimizedSize < 25000) {
-              try {
-                const optimizedPath = './visual-evidence/optimized-preview.jpg';
-                if (fs.existsSync(optimizedPath)) {
-                  const imageBuffer = fs.readFileSync(optimizedPath);
-                  const imageBase64 = imageBuffer.toString('base64');
-                  
-                  console.log(`Image file size: ${optimizedSize} bytes`);
-                  console.log(`Base64 length: ${imageBase64.length} characters`);
-                  
-                  // GitHub comment limit is 65536 chars total - be very conservative
-                  // Base64 encoding increases size by ~33%, so 25KB file ≈ 33KB base64
-                  if (imageBase64.length < 35000 && imageBase64.length > 100) {
-                    // Validate base64 starts correctly for JPEG
-                    if (imageBase64.startsWith('/9j/') || imageBase64.startsWith('iVBOR')) {
-                      commentBody += `### 📸 Screenshot Preview
+            The visual regression test completed successfully! Screenshots are available in the **`visual-evidence-quick`** artifact below.
             
-            ![Visual Test Result](data:image/jpeg;base64,${imageBase64})
+            > **Note**: Click on the workflow run link below and scroll down to the "Artifacts" section to download the full-resolution screenshots.
             
-            *Optimized for PR comment (${Math.round(optimizedSize/1024)}KB, ${Math.round(imageBase64.length/1024)}KB base64)*
-            
-            `;
-                      console.log('✅ Successfully embedded optimized image in PR comment');
-                    } else {
-                      console.log('❌ Invalid base64 image format detected');
-                      commentBody += `### 📸 Screenshot Available
-            
-            Screenshot format validation failed. Download the artifact below for full resolution.
-            
-            `;
-                    }
-                  } else {
-                    console.log(`❌ Base64 too large: ${imageBase64.length} chars (limit: 35000)`);
-                    commentBody += `### 📸 Screenshot Available
-            
-            Screenshot too large for inline display (${Math.round(imageBase64.length/1024)}KB base64). Download the artifact below for full resolution.
-            
-            `;
-                  }
-                } else {
-                  console.log('❌ Optimized image file not found');
-                  commentBody += `### 📸 Screenshot Available
-            
-            Optimized image not found. Download the artifact below for full resolution.
-            
-            `;
-                }
-              } catch (error) {
-                console.log('❌ Error processing screenshot:', error.message);
-                console.log('Error stack:', error.stack);
-                commentBody += `### 📸 Screenshot Available
-            
-            Screenshot processing error: ${error.message}. Download the artifact below for full resolution.
-            
-            `;
-              }
-            } else {
-              commentBody += `### 📸 Screenshot Available
-            
-            Screenshot available in artifact (size: ${Math.round(optimizedSize/1024)}KB). Download below for full resolution.
-            
-            `;
-            }
-            
-            commentBody += `### 📊 Test Summary
+            ### 📊 Test Summary
             
             - ✅ **Browser**: Chromium (Latest)
             - ✅ **Viewport**: Desktop (1920x1080)  
             - ✅ **Theme**: Light Mode
-            - 📁 **Full Evidence**: Download \`visual-evidence-quick\` artifact
-            - 🔗 **Workflow**: [View Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            - 📁 **Evidence**: Download `visual-evidence-quick` artifact from workflow
+            - 🔗 **Workflow**: [View Run & Download Screenshots](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ### 🔽 How to View Screenshots
+            
+            1. Click the workflow link above
+            2. Scroll down to the "Artifacts" section  
+            3. Download `visual-evidence-quick`
+            4. Extract and view `desktop-light.png`
             
             ---
-            *Visual regression test completed successfully. Download the artifact for full resolution screenshots.*`;
-            
-            // Check if we already have a visual regression comment
-            const comments = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-            });
-            
-            const existingComment = comments.data.find(comment =>
-              comment.user.login === 'github-actions[bot]' &&
-              comment.body.includes('Visual Regression Test Results')
-            );
-            
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existingComment.id,
-                body: commentBody,
-              });
-              console.log('Updated existing visual regression comment');
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: commentBody,
-              });
-              console.log('Created new visual regression comment');
-            }
+            *Visual regression test completed successfully. Much simpler than base64 encoding! 🎉*
+          edit-mode: replace
