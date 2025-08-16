@@ -378,12 +378,17 @@
             initParallax();
         }
 
+        // QR code generation is now handled at build time - no CDN dependencies!
+        // Pre-generated QR images load instantly for better performance
+
         // Fix auto-scroll bug - ensure page stays at top
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             // Force scroll to top after everything loads
             window.scrollTo(0, 0);
             document.body.scrollTop = 0; // For Safari
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+            
+            // QR codes are pre-generated at build time - no runtime generation needed!
         });
 
         // Immediately show all sections for instant loading

@@ -2,12 +2,9 @@
 name: Auto Rebase
 
 on:
-  push:
-    branches:
-      - main
   schedule:
-    # Run daily at 9 AM UTC to keep all Dependabot PRs current
-    - cron: '0 9 * * *'
+    # Run weekly on Sundays at 9 AM UTC to keep all Dependabot PRs current
+    - cron: '0 9 * * 0'
   workflow_dispatch:
     inputs:
       pr_number:
@@ -56,7 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Resilient Dependabot Management with Circuit Breaker
-        if: github.event_name == 'push' || github.event_name == 'schedule' || !github.event.inputs.pr_number
+        if: github.event_name == 'schedule' || !github.event.inputs.pr_number
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -195,9 +192,9 @@ jobs:
               elif [ "$INVALID_COMMIT_FORMAT" = true ]; then
                 SHOULD_FORCE_RECREATE=true
                 REASON="has invalid conventional commit format"
-              elif [ "$PR_AGE_DAYS" -gt 21 ]; then
+              elif [ "$PR_AGE_DAYS" -gt 90 ]; then
                 SHOULD_FORCE_RECREATE=true
-                REASON="is older than 21 days (${PR_AGE_DAYS} days)"
+                REASON="is older than 90 days (${PR_AGE_DAYS} days)"
               fi
 
               if [ "$SHOULD_FORCE_RECREATE" = true ]; then
@@ -258,10 +255,10 @@ jobs:
             echo "   • CONFLICTING PRs: Force-closed for automatic recreation"
             echo "   • UNKNOWN status PRs: Force-closed for automatic recreation"
             echo "   • Invalid commit format: Force-closed for recreation with correct format"
-            echo "   • Stale PRs (>21 days): Force-closed for recreation with latest dependencies"
+            echo "   • Stale PRs (>90 days): Force-closed for recreation with latest dependencies"
             echo "   • Valid PRs: Left unchanged"
             echo ""
-            echo "⚡ Next execution: Daily at 9 AM UTC or on every push to main"
+            echo "⚡ Next execution: Weekly on Sundays at 9 AM UTC"
             echo "🛡️ Resilience: Exponential backoff, circuit breaker, and graceful degradation enabled"
 
             # Cleanup temporary files
@@ -472,7 +469,7 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ]; then
             echo "**Trigger**: Push to main branch" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "**Trigger**: Scheduled daily execution (9 AM UTC)" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Scheduled weekly execution (Sundays 9 AM UTC)" >> $GITHUB_STEP_SUMMARY
           elif [ -n "${{ github.event.inputs.pr_number }}" ]; then
             echo "**Trigger**: Manual execution for PR #${{ github.event.inputs.pr_number }}" >> $GITHUB_STEP_SUMMARY
           else
@@ -491,7 +488,7 @@ jobs:
           echo "- **CONFLICTING PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
           echo "- **UNKNOWN status PRs**: Force-closed for automatic recreation" >> $GITHUB_STEP_SUMMARY
           echo "- **Invalid commit format**: Force-closed for recreation with correct format" >> $GITHUB_STEP_SUMMARY
-          echo "- **Stale PRs (>21 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stale PRs (>90 days)**: Force-closed for recreation with latest dependencies" >> $GITHUB_STEP_SUMMARY
           echo "- **Valid PRs**: Left unchanged" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -499,5 +496,5 @@ jobs:
           DEPENDABOT_COUNT=$(timeout 10 gh pr list --author "dependabot[bot]" --json number --jq '. | length' 2>/dev/null || echo "Unknown")
           echo "**Current Dependabot PRs**: $DEPENDABOT_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔄 **Next execution**: Daily at 9 AM UTC or on push to main" >> $GITHUB_STEP_SUMMARY
+          echo "🔄 **Next execution**: Weekly on Sundays at 9 AM UTC" >> $GITHUB_STEP_SUMMARY
           echo "🛡️ **Resilience Features**: Exponential backoff, circuit breaker, API health monitoring" >> $GITHUB_STEP_SUMMARY

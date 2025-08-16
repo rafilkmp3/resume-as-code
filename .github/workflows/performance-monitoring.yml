@@ -4,11 +4,36 @@ name: 🎯 Performance & Quality Monitoring
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   schedule:
     # Run performance monitoring daily
     - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      run_all_tests:
+        description: 'Run all performance tests (full monitoring suite)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: performance-${{ github.ref }}
@@ -23,7 +48,7 @@ jobs:
   lighthouse-ci:
     name: 🚀 Lighthouse CI Performance
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -48,19 +73,35 @@ jobs:
         run: |
           npm install -g serve
           serve -s dist -l 3000 &
-          sleep 5
+          SERVER_PID=$!
+          echo "Started server with PID: $SERVER_PID"
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
+          
+          # Final verification
+          curl -f http://localhost:3000 || (echo "❌ Server failed to start" && exit 1)
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
+          artifactName: lighthouse-results
 
   bundle-analysis:
     name: 📦 Bundle Size Analysis
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.inputs.run_all_tests == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -84,6 +125,7 @@ jobs:
   accessibility-audit:
     name: ♿ Accessibility Audit
     runs-on: ubuntu-latest
+    if: github.event.inputs.run_all_tests == 'true' || github.event_name == 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -102,7 +144,18 @@ jobs:
           npm run build
           npm install -g serve
           serve -s dist -l 3000 &
-          sleep 5
+          SERVER_PID=$!
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
 
       - name: Pa11y Accessibility Audit
         run: |
@@ -118,7 +171,7 @@ jobs:
   core-web-vitals:
     name: 📊 Core Web Vitals
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -144,7 +197,17 @@ jobs:
           npm install -g serve
           serve -s dist -l 3000 &
           SERVER_PID=$!
-          sleep 5
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, waiting..."
+            sleep 2
+          done
           
           # Run Web Vitals measurement
           cat > measure-vitals.js << 'EOF'

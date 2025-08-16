@@ -23,24 +23,17 @@ function getQRCodeURL() {
     console.log('  HEAD:', process.env.HEAD || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
     console.log('  BRANCH:', process.env.BRANCH || process.env.HEAD_REF || process.env.GITHUB_HEAD_REF || 'main');
     console.log('  CONTEXT:', process.env.CONTEXT || (process.env.NETLIFY ? 'deploy-preview' : 'local'));
-    console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL || 'none');
     console.log('  DEPLOY_URL:', process.env.DEPLOY_URL || 'none');
     console.log('  URL:', process.env.URL || 'none');
     console.log('  NODE_ENV:', process.env.NODE_ENV || 'development');
     console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES || 'false');
 
     // Netlify environment (check first as it has highest priority for previews)
-    // Netlify sets NETLIFY=true for all deployments
+    // Since we build in GitHub Actions, we set DEPLOY_URL directly
     if (process.env.NETLIFY === 'true' || process.env.NETLIFY_ENV) {
-      // Use Netlify's DEPLOY_PRIME_URL if available (most reliable)
-      if (process.env.DEPLOY_PRIME_URL) {
-        console.log('🌐 Using DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
-        return process.env.DEPLOY_PRIME_URL;
-      }
-
-      // Try DEPLOY_URL as fallback
+      // Use GitHub Actions-provided DEPLOY_URL
       if (process.env.DEPLOY_URL) {
-        console.log('🌐 Using DEPLOY_URL:', process.env.DEPLOY_URL);
+        console.log('🌐 Using GitHub Actions DEPLOY_URL:', process.env.DEPLOY_URL);
         return process.env.DEPLOY_URL;
       }
 
@@ -125,6 +118,64 @@ async function optimizeProfileImage(imagePath, resumeData, options = {}) {
   }
 }
 
+// Generate optimized QR code image files for reliable PDF embedding (like optimized images)
+async function generateQRCodeImages(url) {
+  try {
+    const QRCode = require('qrcode');
+    const fs = require('fs');
+    const sharp = require('sharp');
+    
+    // Ensure assets/images directory exists
+    const imagesDir = './dist/assets/images';
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+    }
+
+    const results = {};
+    const qrConfigs = [
+      { name: 'modal', size: 120, filename: 'qr-code-modal.png' },
+      { name: 'print', size: 80, filename: 'qr-code-print.png' }
+    ];
+
+    for (const config of qrConfigs) {
+      // Generate QR code as buffer (high quality)
+      const qrBuffer = await QRCode.toBuffer(url, {
+        width: config.size,
+        height: config.size,
+        margin: 1,
+        color: {
+          dark: '#2563eb',
+          light: '#FFFFFF'
+        },
+        type: 'png'
+      });
+
+      // Generate optimized PNG (PNG is more efficient for QR codes than WebP)
+      const pngPath = path.join(imagesDir, config.filename);
+      const pngOutput = await sharp(qrBuffer)
+        .png({ 
+          quality: 90,
+          compressionLevel: 9,
+          adaptiveFiltering: true,
+          palette: true  // Use palette mode for better compression on simple images
+        })
+        .toFile(pngPath);
+
+      const pngSizeKB = Math.round(pngOutput.size / 1024 * 10) / 10;
+      console.log(`   ✅ ${config.name} QR: ${pngSizeKB}KB PNG (${config.size}x${config.size}) - optimized for QR patterns`);
+      
+      results[`${config.name}Path`] = `assets/images/${config.filename}`;
+    }
+
+    console.log(`✅ Optimized QR codes generated for: ${url}`);
+    
+    return results;
+  } catch (error) {
+    console.warn('❌ QR code generation failed:', error.message);
+    return null;
+  }
+}
+
 // Generate HTML from template and data
 async function generateHTML(resumeData, templatePath, options = {}) {
   const isDraft = options.mode === 'draft' || process.env.BUILD_MODE === 'draft';
@@ -154,18 +205,24 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     resumeData.basics.image = 'assets/images/profile-mobile.jpg';
   }
 
-  // QR codes are now generated dynamically in the browser (much more efficient!)
-  // No need to embed 2.9KB base64 data in HTML anymore
-
-  // Enhance resume data with optimized images and QR code URL
+  // Generate QR codes at build time for reliable PDF embedding
   const qrCodeUrl = getQRCodeURL();
+  console.log(`📱 QR Code URL: ${qrCodeUrl}`);
+  
+  let qrCodeImages = null;
+  if (!isDraft) {
+    console.log('🔗 Generating QR code images for reliable PDF embedding...');
+    qrCodeImages = await generateQRCodeImages(qrCodeUrl);
+  }
+
+  // Enhance resume data with optimized images and QR code image paths
   const enhancedResumeData = {
     ...resumeData,
     profileImageOptimization,
-    qrCodeUrl: qrCodeUrl
+    qrCodeUrl: qrCodeUrl,
+    qrCodeModalImage: qrCodeImages?.modalPath || null,
+    qrCodePrintImage: qrCodeImages?.printPath || null
   };
-
-  console.log(`📱 QR Code URL: ${qrCodeUrl}`);
 
   // Generate HTML (QR codes will be generated dynamically in browser)
   let html = template(enhancedResumeData);
@@ -209,7 +266,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // PR-specific information for preview environments
   const prNumber = process.env.REVIEW_ID || process.env.PR_NUMBER || '';
-  const deployUrl = process.env.DEPLOY_PRIME_URL || process.env.DEPLOY_URL || qrCodeUrl;
+  const deployUrl = process.env.DEPLOY_URL || qrCodeUrl;
 
   console.log('📊 Enhanced Version Information:');
   console.log(`  App Version: ${appVersion}`);
@@ -378,6 +435,11 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
 
+  // Wait for any QR codes to load from pre-generated base64 data
+  await page.waitForSelector('#print-qr-code', { timeout: 2000 }).catch(() => {
+    console.log('ℹ️  QR code element not found, continuing PDF generation');
+  });
+
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
     // Force light mode for PDF
@@ -400,6 +462,19 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
 
   // Set screen media type for full visual experience
   await page.emulateMediaType('screen');
+
+  // Suppress all console output during PDF generation to prevent text appearing in PDF
+  await page.evaluateOnNewDocument(() => {
+    const originalConsole = window.console;
+    window.console = {
+      ...originalConsole,
+      log: () => {},
+      warn: () => {},
+      error: () => {},
+      info: () => {},
+      debug: () => {}
+    };
+  });
 
   // Inject CSS to optimize for screen viewing with proper light mode and better spacing
   await page.addStyleTag({
@@ -472,6 +547,21 @@ async function generateScreenOptimizedPDF(browser, filePath, resumeData) {
       .load-more-btn, .experience-counter, .experience-controls,
       .skills-counter, .education-counter { display: none !important; }
 
+      /* Show QR code section for Screen PDF */
+      .print-qr-section {
+        display: block !important;
+        text-align: center !important;
+        margin-top: 1rem !important;
+        padding: 0.5rem !important;
+        page-break-inside: avoid !important;
+      }
+      .print-qr-code {
+        width: 80px !important;
+        height: 80px !important;
+        margin: 0 auto !important;
+        display: block !important;
+      }
+
       /* Ensure profile photo is visible and properly sized */
       .profile-photo {
         display: block !important;
@@ -517,6 +607,11 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
 
   await page.waitForSelector('img', { timeout: 5000 }).catch(() => {});
   await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // Wait for any QR codes to load from pre-generated base64 data
+  await page.waitForSelector('#print-qr-code', { timeout: 2000 }).catch(() => {
+    console.log('ℹ️  QR code element not found, continuing PDF generation');
+  });
 
   // Disable JavaScript pagination and show all content for PDF
   await page.evaluate(() => {
@@ -600,9 +695,18 @@ async function generatePrintOptimizedPDF(browser, filePath, resumeData) {
           page-break-after: auto !important;
         }
         /* QR code optimization for print */
+        .print-qr-section {
+          display: block !important;
+          text-align: center !important;
+          margin-top: 1rem !important;
+          padding: 0.5rem !important;
+          page-break-inside: avoid !important;
+        }
         .print-qr-code {
           width: 80px !important;
           height: 80px !important;
+          margin: 0 auto !important;
+          display: block !important;
         }
       }
     `

@@ -441,10 +441,14 @@
 
         <!-- QR Code Section - Only visible in print -->
         <div class="print-qr-section">
-            <canvas id="print-qr-code" class="print-qr-code" width="100" height="100"></canvas>
+            {{#if qrCodePrintImage}}
+            <img id="print-qr-code" class="print-qr-code" src="{{qrCodePrintImage}}" alt="QR Code" width="80" height="80" />
+            {{else}}
+            <canvas id="print-qr-code" class="print-qr-code" width="80" height="80"></canvas>
+            {{/if}}
             <p class="print-qr-text">
                 <strong>View online version:</strong><br>
-                rafilkmp3.github.io/resume-as-code
+                {{qrCodeUrl}}
             </p>
         </div>
 
@@ -501,10 +505,14 @@
                         <div class="liquid-glass-highlight"></div>
                         <div class="liquid-glass-shadow"></div>
                         <div class="liquid-glass-illumination qr-code-inner">
-                            <canvas id="qr-code-image" class="qr-code-large" width="200" height="200"></canvas>
+                            {{#if qrCodeModalImage}}
+                            <img id="qr-code-image" class="qr-code-large" src="{{qrCodeModalImage}}" alt="QR Code" width="120" height="120" />
+                            {{else}}
+                            <canvas id="qr-code-image" class="qr-code-large" width="120" height="120"></canvas>
+                            {{/if}}
                         </div>
                     </div>
-                    <div class="qr-code-url sf-text">{{basics.url}}</div>
+                    <div class="qr-code-url sf-text">{{qrCodeUrl}}</div>
                     <p class="qr-code-description sf-text">Scan to access resume online</p>
                 </div>
                 <div class="qr-modal-footer">

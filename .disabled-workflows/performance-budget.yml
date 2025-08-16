@@ -4,11 +4,36 @@ name: ⚡ Performance Budget & Core Web Vitals
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'template.html'
+      - 'resume-data.json'
+      - 'scripts/**'
+      - 'package*.json'
+      - '*.css'
+      - '*.scss'
   schedule:
     # Run performance monitoring twice daily
     - cron: '0 6,18 * * *'
+  workflow_dispatch:
+    inputs:
+      run_full_performance_suite:
+        description: 'Run full performance budget analysis (all connection types)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: performance-budget-${{ github.ref }}
