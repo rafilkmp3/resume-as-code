@@ -153,8 +153,8 @@ jobs:
       - name: Configure Node.js for CI
         run: |
           # Suppress Node.js deprecation warnings to reduce CI log noise
-          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> "$GITHUB_ENV"
-          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
+          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> $GITHUB_ENV
+          echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
 
       - name: Emergency deployment notice
         if: env.IS_EMERGENCY == 'true'
@@ -310,8 +310,8 @@ jobs:
           git config --global advice.detachedHead false
 
           # Suppress Node.js deprecation warnings
-          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> "$GITHUB_ENV"
-          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
+          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> $GITHUB_ENV
+          echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

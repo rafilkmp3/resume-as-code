@@ -6,10 +6,17 @@ const { copyRecursive } = require('./utils/fs-utils');
 // Use proper Sharp-based optimization with WebP + JPEG support
 const { optimizeProfileImageForResume } = require('./utils/image-optimization');
 
-console.log('🏗️  Building resume...');
+// Check for validation-only mode
+const isValidationOnly = process.argv.includes('--validate-only');
 
-// Ensure dist directory exists
-if (!fs.existsSync('./dist')) {
+if (isValidationOnly) {
+  console.log('🔍 Validation mode: Checking template and data integrity...');
+} else {
+  console.log('🏗️  Building resume...');
+}
+
+// Ensure dist directory exists (unless validation-only)
+if (!isValidationOnly && !fs.existsSync('./dist')) {
   fs.mkdirSync('./dist');
 }
 
