@@ -63,8 +63,8 @@
   },
   "homepage": "https://github.com/rafilkmp3/resume-as-code#readme",
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
     "@playwright/test": "^1.54.2",
     "@puppeteer/browsers": "^2.5.0",
     "babel-jest": "^30.0.5",
@@ -72,6 +72,6 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
-    "livereload": "^0.10.2"
+    "livereload": "^0.10.3"
   }
 }
