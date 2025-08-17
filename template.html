@@ -56,7 +56,6 @@
       const commitsAhead = 3; // Auto-updated with commits since last release during build  
       const lastReleaseTag = 'v4.1.0'; // Auto-updated with last release tag during build
       const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
-      const environment = isGitHubPages ? 'production' : 'development';
       const branchName = isGitHubPages ? 'main' : 'development';
 
       // Enhanced GA4 configuration
@@ -102,9 +101,9 @@
         const commitsAheadElement = document.getElementById('commits-ahead');
         const deploymentLinksElement = document.getElementById('deployment-links');
 
-        // Detect current environment from URL or variables
+        // Detect current environment from URL
         const currentURL = window.location.href;
-        let detectedEnvironment = environment || 'production';
+        let detectedEnvironment = 'production'; // Default to production
         let contextInfo = {};
 
         if (currentURL.includes('deploy-preview-')) {
@@ -117,6 +116,8 @@
           detectedEnvironment = 'staging';
         } else if (currentURL.includes('localhost') || currentURL.includes('192.168.')) {
           detectedEnvironment = 'development';
+        } else if (currentURL.includes('rafilkmp3.github.io')) {
+          detectedEnvironment = 'production';
         }
 
         // Update basic version info
