@@ -6,6 +6,6 @@ All notable changes to this project will be documented in this file.
 
 ## Recent Changes
 
-- docs: automated documentation updates and maintenance (6bad2a3)
+- chore(release): 🚀 v4.0.0 (#45) (ad153c4)
 
-*Last updated: 2025-08-17 14:10:36 BRT*
+*Last updated: 2025-08-17 16:08:59 BRT*
