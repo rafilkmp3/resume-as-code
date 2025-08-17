@@ -183,12 +183,47 @@ updates:
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
 
+  # 🔧 Pre-commit Hooks - Monthly BRT Schedule  
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      day: 'thursday'     # End of week for comprehensive review
+      time: '16:00'       # 4 PM BRT (19:00 UTC-3) - after work hours
+      timezone: 'America/Sao_Paulo'
+    open-pull-requests-limit: 3
+    rebase-strategy: 'auto'
+    commit-message:
+      prefix: 'chore(hooks):'
+      include: 'scope'
+    reviewers:
+      - 'rafilkmp3'
+    labels:
+      - 'dependencies'
+      - 'pre-commit'
+      - 'automated'
+      - 'quality-tools'
+    groups:
+      pre-commit-hooks:
+        patterns:
+          - 'pre-commit'
+          - 'pre-commit-hooks'
+          - 'conventional-pre-commit'
+        update-types:
+          - 'patch'
+          - 'minor'
+    # Only patch and minor updates for stability
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+
 # 🌟 ENTERPRISE AUTOMATION SUMMARY
 # 
 # 📅 Rio de Janeiro Optimized Schedule:
-# - 🖥️  Tuesday  08:30 BRT: NPM dependencies (pre-standup review)
+# - 🖥️  Tuesday   08:30 BRT: NPM dependencies (pre-standup review)
 # - 🐳  Wednesday 10:00 BRT: Docker images (mid-week stability)
 # - ⚙️  Friday    14:00 BRT: GitHub Actions (end-of-week review)
+# - 🔧  Thursday  16:00 BRT: Pre-commit hooks (monthly quality tools)
 #
 # 🎯 Advanced Features:
 # - Netflix/Meta-style dependency grouping by function

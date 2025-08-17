@@ -4,8 +4,8 @@ const path = require('path');
 describe('Build Process Validation', () => {
   const requiredFiles = [
     'package.json',
-    'templates/template.html',
-    'resume-data.json',
+    'template.html',
+    'src/resume-data.json',
     'scripts/build.js',
     'scripts/server.js',
     'scripts/dev-server.js',
@@ -54,7 +54,7 @@ describe('Build Process Validation', () => {
     });
 
     test('resume-data.json should be valid JSON', () => {
-      const resumeDataPath = path.join(process.cwd(), 'resume-data.json');
+      const resumeDataPath = path.join(process.cwd(), 'src/resume-data.json');
       const resumeDataContent = fs.readFileSync(resumeDataPath, 'utf8');
 
       expect(() => JSON.parse(resumeDataContent)).not.toThrow();
@@ -65,7 +65,7 @@ describe('Build Process Validation', () => {
     });
 
     test('template.html should contain required placeholders', () => {
-      const templatePath = path.join(process.cwd(), 'templates/template.html');
+      const templatePath = path.join(process.cwd(), 'template.html');
       const templateContent = fs.readFileSync(templatePath, 'utf8');
 
       // Check for essential Handlebars placeholders
