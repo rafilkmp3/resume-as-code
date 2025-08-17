@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.2.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.1.0...v4.2.0) (2025-08-17)
+
+
+### Features
+
+* add commits-ahead display for staging and preview environments ([98c9fe6](https://github.com/rafilkmp3/resume-as-code/commit/98c9fe6b8206a33a04f7289526fc0f22ac84f7e2))
+* clickable environment badges with useful contextual links ([80fd19a](https://github.com/rafilkmp3/resume-as-code/commit/80fd19a6806b30a5be4f12ea6f72aa338feb36bd))
+
+
+### Bug Fixes
+
+* critical production deployment failures - NODE_OPTIONS and Docker permissions ([6a5fb17](https://github.com/rafilkmp3/resume-as-code/commit/6a5fb172f45ca8e6c133bf465e591ca4d7585087))
+* resolve duplicate environment detection causing preview to show as development ([eddcfea](https://github.com/rafilkmp3/resume-as-code/commit/eddcfea5fd5b3cbd110ffcb96c10a11e966cc091))
+
+
+### Miscellaneous
+
+* **deps-dev:** bump the build-tools group with 3 updates ([26ad6ff](https://github.com/rafilkmp3/resume-as-code/commit/26ad6ffc602d63911479b62223517cbd0cdcab00))
+* **deps-dev:** bump the build-tools group with 3 updates ([#52](https://github.com/rafilkmp3/resume-as-code/issues/52)) ([63fa6cc](https://github.com/rafilkmp3/resume-as-code/commit/63fa6ccf7a3b9e4b546543967bbea9a93b3adaac))
+* **deps:** bump puppeteer from 24.16.0 to 24.16.2 in the core-runtime group ([#51](https://github.com/rafilkmp3/resume-as-code/issues/51)) ([63ff877](https://github.com/rafilkmp3/resume-as-code/commit/63ff877f963660ac1dd91af300ba1cb91b103d06))
+* **deps:** bump puppeteer in the core-runtime group ([3f627be](https://github.com/rafilkmp3/resume-as-code/commit/3f627be97dfb6c45f2dddaa8a18d131a6da7e0bc))
+
 ## [4.1.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.0.0...v4.1.0) (2025-08-17)
 
 
