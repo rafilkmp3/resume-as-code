@@ -240,29 +240,45 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   const appVersion = process.env.APP_VERSION || packageJson.version;
   const buildBranch = process.env.GITHUB_REF_NAME || process.env.HEAD || process.env.BRANCH || 'main';
 
-  // Smart environment detection
+  // Build-time environment detection (more reliable than frontend detection)
   const isNetlifyPreview = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'deploy-preview';
-  const isNetlifyBranch = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'branch-deploy';
-  const isGitHubPages = process.env.GITHUB_PAGES === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  const isProduction = (buildBranch === 'main' && !isNetlifyPreview) || process.env.NODE_ENV === 'production';
+  const isNetlifyStaging = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'staging';
+  const isNetlifyProduction = process.env.NETLIFY === 'true' && !process.env.CONTEXT;
+  const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+  const isLocalDevelopment = !process.env.CI && !process.env.NETLIFY && !process.env.GITHUB_PAGES;
+
+  // Frontend environment variable for reliable detection
+  let frontendEnvironment;
+  if (isNetlifyPreview) {
+    frontendEnvironment = 'preview';
+  } else if (isNetlifyStaging || (process.env.NETLIFY === 'true' && !isNetlifyPreview)) {
+    frontendEnvironment = 'staging';
+  } else if (isGitHubPages) {
+    frontendEnvironment = 'production';
+  } else if (isLocalDevelopment) {
+    frontendEnvironment = 'development';
+  } else {
+    // Fallback for other CI contexts
+    frontendEnvironment = 'development';
+  }
 
   // Environment classification with detailed context
   let environment, environmentDetails;
   if (isNetlifyPreview) {
-    environment = 'netlify-preview';
+    environment = 'preview';
     environmentDetails = `Netlify PR Preview (#${process.env.REVIEW_ID || 'unknown'})`;
-  } else if (isNetlifyBranch) {
-    environment = 'netlify-branch';
-    environmentDetails = `Netlify Branch Deploy (${buildBranch})`;
-  } else if (isGitHubPages && buildBranch === 'main') {
+  } else if (isNetlifyStaging || (process.env.NETLIFY === 'true' && !isNetlifyPreview)) {
+    environment = 'staging';
+    environmentDetails = `Netlify Staging`;
+  } else if (isGitHubPages) {
     environment = 'production';
     environmentDetails = 'GitHub Pages Production';
-  } else if (isGitHubPages) {
-    environment = 'github-preview';
-    environmentDetails = `GitHub Actions Build (${buildBranch})`;
-  } else {
+  } else if (isLocalDevelopment) {
     environment = 'development';
     environmentDetails = 'Local Development';
+  } else {
+    environment = 'development';
+    environmentDetails = 'CI/CD Build Environment';
   }
 
   const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
@@ -278,6 +294,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   console.log('📊 Enhanced Version Information:');
   console.log(`  App Version: ${appVersion}`);
   console.log(`  Environment: ${environment} (${environmentDetails})`);
+  console.log(`  Frontend Environment: ${frontendEnvironment} (injected into template)`);
   console.log(`  Build Branch: ${buildBranch}`);
   console.log(`  Deploy URL: ${deployUrl}`);
   console.log(`  Commit: ${commitShort}`);
@@ -291,6 +308,12 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
   html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/,
     `const branchName = '${buildBranch}';`);
+  
+  // CRITICAL: Inject build-time environment detection to replace frontend URL-based detection
+  html = html.replace(
+    /const environment = isGitHubPages \? 'production' : 'development';/,
+    `const environment = '${frontendEnvironment}'; // Injected at build time: ${environmentDetails}`
+  );
   // Enhanced environment variable replacements for smart contextual linking
   const buildContext = process.env.BUILD_CONTEXT || 'main';
   const contextUrl = process.env.CONTEXT_URL || '';
@@ -305,6 +328,7 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
   html = html.replace(/const commitsSinceRelease = '\d+';/, `const commitsSinceRelease = '${commitsSinceRelease}';`);
+  html = html.replace(/const lastReleaseTag = '[^']*';/, `const lastReleaseTag = '${lastReleaseTag}';`);
   html = html.replace(/const buildContext = '[^']*';/, `const buildContext = '${buildContext}';`);
   html = html.replace(/const prNumber = '[^']*';/, `const prNumber = '${prNumber}';`);
   html = html.replace(/const contextUrl = '[^']*';/, `const contextUrl = '${contextUrl}';`);
