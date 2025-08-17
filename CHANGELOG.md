@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.1.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.0.0...v4.1.0) (2025-08-17)
+
+
+### Features
+
+* smart testing strategy - unlimited ci power, minimal local overhead ([719816e](https://github.com/rafilkmp3/resume-as-code/commit/719816e26c12bc292ae823dc6b031c45c096e1f4))
+
+
+### Bug Fixes
+
+* critical workflow improvements - path resolution, naming clarity, and lfs cleanup ([36b3362](https://github.com/rafilkmp3/resume-as-code/commit/36b3362bc3dfb04582f635c3e7e4c4fad29477df))
+* resolve release-please PR template variable substitution ([d9291fe](https://github.com/rafilkmp3/resume-as-code/commit/d9291fe7e1b701b87b1bf52cb6d7597b80c0bf5b))
+* resolve TruffleHog BASE/HEAD commit configuration for main branch workflows ([b1d6ca6](https://github.com/rafilkmp3/resume-as-code/commit/b1d6ca60c03164c4e80921e4fb796c7592f3889e))
+
+
+### Documentation
+
+* automated documentation updates and maintenance ([433819b](https://github.com/rafilkmp3/resume-as-code/commit/433819b1de4fbcb8d02f7163b911ecdc5512b18f))
+* comprehensive workflow documentation and enterprise footer tracking ([#53](https://github.com/rafilkmp3/resume-as-code/issues/53)) ([b4032dd](https://github.com/rafilkmp3/resume-as-code/commit/b4032dd37036c4d6ff70f02925c485975fd9f25a))
+
 ## [4.0.0](https://github.com/rafilkmp3/resume-as-code/compare/v3.6.0...v4.0.0) (2025-08-15)
 
 
