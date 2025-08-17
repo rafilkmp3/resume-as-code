@@ -54,8 +54,27 @@
       const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
       const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
-      const environment = isGitHubPages ? 'production' : 'development';
-      const branchName = isGitHubPages ? 'main' : 'development';
+      const isNetlifyStaging = window.location.hostname === 'resume-as-code.netlify.app';
+      const isNetlifyPreview = window.location.hostname.includes('deploy-preview-') && window.location.hostname.includes('netlify.app');
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname.includes('192.168.');
+      
+      let environment, branchName;
+      if (isGitHubPages) {
+        environment = 'production';
+        branchName = 'main';
+      } else if (isNetlifyStaging) {
+        environment = 'staging';
+        branchName = 'main';
+      } else if (isNetlifyPreview) {
+        environment = 'preview';
+        branchName = 'feature-branch';
+      } else if (isLocalDev) {
+        environment = 'development';
+        branchName = 'development';
+      } else {
+        environment = 'development';
+        branchName = 'unknown';
+      }
 
       // Enhanced GA4 configuration
       gtag('config', 'G-1L4XD6LG6Z', {
@@ -129,6 +148,42 @@
         if (environmentBadge) {
           environmentBadge.className = `environment-badge ${envConfig.class}`;
           environmentBadge.style.setProperty('--env-color', envConfig.color);
+          
+          // Make environment badge clickable with useful context
+          let targetURL = '';
+          let tooltipText = '';
+          
+          switch (detectedEnvironment) {
+            case 'production':
+              targetURL = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml';
+              tooltipText = 'View production deployment history and status';
+              break;
+            case 'staging':
+              targetURL = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
+              tooltipText = 'View staging deployment history and pipeline status';
+              break;
+            case 'preview':
+              if (contextInfo.prNumber) {
+                targetURL = `https://github.com/rafilkmp3/resume-as-code/pull/${contextInfo.prNumber}`;
+                tooltipText = `View pull request #${contextInfo.prNumber} for this preview`;
+              } else {
+                targetURL = 'https://github.com/rafilkmp3/resume-as-code/pulls';
+                tooltipText = 'View all pull requests';
+              }
+              break;
+            case 'development':
+              targetURL = 'https://github.com/rafilkmp3/resume-as-code/tree/main';
+              tooltipText = 'View source code repository';
+              break;
+          }
+          
+          if (targetURL) {
+            environmentBadge.style.cursor = 'pointer';
+            environmentBadge.title = tooltipText;
+            environmentBadge.addEventListener('click', function() {
+              window.open(targetURL, '_blank', 'noopener,noreferrer');
+            });
+          }
         }
 
         // Update commit prefix based on context
@@ -2469,6 +2524,19 @@
             background-color: var(--env-color, var(--brand-500));
             color: white;
             border: 1px solid var(--env-color, var(--brand-500));
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .environment-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            filter: brightness(1.1);
+        }
+
+        .environment-badge:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .env-production {
