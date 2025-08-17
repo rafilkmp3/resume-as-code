@@ -28,6 +28,59 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make test-performance` - Run performance tests
 - `npm test` - Alias for `make test`
 
+### 🚀 Smart Testing Strategy (Leverage Unlimited GitHub Actions Minutes)
+
+**Philosophy**: Use fast local tests for immediate feedback, leverage unlimited GitHub Actions minutes for comprehensive testing.
+
+#### Local Fast Tests (< 2 minutes)
+```bash
+npm run test:local     # Fast validation: file existence, JSON parsing, template syntax
+npm run test:smart     # Auto-detect mode (local=fast, CI=comprehensive)
+```
+
+#### CI Comprehensive Tests (Unlimited Minutes)
+```bash
+npm run test:ci        # Full comprehensive testing suite
+npm run test:trigger   # Trigger CI workflows from local environment
+```
+
+#### Smart Testing Commands
+
+- **`npm run test:local`** - Essential validations only (< 60 seconds)
+  - File existence check (resume-data.json, template.html)
+  - JSON schema validation
+  - Template syntax compilation
+  - Basic unit tests (if time permits)
+
+- **`npm run test:ci`** - Comprehensive testing (5-30 minutes)
+  - Unit tests with full coverage reports
+  - Visual regression matrix (20 viewport/theme combinations)
+  - Cross-browser E2E tests (Chrome, Firefox, Safari)
+  - Accessibility audit (WCAG 2.1 AA compliance)
+  - Performance testing (Core Web Vitals)
+  - PDF generation validation (3 variants)
+
+- **`npm run test:trigger`** - Launch CI workflows
+  - Triggers 4 parallel workflows using GitHub Actions
+  - Visual Regression Testing (🎨)
+  - Performance & Quality Monitoring (🎯)
+  - Security Scanning (🔒)
+  - Netlify Staging Pipeline
+
+#### Resource Optimization Strategy
+
+**Local Benefits:**
+- Zero compute consumption for long-running tests
+- Immediate feedback for basic validations
+- Fast iteration during development
+
+**CI Benefits:**
+- Unlimited GitHub Actions minutes (open source repository)
+- Parallel execution across multiple runners
+- Cross-platform testing (AMD64 CI vs ARM64 local)
+- Artifact collection and preservation
+- No timeout limitations
+
 ### Docker Operations
 
 - `make docker-check` - Verify Docker is running (required for all operations)
@@ -523,6 +576,135 @@ make test   # Run all tests
 - **ARM vs AMD64 Issues**: If tests pass locally (ARM) but fail in CI (AMD64), check browser compatibility
 - **CI/CD Authentication**: Run `gh auth status` to verify GitHub CLI authentication
 - **CI Pipeline Validation**: Use `gh run watch` to monitor running workflows in real-time
+
+### 🔒 Security Scanning & Vulnerability Management
+
+**Comprehensive security validation with context-aware scanning patterns.**
+
+#### Security Scanning Workflows
+
+- **`🔒 Security Scanning`** - Comprehensive security validation
+  - Dependency vulnerability scanning (NPM Audit)
+  - Secret detection with TruffleHog
+  - Container security scanning with Trivy
+  - Infrastructure security with Checkov
+  - OSV (Open Source Vulnerabilities) database scanning
+
+#### TruffleHog Secret Detection (Context-Aware)
+
+**Problem Solved**: Fixed "BASE and HEAD commits are the same" error that blocked security scanning on main branch.
+
+**Three Scanning Modes:**
+
+1. **Pull Request Mode** (Differential Scanning)
+   ```bash
+   # Scans only changes in PR
+   base: ${{ github.event.pull_request.base.sha }}
+   head: ${{ github.event.pull_request.head.sha }}
+   ```
+
+2. **Main Branch Push** (Single Commit Scanning)
+   ```bash
+   # Scans last commit vs previous commit
+   base: ${{ github.sha }}~1
+   head: ${{ github.sha }}
+   ```
+
+3. **Scheduled/Manual** (Full Repository Scanning)
+   ```bash
+   # Scans entire repository
+   path: ./
+   # No base/head specification for full scan
+   ```
+
+#### Security Troubleshooting Guide
+
+**Common Issues & Solutions:**
+
+- **"BASE and HEAD commits are the same"**
+  - ✅ **FIXED**: Auto-detects context and uses appropriate scanning mode
+  - PR: Differential scanning from base SHA to head SHA
+  - Main: Single commit scanning (current vs previous)
+  - Full: Complete repository scan for scheduled runs
+
+- **"No secrets found but there should be"**
+  - Check `--only-verified` flag (may exclude unverified secrets)
+  - Verify file patterns aren't excluded by `.gitignore`
+  - Use `--debug` flag for detailed scanning logs
+
+#### Workflow Monitoring Commands
+
+```bash
+# Monitor security scanning status
+gh workflow run "🔒 Security Scanning" --ref main
+gh run list --workflow="🔒 Security Scanning" --limit=5
+
+# Check specific security scan results
+gh run view <run-id> --log
+gh run view <run-id> --job=<job-id>  # For specific security scan job
+```
+
+### 🔍 Comprehensive Workflow Troubleshooting
+
+#### Common Workflow Issues & Solutions
+
+**1. NODE_OPTIONS Environment Variable Issues**
+```bash
+# ❌ Wrong (causes "Can't store output parameter" error)
+echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> "$GITHUB_ENV"
+
+# ✅ Correct
+echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> $GITHUB_ENV
+```
+
+**2. Visual Testing Resume Data Path Issues**
+```bash
+# Problem: "Could not load resume-data.json for QR code generation"
+# ✅ Solution: Enhanced path resolution with multiple fallback strategies
+possiblePaths = [
+  'src/resume-data.json',           # Primary location
+  'resume-data.json',               # Fallback location
+  '../src/resume-data.json'         # Relative fallback
+]
+```
+
+**3. TruffleHog Security Scanning Issues**
+```bash
+# Problem: "BASE and HEAD commits are the same"
+# ✅ Solution: Context-aware scanning configuration
+if PR: use differential scanning
+if main push: use single commit scanning  
+if scheduled: use full repository scanning
+```
+
+**4. Workflow Naming Confusion**
+```bash
+# ❌ Confusing: "Deploy to Production" (but actually staging)
+# ✅ Clear: "Deploy to Netlify Staging"
+# ✅ Clear: "Deploy to GitHub Pages Production"
+```
+
+#### Deployment Pipeline Validation
+
+**Three-Tier Architecture:**
+1. **PR Preview** → Netlify preview deployments
+2. **Netlify Staging** → Staging environment validation
+3. **GitHub Pages Production** → Production deployments (releases only)
+
+**Monitoring Commands:**
+```bash
+# Monitor all deployment pipelines
+gh run list --limit 10
+gh workflow list
+
+# Monitor specific deployment
+gh run watch <run-id>
+gh run view <run-id> --log-failed
+
+# Check deployment status
+curl -I https://resume-as-code.netlify.app/           # Staging
+curl -I https://rafilkmp3.github.io/resume-as-code/  # Production
+```
 
 ### Platform Engineering Commands
 
