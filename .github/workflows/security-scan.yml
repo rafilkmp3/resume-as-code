@@ -74,12 +74,52 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: TruffleHog OSS Secret Scanner
+      - name: Configure TruffleHog scan parameters
+        id: trufflehog-config
+        run: |
+          echo "🔍 Configuring TruffleHog scan parameters for context: ${{ github.event_name }}"
+          
+          # Configure scan mode based on trigger context
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # PR mode: Scan only changes in the PR
+            echo "scan-mode=differential" >> $GITHUB_OUTPUT
+            echo "base-ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+            echo "head-ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+            echo "📊 PR Mode: Scanning changes from ${{ github.event.pull_request.base.sha }} to ${{ github.event.pull_request.head.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "main" ]]; then
+            # Main branch push: Scan last commit only (to avoid BASE=HEAD issue)
+            echo "scan-mode=commit" >> $GITHUB_OUTPUT
+            echo "head-ref=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "📊 Main Branch Push: Scanning single commit ${{ github.sha }}"
+          else
+            # All other cases: Full repository scan
+            echo "scan-mode=full" >> $GITHUB_OUTPUT
+            echo "📊 Full Repository Scan: Scanning entire repository"
+          fi
+
+      - name: TruffleHog OSS Secret Scanner (Differential)
+        if: steps.trufflehog-config.outputs.scan-mode == 'differential'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: main
-          head: HEAD
+          base: ${{ steps.trufflehog-config.outputs.base-ref }}
+          head: ${{ steps.trufflehog-config.outputs.head-ref }}
+          extra_args: --debug --only-verified
+
+      - name: TruffleHog OSS Secret Scanner (Single Commit)
+        if: steps.trufflehog-config.outputs.scan-mode == 'commit'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.sha }}~1
+          head: ${{ github.sha }}
+          extra_args: --debug --only-verified
+
+      - name: TruffleHog OSS Secret Scanner (Full Repository)
+        if: steps.trufflehog-config.outputs.scan-mode == 'full'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
           extra_args: --debug --only-verified
 
   container-security:
