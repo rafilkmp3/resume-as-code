@@ -53,6 +53,8 @@
       const appVersion = '1.4.0'; // Auto-updated from package.json during build
       const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
+      const commitsAhead = 0; // Auto-updated with commits since last release during build
+      const lastReleaseTag = 'v1.0.0'; // Auto-updated with last release tag during build
       const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
       const isNetlifyStaging = window.location.hostname === 'resume-as-code.netlify.app';
       const isNetlifyPreview = window.location.hostname.includes('deploy-preview-') && window.location.hostname.includes('netlify.app');
@@ -139,6 +141,17 @@
         // Update basic version info
         if (versionElement) versionElement.textContent = appVersion;
         if (commitElement) commitElement.textContent = commitHash;
+
+        // Update commits ahead info for staging and preview environments
+        if (commitsAheadElement) {
+          if ((detectedEnvironment === 'staging' || detectedEnvironment === 'preview') && commitsAhead > 0) {
+            commitsAheadElement.textContent = `+${commitsAhead}`;
+            commitsAheadElement.title = `${commitsAhead} commits ahead of ${lastReleaseTag}`;
+            commitsAheadElement.style.display = 'inline';
+          } else {
+            commitsAheadElement.style.display = 'none';
+          }
+        }
 
         // Update environment badge with styling
         const envConfig = environmentMap[detectedEnvironment] || environmentMap['production'];
