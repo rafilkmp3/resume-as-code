@@ -1,0 +1,18 @@
+{
+  "lastUpdated": "2025-08-17T13:41:44.265Z",
+  "version": "1.0.0",
+  "baseline": {
+    "description": "Pre-optimization baseline (Phase 1)",
+    "buildTime": 64000,
+    "testTime": 120000,
+    "ciSuccessRate": 30,
+    "cacheHitRate": 15
+  },
+  "current": {
+    "buildTime": null,
+    "testTime": null,
+    "ciSuccessRate": null,
+    "cacheHitRate": null
+  },
+  "history": []
+}

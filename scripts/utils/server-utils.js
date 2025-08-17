@@ -7,10 +7,29 @@ function createSimpleServer(port, publicDir, useCache = false) {
   // Load resume data for QR code generation
   let resumeData;
   try {
-    const resumeDataPath = path.join(process.cwd(), 'resume-data.json');
-    resumeData = JSON.parse(fs.readFileSync(resumeDataPath, 'utf8'));
+    // Try multiple possible paths for resume-data.json
+    const possiblePaths = [
+      path.join(process.cwd(), 'src', 'resume-data.json'),
+      path.join(process.cwd(), 'resume-data.json'),
+      path.join(__dirname, '..', '..', 'src', 'resume-data.json'),
+    ];
+    
+    let resumeDataPath = null;
+    for (const testPath of possiblePaths) {
+      if (fs.existsSync(testPath)) {
+        resumeDataPath = testPath;
+        break;
+      }
+    }
+    
+    if (resumeDataPath) {
+      resumeData = JSON.parse(fs.readFileSync(resumeDataPath, 'utf8'));
+      console.log(`✅ Loaded resume data from: ${resumeDataPath}`);
+    } else {
+      throw new Error('resume-data.json not found in any expected location');
+    }
   } catch (err) {
-    console.warn('Could not load resume-data.json for QR code generation');
+    console.warn('Could not load resume-data.json for QR code generation:', err.message);
     resumeData = {
       basics: { url: 'https://rafilkmp3.github.io/resume-as-code' },
     };

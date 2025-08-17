@@ -1,4 +1,4 @@
-name: Staging Pipeline
+name: Netlify Staging Pipeline
 
 on:
   push:
@@ -46,7 +46,7 @@ jobs:
   # Unified build job (handles both normal and emergency modes)
   # Note: Version management is fully handled by release-please workflow
   build:
-    name: Build and Deploy to Staging (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
+    name: Build for Netlify Staging (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -300,8 +300,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         continue-on-error: true
-        with:
-          lfs: true
 
       - name: Configure Git and Node.js for CI
         continue-on-error: true
@@ -358,15 +356,15 @@ jobs:
           retention-days: 7
         continue-on-error: true
 
-  # Production deployment (guaranteed to work)
+  # Staging deployment to Netlify (guaranteed to work)
   deploy:
-    name: Deploy to Production
+    name: Deploy to Netlify Staging
     if: github.ref == 'refs/heads/main'
     needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
-      name: github-pages
+      name: netlify-staging
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download build artifacts
@@ -384,28 +382,31 @@ jobs:
         with:
           args: deploy --json --dir=dist --prod
 
-      - name: Deployment summary
+      - name: Netlify Staging Deployment Summary
         run: |
           DEPLOY_MODE="${{ github.event.inputs.deployment_mode || 'normal' }}"
 
           if [ "$DEPLOY_MODE" = "emergency" ]; then
-            echo "# 🚨 EMERGENCY STAGING DEPLOYMENT COMPLETE" >> $GITHUB_STEP_SUMMARY
+            echo "# 🚨 EMERGENCY STAGING DEPLOYMENT TO NETLIFY COMPLETE" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Emergency Reason:** ${{ github.event.inputs.emergency_reason }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Deployment Type:** 🚨 EMERGENCY - No testing, maximum speed" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Type:** 🚨 EMERGENCY STAGING - No testing, maximum speed" >> $GITHUB_STEP_SUMMARY
+            echo "**Target Environment:** Netlify Staging (NOT Production)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "# 🚀 Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
+            echo "# 🚀 NETLIFY STAGING DEPLOYMENT COMPLETE" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Deployment Type:** Normal staging pipeline" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment Type:** Normal staging pipeline to Netlify" >> $GITHUB_STEP_SUMMARY
+            echo "**Target Environment:** Netlify Staging (NOT Production)" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🌐 Staging Environment" >> $GITHUB_STEP_SUMMARY
-          echo "### 📱 [**View Staging**](https://resume-as-code.netlify.app/)" >> $GITHUB_STEP_SUMMARY
+          echo "## 🌐 Netlify Staging Environment (NOT Production)" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 [**View Staging Site**](https://resume-as-code.netlify.app/)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
           echo "**Actor:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** This is STAGING deployment - Production deployments only happen via GitHub Pages after releases" >> $GITHUB_STEP_SUMMARY
 
           if [ "$DEPLOY_MODE" = "emergency" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY

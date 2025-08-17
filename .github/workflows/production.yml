@@ -1,5 +1,5 @@
 ---
-name: Production Deployment
+name: GitHub Pages Production Pipeline
 
 on:
   release:
