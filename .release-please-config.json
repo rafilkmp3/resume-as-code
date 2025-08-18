@@ -5,7 +5,6 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "package-name": "resume",
       "pull-request-title-pattern": "chore(release): 🚀 v${version}",
       "pull-request-header": "## Release Notes\n\n**Live Site**: [rafilkmp3.github.io/resume-as-code](https://rafilkmp3.github.io/resume-as-code/)\n\n**What's Changed**:",
       "extra-files": [
