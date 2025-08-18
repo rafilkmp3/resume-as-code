@@ -37,13 +37,29 @@ class IndustryVersionManager {
       let commitHash = this.executeGitCommand(['rev-parse', 'HEAD']);
       let branchName = this.executeGitCommand(['rev-parse', '--abbrev-ref', 'HEAD']);
       
-      // Fallback to environment variables if git is not available (Docker build context)
-      if (!commitHash && process.env.GITHUB_SHA) {
-        console.log('🔄 Git not available, using environment variables for version info');
+      // Enhanced fallback to environment variables (Docker build context or git issues)
+      const hasValidGitInfo = commitHash && branchName && commitHash !== 'unknown' && branchName !== 'unknown';
+      
+      // Debug output for troubleshooting
+      console.log('🔍 Git command results:');
+      console.log(`  commitHash: "${commitHash}"`);
+      console.log(`  branchName: "${branchName}"`);
+      console.log(`  latestTag: "${latestTag}"`);
+      console.log(`  hasValidGitInfo: ${hasValidGitInfo}`);
+      console.log(`  GITHUB_SHA env: "${process.env.GITHUB_SHA}"`);
+      
+      if (!hasValidGitInfo && process.env.GITHUB_SHA) {
+        console.log('🔄 Git information incomplete/unavailable, using environment variables');
         commitHash = this.sanitizeEnvVar(process.env.GITHUB_SHA);
         branchName = this.sanitizeEnvVar(process.env.GITHUB_REF_NAME) || 'unknown';
         latestTag = this.sanitizeEnvVar(process.env.LAST_RELEASE_TAG) || 'v0.0.0';
         gitDescribe = `${latestTag}-${this.sanitizeEnvVar(process.env.COMMITS_SINCE_RELEASE) || '0'}-g${commitHash ? commitHash.substring(0, 7) : 'unknown'}`;
+        
+        console.log('🔄 Environment fallback values:');
+        console.log(`  GITHUB_SHA: "${process.env.GITHUB_SHA}"`);
+        console.log(`  GITHUB_REF_NAME: "${process.env.GITHUB_REF_NAME}"`);
+        console.log(`  LAST_RELEASE_TAG: "${process.env.LAST_RELEASE_TAG}"`);
+        console.log(`  COMMITS_SINCE_RELEASE: "${process.env.COMMITS_SINCE_RELEASE}"`);
       }
       
       // Set defaults if still not available
