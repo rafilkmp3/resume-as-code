@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.3.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.1...v4.3.0) (2025-08-18)
+
+
+### Features
+
+* promote Resume-as-Code Platform to primary key project with enhanced description ([4ee5672](https://github.com/rafilkmp3/resume-as-code/commit/4ee567211db5922cba7b587bacdef412d63f6bb0))
+
+
+### Bug Fixes
+
+* improve release-please configuration for cleaner branches and messages ([0df7603](https://github.com/rafilkmp3/resume-as-code/commit/0df760306f7ce38a1e109d0191b251662764b53d))
+* resolve NODE_OPTIONS GITHUB_ENV syntax error in workflows ([e592fb7](https://github.com/rafilkmp3/resume-as-code/commit/e592fb736001f7b1d0dfb5b0b44cd2af00ae1d31))
+* simplify release-please branch naming by removing package-name component ([930e716](https://github.com/rafilkmp3/resume-as-code/commit/930e716865e414b099b0166dee604cf86a43d180))
+
 ## [4.2.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.0...v4.2.1) (2025-08-18)
 
 
