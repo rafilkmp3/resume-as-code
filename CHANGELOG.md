@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.0...v4.2.1) (2025-08-18)
+
+
+### Bug Fixes
+
+* prevent staging pipeline from running on release commits ([4c804fb](https://github.com/rafilkmp3/resume-as-code/commit/4c804fbdfa54cbc696bbc79b55de4f290879cfdb))
+
 ## [4.2.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.1.0...v4.2.0) (2025-08-17)
 
 
