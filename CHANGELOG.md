@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.1...v4.2.2) (2025-08-18)
+
+
+### Bug Fixes
+
+* improve release-please configuration for cleaner branches and messages ([0df7603](https://github.com/rafilkmp3/resume-as-code/commit/0df760306f7ce38a1e109d0191b251662764b53d))
+* resolve NODE_OPTIONS GITHUB_ENV syntax error in workflows ([e592fb7](https://github.com/rafilkmp3/resume-as-code/commit/e592fb736001f7b1d0dfb5b0b44cd2af00ae1d31))
+
 ## [4.2.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.0...v4.2.1) (2025-08-18)
 
 
