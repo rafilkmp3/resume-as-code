@@ -94,6 +94,12 @@ npm run test:trigger   # Trigger CI workflows from local environment
 - `npm run dev:clean` - Clean development artifacts
 - `npm run dev:setup` - Automated environment setup
 
+### Resume Auto-Updater
+
+- `npm run resume:update` - Apply all configured automatic updates to resume data
+- `npm run resume:update:dry-run` - Preview what changes would be applied without modifying files
+- `npm run resume:update:config` - Show current auto-updater configuration
+
 ### Utilities
 
 - `make clean` - Clean local environment to match GitHub Actions runner (CI/CD parity)

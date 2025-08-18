@@ -307,6 +307,63 @@ Latest versions with emoji and unicode support:
 - **Pre-commit Hooks v6.0.0**: Enhanced file validation
 - **Supports**: Multi-line commits, structured formatting, all conventional types (feat, fix, docs, chore, etc.)
 
+## 🤖 Resume Auto-Updater
+
+**Automatic resume data updates integrated with Release Please - Industry-standard version management.**
+
+Keep your resume data current automatically during every release:
+
+### **Automatic Updates Applied**
+
+- **📅 Timestamps**: `meta.lastUpdated` with current date
+- **🟢 Availability Status**: Configurable work availability display  
+- **🔗 Production URLs**: Ensures all links point to production
+- **📈 Project Highlights**: Adds version milestones and commit achievements
+- **⏰ Smart Conditions**: Time-based (30 days) and version-based (major/minor) triggers
+
+### **Usage Commands**
+
+```bash
+# Apply all configured updates  
+npm run resume:update
+
+# Preview changes without applying them
+npm run resume:update:dry-run
+
+# Show current configuration
+npm run resume:update:config
+```
+
+### **Configuration**
+
+Fully configurable through `config/resume-auto-update.json`:
+
+```json
+{
+  "enabled": true,
+  "updateFields": {
+    "lastUpdated": { "enabled": true, "format": "YYYY-MM-DD" },
+    "availability": { "enabled": true, "value": "open_to_work" },
+    "projectHighlights": { "enabled": true, "maxHighlights": 6 }
+  },
+  "conditionalUpdates": {
+    "timeBased": { "minimumDaysBetweenUpdates": 30 },
+    "versionBased": { "triggerOnVersionTypes": ["major", "minor"] }
+  }
+}
+```
+
+### **Integration with Release Process**
+
+- **🔄 Automatic**: Runs before every Release Please PR creation
+- **📝 Git Integration**: Creates descriptive commits when changes detected  
+- **🛡️ Safe**: Dry-run mode and conditional logic prevent unwanted updates
+- **📊 Transparent**: Full git history and detailed logging
+
+See [docs/RESUME-AUTO-UPDATER.md](docs/RESUME-AUTO-UPDATER.md) for complete documentation.
+
+---
+
 ## 🎨 Key Features
 
 ### **Advanced PDF Generation**

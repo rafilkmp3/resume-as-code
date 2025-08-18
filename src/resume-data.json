@@ -418,6 +418,15 @@
     }
   ],
   "meta": {
-    "lastUpdated": "2025-08-18"
+    "lastUpdated": "2025-08-18",
+    "availability": {
+      "status": "open_to_work",
+      "icon": "🟢",
+      "text": "Open to Work",
+      "types": [
+        "Full-time",
+        "Contract"
+      ]
+    }
   }
 }
