@@ -31,15 +31,32 @@ class IndustryVersionManager {
   // Calculate comprehensive git information with secure command execution
   calculateGitInfo() {
     try {
-      // Get git describe (Google/Kubernetes style) - SECURE: using argument arrays
-      let gitDescribe = this.executeGitCommand(['describe', '--tags', '--always', '--dirty']) || 'v0.0.0-unknown';
+      // Try git commands first
+      let gitDescribe = this.executeGitCommand(['describe', '--tags', '--always', '--dirty']);
+      let latestTag = this.executeGitCommand(['describe', '--tags', '--abbrev=0']);
+      let commitHash = this.executeGitCommand(['rev-parse', 'HEAD']);
+      let branchName = this.executeGitCommand(['rev-parse', '--abbrev-ref', 'HEAD']);
+      
+      // Fallback to environment variables if git is not available (Docker build context)
+      if (!commitHash && process.env.GITHUB_SHA) {
+        console.log('🔄 Git not available, using environment variables for version info');
+        commitHash = this.sanitizeEnvVar(process.env.GITHUB_SHA);
+        branchName = this.sanitizeEnvVar(process.env.GITHUB_REF_NAME) || 'unknown';
+        latestTag = this.sanitizeEnvVar(process.env.LAST_RELEASE_TAG) || 'v0.0.0';
+        gitDescribe = `${latestTag}-${this.sanitizeEnvVar(process.env.COMMITS_SINCE_RELEASE) || '0'}-g${commitHash ? commitHash.substring(0, 7) : 'unknown'}`;
+      }
+      
+      // Set defaults if still not available
+      gitDescribe = gitDescribe || 'v0.0.0-unknown';
+      latestTag = latestTag || 'v0.0.0';
+      commitHash = commitHash || 'unknown';
+      branchName = branchName || 'unknown';
 
-      // Get latest tag - SECURE: using argument arrays
-      let latestTag = this.executeGitCommand(['describe', '--tags', '--abbrev=0']) || 'v0.0.0';
-
-      // Get commits since latest tag - SECURE: validates tag before use
+      // Calculate commits since tag
       let commitsSinceTag = 0;
-      if (latestTag && this.isValidGitTag(latestTag)) {
+      if (process.env.COMMITS_SINCE_RELEASE) {
+        commitsSinceTag = parseInt(this.sanitizeEnvVar(process.env.COMMITS_SINCE_RELEASE)) || 0;
+      } else if (latestTag && this.isValidGitTag(latestTag)) {
         const commitsOutput = this.executeGitCommand(['rev-list', '--count', `${latestTag}..HEAD`]);
         commitsSinceTag = parseInt(commitsOutput) || 0;
       }
@@ -50,12 +67,7 @@ class IndustryVersionManager {
         commitsSinceTag = parseInt(allCommitsOutput) || 0;
       }
 
-      // Get current commit info - SECURE: using argument arrays
-      const commitHash = this.executeGitCommand(['rev-parse', 'HEAD']) || 'unknown';
       const commitShort = this.isValidCommitHash(commitHash) ? commitHash.substring(0, 7) : 'unknown';
-      
-      // Get branch name - SECURE: using argument arrays
-      const branchName = this.executeGitCommand(['rev-parse', '--abbrev-ref', 'HEAD']) || 'unknown';
 
       // Check if working directory is dirty - SECURE: using argument arrays
       const status = this.executeGitCommand(['status', '--porcelain']) || '';
@@ -71,14 +83,19 @@ class IndustryVersionManager {
         isDirty
       };
     } catch (error) {
-      console.warn('⚠️ Git information not available - using defaults');
+      console.warn('⚠️ Git information not available - using environment fallbacks');
+      
+      // Final fallback using environment variables
+      const envCommitHash = this.sanitizeEnvVar(process.env.GITHUB_SHA) || 'unknown';
+      const envCommitShort = envCommitHash !== 'unknown' ? envCommitHash.substring(0, 7) : 'unknown';
+      
       return {
         describe: 'unknown',
-        latestTag: 'v0.0.0',
-        commitsSinceTag: 0,
-        commitHash: 'unknown',
-        commitShort: 'unknown',
-        branchName: 'unknown',
+        latestTag: this.sanitizeEnvVar(process.env.LAST_RELEASE_TAG) || 'v0.0.0',
+        commitsSinceTag: parseInt(this.sanitizeEnvVar(process.env.COMMITS_SINCE_RELEASE)) || 0,
+        commitHash: envCommitHash,
+        commitShort: envCommitShort,
+        branchName: this.sanitizeEnvVar(process.env.GITHUB_REF_NAME) || 'unknown',
         isDirty: false
       };
     }

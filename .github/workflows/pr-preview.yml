@@ -127,6 +127,7 @@ jobs:
         run: |
           echo "🏗️ Building preview for PR #${PR_NUMBER}"
           echo "📊 Version: ${LATEST_TAG} +${COMMITS_AHEAD} commits ahead"
+          echo "🔗 Git Info: ${HEAD_SHA:0:7} on ${HEAD_REF}"
           
           docker buildx build \
             --file docker/Dockerfile \
@@ -145,6 +146,7 @@ jobs:
             --build-arg LAST_RELEASE_TAG="${LATEST_TAG}" \
             --build-arg GITHUB_RUN_ID="${{ github.run_id }}" \
             --build-arg GITHUB_RUN_NUMBER="${{ github.run_number }}" \
+            --build-arg APP_VERSION="${LATEST_TAG}" \
             --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \

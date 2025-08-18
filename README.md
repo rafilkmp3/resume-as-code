@@ -1,59 +1,11 @@
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
 # 🚀 Resume as Code
 
 **Modern Resume Generation System with Enterprise-Grade CI/CD Pipeline**
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-brightgreen?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![CI/CD Status](https://github.com/rafilkmp3/resume-as-code/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
+[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
 [![Release Please](https://img.shields.io/badge/📦_Release_Please-Automated-purple?style=for-the-badge)](https://github.com/rafilkmp3/resume-as-code/releases)
-[![Docker](https://img.shields.io/badge/Docker-Multi--Arch-blue?style=for-the-badge&logo=docker)](https://github.com/rafilkmp3/resume-as-code)
 
 > Infrastructure-as-Code approach to resume generation, showcasing modern DevOps practices and platform engineering excellence.
 
@@ -91,10 +43,6 @@ graph TD
 
 ```
 📦 resume-as-code/
-├── 📁 archive/                 # Legacy and analysis files
-│   ├── analysis/              # Historical analysis documents
-│   ├── temp-tests/            # Archived test files
-│   └── legacy/                # Backup and debug files
 ├── 🎯 assets/                  # Static assets and images
 ├── ⚙️ config/                  # Build and test configurations
 │   ├── babel.config.js
@@ -102,14 +50,11 @@ graph TD
 │   ├── playwright.config.js
 │   └── *.fast.config.js       # Optimized configs for development
 ├── 🐳 docker/                  # Multi-architecture containerization
-├── 📁 docs/                    # Documentation and analysis
-│   ├── analysis/              # Performance and audit results
-│   ├── screenshots/           # Visual documentation
-│   └── *.md                   # Technical documentation
 ├── 🔧 scripts/                 # Build automation and utilities
 │   ├── build.js               # Main build orchestrator
 │   ├── dev-server.js          # Hot-reload development server
 │   ├── server.js              # Production server
+│   ├── version-manager.js     # Industry-standard version management
 │   └── utils/                 # Shared utilities
 ├── 🧪 tests/                   # Comprehensive test suite
 │   ├── unit/                  # Jest unit tests
