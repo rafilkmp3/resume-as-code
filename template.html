@@ -10,9 +10,17 @@
 
     <!-- Build metadata for cache busting and version tracking -->
     <meta name="generator" content="Resume-as-Code">
+    <meta name="app-version" content="{{appVersion}}">
+    <meta name="app-environment" content="development">
+    <meta name="app-channel" content="development">
+    <meta name="app-branch" content="development">
     <meta name="build-commit" content="dev-local">
     <meta name="build-timestamp" content="2025-01-08T00:00:00.000Z">
-    <meta name="app-version" content="{{appVersion}}">
+    <meta name="commits-ahead" content="3">
+    <meta name="last-release-tag" content="v4.1.0">
+    <meta name="github-run-id" content="">
+    <meta name="github-run-number" content="">
+    <meta name="github-pr-number" content="">
     <meta name="keywords" content="resume, cv, {{basics.name}}, {{basics.label}}, platform engineer, devops, cloud architect, aws, gcp, kubernetes">
 
     <!-- Cache busting headers -->
@@ -83,257 +91,156 @@
 
       // Enhanced event tracking will be loaded after DOM is ready
 
-      // Enterprise-grade version tracking and footer management
+      // Enhanced version management system with hidden technical data
       document.addEventListener('DOMContentLoaded', function() {
-        // Environment detection and classification
-        const environmentMap = {
-          'production': { class: 'env-production', label: 'Production', color: '#22c55e' },
-          'staging': { class: 'env-staging', label: 'Staging', color: '#f59e0b' },
-          'preview': { class: 'env-preview', label: 'Preview', color: '#3b82f6' },
-          'development': { class: 'env-development', label: 'Development', color: '#8b5cf6' }
-        };
+        // User-friendly footer elements
+        const userVersionElement = document.getElementById('user-version');
+        const updateMonthElement = document.getElementById('update-month');
+        const buildTimestampElement = document.getElementById('build-timestamp');
+        const versionContextLink = document.getElementById('version-context-link');
 
-        // Get all version elements
-        const versionElement = document.getElementById('app-version');
-        const environmentElement = document.getElementById('app-environment');
-        const environmentBadge = document.getElementById('environment-badge');
-        const commitElement = document.getElementById('app-commit');
-        const commitPrefixElement = document.getElementById('commit-prefix');
-        const versionLinkElement = document.getElementById('version-link');
-        const commitLinkElement = document.getElementById('commit-link');
-        const buildLinkElement = document.getElementById('build-link');
-        const buildNumberElement = document.getElementById('build-number');
-        const buildTimeElement = document.getElementById('build-time');
-        const commitsAheadElement = document.getElementById('commits-ahead');
-        const deploymentLinksElement = document.getElementById('deployment-links');
+        // Build time display
+        if (buildTimestampElement) {
+          const buildDate = new Date(buildTimestamp);
+          const timeString = buildDate.toLocaleTimeString('en-US', { 
+            hour12: false, 
+            hour: '2-digit', 
+            minute: '2-digit'
+          });
+          buildTimestampElement.textContent = timeString;
+        }
 
-        // Use build-time detected environment (SECURE: No URL parsing)
-        const detectedEnvironment = environment;
-        const contextInfo = {
-          prNumber: prNumber || null
-        };
-
-        // Update basic version info
-        if (versionElement) versionElement.textContent = appVersion;
-        if (commitElement) commitElement.textContent = commitHash;
-
-        // Update commits ahead info for staging and preview environments
-        if (commitsAheadElement) {
-          if ((detectedEnvironment === 'staging' || detectedEnvironment === 'preview') && commitsAhead > 0) {
-            const aheadText = commitsAhead === 1 ? `+${commitsAhead} commit` : `+${commitsAhead} commits`;
-            commitsAheadElement.textContent = `+${commitsAhead}`;
-            commitsAheadElement.title = `${aheadText} ahead of ${lastReleaseTag}`;
-            commitsAheadElement.style.display = 'inline';
+        // Environment-specific display logic and contextual links
+        if (userVersionElement && versionContextLink) {
+          // Simplified version format with environment-specific enhancements
+          const majorMinor = appVersion.split('.').slice(0, 2).join('.');
+          let contextUrl = '#';
+          let linkTitle = 'View version details';
+          
+          if (environment === 'production') {
+            // Production: Clean version only, link to latest release
+            userVersionElement.textContent = `v${majorMinor}`;
+            contextUrl = `https://github.com/rafilkmp3/resume-as-code/releases/tag/${lastReleaseTag}`;
+            linkTitle = `View release ${lastReleaseTag}`;
+          } else if (environment === 'staging') {
+            // Staging: Show commits ahead, link to staging pipeline
+            const commitsAheadText = commitsAhead > 0 ? ` +${commitsAhead}` : '';
+            userVersionElement.textContent = `v${majorMinor}${commitsAheadText}`;
+            userVersionElement.style.color = '#f59e0b';
+            userVersionElement.style.fontWeight = '600';
+            contextUrl = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
+            linkTitle = 'View staging pipeline';
+          } else if (environment === 'preview') {
+            // Preview: Show commits ahead, link to PR
+            const commitsAheadText = commitsAhead > 0 ? ` +${commitsAhead}` : '';
+            userVersionElement.textContent = `v${majorMinor}${commitsAheadText}`;
+            userVersionElement.style.color = '#3b82f6';
+            userVersionElement.style.fontWeight = '600';
             
-            // Add visual indication for commits ahead
-            commitsAheadElement.style.background = detectedEnvironment === 'staging' ? '#f59e0b' : '#3b82f6';
-            commitsAheadElement.style.color = 'white';
-          } else {
-            commitsAheadElement.style.display = 'none';
-          }
-        }
-
-        // Update environment badge with styling
-        const envConfig = environmentMap[detectedEnvironment] || environmentMap['production'];
-        if (environmentElement) {
-          environmentElement.textContent = envConfig.label;
-        }
-        if (environmentBadge) {
-          environmentBadge.className = `environment-badge ${envConfig.class}`;
-          environmentBadge.style.setProperty('--env-color', envConfig.color);
-          
-          // Make environment badge clickable with useful context
-          let targetURL = '';
-          let tooltipText = '';
-          
-          switch (detectedEnvironment) {
-            case 'production':
-              targetURL = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml';
-              tooltipText = 'View production deployment history and status';
-              break;
-            case 'staging':
-              targetURL = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
-              tooltipText = 'View staging deployment history and pipeline status';
-              break;
-            case 'preview':
-              if (contextInfo.prNumber) {
-                targetURL = `https://github.com/rafilkmp3/resume-as-code/pull/${contextInfo.prNumber}`;
-                tooltipText = `View pull request #${contextInfo.prNumber} for this preview`;
-              } else {
-                targetURL = 'https://github.com/rafilkmp3/resume-as-code/pulls';
-                tooltipText = 'View all pull requests';
-              }
-              break;
-            case 'development':
-              targetURL = 'https://github.com/rafilkmp3/resume-as-code/tree/main';
-              tooltipText = 'View source code repository';
-              break;
-          }
-          
-          if (targetURL) {
-            environmentBadge.style.cursor = 'pointer';
-            environmentBadge.title = tooltipText;
-            environmentBadge.addEventListener('click', function() {
-              window.open(targetURL, '_blank', 'noopener,noreferrer');
-            });
-          }
-        }
-
-        // Update environment icon based on detected environment
-        const envIcon = document.getElementById('env-icon');
-        if (envIcon) {
-          const iconMap = {
-            'production': '🟢',
-            'staging': '🟠', 
-            'preview': '🔵',
-            'development': '🟣'
-          };
-          envIcon.textContent = iconMap[detectedEnvironment] || '🟢';
-        }
-
-        // Update commit prefix based on context
-        if (commitPrefixElement) {
-          if (contextInfo.prNumber) {
-            commitPrefixElement.textContent = `pr-${contextInfo.prNumber}@`;
-          } else if (detectedEnvironment === 'development') {
-            commitPrefixElement.textContent = 'local@';
-          } else {
-            commitPrefixElement.textContent = 'main@';
-          }
-        }
-
-        // Update version link
-        if (versionLinkElement && appVersion) {
-          const cleanVersion = appVersion.replace(/[^0-9.]/g, '');
-          if (detectedEnvironment === 'preview' && contextInfo.prNumber) {
-            versionLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/pull/${contextInfo.prNumber}`;
-            versionLinkElement.title = `View Pull Request #${contextInfo.prNumber}`;
-          } else {
-            versionLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/releases/tag/v${cleanVersion}`;
-            versionLinkElement.title = `View release v${cleanVersion}`;
-          }
-        }
-
-        // Update commit link
-        if (commitLinkElement && commitHash && commitHash !== 'dev-local') {
-          const fullCommitHash = commitHash.length === 7 ? commitHash : commitHash.substring(0, 7);
-          commitLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/commit/${fullCommitHash}`;
-          commitLinkElement.title = `View commit ${fullCommitHash} on GitHub`;
-        } else if (commitLinkElement) {
-          commitLinkElement.href = 'https://github.com/rafilkmp3/resume-as-code';
-          commitLinkElement.title = 'Development build - view repository';
-        }
-
-        // Update build link (GitHub Actions run)
-        if (buildLinkElement && typeof runId !== 'undefined' && runId) {
-          buildLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/actions/runs/${runId}`;
-          buildLinkElement.title = `View GitHub Actions build #${runId}`;
-        } else if (buildLinkElement) {
-          buildLinkElement.href = 'https://github.com/rafilkmp3/resume-as-code/actions';
-          buildLinkElement.title = 'View GitHub Actions workflows';
-        }
-
-        // Update build number
-        if (buildNumberElement) {
-          buildNumberElement.textContent = typeof runId !== 'undefined' ? runId : 'local';
-        }
-
-        // Update build time
-        if (buildTimeElement) {
-          const buildDate = typeof buildTimestamp !== 'undefined' && buildTimestamp 
-            ? new Date(buildTimestamp) 
-            : new Date();
-          buildTimeElement.textContent = buildDate.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'America/Sao_Paulo'
-          }) + ' BRT';
-          buildTimeElement.title = `Build timestamp: ${buildDate.toISOString()}`;
-        }
-
-        // Update commits ahead indicator
-        if (commitsAheadElement) {
-          const commits = typeof commitsAhead !== 'undefined' ? commitsAhead : '0';
-          if (commits && commits !== '0') {
-            commitsAheadElement.textContent = `+${commits} commits`;
-            commitsAheadElement.style.display = 'inline';
-          } else {
-            commitsAheadElement.style.display = 'none';
-          }
-        }
-
-        // Generate deployment links based on environment
-        if (deploymentLinksElement) {
-          const links = [];
-          
-          if (detectedEnvironment === 'preview') {
-            links.push(`<a href="https://resume-as-code.netlify.app/" target="_blank" title="View staging deployment">→ Staging</a>`);
-            links.push(`<a href="https://rafilkmp3.github.io/resume-as-code/" target="_blank" title="View production deployment">→ Production</a>`);
-          } else if (detectedEnvironment === 'staging') {
-            links.push(`<a href="https://rafilkmp3.github.io/resume-as-code/" target="_blank" title="View production deployment">→ Production</a>`);
-          } else if (detectedEnvironment === 'development') {
-            links.push(`<a href="https://resume-as-code.netlify.app/" target="_blank" title="View staging deployment">→ Staging</a>`);
-            links.push(`<a href="https://rafilkmp3.github.io/resume-as-code/" target="_blank" title="View production deployment">→ Production</a>`);
-          }
-          
-          if (links.length > 0) {
-            deploymentLinksElement.innerHTML = links.join(' ');
-          }
-        }
-
-        // Setup version details modal functionality
-        const versionDetailsBtn = document.getElementById('version-details-btn');
-        const versionModal = document.getElementById('version-details-modal');
-        const versionModalClose = document.getElementById('version-modal-close');
-
-        if (versionDetailsBtn && versionModal) {
-          // Populate modal with current version information
-          const populateModal = () => {
-            document.getElementById('modal-environment').textContent = detectedEnvironment;
-            document.getElementById('modal-version').textContent = appVersion || 'Unknown';
-            document.getElementById('modal-commit').textContent = commitHash || 'Unknown';
-            document.getElementById('modal-build-time').textContent = document.getElementById('build-time')?.textContent || 'Unknown';
-            document.getElementById('modal-build-number').textContent = buildNumber || 'Unknown';
-            document.getElementById('modal-branch').textContent = 
-              contextInfo.prNumber ? `PR #${contextInfo.prNumber}` : 
-              (detectedEnvironment === 'development' ? 'local' : 'main');
-          };
-
-          // Show modal
-          versionDetailsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            populateModal();
-            versionModal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-          });
-
-          // Hide modal
-          const hideModal = () => {
-            versionModal.classList.remove('show');
-            document.body.style.overflow = '';
-          };
-
-          if (versionModalClose) {
-            versionModalClose.addEventListener('click', hideModal);
-          }
-
-          // Close on backdrop click
-          versionModal.addEventListener('click', (e) => {
-            if (e.target === versionModal) {
-              hideModal();
+            // Extract PR number from URL if preview environment
+            const currentUrl = window.location.hostname;
+            const prMatch = currentUrl.match(/deploy-preview-(\d+)/);
+            if (prMatch) {
+              const prNumber = prMatch[1];
+              contextUrl = `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`;
+              linkTitle = `View Pull Request #${prNumber}`;
+            } else {
+              contextUrl = 'https://github.com/rafilkmp3/resume-as-code/pulls';
+              linkTitle = 'View pull requests';
             }
-          });
-
-          // Close on escape key
-          document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && versionModal.classList.contains('show')) {
-              hideModal();
-            }
-          });
+          } else {
+            // Development: Show branch info, link to repository
+            userVersionElement.textContent = `v${majorMinor} (${branchName})`;
+            userVersionElement.style.color = '#10b981';
+            userVersionElement.style.fontWeight = '600';
+            contextUrl = 'https://github.com/rafilkmp3/resume-as-code';
+            linkTitle = 'View repository';
+          }
+          
+          // Set the contextual link
+          versionContextLink.href = contextUrl;
+          versionContextLink.title = linkTitle;
         }
+
+        if (updateMonthElement) {
+          // Format timestamp to user-friendly month format
+          const buildDate = new Date(buildTimestamp);
+          const monthYear = buildDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            year: 'numeric' 
+          });
+          updateMonthElement.textContent = monthYear;
+          
+          // Environment-specific timestamp styling
+          if (environment !== 'production') {
+            updateMonthElement.style.fontSize = '0.875rem';
+            updateMonthElement.style.opacity = '0.8';
+          }
+        }
+
+        // Hidden Technical Data System - Console Logging
+        console.group('🔧 Resume-as-Code Technical Information');
+        console.log('📋 Version Information:');
+        console.table({
+          'App Version': appVersion,
+          'Environment': environment,
+          'Channel': channel,
+          'Branch': branchName,
+          'Commits Ahead': commitsAhead > 0 ? `+${commitsAhead}` : 'Release',
+          'Last Release': lastReleaseTag
+        });
+        
+        console.log('🏗️ Build Information:');
+        console.table({
+          'Commit Hash': commitHash,
+          'Build Timestamp': buildTimestamp,
+          'GitHub Run ID': runId || 'Local build',
+          'GitHub Run Number': runNumber || 'N/A',
+          'PR Number': prNumber || 'N/A'
+        });
+
+        console.log('🔗 Useful Links:');
+        const links = {};
+        if (environment === 'production') {
+          links['Latest Release'] = `https://github.com/rafilkmp3/resume-as-code/releases/tag/${lastReleaseTag}`;
+          links['Release Notes'] = `https://github.com/rafilkmp3/resume-as-code/releases`;
+        } else if (environment === 'staging') {
+          links['Staging Pipeline'] = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
+          links['Compare Changes'] = compareUrl || `https://github.com/rafilkmp3/resume-as-code/compare/${lastReleaseTag}...${commitHash}`;
+        } else if (environment === 'preview' && prNumber) {
+          links['Pull Request'] = `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`;
+          links['PR Pipeline'] = contextUrl || `https://github.com/rafilkmp3/resume-as-code/actions`;
+        }
+        
+        if (commitHash !== 'dev-local') {
+          links['Commit Details'] = `https://github.com/rafilkmp3/resume-as-code/commit/${commitHash}`;
+        }
+        links['Repository'] = 'https://github.com/rafilkmp3/resume-as-code';
+        
+        console.table(links);
+        console.groupEnd();
+
+        // Add version API endpoint data to window for external access
+        window.resumeVersionAPI = {
+          version: appVersion,
+          environment: environment,
+          channel: channel,
+          branch: branchName,
+          commit: commitHash,
+          buildTimestamp: buildTimestamp,
+          commitsAhead: commitsAhead,
+          lastReleaseTag: lastReleaseTag,
+          runId: runId,
+          runNumber: runNumber,
+          prNumber: prNumber,
+          contextUrl: contextUrl,
+          compareUrl: compareUrl,
+          userFriendlyVersion: `v${appVersion.split('.').slice(0, 2).join('.')}`,
+          lastUpdated: new Date(buildTimestamp).toLocaleDateString('en-US', { 
+            month: 'short', 
+            year: 'numeric' 
+          })
+        };
       });
     </script>
 
@@ -2503,382 +2410,35 @@
         }
 
         .footer {
-            position: relative;
-            padding: 2.5rem 1rem 2rem;
-            background: linear-gradient(135deg, var(--color-surface-raised) 0%, var(--color-surface) 100%);
+            text-align: center;
+            padding: 2rem 1rem 1.5rem;
+            background: var(--color-surface-raised);
             border-top: 1px solid var(--color-border-subtle);
-            margin-top: 3rem;
+            color: var(--color-text-secondary);
             font-size: 0.875rem;
-            overflow: hidden;
-        }
-
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                var(--color-accent-primary) 0%, 
-                var(--color-accent-secondary) 50%, 
-                var(--color-accent-primary) 100%);
-            opacity: 0.8;
+            margin-top: 3rem;
         }
 
         .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            align-items: start;
-        }
-
-        /* Developer Brand Section */
-        .footer-brand {
-            text-align: center;
-        }
-
-        .brand-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            color: var(--color-text-primary);
-            font-weight: 600;
-            font-size: var(--font-size-base);
-        }
-
-        .heart-icon {
-            color: #e11d48;
-            animation: heartbeat 2s ease-in-out infinite;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .tech-stack {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tech-badge {
-            padding: 0.25rem 0.5rem;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border-subtle);
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .tech-badge:hover {
-            background: var(--color-accent-primary);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Enterprise Version Tracking */
-        .footer-tracking {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .version-control {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            font-family: var(--font-family-mono);
-            font-size: 0.75rem;
-            text-align: center;
-        }
-
-        .version-primary {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .env-version-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .build-info-inline {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            color: var(--color-text-secondary);
-        }
-
-        .version-secondary {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: var(--color-text-secondary);
-            flex-wrap: wrap;
-        }
-
-        .commit-info {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            text-decoration: none;
-            color: inherit;
-            transition: color 0.2s ease;
-        }
-
-        .commit-info:hover {
-            color: var(--color-accent-primary);
-        }
-
-        .git-icon, .build-icon {
-            font-size: 0.8em;
-        }
-
-        .info-separator, .build-separator {
-            opacity: 0.5;
-            margin: 0 0.25rem;
-        }
-
-        /* Quick Actions */
-        .version-actions {
-            margin-top: 0.5rem;
-        }
-
-        .quick-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .action-link {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            color: var(--color-text-secondary);
-            font-size: 0.7rem;
-            font-weight: 500;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .action-link:hover {
-            background: var(--color-surface);
-            color: var(--color-accent-primary);
-            transform: translateY(-1px);
-        }
-
-        .action-icon {
-            font-size: 0.9em;
-        }
-
-        /* Architecture Info */
-        .architecture-info {
-            text-align: center;
-            color: var(--color-text-secondary);
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            flex-wrap: wrap;
-        }
-
-        .resume-code-link {
-            color: var(--color-accent-primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-
-        .resume-code-link:hover {
-            color: var(--color-accent-secondary);
-        }
-
-        .architecture-desc {
-            opacity: 0.7;
-        }
-
-        /* Version Details Modal */
-        .version-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .version-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .version-modal-content {
-            position: relative;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow: hidden;
-            border-radius: 1rem;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .version-modal.show .version-modal-content {
-            transform: scale(1);
-        }
-
-        .version-modal-inner {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .version-modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--color-border-subtle);
-        }
-
-        .version-modal-header h3 {
-            margin: 0;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--color-text-primary);
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            transition: all 0.2s ease;
-            line-height: 1;
-        }
-
-        .modal-close-btn:hover {
-            background: var(--color-surface);
-            color: var(--color-text-primary);
-        }
-
-        .version-grid {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: 1fr;
-        }
-
-        .version-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border-subtle);
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .version-item:hover {
-            background: var(--color-surface-raised);
-            border-color: var(--color-accent-primary);
-        }
-
-        .version-label {
-            font-weight: 600;
-            color: var(--color-text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .version-value {
-            font-family: var(--font-family-mono);
-            font-size: 0.875rem;
-            color: var(--color-text-primary);
-            background: var(--color-surface-raised);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            border: 1px solid var(--color-border-subtle);
-        }
-
-        /* Responsive footer adjustments */
-        @media (min-width: 768px) {
-            .footer-content {
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-                align-items: center;
-            }
-
-            .footer-brand {
-                text-align: left;
-            }
-
-            .footer-tracking {
-                align-items: flex-end;
-                text-align: right;
-            }
-
-            .version-control {
-                align-items: flex-end;
-                text-align: right;
-            }
-
-            .version-primary, .version-secondary {
-                justify-content: flex-end;
-            }
-
-            .quick-actions {
-                justify-content: flex-end;
-            }
-
-            .architecture-info {
-                justify-content: flex-end;
-            }
-
-            .version-grid {
-                grid-template-columns: 1fr 1fr;
-            }
         }
 
         .footer-main {
             font-weight: 600;
             font-size: var(--font-size-base);
+            line-height: 1.4;
+        }
+
+        #build-time {
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        #build-timestamp {
+            font-family: var(--font-family-mono);
+            font-weight: 600;
         }
 
         .footer-version {
@@ -2890,9 +2450,44 @@
         }
 
         .app-info {
-            font-family: var(--font-family-mono);
+            font-family: var(--font-family-sans);
             font-weight: 500;
             color: var(--color-text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Enhanced styling for user-friendly version display */
+        #user-version {
+            font-family: var(--font-family-mono);
+            font-weight: 600;
+            transition: color 0.2s ease;
+            cursor: help;
+        }
+
+        #user-version:hover {
+            opacity: 0.8;
+        }
+
+        #last-updated {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            transition: opacity 0.2s ease;
+        }
+
+        #update-month {
+            font-weight: 500;
+        }
+
+        /* Accessibility improvements */
+        .footer-version [id] {
+            outline: none;
+            border-radius: 2px;
+        }
+
+        .footer-version [id]:focus-visible {
+            outline: 2px solid var(--color-accent-primary, #3b82f6);
+            outline-offset: 2px;
+            background: var(--color-bg-hover, rgba(59, 130, 246, 0.1));
         }
 
         .version-link, .resume-code-link, .commit-link {
@@ -2911,160 +2506,55 @@
             opacity: 0.8;
         }
 
-        /* Enterprise-grade version tracking styles */
-        .version-info {
-            font-family: var(--font-family-mono);
-            font-size: var(--font-size-xs);
-            line-height: 1.4;
+        /* Mobile optimizations for footer */
+        @media (max-width: 767px) {
+            .footer {
+                padding: 1.5rem 1rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .footer-main {
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+                text-align: center;
+                line-height: 1.3;
+            }
+            
+            #build-time {
+                font-size: 0.8rem;
+                display: block;
+                margin-top: 0.25rem;
+            }
+            
+            #build-timestamp {
+                font-size: 0.75rem;
+            }
+            
+            .app-info {
+                font-size: 0.75rem;
+                line-height: 1.3;
+            }
+            
+            #last-updated {
+                font-size: 0.7rem;
+            }
+            
+            .build-info {
+                font-size: 0.65rem;
+                margin-top: 0.25rem;
+            }
         }
 
-        .primary-version {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
-            flex-wrap: wrap;
-        }
-
-        .environment-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.375rem 0.75rem;
-            border-radius: 1.5rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-            text-decoration: none;
-            background-color: var(--env-color, var(--brand-500));
-            color: white;
-            border: 1px solid var(--env-color, var(--brand-500));
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease-out;
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .environment-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .environment-badge:hover::before {
-            left: 100%;
-        }
-
-        .environment-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            filter: brightness(1.1) saturate(1.1);
-        }
-
-        .environment-badge:active {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .env-icon {
-            font-size: 0.8em;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .environment-badge:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .env-production {
-            --env-color: #22c55e;
-        }
-
-        .env-staging {
-            --env-color: #f59e0b;
-        }
-
-        .env-preview {
-            --env-color: #3b82f6;
-        }
-
-        .env-development {
-            --env-color: #8b5cf6;
-        }
-
-        .build-metadata {
-            color: var(--color-text-secondary);
-            font-size: 0.65rem;
-        }
-
-        .build-number {
-            color: inherit;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .build-number:hover {
-            color: var(--brand-400);
-            text-decoration: underline;
-        }
-
-        .secondary-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.65rem;
-            color: var(--color-text-secondary);
-            margin-bottom: 0.25rem;
-            flex-wrap: wrap;
-        }
-
-        .build-time {
-            font-variant-numeric: tabular-nums;
-        }
-
-        .commits-ahead {
-            background-color: var(--color-accent-secondary);
-            color: var(--color-accent-primary);
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            font-size: 0.6rem;
-            font-weight: 500;
-        }
-
-        .deployment-links {
-            display: flex;
-            gap: 0.5rem;
-            font-size: 0.65rem;
-            margin-top: 0.25rem;
-        }
-
-        .deployment-links a {
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            background-color: var(--color-bg-secondary);
-            border: 1px solid var(--color-border);
-            transition: all 0.2s ease;
-        }
-
-        .deployment-links a:hover {
-            color: var(--brand-400);
-            background-color: var(--color-bg-tertiary);
-            border-color: var(--brand-500);
+        /* Enhanced responsive design for tablet and mobile */
+        @media (max-width: 480px) {
+            .footer-version {
+                gap: 0.1rem;
+            }
+            
+            .app-info {
+                text-align: center;
+                word-break: break-word;
+            }
         }
 
         @media (min-width: 768px) {
@@ -6685,134 +6175,26 @@ button.liquid-contact-card {
 
         <footer class="footer">
             <div class="footer-content">
-                <!-- Developer Brand Section -->
-                <div class="footer-brand">
-                    <div class="brand-text">
-                        <span class="made-with">Developed with</span>
-                        <span class="heart-icon">❤️</span>
-                        <span class="location">in Rio de Janeiro</span>
-                    </div>
-                    <div class="tech-stack">
-                        <span class="tech-badge">Node.js</span>
-                        <span class="tech-badge">Handlebars</span>
-                        <span class="tech-badge">Puppeteer</span>
-                        <span class="tech-badge">Docker</span>
-                        <span class="tech-badge">GitHub Actions</span>
-                        <span class="tech-badge">Netlify</span>
-                    </div>
+                <div class="footer-main">
+                    Developed with ❤️ in Rio de Janeiro • 
+                    <span class="no-print">Node.js + Docker + Puppeteer + Handlebars + GitHub Actions + Netlify • </span>
+                    <span id="build-time" class="no-print">Built at <span id="build-timestamp">loading...</span></span>
                 </div>
-
-                <!-- Enterprise Version Tracking -->
-                <div class="footer-tracking">
-                    <div class="version-control no-print">
-                        <!-- Environment & Version Row -->
-                        <div class="version-primary">
-                            <div class="env-version-group">
-                                <span class="environment-badge" id="environment-badge">
-                                    <span class="env-icon" id="env-icon">🟢</span>
-                                    <span id="app-environment">production</span>
-                                </span>
-                                <a href="https://github.com/rafilkmp3/resume-as-code/releases/tag/v1.3.0"
-                                   id="version-link"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   class="version-link"
-                                   title="View release notes">
-                                    <span class="version-label">v</span><span id="app-version">{{appVersion}}</span><span class="commits-ahead" id="commits-ahead" title="Commits since last release">{{commitsAhead}}</span>
-                                </a>
-                            </div>
-                            <div class="build-info-inline">
-                                <span class="build-separator">•</span>
-                                <a href="#" id="build-link" target="_blank" rel="noopener noreferrer" class="build-number" title="View build details">
-                                    <span class="build-icon">🔨</span>#<span id="build-number">{{buildNumber}}</span>
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <!-- Git & Deployment Row -->
-                        <div class="version-secondary">
-                            <a href="#"
-                               id="commit-link" 
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="commit-info"
-                               title="View this commit on GitHub">
-                                <span class="git-icon">⚡</span>
-                                <span id="commit-prefix">main@</span><span id="app-commit">dev-local</span>
-                            </a>
-                            <span class="info-separator">•</span>
-                            <span class="deploy-time" id="build-time" title="Build timestamp">{{buildTimestamp}}</span>
-                        </div>
-                        
-                        <!-- Quick Actions Row -->
-                        <div class="version-actions" id="deployment-links">
-                            <div class="quick-actions">
-                                <a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" rel="noopener noreferrer" class="action-link" title="View source code">
-                                    <span class="action-icon">📄</span>
-                                    <span class="action-text">Source</span>
-                                </a>
-                                <a href="https://github.com/rafilkmp3/resume-as-code/actions" target="_blank" rel="noopener noreferrer" class="action-link" title="View CI/CD pipelines">
-                                    <span class="action-icon">🚀</span>
-                                    <span class="action-text">Pipelines</span>
-                                </a>
-                                <button id="version-details-btn" class="action-link" title="View detailed version information">
-                                    <span class="action-icon">ℹ️</span>
-                                    <span class="action-text">Details</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Resume-as-Code Brand -->
-                    <div class="architecture-info no-print">
-                        <span class="architecture-text">Built with</span>
-                        <a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" rel="noopener noreferrer" class="resume-code-link">
-                            <strong>Resume-as-Code</strong>
+                <div class="footer-version">
+                    <!-- User-friendly visible footer with clickable contextual links -->
+                    <span class="app-info">
+                        © 2025 Rafael Sathler • 
+                        <a href="#" 
+                           id="version-context-link" 
+                           class="version-link no-print"
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           title="View version details">
+                            <span id="user-version">v{{appVersion}}</span>
                         </a>
-                        <span class="architecture-desc">• Infrastructure as Code</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Expandable Version Details Modal -->
-            <div id="version-details-modal" class="version-modal" style="display: none;">
-                <div class="version-modal-content liquid-glass-container">
-                    <div class="liquid-glass-highlight"></div>
-                    <div class="liquid-glass-shadow"></div>
-                    <div class="liquid-glass-illumination version-modal-inner">
-                        <div class="version-modal-header">
-                            <h3>Version Information</h3>
-                            <button id="version-modal-close" class="modal-close-btn">×</button>
-                        </div>
-                        <div class="version-modal-body">
-                            <div class="version-grid">
-                                <div class="version-item">
-                                    <span class="version-label">Environment</span>
-                                    <span class="version-value" id="modal-environment">Loading...</span>
-                                </div>
-                                <div class="version-item">
-                                    <span class="version-label">Version</span>
-                                    <span class="version-value" id="modal-version">Loading...</span>
-                                </div>
-                                <div class="version-item">
-                                    <span class="version-label">Commit</span>
-                                    <span class="version-value" id="modal-commit">Loading...</span>
-                                </div>
-                                <div class="version-item">
-                                    <span class="version-label">Build Time</span>
-                                    <span class="version-value" id="modal-build-time">Loading...</span>
-                                </div>
-                                <div class="version-item">
-                                    <span class="version-label">Build Number</span>
-                                    <span class="version-value" id="modal-build-number">Loading...</span>
-                                </div>
-                                <div class="version-item">
-                                    <span class="version-label">Branch</span>
-                                    <span class="version-value" id="modal-branch">main</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <span id="last-updated" class="no-print"> • Last updated <span id="update-month">Aug 2025</span></span>
+                    </span>
+                    <span class="build-info no-print">Built with <strong><a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" rel="noopener noreferrer" class="resume-code-link">Resume-as-Code</a></strong></span>
                 </div>
             </div>
         </footer>

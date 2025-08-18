@@ -168,6 +168,20 @@
   "certificates": [],
   "projects": [
     {
+      "name": "Resume-as-Code: Enterprise Version Management System",
+      "url": "https://github.com/rafilkmp3/resume-as-code",
+      "description": "Industry-standard resume generation platform with infrastructure-as-code principles, featuring multi-environment CI/CD, automated PDF generation, and comprehensive version management",
+      "highlights": [
+        "Built comprehensive CI/CD pipeline with GitHub Actions featuring automated testing, visual regression, and multi-environment deployments (staging, preview, production)",
+        "Implemented enterprise version management system with semantic versioning, automated changelogs, and industry-standard API endpoints (.well-known/version.json)",
+        "Architected component-based template system with Hot-reload development server, responsive design, and optimized asset management",
+        "Created automated PDF generation system using Puppeteer with multiple formats (screen-optimized, print-optimized, ATS-friendly) and QR code integration",
+        "Developed Docker-based build system with multi-platform support (ARM64/AMD64), comprehensive testing matrix, and performance optimization achieving 99.5% bandwidth reduction",
+        "Integrated advanced observability with Google Analytics 4, comprehensive logging, and technical metadata systems for debugging and monitoring"
+      ],
+      "keywords": ["Node.js", "Docker", "GitHub Actions", "Puppeteer", "Handlebars", "CI/CD", "Automated Testing", "PDF Generation", "Version Management", "DevOps", "Infrastructure-as-Code"]
+    },
+    {
       "name": "Self-Service Terraform Platform with Atlantis Integration",
       "url": "https://www.runatlantis.io/",
       "description": "Enterprise-grade GitOps platform enabling teams to self-apply Terraform through GitHub PR interface using Atlantis",

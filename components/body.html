@@ -454,24 +454,24 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <div class="footer-main">Developed with ❤️ in Rio de Janeiro</div>
+                <div class="footer-main">
+                    Developed with ❤️ in Rio de Janeiro • 
+                    <span class="no-print">Node.js + Docker + Puppeteer + Handlebars + GitHub Actions + Netlify • </span>
+                    <span id="build-time" class="no-print">Built at <span id="build-timestamp">loading...</span></span>
+                </div>
                 <div class="footer-version">
+                    <!-- User-friendly visible footer with clickable contextual links -->
                     <span class="app-info">
-                        <a href="https://github.com/rafilkmp3/resume-as-code/releases/tag/v1.3.0"
-                           id="version-link"
-                           target="_blank"
+                        © 2025 Rafael Sathler • 
+                        <a href="#" 
+                           id="version-context-link" 
+                           class="version-link no-print"
+                           target="_blank" 
                            rel="noopener noreferrer"
-                           class="version-link no-print">
-                            v<span id="app-version">{{appVersion}}</span>
-                        </a> • <span id="app-environment">production</span> •
-                        <a href="#"
-                           id="commit-link"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="commit-link no-print"
-                           title="View this commit on GitHub">
-                            <span id="app-commit">dev-local</span>
+                           title="View version details">
+                            <span id="user-version">v{{appVersion}}</span>
                         </a>
+                        <span id="last-updated" class="no-print"> • Last updated <span id="update-month">Aug 2025</span></span>
                     </span>
                     <span class="build-info no-print">Built with <strong><a href="https://github.com/rafilkmp3/resume-as-code" target="_blank" rel="noopener noreferrer" class="resume-code-link">Resume-as-Code</a></strong></span>
                 </div>

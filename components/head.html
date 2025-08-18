@@ -10,9 +10,17 @@
 
     <!-- Build metadata for cache busting and version tracking -->
     <meta name="generator" content="Resume-as-Code">
+    <meta name="app-version" content="{{appVersion}}">
+    <meta name="app-environment" content="development">
+    <meta name="app-channel" content="development">
+    <meta name="app-branch" content="development">
     <meta name="build-commit" content="dev-local">
     <meta name="build-timestamp" content="2025-01-08T00:00:00.000Z">
-    <meta name="app-version" content="{{appVersion}}">
+    <meta name="commits-ahead" content="3">
+    <meta name="last-release-tag" content="v4.1.0">
+    <meta name="github-run-id" content="">
+    <meta name="github-run-number" content="">
+    <meta name="github-pr-number" content="">
     <meta name="keywords" content="resume, cv, {{basics.name}}, {{basics.label}}, platform engineer, devops, cloud architect, aws, gcp, kubernetes">
 
     <!-- Cache busting headers -->
@@ -83,32 +91,156 @@
 
       // Enhanced event tracking will be loaded after DOM is ready
 
-      // Update footer with dynamic version info
+      // Enhanced version management system with hidden technical data
       document.addEventListener('DOMContentLoaded', function() {
-        const versionElement = document.getElementById('app-version');
-        const environmentElement = document.getElementById('app-environment');
-        const commitElement = document.getElementById('app-commit');
-        const versionLinkElement = document.getElementById('version-link');
-        const commitLinkElement = document.getElementById('commit-link');
+        // User-friendly footer elements
+        const userVersionElement = document.getElementById('user-version');
+        const updateMonthElement = document.getElementById('update-month');
+        const buildTimestampElement = document.getElementById('build-timestamp');
+        const versionContextLink = document.getElementById('version-context-link');
 
-        if (versionElement) versionElement.textContent = appVersion;
-        if (environmentElement) environmentElement.textContent = environment;
-        if (commitElement) commitElement.textContent = commitHash;
-
-        // Update version link URL dynamically
-        if (versionLinkElement && appVersion) {
-          const cleanVersion = appVersion.replace(/[^0-9.]/g, ''); // Remove non-numeric chars except dots
-          versionLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/releases/tag/v${cleanVersion}`;
+        // Build time display
+        if (buildTimestampElement) {
+          const buildDate = new Date(buildTimestamp);
+          const timeString = buildDate.toLocaleTimeString('en-US', { 
+            hour12: false, 
+            hour: '2-digit', 
+            minute: '2-digit'
+          });
+          buildTimestampElement.textContent = timeString;
         }
 
-        // Update commit link URL dynamically
-        if (commitLinkElement && commitHash && commitHash !== 'dev-local') {
-          commitLinkElement.href = `https://github.com/rafilkmp3/resume-as-code/commit/${commitHash.length === 7 ? commitHash + '...' : commitHash}`;
-          commitLinkElement.title = `View commit ${commitHash} on GitHub`;
-        } else if (commitLinkElement && commitHash === 'dev-local') {
-          commitLinkElement.href = 'https://github.com/rafilkmp3/resume-as-code';
-          commitLinkElement.title = 'Development build - view repository';
+        // Environment-specific display logic and contextual links
+        if (userVersionElement && versionContextLink) {
+          // Simplified version format with environment-specific enhancements
+          const majorMinor = appVersion.split('.').slice(0, 2).join('.');
+          let contextUrl = '#';
+          let linkTitle = 'View version details';
+          
+          if (environment === 'production') {
+            // Production: Clean version only, link to latest release
+            userVersionElement.textContent = `v${majorMinor}`;
+            contextUrl = `https://github.com/rafilkmp3/resume-as-code/releases/tag/${lastReleaseTag}`;
+            linkTitle = `View release ${lastReleaseTag}`;
+          } else if (environment === 'staging') {
+            // Staging: Show commits ahead, link to staging pipeline
+            const commitsAheadText = commitsAhead > 0 ? ` +${commitsAhead}` : '';
+            userVersionElement.textContent = `v${majorMinor}${commitsAheadText}`;
+            userVersionElement.style.color = '#f59e0b';
+            userVersionElement.style.fontWeight = '600';
+            contextUrl = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
+            linkTitle = 'View staging pipeline';
+          } else if (environment === 'preview') {
+            // Preview: Show commits ahead, link to PR
+            const commitsAheadText = commitsAhead > 0 ? ` +${commitsAhead}` : '';
+            userVersionElement.textContent = `v${majorMinor}${commitsAheadText}`;
+            userVersionElement.style.color = '#3b82f6';
+            userVersionElement.style.fontWeight = '600';
+            
+            // Extract PR number from URL if preview environment
+            const currentUrl = window.location.hostname;
+            const prMatch = currentUrl.match(/deploy-preview-(\d+)/);
+            if (prMatch) {
+              const prNumber = prMatch[1];
+              contextUrl = `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`;
+              linkTitle = `View Pull Request #${prNumber}`;
+            } else {
+              contextUrl = 'https://github.com/rafilkmp3/resume-as-code/pulls';
+              linkTitle = 'View pull requests';
+            }
+          } else {
+            // Development: Show branch info, link to repository
+            userVersionElement.textContent = `v${majorMinor} (${branchName})`;
+            userVersionElement.style.color = '#10b981';
+            userVersionElement.style.fontWeight = '600';
+            contextUrl = 'https://github.com/rafilkmp3/resume-as-code';
+            linkTitle = 'View repository';
+          }
+          
+          // Set the contextual link
+          versionContextLink.href = contextUrl;
+          versionContextLink.title = linkTitle;
         }
+
+        if (updateMonthElement) {
+          // Format timestamp to user-friendly month format
+          const buildDate = new Date(buildTimestamp);
+          const monthYear = buildDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            year: 'numeric' 
+          });
+          updateMonthElement.textContent = monthYear;
+          
+          // Environment-specific timestamp styling
+          if (environment !== 'production') {
+            updateMonthElement.style.fontSize = '0.875rem';
+            updateMonthElement.style.opacity = '0.8';
+          }
+        }
+
+        // Hidden Technical Data System - Console Logging
+        console.group('🔧 Resume-as-Code Technical Information');
+        console.log('📋 Version Information:');
+        console.table({
+          'App Version': appVersion,
+          'Environment': environment,
+          'Channel': channel,
+          'Branch': branchName,
+          'Commits Ahead': commitsAhead > 0 ? `+${commitsAhead}` : 'Release',
+          'Last Release': lastReleaseTag
+        });
+        
+        console.log('🏗️ Build Information:');
+        console.table({
+          'Commit Hash': commitHash,
+          'Build Timestamp': buildTimestamp,
+          'GitHub Run ID': runId || 'Local build',
+          'GitHub Run Number': runNumber || 'N/A',
+          'PR Number': prNumber || 'N/A'
+        });
+
+        console.log('🔗 Useful Links:');
+        const links = {};
+        if (environment === 'production') {
+          links['Latest Release'] = `https://github.com/rafilkmp3/resume-as-code/releases/tag/${lastReleaseTag}`;
+          links['Release Notes'] = `https://github.com/rafilkmp3/resume-as-code/releases`;
+        } else if (environment === 'staging') {
+          links['Staging Pipeline'] = 'https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml';
+          links['Compare Changes'] = compareUrl || `https://github.com/rafilkmp3/resume-as-code/compare/${lastReleaseTag}...${commitHash}`;
+        } else if (environment === 'preview' && prNumber) {
+          links['Pull Request'] = `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`;
+          links['PR Pipeline'] = contextUrl || `https://github.com/rafilkmp3/resume-as-code/actions`;
+        }
+        
+        if (commitHash !== 'dev-local') {
+          links['Commit Details'] = `https://github.com/rafilkmp3/resume-as-code/commit/${commitHash}`;
+        }
+        links['Repository'] = 'https://github.com/rafilkmp3/resume-as-code';
+        
+        console.table(links);
+        console.groupEnd();
+
+        // Add version API endpoint data to window for external access
+        window.resumeVersionAPI = {
+          version: appVersion,
+          environment: environment,
+          channel: channel,
+          branch: branchName,
+          commit: commitHash,
+          buildTimestamp: buildTimestamp,
+          commitsAhead: commitsAhead,
+          lastReleaseTag: lastReleaseTag,
+          runId: runId,
+          runNumber: runNumber,
+          prNumber: prNumber,
+          contextUrl: contextUrl,
+          compareUrl: compareUrl,
+          userFriendlyVersion: `v${appVersion.split('.').slice(0, 2).join('.')}`,
+          lastUpdated: new Date(buildTimestamp).toLocaleDateString('en-US', { 
+            month: 'short', 
+            year: 'numeric' 
+          })
+        };
       });
     </script>
 

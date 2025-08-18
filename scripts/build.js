@@ -338,6 +338,22 @@ async function generateHTML(resumeData, templatePath, options = {}) {
     `$1${buildTimestamp}$2`);
   html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
     `$1${appVersion}$2`);
+  html = html.replace(/(<meta name="app-environment" content=")[^"]*(")/,
+    `$1${environment}$2`);
+  html = html.replace(/(<meta name="app-channel" content=")[^"]*(")/,
+    `$1${versionInfo.channel}$2`);
+  html = html.replace(/(<meta name="app-branch" content=")[^"]*(")/,
+    `$1${buildBranch}$2`);
+  html = html.replace(/(<meta name="commits-ahead" content=")[^"]*(")/,
+    `$1${commitsSinceRelease}$2`);
+  html = html.replace(/(<meta name="last-release-tag" content=")[^"]*(")/,
+    `$1${lastReleaseTag}$2`);
+  html = html.replace(/(<meta name="github-run-id" content=")[^"]*(")/,
+    `$1${githubRunId}$2`);
+  html = html.replace(/(<meta name="github-run-number" content=")[^"]*(")/,
+    `$1${githubRunNumber}$2`);
+  html = html.replace(/(<meta name="github-pr-number" content=")[^"]*(")/,
+    `$1${prNumber}$2`);
   
   // Add enhanced version metadata for industry standards
   html = html.replace(/(<meta name="app-version" content="[^"]*">)/,
