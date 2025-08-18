@@ -1,6 +1,7 @@
 ---
-# Practical pre-commit hooks for resume-as-code
-# Focus: Only essential quality gates that add real value
+# FAST & ESSENTIAL PRE-COMMIT HOOKS
+# Philosophy: Only fail on issues that MUST be caught at commit time
+# Everything else handled in CI/CD for speed
 
 repos:
   # NON-NEGOTIABLE: Conventional Commits validation for release-please
@@ -10,34 +11,3 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: [optional-scope]
-
-  # Essential JSON validation (prevents broken builds)
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: check-json
-      - id: check-yaml
-      - id: check-merge-conflict
-
-  # Resume data validation (CRITICAL: Project-specific)
-  - repo: local
-    hooks:
-      - id: resume-data-validation
-        name: Resume JSON Schema validation
-        entry: bash
-        args:
-          - '-c'
-          - 'npx ajv-cli validate -s config/resume-schema.json -d src/resume-data.json && echo "✅ resume-data passes validation"'
-        language: system
-        files: src/resume-data\.json$
-        pass_filenames: false
-
-  # npm audit (security without being annoying)
-  - repo: local
-    hooks:
-      - id: npm-audit
-        name: npm audit
-        entry: npm audit --audit-level=high
-        language: system
-        files: package.*\.json$
-        pass_filenames: false
