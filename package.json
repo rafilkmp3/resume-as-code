@@ -32,7 +32,10 @@
     "perf:build": "node scripts/performance-monitor.js build",
     "perf:test": "node scripts/performance-monitor.js test",
     "ux:analyze": "node scripts/ux-analyzer.js",
-    "accessibility:audit": "node scripts/accessibility-audit.js"
+    "accessibility:audit": "node scripts/accessibility-audit.js",
+    "resume:update": "node scripts/resume-auto-updater.js",
+    "resume:update:dry-run": "node scripts/resume-auto-updater.js --dry-run",
+    "resume:update:config": "node scripts/resume-auto-updater.js --config"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",
