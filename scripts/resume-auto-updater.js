@@ -507,6 +507,7 @@ class ResumeAutoUpdater {
             
             // Ensure we're back on main branch
             try {
+                const { execSync } = require('child_process');
                 execSync('git checkout main');
             } catch (checkoutError) {
                 console.error('❌ Failed to switch back to main branch:', checkoutError.message);
