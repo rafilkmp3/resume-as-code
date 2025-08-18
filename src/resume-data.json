@@ -176,7 +176,8 @@
         "Integrated Atlantis with GitHub PR workflows for automated Terraform plan/apply via PR comments",
         "Implemented GitOps workflows with Terragrunt and Atlantis allowing teams to apply infrastructure changes seamlessly",
         "Created secure multi-environment promotion pipelines with Atlantis server reducing deployment time from days to minutes",
-        "Established governance controls with policy-as-code using Sentinel and OPA integrated with Atlantis workflows"
+        "Established governance controls with policy-as-code using Sentinel and OPA integrated with Atlantis workflows",
+        "Released vmain with enhanced industry-standard version management and comprehensive CI/CD pipeline"
       ],
       "keywords": [
         "Terraform",
@@ -415,5 +416,17 @@
         "Problem solving"
       ]
     }
-  ]
+  ],
+  "meta": {
+    "lastUpdated": "2025-08-18",
+    "availability": {
+      "status": "open_to_work",
+      "icon": "🟢",
+      "text": "Open to Work",
+      "types": [
+        "Full-time",
+        "Contract"
+      ]
+    }
+  }
 }
