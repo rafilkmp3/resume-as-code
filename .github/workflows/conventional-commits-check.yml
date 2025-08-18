@@ -27,9 +27,15 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install conventional-commits-parser
+      - name: Install commitlint (same as local)
         run: |
-          npm install -g @commitlint/cli @commitlint/config-conventional
+          # Use same installation method as local development
+          if command -v brew &> /dev/null; then
+            brew install commitlint
+          else
+            # Fallback for non-macOS runners
+            npm install -g @commitlint/cli @commitlint/config-conventional
+          fi
 
       - name: Create commitlint config
         run: |
