@@ -27,15 +27,9 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install commitlint (same as local)
+      - name: Install commitlint
         run: |
-          # Use same installation method as local development
-          if command -v brew &> /dev/null; then
-            brew install commitlint
-          else
-            # Fallback for non-macOS runners
-            npm install -g @commitlint/cli @commitlint/config-conventional
-          fi
+          npm install -g @commitlint/cli @commitlint/config-conventional
 
       - name: Create commitlint config
         run: |
