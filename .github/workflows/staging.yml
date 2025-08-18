@@ -48,6 +48,8 @@ jobs:
   build:
     name: Build for Netlify Staging (${{ github.event.inputs.deployment_mode || 'normal' }} mode)
     runs-on: ubuntu-latest
+    # Skip staging builds for release commits - those should only trigger production
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     timeout-minutes: 10
     env:
       DOCKER_BUILDKIT: 1
