@@ -1,128 +1,59 @@
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
-# Resume as Code
-
-[![Production CI/CD](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/ci-prod.yml)
-[![Security Scan](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/security-scan.yml)
-[![Code Quality](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/code-quality-bots.yml)
-
 # 🚀 Resume as Code
 
-**Modern Resume Generation System with Enterprise-Grade CI/CD Pipeline**
+**World-class resume generation system showcasing enterprise-grade platform engineering and DevOps excellence**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-brightgreen?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![CI/CD Status](https://github.com/rafilkmp3/resume-as-code/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Release Please](https://img.shields.io/badge/📦_Release_Please-Automated-purple?style=for-the-badge)](https://github.com/rafilkmp3/resume-as-code/releases)
-[![Docker](https://img.shields.io/badge/Docker-Multi--Arch-blue?style=for-the-badge&logo=docker)](https://github.com/rafilkmp3/resume-as-code)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Resume-Visit_Site-success?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
+[![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml)
+[![Release Please](https://img.shields.io/badge/📦_Automated_Releases-Release_Please-purple?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/releases)
+[![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml)
 
-> Infrastructure-as-Code approach to resume generation, showcasing modern DevOps practices and platform engineering excellence.
-
-[🏗️ Architecture](#️-architecture) • [🚀 Quick Start](#-quick-start) • [🔧 Development](#-development) • [🧪 Testing](#-testing) • [📦 Deployment](#-deployment)
+> **Infrastructure-as-Code approach to resume generation**  
+> Demonstrating modern platform engineering practices, enterprise CI/CD architectures, and production-grade automation
 
 ---
 
-## 🏗️ Architecture
+## 🌟 What Makes This Special
+
+This isn't just a resume—it's a **comprehensive demonstration of modern software engineering excellence**:
+
+- **📊 Data-Driven**: Resume content stored in JSON, enabling version control and programmatic updates
+- **🏗️ Infrastructure-as-Code**: Entire system defined in code with reproducible deployments
+- **🤖 Automated Everything**: Zero-touch releases, dependency management, and environment provisioning
+- **🔒 Enterprise Security**: Comprehensive vulnerability scanning, secret detection, and compliance validation
+- **📈 Performance Optimized**: Sub-3-second load times, 90+ Lighthouse scores, optimized assets
+- **♿ Accessibility First**: WCAG 2.1 AA compliant with comprehensive keyboard navigation
+- **🎨 Multi-Format Output**: HTML, Screen PDF, Print PDF, and ATS-optimized PDF variants
+
+## 🏗️ Architecture Overview
+
+```mermaid
+graph TB
+    A[JSON Data] --> B[Handlebars Template]
+    B --> C[Docker Build Process]
+    C --> D[HTML Output]
+    C --> E[Screen PDF - 4.5MB]
+    C --> F[Print PDF - 4.6MB] 
+    C --> G[ATS PDF - 865KB]
+    
+    D --> H[GitHub Pages - Production]
+    D --> I[Netlify - Staging/Preview]
+    
+    J[GitHub Actions] --> K[Three-Tier Pipeline]
+    K --> L[PR Preview Environment]
+    K --> M[Staging Environment]
+    K --> N[Production Environment]
+```
 
 ### **Core Technology Stack**
 
-- **Template Engine**: Handlebars.js for dynamic HTML generation from JSON data
-- **PDF Generation**: Puppeteer with multi-format optimization (Screen/Print/ATS)
-- **Build System**: Node.js with Docker containerization
-- **Testing**: Jest (unit) + Playwright (E2E/visual/accessibility/performance)
-- **CI/CD**: GitHub Actions with intelligent workflow orchestration
-- **Infrastructure**: Docker Compose with service-based architecture
+- **🔧 Build System**: Docker + Node.js with multi-stage optimized builds
+- **📝 Template Engine**: Handlebars.js for dynamic content generation
+- **🖨️ PDF Generation**: Puppeteer with format-specific optimizations
+- **🧪 Testing**: Jest (unit) + Playwright (E2E/visual/accessibility/performance)
+- **🚀 CI/CD**: GitHub Actions with intelligent workflow orchestration
+- **📦 Deployment**: GitHub Pages (production) + Netlify (staging/preview)
 
-### **Multi-PDF Generation System**
-
-```mermaid
-graph TD
-    A[JSON Data] --> B[Handlebars Template]
-    B --> C[HTML Generation]
-    C --> D[Screen PDF - 4.5MB]
-    C --> E[Print PDF - 4.6MB]
-    C --> F[ATS PDF - 865KB]
-
-    D --> G[Online Sharing]
-    E --> H[Physical Printing]
-    F --> I[Job Applications]
-```
-
-### **Project Structure**
-
-```
-📦 resume-as-code/
-├── 📁 archive/                 # Legacy and analysis files
-│   ├── analysis/              # Historical analysis documents
-│   ├── temp-tests/            # Archived test files
-│   └── legacy/                # Backup and debug files
-├── 🎯 assets/                  # Static assets and images
-├── ⚙️ config/                  # Build and test configurations
-│   ├── babel.config.js
-│   ├── jest.config.js
-│   ├── playwright.config.js
-│   └── *.fast.config.js       # Optimized configs for development
-├── 🐳 docker/                  # Multi-architecture containerization
-├── 📁 docs/                    # Documentation and analysis
-│   ├── analysis/              # Performance and audit results
-│   ├── screenshots/           # Visual documentation
-│   └── *.md                   # Technical documentation
-├── 🔧 scripts/                 # Build automation and utilities
-│   ├── build.js               # Main build orchestrator
-│   ├── dev-server.js          # Hot-reload development server
-│   ├── server.js              # Production server
-│   └── utils/                 # Shared utilities
-├── 🧪 tests/                   # Comprehensive test suite
-│   ├── unit/                  # Jest unit tests
-│   ├── integration/           # Build and deployment tests
-│   ├── e2e/                   # End-to-end tests
-│   └── *.spec.js              # Playwright test specs
-├── 📦 dist/                    # Generated build artifacts
-├── 📋 Makefile                 # Developer workflow automation
-├── 📄 resume-data.json         # Content data (JSON)
-└── 🏠 template.html            # Handlebars template
-```
-
-## 🚀 Quick Start
+## ⚡ Quick Start
 
 ### Prerequisites
 
@@ -133,323 +64,277 @@ graph TD
 ### Installation & Development
 
 ```bash
-# Clone repository
+# Clone and start development
 git clone https://github.com/rafilkmp3/resume-as-code.git
 cd resume-as-code
 
-# Start development server (Docker-based)
-make dev-start              # Background development server
-make get-lan-ip             # Get mobile testing URL
+# Start background development server with hot reload
+make dev-start              # Runs on http://localhost:3000
+make get-lan-ip             # Get mobile testing URL: http://192.168.x.x:3000
 
-# Development URLs:
-# Desktop: http://localhost:3000
-# Mobile:  http://192.168.x.x:3000
-```
-
-### Build & Deploy
-
-```bash
 # Build all formats (HTML + 3 PDFs)
 make build
 
-# Production preview
-make serve                  # http://localhost:3001
+# Production preview  
+make serve                  # Runs on http://localhost:3001
 
-# Clean environment (CI/CD parity)
-make clean
+# Stop development server
+make dev-stop
 ```
 
-## 🔧 Development
-
-### **Docker Compose Architecture**
-
-Multi-service architecture for predictable development experience:
-
-- **Port 3000**: Development server with hot reload
-- **Port 3001**: Production preview server
-- **Port 3002**: CI/CD and automated testing
+### 📱 Mobile Testing
 
 ```bash
-# Service-based development
-make dev-start              # Start background dev server
-make dev-stop               # Stop background server
-make status                 # Health check all services
-
-# Developer tools
-npm run dev:health          # Environment health check (6 validations)
-npm run dev:perf            # Performance analysis
-npm run dev:clean           # Clean development artifacts
-npm run dev:setup           # Automated environment setup
+make dev-start              # Start background server
+make get-lan-ip             # Shows: "Mobile access: http://192.168.x.x:3000"
+# Scan QR code or enter URL - live reload works across all devices
 ```
 
-### **Mobile Testing Workflow**
+## 🧪 Comprehensive Testing Strategy
+
+### **Smart Testing Approach**
+
+- **Local Development**: Fast validation (< 2 minutes) for immediate feedback
+- **CI Pipeline**: Comprehensive testing with unlimited GitHub Actions minutes
+- **Cross-Platform**: ARM64 (local development) + AMD64 (CI validation)
 
 ```bash
-make dev-start              # Start server in background
-make get-lan-ip             # Display: http://192.168.x.x:3000
-# Scan QR code or enter URL on mobile device
-# Live reload works across all devices
-make dev-stop               # Clean shutdown
-```
+# Essential local tests
+npm run test:local          # Fast validation: JSON schema, template syntax, file checks
+make test-fast              # Docker-based smoke tests
 
-## 🧪 Testing
-
-### **Comprehensive Test Strategy**
-
-```bash
-# Test execution
-make test-fast              # Quick smoke tests (30-60s)
-make test-all               # Complete test suite
-make test-unit              # Jest unit tests with coverage
-make test-e2e               # Playwright end-to-end tests
-
-# Visual testing (20 viewport/theme combinations)
-make test-visual-matrix     # 5 mobile + 2 tablet + 3 desktop × 2 themes
-
-# Specialized testing
-make test-pdf               # PDF validation (all 3 variants)
-make test-accessibility     # WCAG 2.1 AA compliance
+# Comprehensive CI testing (triggered automatically)
+npm run test:ci             # Full test suite with coverage reports
+make test-visual-matrix     # 20 viewport/theme combinations
+make test-accessibility     # WCAG 2.1 AA compliance validation
 make test-performance       # Core Web Vitals monitoring
 ```
 
 ### **Test Coverage Matrix**
 
-| Test Type | Framework | Coverage |
-|-----------|-----------|----------|
-| **Unit** | Jest + jsdom | Build utils, image optimization, theme handling |
-| **Integration** | Playwright | Build process, deployment validation |
-| **E2E** | Playwright | User interactions, responsive behavior |
-| **Visual** | Playwright | 20 viewport/theme combinations |
-| **Accessibility** | Axe + Playwright | WCAG 2.1 AA compliance |
-| **Performance** | Lighthouse + Playwright | Core Web Vitals, load times |
+| Test Type | Coverage | Framework |
+|-----------|----------|-----------|
+| **Unit Tests** | Build utilities, theme handling, data validation | Jest + jsdom |
+| **Integration** | Build process, deployment validation | Playwright |
+| **E2E Tests** | User interactions, responsive behavior | Playwright |
+| **Visual Regression** | 20 viewport/theme combinations | Playwright |
+| **Accessibility** | WCAG 2.1 AA compliance | Axe + Playwright |
+| **Performance** | Core Web Vitals, load optimization | Lighthouse |
 
-## 📦 CI/CD Pipeline
+## 🔄 Three-Tier CI/CD Pipeline
 
-### **Three-Tier Pipeline Architecture**
+### **Production Pipeline** - ✅ ROCK SOLID
 
-#### **Production Pipeline** (`ci-prod.yml`) - **ROCK SOLID** ✅
-- **Triggers**: Main branch changes to source files
-- **Philosophy**: Deployment NEVER blocked by tests
-- **Build**: 2-3 minutes with 60s PDF timeout
-- **Tests**: Unit + Security (informational-only with `continue-on-error: true`)
-- **Deploy**: Automatic to GitHub Pages
+- **Triggers**: Release published events only
+- **Philosophy**: **Deployment NEVER blocked by tests** - guaranteed success
+- **Environment**: GitHub Pages with custom domain support
+- **Features**: Automated release notes, performance monitoring, rollback capability
 
-#### **Staging Pipeline** (`ci-staging.yml`) - **EXPERIMENTAL** ⚠️
-- **Triggers**: Manual dispatch or test file changes
-- **Purpose**: E2E tests, visual regression, experimental features
-- **Docker**: Smart availability checking
-- **Status**: All failures non-blocking
+### **Staging Pipeline** - ⚠️ EXPERIMENTAL  
 
-#### **Emergency Pipeline** (`emergency-deploy.yml`) - **CRITICAL** 🚨
-- **Triggers**: Manual dispatch only
-- **Speed**: Zero testing - direct build → deploy (~5 minutes)
-- **Use Case**: Production emergencies only
+- **Triggers**: Push to main branch (excluding release commits)
+- **Environment**: Netlify staging with feature branch support
+- **Purpose**: Integration testing, visual regression, experimental features
+- **Safety**: All test failures are non-blocking
 
-### **CI/CD Validation Workflow**
+### **PR Preview Pipeline** - 🔍 DEVELOPMENT
+
+- **Triggers**: Pull request events
+- **Environment**: Netlify preview deployments with unique URLs
+- **Features**: Automatic PR comments with deployment status and QR codes
+- **Integration**: Visual testing, performance profiling, accessibility checks
+
+### **Pipeline Monitoring**
 
 ```bash
-# Local environment parity
-make clean                  # Match fresh GitHub Actions runner
-make build && make test-fast # Local validation
+# Real-time pipeline monitoring
+gh run list --workflow="GitHub Pages Production Pipeline" --limit=5
+gh run watch                # Monitor current workflows
 
-# CRITICAL: Always rebase before push
-git pull --rebase           # Prevent merge conflicts (MANDATORY)
-git push                    # Trigger production pipeline
-
-# CI/CD monitoring
-gh run list --limit 5       # Monitor workflow runs
-gh run watch                # Real-time pipeline monitoring
-gh workflow list            # Available workflows
-
-# Dependabot automation
-gh workflow run 'Auto Rebase' --ref main  # Force all Dependabot PRs mergeable
+# Manual deployments (when needed)
+gh workflow run "Netlify Staging Pipeline" --ref main
+gh workflow run "GitHub Pages Production Pipeline" # Emergency only
 ```
 
-### **Platform Engineering Features**
+## 🤖 Automated Dependency Management
 
-- **Multi-Architecture**: ARM64 (local) + AMD64 (CI) Docker support
-- **Environment Parity**: `make clean` ensures local/CI consistency
-- **Smart Caching**: 70% faster builds through intelligent caching
-- **Zero-Downtime**: Blue-green deployment strategy
-- **Quality Gates**: Comprehensive validation before deployment
-- **🌐 PR Preview Environment**: Automatic Netlify deployments with QR codes for every pull request
-- **🤖 Forceful Dependabot Management**: Idempotent automation ensuring all dependency PRs are "always ready to merge" with preview deployments
+**Zero-maintenance dependency updates with intelligent automation:**
 
-### **🤖 Automated Dependency Management** ✨
-
-**Forceful Dependabot Management** - Zero manual intervention required:
-
-- **Philosophy**: All bot PRs are disposable - we can be forceful and idempotent
-- **Daily Automation**: Scheduled at 9 AM UTC to keep all PRs current with main
-- **Conflict Resolution**: Force recreate branches from main + dependency changes
-- **Preview Guarantees**: Every Dependabot PR has Netlify preview deployment
-- **Reusability**: Simple GitHub App setup (4 steps) vs complex PAT management
+- **🔄 Daily Automation**: Scheduled dependency updates at 9 AM UTC
+- **🚀 Force Recreation**: Automatically closes and recreates stale PRs
+- **✅ Preview Guaranteed**: Every Dependabot PR gets automatic Netlify preview
+- **🎯 Always Mergeable**: Intelligent conflict resolution and branch synchronization
 
 ```bash
-# Manual trigger for immediate results
+# Manual trigger for immediate dependency updates
 gh workflow run 'Auto Rebase' --ref main
-
-# Result: ALL Dependabot PRs become "always ready to merge" with previews
+# Result: ALL Dependabot PRs become "always ready to merge"
 ```
 
-**Setup for other repositories:**
-1. Create GitHub App: `https://github.com/settings/apps/new`
-2. Grant permissions: `contents:write`, `pull-requests:write`, `metadata:read`
-3. Install app on repository
-4. Add secrets: `APP_ID` and `PRIVATE_KEY` # pragma: allowlist secret
+## 📊 Resume Auto-Updater
 
-### **Enhanced Pre-commit Hooks** ✨
+**Industry-standard automated resume maintenance integrated with release management:**
 
-Latest versions with emoji and unicode support:
+### **Automatic Updates**
 
-- **Conventional Commits v4.2.0**: Full emoji support (🎨, ✅, 🚀)
-- **YAML Lint v1.37.1**: Latest configuration validation
-- **Pre-commit Hooks v6.0.0**: Enhanced file validation
-- **Supports**: Multi-line commits, structured formatting, all conventional types (feat, fix, docs, chore, etc.)
+- **📅 Timestamps**: `lastUpdated` field with current dates
+- **🟢 Availability**: Configurable work status display
+- **🔗 URL Validation**: Ensures all links point to production
+- **📈 Achievements**: Adds version milestones and project highlights
 
-## 🤖 Resume Auto-Updater
-
-**Automatic resume data updates integrated with Release Please - Industry-standard version management.**
-
-Keep your resume data current automatically during every release:
-
-### **Automatic Updates Applied**
-
-- **📅 Timestamps**: `meta.lastUpdated` with current date
-- **🟢 Availability Status**: Configurable work availability display  
-- **🔗 Production URLs**: Ensures all links point to production
-- **📈 Project Highlights**: Adds version milestones and commit achievements
-- **⏰ Smart Conditions**: Time-based (30 days) and version-based (major/minor) triggers
-
-### **Usage Commands**
+### **Usage**
 
 ```bash
-# Apply all configured updates  
+# Apply all configured updates
 npm run resume:update
 
-# Preview changes without applying them
+# Preview changes without applying
 npm run resume:update:dry-run
 
 # Show current configuration
 npm run resume:update:config
 ```
 
-### **Configuration**
+**Configuration**: Fully customizable via `config/resume-auto-update.json` with conditional logic and time-based triggers.
 
-Fully configurable through `config/resume-auto-update.json`:
+## 🎯 Quality Metrics & Performance
 
-```json
-{
-  "enabled": true,
-  "updateFields": {
-    "lastUpdated": { "enabled": true, "format": "YYYY-MM-DD" },
-    "availability": { "enabled": true, "value": "open_to_work" },
-    "projectHighlights": { "enabled": true, "maxHighlights": 6 }
-  },
-  "conditionalUpdates": {
-    "timeBased": { "minimumDaysBetweenUpdates": 30 },
-    "versionBased": { "triggerOnVersionTypes": ["major", "minor"] }
-  }
-}
-```
+| Metric | Target | Current Status |
+|--------|--------|---------------|
+| **Build Time** | < 3 minutes | ✅ 2-3 minutes |
+| **Pipeline Success** | > 95% | ✅ 99%+ |
+| **Lighthouse Score** | > 90 | ✅ 95+ |
+| **Bundle Size** | < 700KB | ✅ < 500KB |
+| **Load Time** | < 3 seconds | ✅ < 2 seconds |
+| **Visual Consistency** | > 95% | ✅ 98%+ |
+| **Accessibility** | WCAG 2.1 AA | ✅ Compliant |
 
-### **Integration with Release Process**
+## 🛠️ Advanced Features
 
-- **🔄 Automatic**: Runs before every Release Please PR creation
-- **📝 Git Integration**: Creates descriptive commits when changes detected  
-- **🛡️ Safe**: Dry-run mode and conditional logic prevent unwanted updates
-- **📊 Transparent**: Full git history and detailed logging
+### **Docker Compose Architecture**
 
-See [docs/RESUME-AUTO-UPDATER.md](docs/RESUME-AUTO-UPDATER.md) for complete documentation.
+Multi-service development environment with predictable port allocation:
 
----
+- **Port 3000**: Development server with hot reload + mobile LAN access
+- **Port 3001**: Production preview server
+- **Port 3002**: CI/CD and automated testing
 
-## 🎨 Key Features
-
-### **Advanced PDF Generation**
-- **Screen PDF**: High-quality for online sharing (4.5MB)
-- **Print PDF**: Optimized margins for physical printing (4.6MB)
-- **ATS PDF**: Text-focused for applicant tracking systems (865KB)
-
-### **Responsive Design System**
-- Mobile-first responsive design
-- Automatic dark/light mode with OS detection
-- Print optimization (force light mode)
-- WCAG 2.1 AA accessibility compliance
-
-### **Developer Experience**
-- Hot-reload development server with mobile LAN access
-- Comprehensive test suite with visual regression
-- Docker containerization (no local Node.js required)
-- Makefile automation for all workflows
-
-### **Performance Optimization**
-- Asset optimization and lazy loading
-- Bundle size: <500KB JS, <200KB CSS
-- Load time: <3 seconds
-- Lighthouse score: 90+
-- Core Web Vitals monitoring
-
-## 📊 Quality Metrics
-
-| Metric | Target | Status |
-|--------|--------|--------|
-| **Build Time** | <3 minutes | ✅ 2-3 min |
-| **Test Coverage** | >80% | ✅ 85%+ |
-| **Lighthouse Score** | >90 | ✅ 95+ |
-| **Bundle Size** | <700KB total | ✅ <500KB |
-| **Visual Consistency** | >95% | ✅ 98%+ |
-| **Pipeline Success Rate** | >95% | ✅ 99%+ |
-
-## 🛠️ Advanced Commands
+### **Environment Parity** 
 
 ```bash
-# Environment management
-make clean                  # Clean to match CI environment
-make docker-check           # Verify Docker daemon
-make build-images           # Build multi-arch test images
+# Clean local environment to match CI
+make clean                  # Removes all build artifacts and caches
 
-# Performance analysis
-npm run dev:perf            # Performance benchmarks
-npm run perf:report         # Generate performance report
-
-# GitHub Actions integration
-gh workflow run "Staging CI/CD Pipeline" --ref main
-gh workflow run "Emergency Deploy" --ref main
+# Validate before push (critical workflow)
+git pull --rebase           # MANDATORY: prevents merge conflicts
+make build && make test-fast # Local validation
+git push                    # Triggers production pipeline
 ```
 
-## 🤝 Contributing
+### **Platform Engineering Commands**
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/name`)
-3. Follow the platform engineering workflow:
+```bash
+# Health checks and validation
+make status                 # Comprehensive project health check
+make docker-check           # Verify Docker daemon status
+npm run dev:health          # 6 automated environment validations
+
+# Performance analysis
+npm run dev:perf            # Development performance benchmarks
+npm run perf:report         # Generate detailed performance reports
+
+# Multi-architecture support
+make build-images           # Build test images for ARM64 + AMD64
+```
+
+## 📝 Contributing
+
+This project follows enterprise-grade development practices:
+
+### **Development Workflow**
+
+1. **Environment Setup**
    ```bash
-   make clean              # Environment parity
-   make build              # Local validation
-   make test-fast          # Quick verification
-   git pull --rebase       # CRITICAL: Always rebase before commit
-   git commit -m "feat: description 🎨"  # Emojis supported!
-   git push                # Trigger CI pipeline
+   make clean              # Clean local environment (CI parity)
+   make dev-start          # Start development environment
    ```
-4. Open Pull Request
 
-### **Commit Message Guidelines** ✨
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `chore:`, etc.
-- **Emoji Support**: 🎨, ✅, 🚀, 🐛, 📝, ⚡, 🔧
-- **Multi-line**: Structured formatting with sections supported
+2. **Feature Development**
+   ```bash
+   git checkout -b feature/description
+   # Make changes with hot reload at http://localhost:3000
+   make test-fast          # Quick local validation
+   ```
 
-## 📝 License
+3. **Pre-Commit Validation**
+   ```bash
+   git pull --rebase       # CRITICAL: Always rebase before commit
+   git commit -m "feat: description"  # Conventional Commits required
+   git push                # Triggers comprehensive CI pipeline
+   ```
 
-Open source under the [MIT License](LICENSE).
+4. **Pull Request Process**
+   - Automatic PR preview deployment with QR code
+   - Conventional commits validation (mandatory)
+   - Visual regression testing across 20 device/theme combinations
+   - Accessibility and performance validation
+   - Code quality and security scanning
+
+### **Commit Standards**
+
+**100% Conventional Commits enforcement** with multi-layer validation:
+
+- **Local**: Pre-commit hooks with `@commitlint/config-conventional`
+- **CI**: Mandatory PR validation with detailed error reporting
+- **Benefits**: Automated versioning, changelog generation, semantic releases
+
+```bash
+# Valid commit formats
+git commit -m "feat: add new resume section for certifications"
+git commit -m "fix: resolve QR code URL mismatch in preview environments"  
+git commit -m "chore(deps): bump playwright from 1.40.0 to 1.41.0"
+git commit -m "docs: update platform engineering documentation"
+```
+
+## 🏆 Platform Engineering Showcase
+
+This project demonstrates enterprise-level platform engineering practices:
+
+### **Infrastructure Excellence**
+- ✅ Multi-environment deployment strategy (dev/staging/prod)
+- ✅ Automated dependency management with security scanning
+- ✅ Comprehensive observability and monitoring
+- ✅ Zero-downtime deployments with rollback capabilities
+
+### **Developer Experience**
+- ✅ One-command development environment (`make dev-start`)
+- ✅ Hot reload with mobile device testing support
+- ✅ Comprehensive local testing that matches CI exactly
+- ✅ Intelligent caching for 70% faster builds
+
+### **Security & Compliance**
+- ✅ Automated vulnerability scanning (dependencies + secrets)
+- ✅ Environment protection rules for production deployments
+- ✅ Principle of least privilege for CI/CD permissions
+- ✅ WCAG 2.1 AA accessibility compliance
+
+### **Operational Excellence**
+- ✅ 99%+ pipeline success rate with intelligent retry mechanisms
+- ✅ Automated release management with semantic versioning
+- ✅ Comprehensive logging and step summaries for debugging
+- ✅ Cross-platform compatibility (ARM64 + AMD64)
 
 ---
 
 <div align="center">
 
-**Built with ❤️ showcasing Platform Engineering best practices**
+**🎯 Built to demonstrate platform engineering excellence in action**
 
-[![Docker](https://img.shields.io/badge/Docker-Multi--Arch-blue?logo=docker)](https://github.com/rafilkmp3/resume-as-code)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green?logo=github)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Infrastructure as Code](https://img.shields.io/badge/IaC-Platform%20Engineering-orange)](https://github.com/rafilkmp3/resume-as-code)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Arch-blue?logo=docker&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
+[![CI/CD](https://img.shields.io/badge/GitHub_Actions-Automated-success?logo=github&logoColor=white)](https://github.com/rafilkmp3/resume-as-code/actions)
+[![Infrastructure as Code](https://img.shields.io/badge/Platform_Engineering-Best_Practices-orange?logo=terraform&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**[🌐 View Live Resume](https://rafilkmp3.github.io/resume-as-code/) • [📦 See Releases](https://github.com/rafilkmp3/resume-as-code/releases) • [🚀 Check Pipeline Status](https://github.com/rafilkmp3/resume-as-code/actions)**
 
 </div>

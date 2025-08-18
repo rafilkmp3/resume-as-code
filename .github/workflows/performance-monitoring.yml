@@ -71,24 +71,36 @@ jobs:
 
       - name: Serve site for testing
         run: |
-          npm install -g serve
-          serve -s dist -l 3000 &
+          echo "🚀 Starting production server on port 3000..."
+          PORT=3000 npm run serve &
           SERVER_PID=$!
           echo "Started server with PID: $SERVER_PID"
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           
           # Wait for server to be ready with health check
-          echo "Waiting for server to be ready..."
+          echo "⏳ Waiting for server to be ready..."
           for i in {1..30}; do
             if curl -f http://localhost:3000 >/dev/null 2>&1; then
-              echo "✅ Server is ready!"
+              echo "✅ Server is ready and responding!"
+              echo "📊 Server response check:"
+              curl -I http://localhost:3000
               break
             fi
-            echo "Attempt $i/30: Server not ready yet, waiting..."
+            echo "Attempt $i/30: Server not ready yet, waiting 2s..."
             sleep 2
           done
           
-          # Final verification
-          curl -f http://localhost:3000 || (echo "❌ Server failed to start" && exit 1)
+          # Final verification with detailed error reporting
+          if ! curl -f http://localhost:3000 >/dev/null 2>&1; then
+            echo "❌ Server failed to start or respond"
+            echo "🔍 Checking server logs and process status:"
+            ps aux | grep node || echo "No node processes found"
+            netstat -an | grep 3000 || echo "Port 3000 not listening"
+            ls -la dist/ || echo "No dist directory found"
+            exit 1
+          fi
+          
+          echo "🎉 Server ready for Lighthouse CI testing"
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
@@ -97,6 +109,15 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
           artifactName: lighthouse-results
+
+      - name: Cleanup server
+        if: always()
+        run: |
+          echo "🧹 Cleaning up server process..."
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID || echo "Server process already terminated"
+            echo "Server process $SERVER_PID terminated"
+          fi
 
   bundle-analysis:
     name: 📦 Bundle Size Analysis
