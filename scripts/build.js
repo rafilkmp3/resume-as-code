@@ -5,6 +5,8 @@ const Handlebars = require('handlebars');
 const { copyRecursive } = require('./utils/fs-utils');
 // Use proper Sharp-based optimization with WebP + JPEG support
 const { optimizeProfileImageForResume } = require('./utils/image-optimization');
+// Industry-standard version management
+const IndustryVersionManager = require('./version-manager');
 
 // Check for validation-only mode
 const isValidationOnly = process.argv.includes('--validate-only');
@@ -235,10 +237,18 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   let html = template(enhancedResumeData);
   console.log('✅ Template generated successfully with dynamic QR code support!');
 
-  // Enhanced environment detection for smart preview configuration
-  const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-  const appVersion = process.env.APP_VERSION || packageJson.version;
-  const buildBranch = process.env.GITHUB_REF_NAME || process.env.HEAD || process.env.BRANCH || 'main';
+  // Initialize industry-standard version management
+  console.log('🏢 Initializing industry-standard version management...');
+  const versionManager = new IndustryVersionManager();
+  const versionInfo = versionManager.getVersionObject();
+  const templateVars = versionManager.getTemplateVariables();
+  
+  // Display comprehensive version information (big tech style)
+  versionManager.displayVersionInfo();
+  
+  // Enhanced environment detection with industry-standard versioning
+  const appVersion = templateVars.appVersion; // Now from version manager
+  const buildBranch = versionInfo.gitBranch;
 
   // Build-time environment detection (more reliable than frontend detection)
   const isNetlifyPreview = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'deploy-preview';
@@ -247,61 +257,38 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   const isGitHubPages = process.env.GITHUB_PAGES === 'true';
   const isLocalDevelopment = !process.env.CI && !process.env.NETLIFY && !process.env.GITHUB_PAGES;
 
-  // Frontend environment variable for reliable detection
-  let frontendEnvironment;
-  if (isNetlifyPreview) {
-    frontendEnvironment = 'preview';
-  } else if (isNetlifyStaging || (process.env.NETLIFY === 'true' && !isNetlifyPreview)) {
-    frontendEnvironment = 'staging';
-  } else if (isGitHubPages) {
-    frontendEnvironment = 'production';
-  } else if (isLocalDevelopment) {
-    frontendEnvironment = 'development';
-  } else {
-    // Fallback for other CI contexts
-    frontendEnvironment = 'development';
-  }
+  // Use industry-standard environment detection from version manager
+  const frontendEnvironment = versionInfo.environment;
+  const environment = versionInfo.environment;
+  const environmentDetails = versionInfo.environmentDetails;
 
-  // Environment classification with detailed context
-  let environment, environmentDetails;
-  if (isNetlifyPreview) {
-    environment = 'preview';
-    environmentDetails = `Netlify PR Preview (#${process.env.REVIEW_ID || 'unknown'})`;
-  } else if (isNetlifyStaging || (process.env.NETLIFY === 'true' && !isNetlifyPreview)) {
-    environment = 'staging';
-    environmentDetails = `Netlify Staging`;
-  } else if (isGitHubPages) {
-    environment = 'production';
-    environmentDetails = 'GitHub Pages Production';
-  } else if (isLocalDevelopment) {
-    environment = 'development';
-    environmentDetails = 'Local Development';
-  } else {
-    environment = 'development';
-    environmentDetails = 'CI/CD Build Environment';
-  }
-
-  const commitHash = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || 'dev-local';
-  const commitShort = commitHash !== 'dev-local' ? commitHash.substring(0, 7) : 'dev-local';
-  const commitsSinceRelease = process.env.COMMITS_SINCE_RELEASE || '0';
-  const lastReleaseTag = process.env.LAST_RELEASE_TAG || 'none';
-  const buildTimestamp = new Date().toISOString();
+  // Use industry-standard version data from version manager
+  const commitHash = versionInfo.gitCommit;
+  const commitShort = versionInfo.gitCommitShort;
+  const commitsSinceRelease = versionInfo.gitCommitsSinceTag;
+  const lastReleaseTag = versionInfo.gitTag;
+  const buildTimestamp = versionInfo.buildDate;
+  const githubRunId = versionInfo.buildRunId;
+  const githubRunNumber = versionInfo.buildRunNumber;
 
   // PR-specific information for preview environments
-  const prNumber = process.env.REVIEW_ID || process.env.PR_NUMBER || '';
+  const prNumber = versionInfo.prNumber || '';
   const deployUrl = process.env.DEPLOY_URL || qrCodeUrl;
 
-  console.log('📊 Enhanced Version Information:');
-  console.log(`  App Version: ${appVersion}`);
+  console.log('📊 Industry-Standard Build Context:');
+  console.log(`  App Version: ${appVersion} (Display: ${versionInfo.displayVersion})`);
+  console.log(`  Enhanced Version: ${versionInfo.enhancedVersion}`);
   console.log(`  Environment: ${environment} (${environmentDetails})`);
-  console.log(`  Frontend Environment: ${frontendEnvironment} (injected into template)`);
+  console.log(`  Channel: ${versionInfo.channel}`);
   console.log(`  Build Branch: ${buildBranch}`);
   console.log(`  Deploy URL: ${deployUrl}`);
-  console.log(`  Commit: ${commitShort}`);
-  console.log(`  Commits since release: ${commitsSinceRelease}`);
-  console.log(`  Last release tag: ${lastReleaseTag}`);
+  console.log(`  Git Commit: ${commitShort} (${versionInfo.gitVersion})`);
+  console.log(`  Commits ahead: ${commitsSinceRelease} since ${lastReleaseTag}`);
   if (prNumber) {
     console.log(`  PR Number: #${prNumber}`);
+  }
+  if (githubRunId) {
+    console.log(`  Build Run: ${githubRunId} (#${githubRunNumber})`);
   }
 
   // Replace version placeholders in HTML
@@ -327,12 +314,14 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   html = html.replace(/const commitHash = '[^']*';/, `const commitHash = '${commitShort}';`);
   html = html.replace(/const buildTimestamp = '[^']*';/, `const buildTimestamp = '${buildTimestamp}';`);
-  html = html.replace(/const commitsSinceRelease = '\d+';/, `const commitsSinceRelease = '${commitsSinceRelease}';`);
+  html = html.replace(/const commitsAhead = \d+;/, `const commitsAhead = ${commitsSinceRelease};`);
   html = html.replace(/const lastReleaseTag = '[^']*';/, `const lastReleaseTag = '${lastReleaseTag}';`);
   html = html.replace(/const buildContext = '[^']*';/, `const buildContext = '${buildContext}';`);
   html = html.replace(/const prNumber = '[^']*';/, `const prNumber = '${prNumber}';`);
   html = html.replace(/const contextUrl = '[^']*';/, `const contextUrl = '${contextUrl}';`);
   html = html.replace(/const compareUrl = '[^']*';/, `const compareUrl = '${compareUrl}';`);
+  html = html.replace(/const runId = '[^']*';/, `const runId = '${githubRunId}';`);
+  html = html.replace(/const runNumber = '[^']*';/, `const runNumber = '${githubRunNumber}';`);
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/,
@@ -342,13 +331,30 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/<span id="commits-since-release">[^<]*<\/span>/,
     `<span id="commits-since-release">${commitsSinceRelease}</span>`);
 
-  // Update meta tags with build information
+  // Update meta tags with industry-standard build information
   html = html.replace(/(<meta name="build-commit" content=")[^"]*(")/,
     `$1${commitShort}$2`);
   html = html.replace(/(<meta name="build-timestamp" content=")[^"]*(")/,
     `$1${buildTimestamp}$2`);
   html = html.replace(/(<meta name="app-version" content=")[^"]*(")/,
     `$1${appVersion}$2`);
+  
+  // Add enhanced version metadata for industry standards
+  html = html.replace(/(<meta name="app-version" content="[^"]*">)/,
+    `$1\n    <meta name="enhanced-version" content="${versionInfo.enhancedVersion}">
+    <meta name="git-version" content="${versionInfo.gitVersion}">
+    <meta name="build-channel" content="${versionInfo.channel}">
+    <meta name="deployment-context" content="${versionInfo.deploymentContext}">`);
+  
+  // Generate and write version API endpoint (.well-known/version.json)
+  console.log('📄 Generating industry-standard version API endpoint...');
+  try {
+    const versionApiPath = versionManager.writeVersionAPI('./dist');
+    console.log(`✅ Version API endpoint: ${versionApiPath}`);
+    console.log(`🌐 Access via: ${deployUrl}/.well-known/version.json`);
+  } catch (error) {
+    console.warn('⚠️ Failed to generate version API:', error.message);
+  }
 
   // Inject livereload script for development mode
   const isDevelopment = process.env.NODE_ENV === 'development' || isDraft;

@@ -55,6 +55,11 @@
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
       const commitsAhead = 3; // Auto-updated with commits since last release during build  
       const lastReleaseTag = 'v4.1.0'; // Auto-updated with last release tag during build
+      const runId = ''; // Auto-updated with GitHub Actions run ID during build
+      const runNumber = ''; // Auto-updated with GitHub Actions run number during build
+      const prNumber = ''; // Auto-updated with PR number during build
+      const contextUrl = ''; // Auto-updated during build
+      const compareUrl = ''; // Auto-updated during build
       const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
       const branchName = isGitHubPages ? 'main' : 'development';
 
@@ -6701,8 +6706,11 @@ button.liquid-contact-card {
                     </div>
                     <div class="tech-stack">
                         <span class="tech-badge">Node.js</span>
+                        <span class="tech-badge">Handlebars</span>
+                        <span class="tech-badge">Puppeteer</span>
                         <span class="tech-badge">Docker</span>
                         <span class="tech-badge">GitHub Actions</span>
+                        <span class="tech-badge">Netlify</span>
                     </div>
                 </div>
 

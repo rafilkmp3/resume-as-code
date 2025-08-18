@@ -102,20 +102,38 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Calculate commits ahead for version display
+        id: version_info
+        run: |
+          # Get latest release tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          
+          # Calculate commits ahead of latest release
+          COMMITS_AHEAD=$(git rev-list --count ${LATEST_TAG}..HEAD 2>/dev/null || echo "0")
+          echo "commits_ahead=${COMMITS_AHEAD}" >> $GITHUB_OUTPUT
+          
+          echo "🔖 Version Information:"
+          echo "  Latest Release: ${LATEST_TAG}"
+          echo "  Commits Ahead: ${COMMITS_AHEAD}"
+
       - name: Build Preview with Docker
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          LATEST_TAG: ${{ steps.version_info.outputs.latest_tag }}
+          COMMITS_AHEAD: ${{ steps.version_info.outputs.commits_ahead }}
         run: |
           echo "🏗️ Building preview for PR #${PR_NUMBER}"
+          echo "📊 Version: ${LATEST_TAG} +${COMMITS_AHEAD} commits ahead"
+          
           docker buildx build \
             --file docker/Dockerfile \
             --target builder \
             --platform linux/amd64 \
             --build-arg GITHUB_SHA="${HEAD_SHA}" \
             --build-arg GITHUB_REF_NAME="${HEAD_REF}" \
-            --build-arg APP_VERSION="preview-${PR_NUMBER}" \
             --build-arg BUILD_CONTEXT=pr \
             --build-arg PR_NUMBER="${PR_NUMBER}" \
             --build-arg NODE_ENV=preview \
@@ -123,6 +141,10 @@ jobs:
             --build-arg NETLIFY_ENV=deploy-preview \
             --build-arg CONTEXT=deploy-preview \
             --build-arg DEPLOY_URL="${DEPLOY_URL}" \
+            --build-arg COMMITS_SINCE_RELEASE="${COMMITS_AHEAD}" \
+            --build-arg LAST_RELEASE_TAG="${LATEST_TAG}" \
+            --build-arg GITHUB_RUN_ID="${{ github.run_id }}" \
+            --build-arg GITHUB_RUN_NUMBER="${{ github.run_number }}" \
             --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
