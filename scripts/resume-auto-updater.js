@@ -385,6 +385,136 @@ class ResumeAutoUpdater {
     }
 
     /**
+     * Check if Release Please PR exists and update it
+     */
+    async updateReleasePleasePR() {
+        const config = this.loadConfig();
+        
+        if (!config.releasePlease?.enabled || !config.releasePlease?.keepBranchUpdated) {
+            console.log('📋 Release Please PR updates disabled in configuration');
+            return;
+        }
+
+        console.log('🔄 Checking for Release Please PR to update...\n');
+        
+        try {
+            const { execSync } = require('child_process');
+            
+            // Check if there's an open Release Please PR
+            const prListOutput = execSync('gh pr list --author="github-actions[bot]" --label="autorelease: pending" --json number,title,headRefName', { 
+                encoding: 'utf8' 
+            });
+            
+            const openPRs = JSON.parse(prListOutput);
+            const releasePR = openPRs.find(pr => 
+                (pr.title.includes('chore(release)') || pr.title.includes('🚀 v')) &&
+                pr.headRefName.includes('release-please')
+            );
+            
+            if (!releasePR) {
+                console.log('📋 No Release Please PR found - updates will apply on next release');
+                return;
+            }
+            
+            console.log(`📦 Found Release Please PR #${releasePR.number}: ${releasePR.title}`);
+            console.log(`🌿 Branch: ${releasePR.headRefName}`);
+            
+            // Checkout the Release Please branch
+            console.log(`\n🔄 Switching to Release Please branch: ${releasePR.headRefName}`);
+            execSync(`git fetch origin ${releasePR.headRefName}`);
+            execSync(`git checkout ${releasePR.headRefName}`);
+            
+            // Apply updates to the branch
+            console.log('\n🤖 Running Resume Auto-Updater on Release Please branch...');
+            const resumeData = this.loadResumeData();
+            const gitInfo = await this.getGitInfo();
+            
+            let changesApplied = 0;
+            const updates = [];
+            
+            // Apply same updates as main process
+            if (!resumeData.meta) {
+                resumeData.meta = {};
+            }
+            
+            // Process updates (simplified version focusing on key fields)
+            for (const [updateName, updateConfig] of Object.entries(config.updateFields)) {
+                if (!updateConfig.enabled) continue;
+                
+                switch (updateName) {
+                    case 'lastUpdated':
+                        const currentDate = this.getCurrentDate(updateConfig.format);
+                        if (resumeData.meta.lastUpdated !== currentDate) {
+                            resumeData.meta.lastUpdated = currentDate;
+                            updates.push(`Updated lastUpdated to ${currentDate}`);
+                            changesApplied++;
+                        }
+                        break;
+                        
+                    case 'projectHighlights':
+                        if (resumeData.projects && resumeData.projects[0]) {
+                            const project = resumeData.projects[0];
+                            const newHighlights = updateConfig.append.map(highlight => 
+                                this.applyTemplateVariables(highlight, gitInfo)
+                            );
+                            
+                            for (const newHighlight of newHighlights) {
+                                if (!project.highlights.some(h => h.includes(newHighlight.split(' ')[1]))) {
+                                    project.highlights.push(newHighlight);
+                                    updates.push(`Added project highlight: ${newHighlight.substring(0, 50)}...`);
+                                    changesApplied++;
+                                }
+                            }
+                            
+                            if (project.highlights.length > updateConfig.maxHighlights) {
+                                project.highlights = project.highlights.slice(0, updateConfig.maxHighlights);
+                                updates.push(`Limited project highlights to ${updateConfig.maxHighlights}`);
+                            }
+                        }
+                        break;
+                }
+            }
+            
+            if (changesApplied > 0) {
+                // Save updated resume data
+                fs.writeFileSync(this.resumeDataPath, JSON.stringify(resumeData, null, 2) + '\n');
+                
+                console.log(`\n📊 Applied ${changesApplied} updates to Release Please PR branch`);
+                updates.forEach(update => console.log(`   • ${update}`));
+                
+                // Commit and push changes to the Release Please branch
+                console.log('\n📝 Committing updates to Release Please branch...');
+                execSync('git add src/resume-data.json');
+                
+                const commitMessage = config.releasePlease.autoCommit.message || 
+                    'chore: automatic resume data updates for release\n\n🤖 Generated by resume-auto-updater';
+                
+                execSync(`git commit -m "${commitMessage}"`);
+                execSync(`git push origin ${releasePR.headRefName}`);
+                
+                console.log('✅ Release Please PR updated with latest resume data');
+                console.log(`🔗 View PR: https://github.com/rafilkmp3/resume-as-code/pull/${releasePR.number}`);
+            } else {
+                console.log('✨ Release Please PR already has current resume data');
+            }
+            
+            // Switch back to main branch
+            console.log('\n🔄 Switching back to main branch');
+            execSync('git checkout main');
+            
+        } catch (error) {
+            console.error('⚠️ Failed to update Release Please PR:', error.message);
+            
+            // Ensure we're back on main branch
+            try {
+                execSync('git checkout main');
+            } catch (checkoutError) {
+                console.error('❌ Failed to switch back to main branch:', checkoutError.message);
+            }
+        }
+    }
+
+    /**
      * Show current configuration
      */
     showConfiguration() {

@@ -35,7 +35,8 @@
     "accessibility:audit": "node scripts/accessibility-audit.js",
     "resume:update": "node scripts/resume-auto-updater.js",
     "resume:update:dry-run": "node scripts/resume-auto-updater.js --dry-run",
-    "resume:update:config": "node scripts/resume-auto-updater.js --config"
+    "resume:update:config": "node scripts/resume-auto-updater.js --config",
+    "resume:update:pr": "node -e \"const ResumeAutoUpdater = require('./scripts/resume-auto-updater.js'); const updater = new ResumeAutoUpdater(); updater.updateReleasePleasePR();\""
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",
