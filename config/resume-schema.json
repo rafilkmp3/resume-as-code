@@ -330,6 +330,45 @@
           }
         }
       }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Metadata about the resume including last updated timestamp and availability status",
+      "properties": {
+        "lastUpdated": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Last updated date in YYYY-MM-DD format"
+        },
+        "availability": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Current work availability status",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["open_to_work", "not_available"],
+              "description": "Work availability status"
+            },
+            "icon": {
+              "type": "string",
+              "description": "Icon representation of availability status"
+            },
+            "text": {
+              "type": "string",
+              "description": "Human-readable availability text"
+            },
+            "types": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Types of work opportunities available"
+            }
+          }
+        }
+      }
     }
   }
 }
