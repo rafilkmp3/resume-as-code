@@ -76,6 +76,10 @@ jobs:
 
           # Get commit messages (excluding merge commits)
           git log --format="%H|%s" $BASE_SHA..$HEAD_SHA --no-merges > commits.txt
+          
+          # Also exclude any commits that start with "Merge" (additional safety)
+          grep -v "^[^|]*|Merge " commits.txt > commits_filtered.txt || true
+          mv commits_filtered.txt commits.txt
 
           echo "📋 Commits to validate:"
           cat commits.txt
