@@ -2,12 +2,51 @@
 # FAST & ESSENTIAL PRE-COMMIT HOOKS
 # Philosophy: Only fail on issues that MUST be caught at commit time
 # Everything else handled in CI/CD for speed
+# IMPORTANT: Uses EXACT same commitlint rules as CI
 
 repos:
-  # NON-NEGOTIABLE: Conventional Commits validation for release-please
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.2.0
+  # NON-NEGOTIABLE: Conventional Commits validation (SAME as CI)
+  - repo: local
     hooks:
-      - id: conventional-pre-commit
+      - id: commitlint
+        name: Conventional Commits validation (exact same as CI)
+        entry: bash
+        args:
+          - '-c'
+          - |
+            # Create commitlint config (EXACT same as CI)
+            cat > commitlint.config.js << 'EOF'
+            module.exports = {
+              extends: ['@commitlint/config-conventional'],
+              rules: {
+                'type-enum': [
+                  2,
+                  'always',
+                  [
+                    'feat',     // New features
+                    'fix',      // Bug fixes
+                    'chore',    // Maintenance, dependencies
+                    'docs',     // Documentation
+                    'style',    // Code formatting (hidden in changelog)
+                    'refactor', // Code refactoring
+                    'perf',     // Performance improvements
+                    'test',     // Test changes (hidden in changelog)
+                    'ci',       // CI/CD changes
+                    'build',    // Build system changes
+                    'revert'    // Revert commits
+                  ]
+                ],
+                'scope-case': [2, 'always', 'lower-case'],
+                'subject-case': [2, 'always', 'lower-case'],
+                'subject-empty': [2, 'never'],
+                'subject-full-stop': [2, 'never', '.'],
+                'header-max-length': [2, 'always', 100]
+              }
+            };
+            EOF
+            
+            # Validate using exact same logic as CI
+            commitlint --config commitlint.config.js --edit "$1"
+        language: system
         stages: [commit-msg]
-        args: [optional-scope]
+        pass_filenames: false
