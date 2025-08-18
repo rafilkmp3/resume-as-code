@@ -168,7 +168,34 @@
   "certificates": [],
   "projects": [
     {
-      "name": "Self-Service Terraform Platform with Atlantis Integration",
+      "name": "Resume-as-Code Platform",
+      "url": "https://github.com/rafilkmp3/resume-as-code",
+      "description": "World-class resume generation system showcasing enterprise-grade platform engineering and DevOps excellence",
+      "highlights": [
+        "Architected comprehensive three-tier CI/CD pipeline: PR Preview (Netlify) → Staging (Netlify) → Production (GitHub Pages)",
+        "Implemented Infrastructure-as-Code approach with Docker containerization, multi-stage builds, and cross-platform support (ARM64/AMD64)",
+        "Built automated dependency management system with intelligent PR recreation and zero-maintenance updates achieving 99%+ pipeline success rate",
+        "Engineered multi-format PDF generation system (Screen/Print/ATS optimized) with Puppeteer achieving 99.5% bandwidth reduction through image optimization",
+        "Designed comprehensive testing strategy with 20 viewport/theme combinations, accessibility compliance (WCAG 2.1 AA), and performance monitoring",
+        "Created automated release management with Release-Please integration, conventional commits enforcement, and semantic versioning",
+        "Implemented enterprise security practices including vulnerability scanning, secret detection, and environment protection rules",
+        "Achieved 95+ Lighthouse scores, sub-3-second load times, and comprehensive observability with detailed pipeline monitoring"
+      ],
+      "keywords": [
+        "Platform Engineering",
+        "DevOps",
+        "CI/CD",
+        "Docker",
+        "GitHub Actions",
+        "Infrastructure as Code",
+        "Multi-Environment Deployment",
+        "Performance Optimization",
+        "Security Automation",
+        "Release Management"
+      ]
+    },
+    {
+      "name": "Self-Service Terraform Platform with Atlantis Integration", 
       "url": "https://www.runatlantis.io/",
       "description": "Enterprise-grade GitOps platform enabling teams to self-apply Terraform through GitHub PR interface using Atlantis",
       "highlights": [
@@ -205,32 +232,12 @@
       "keywords": [
         "AWS Route53",
         "Multi-Cloud",
-        "Hybrid Network",
+        "Hybrid Network", 
         "DNS",
         "VPC",
         "Transit Gateway",
         "On-Premises",
         "HA/DR"
-      ]
-    },
-    {
-      "name": "Resume-as-Code Platform",
-      "url": "https://github.com/rafilkmp3/resume-as-code",
-      "description": "Full-stack resume generation system demonstrating Platform Engineering principles",
-      "highlights": [
-        "Built automated CI/CD pipeline with Handlebars templating and Puppeteer PDF generation",
-        "Implemented dark/light theme with OS preference detection and accessibility features",
-        "Created ATS-friendly export functionality for job application compatibility",
-        "Deployed with GitHub Pages integration and Make-based build system"
-      ],
-      "keywords": [
-        "Node.js",
-        "Handlebars",
-        "Puppeteer",
-        "HTML/CSS",
-        "JavaScript",
-        "CI/CD",
-        "GitHub Pages"
       ]
     },
     {
