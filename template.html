@@ -49,7 +49,7 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // App version and environment detection
+      // Build-time injected variables (SECURE: No frontend URL detection)
       const appVersion = '1.4.0'; // Auto-updated from package.json during build
       const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
@@ -60,8 +60,9 @@
       const prNumber = ''; // Auto-updated with PR number during build
       const contextUrl = ''; // Auto-updated during build
       const compareUrl = ''; // Auto-updated during build
-      const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
-      const branchName = isGitHubPages ? 'main' : 'development';
+      const environment = 'development'; // Auto-updated with detected environment during build
+      const channel = 'development'; // Auto-updated with deployment channel during build
+      const branchName = 'development'; // Auto-updated with git branch during build
 
       // Enhanced GA4 configuration
       gtag('config', 'G-1L4XD6LG6Z', {
@@ -106,24 +107,11 @@
         const commitsAheadElement = document.getElementById('commits-ahead');
         const deploymentLinksElement = document.getElementById('deployment-links');
 
-        // Detect current environment from URL
-        const currentURL = window.location.href;
-        let detectedEnvironment = 'production'; // Default to production
-        let contextInfo = {};
-
-        if (currentURL.includes('deploy-preview-')) {
-          detectedEnvironment = 'preview';
-          const prMatch = currentURL.match(/deploy-preview-(\d+)--/);
-          if (prMatch) {
-            contextInfo.prNumber = prMatch[1];
-          }
-        } else if (currentURL.includes('netlify.app') && !currentURL.includes('deploy-preview-')) {
-          detectedEnvironment = 'staging';
-        } else if (currentURL.includes('localhost') || currentURL.includes('192.168.')) {
-          detectedEnvironment = 'development';
-        } else if (currentURL.includes('rafilkmp3.github.io')) {
-          detectedEnvironment = 'production';
-        }
+        // Use build-time detected environment (SECURE: No URL parsing)
+        const detectedEnvironment = environment;
+        const contextInfo = {
+          prNumber: prNumber || null
+        };
 
         // Update basic version info
         if (versionElement) versionElement.textContent = appVersion;

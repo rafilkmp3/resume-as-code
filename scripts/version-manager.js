@@ -466,7 +466,8 @@ class IndustryVersionManager {
       contextUrl: '',
       compareUrl: '',
       environment: version.environment,
-      channel: version.channel
+      channel: version.channel,
+      branchName: version.gitBranch
     };
   }
 }

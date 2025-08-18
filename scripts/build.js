@@ -293,14 +293,8 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   // Replace version placeholders in HTML
   html = html.replace(/const appVersion = '[^']*';/, `const appVersion = '${appVersion}';`);
-  html = html.replace(/const branchName = isProduction \? 'main' : 'preview';/,
-    `const branchName = '${buildBranch}';`);
   
-  // CRITICAL: Inject build-time environment detection to replace frontend URL-based detection
-  html = html.replace(
-    /const environment = isGitHubPages \? 'production' : 'development';/,
-    `const environment = '${frontendEnvironment}'; // Injected at build time: ${environmentDetails}`
-  );
+  // Build-time environment injection is now handled below with templateVars
   // Enhanced environment variable replacements for smart contextual linking
   const buildContext = process.env.BUILD_CONTEXT || 'main';
   const contextUrl = process.env.CONTEXT_URL || '';
@@ -322,6 +316,12 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   html = html.replace(/const compareUrl = '[^']*';/, `const compareUrl = '${compareUrl}';`);
   html = html.replace(/const runId = '[^']*';/, `const runId = '${githubRunId}';`);
   html = html.replace(/const runNumber = '[^']*';/, `const runNumber = '${githubRunNumber}';`);
+  
+  // SECURITY FIX: Replace frontend environment detection with build-time injection
+  html = html.replace(/const environment = '[^']*';/, `const environment = '${templateVars.environment}';`);
+  html = html.replace(/const channel = '[^']*';/, `const channel = '${templateVars.channel}';`);
+  html = html.replace(/const branchName = '[^']*';/, `const branchName = '${templateVars.branchName}';`);
+  
   html = html.replace(/<span id="app-version">[\d.]+<\/span>/,
     `<span id="app-version">${appVersion}</span>`);
   html = html.replace(/<span id="app-environment">[^<]*<\/span>/,

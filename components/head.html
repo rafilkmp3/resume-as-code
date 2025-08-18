@@ -49,13 +49,20 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // App version and environment detection
+      // Build-time injected variables (SECURE: No frontend URL detection)
       const appVersion = '1.4.0'; // Auto-updated from package.json during build
       const commitHash = 'dev-local'; // Auto-updated from CI commit hash during build
       const buildTimestamp = '2025-01-08T00:00:00.000Z'; // Auto-updated during build
-      const isGitHubPages = window.location.hostname === 'rafilkmp3.github.io';
-      const environment = isGitHubPages ? 'production' : 'development';
-      const branchName = isGitHubPages ? 'main' : 'development';
+      const commitsAhead = 3; // Auto-updated with commits since last release during build  
+      const lastReleaseTag = 'v4.1.0'; // Auto-updated with last release tag during build
+      const runId = ''; // Auto-updated with GitHub Actions run ID during build
+      const runNumber = ''; // Auto-updated with GitHub Actions run number during build
+      const prNumber = ''; // Auto-updated with PR number during build
+      const contextUrl = ''; // Auto-updated during build
+      const compareUrl = ''; // Auto-updated during build
+      const environment = 'development'; // Auto-updated with detected environment during build
+      const channel = 'development'; // Auto-updated with deployment channel during build
+      const branchName = 'development'; // Auto-updated with git branch during build
 
       // Enhanced GA4 configuration
       gtag('config', 'G-1L4XD6LG6Z', {
