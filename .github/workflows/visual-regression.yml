@@ -378,7 +378,7 @@ jobs:
           path: accessibility-reports/
           retention-days: 30
 
-  # Post visual evidence to PR comments - simple approach without base64 complexity
+  # Post visual evidence to PR comments with direct image embedding
   post-visual-evidence:
     name: 📸 Post Visual Evidence to PR
     runs-on: ubuntu-latest
@@ -386,43 +386,125 @@ jobs:
     needs: [visual-regression-quick]
     
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Download visual evidence
         uses: actions/download-artifact@v4
         with:
           name: visual-evidence-quick
           path: ./visual-evidence
       
-      - name: Create simple PR comment with artifact reference
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Upload images to temporary hosting and create PR comment
+        run: |
+          # Find screenshot files
+          SCREENSHOT_FILE=$(find ./visual-evidence/quick -name "*.png" | head -1)
+          
+          if [ -z "$SCREENSHOT_FILE" ]; then
+            echo "No screenshots found to upload"
+            exit 0
+          fi
+          
+          echo "📸 Found screenshot: $SCREENSHOT_FILE"
+          
+          # Upload to imgbb.com for temporary public hosting (similar to Lighthouse's temporaryPublicStorage)
+          # This provides a direct URL that can be embedded in GitHub comments
+          IMGBB_RESPONSE=$(curl -s -X POST \
+            -F "image=@$SCREENSHOT_FILE" \
+            -F "expiration=604800" \
+            "https://api.imgbb.com/1/upload?key=bec1c6c4bbfd39e1f3ee4c5c1c3d0d63")
+          
+          # Extract the direct URL from the response
+          IMAGE_URL=$(echo "$IMGBB_RESPONSE" | jq -r '.data.url // empty')
+          
+          if [ -z "$IMAGE_URL" ] || [ "$IMAGE_URL" = "null" ]; then
+            echo "⚠️ Failed to upload to imgbb, falling back to artifact-only approach"
+            IMAGE_URL=""
+          else
+            echo "✅ Successfully uploaded to temporary storage: $IMAGE_URL"
+          fi
+          
+          # Save the image URL for the next step
+          echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
+          
+      - name: Create PR comment with embedded image
+        uses: actions/github-script@v7
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          body: |
-            ## 📸 Visual Regression Test Results
+          script: |
+            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const commitSha = context.sha.substring(0, 7);
+            const imageUrl = process.env.IMAGE_URL;
             
-            **Quick Visual Test**: Chromium Desktop Light Mode
+            let imageSection = '';
+            if (imageUrl && imageUrl !== '') {
+              imageSection = `
+            ### 🖼️ Visual Test Screenshot
             
-            ### 📸 Screenshot Available
+            ![Visual Test Result - Desktop Light Mode](${imageUrl})
             
-            The visual regression test completed successfully! Screenshots are available in the **`visual-evidence-quick`** artifact below.
+            <sub>📸 Screenshot hosted temporarily (7 days) | Full resolution available in artifacts</sub>`;
+            } else {
+              imageSection = `
+            ### 📁 Visual Test Evidence
             
-            > **Note**: Click on the workflow run link below and scroll down to the "Artifacts" section to download the full-resolution screenshots.
+            Screenshots are available in the workflow artifacts below (imgbb upload failed).`;
+            }
             
-            ### 📊 Test Summary
+            const commentBody = `## 📸 Visual Regression Test Results
+            
+            **Test Completed**: ${timestamp} UTC | **Commit**: \`${commitSha}\`
+            ${imageSection}
+            
+            <details>
+            <summary>📊 Test Details</summary>
             
             - ✅ **Browser**: Chromium (Latest)
-            - ✅ **Viewport**: Desktop (1920x1080)  
+            - ✅ **Viewport**: Desktop (1920×1080)  
             - ✅ **Theme**: Light Mode
-            - 📁 **Evidence**: Download `visual-evidence-quick` artifact from workflow
-            - 🔗 **Workflow**: [View Run & Download Screenshots](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - ✅ **Status**: Test Completed Successfully
+            - 📁 **Artifacts**: [Download Full Evidence](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
             
-            ### 🔽 How to View Screenshots
+            ### 🔧 Test Coverage
+            - **Quick Mode**: Single screenshot for fast feedback
+            - **Full Matrix**: Use \`run_full_matrix=true\` for 18 browser/viewport/theme combinations
             
-            1. Click the workflow link above
-            2. Scroll down to the "Artifacts" section  
-            3. Download `visual-evidence-quick`
-            4. Extract and view `desktop-light.png`
+            </details>
+            
+            ### 🔗 Additional Resources
+            
+            - 📋 [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            - 📦 [Download All Artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
             
             ---
-            *Visual regression test completed successfully. Much simpler than base64 encoding! 🎉*
-          edit-mode: replace
+            <sub>🤖 Visual regression test with temporary image hosting (similar to Lighthouse's temporaryPublicStorage)</sub>`;
+            
+            // Create or update the PR comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.body.includes('📸 Visual Regression Test Results')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+              console.log('✅ Updated existing PR comment with visual evidence');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              console.log('✅ Created new PR comment with visual evidence');
+            }
