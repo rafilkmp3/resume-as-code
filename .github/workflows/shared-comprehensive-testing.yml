@@ -270,33 +270,88 @@ jobs:
     timeout-minutes: 5
     outputs:
       accessibility_status: ${{ steps.axe-test.outputs.accessibility_status }}
+      accessibility_violations: ${{ steps.axe-test.outputs.accessibility_violations }}
+      critical_violations: ${{ steps.axe-test.outputs.critical_violations }}
+      serious_violations: ${{ steps.axe-test.outputs.serious_violations }}
+      moderate_violations: ${{ steps.axe-test.outputs.moderate_violations }}
+      minor_violations: ${{ steps.axe-test.outputs.minor_violations }}
+      accessibility_summary: ${{ steps.axe-test.outputs.accessibility_summary }}
+      top_violations: ${{ steps.axe-test.outputs.top_violations }}
     steps:
       - name: Environment-Agnostic Accessibility Testing
         id: axe-test
         run: |
-          echo "♿ ACCESSIBILITY TESTING - UNIVERSAL URL APPROACH"
-          echo "=============================================="
-          echo "🎯 TARGET URL: ${{ inputs.target_url }}"
-          echo "🌍 ENVIRONMENT: ${{ inputs.environment_name }}"
+          echo "♿ ACCESSIBILITY TESTING - REAL DEPLOYMENT"
+          echo "=========================================="
+          echo "📋 PURPOSE: WCAG 2.1 AA compliance testing on actual deployed site"
+          echo "🎯 TARGET: ${{ inputs.target_url }}"
           echo "📊 CONTEXT: ${{ inputs.environment_context }}"
-          echo "📋 PURPOSE: WCAG 2.1 AA compliance testing on live environment" 
           echo "✅ METHODOLOGY: Axe-core accessibility engine"
           echo ""
           
           # Install axe-core CLI
           npm install -g @axe-core/cli
           
-          echo "🔍 Running Axe accessibility audit on ${{ inputs.environment_name }} environment..."
+          echo "🔍 Running comprehensive Axe accessibility audit on ${{ inputs.environment_name }} environment..."
           
-          # Run axe with comprehensive WCAG tests on ANY URL
-          if axe "${{ inputs.target_url }}" --save axe-report.json --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" --timeout=30000; then
-            echo "✅ Axe accessibility audit passed on ${{ inputs.environment_name }}"
+          # Run axe with comprehensive WCAG tests and detailed output
+          ACCESSIBILITY_EXIT_CODE=0
+          if axe "${{ inputs.target_url }}" \
+            --save axe-report.json \
+            --save axe-report.html \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout=30000 \
+            --tags wcag2a,wcag2aa,wcag21aa \
+            --exit; then
+            echo "✅ Axe accessibility audit PASSED on ${{ inputs.environment_name }}"
+            echo "🎉 No accessibility violations found!"
             echo "accessibility_status=success" >> $GITHUB_OUTPUT
+            echo "accessibility_violations=0" >> $GITHUB_OUTPUT
+            echo "accessibility_summary=✅ WCAG 2.1 AA Compliant - No violations detected" >> $GITHUB_OUTPUT
           else
-            echo "⚠️ Accessibility issues found on ${{ inputs.environment_name }} environment"
-            echo "🔧 Check axe-report.json for detailed WCAG compliance report"
+            ACCESSIBILITY_EXIT_CODE=$?
+            echo "⚠️ Accessibility violations detected on ${{ inputs.environment_name }} environment"
             echo "accessibility_status=failed" >> $GITHUB_OUTPUT
-            exit 1
+            
+            # Extract detailed violation information from JSON report
+            if [ -f "axe-report.json" ]; then
+              # Install jq for JSON parsing
+              sudo apt-get update && sudo apt-get install -y jq
+              
+              TOTAL_VIOLATIONS=$(jq '.violations | length' axe-report.json)
+              CRITICAL_VIOLATIONS=$(jq '[.violations[] | select(.impact == "critical")] | length' axe-report.json)
+              SERIOUS_VIOLATIONS=$(jq '[.violations[] | select(.impact == "serious")] | length' axe-report.json)
+              MODERATE_VIOLATIONS=$(jq '[.violations[] | select(.impact == "moderate")] | length' axe-report.json)
+              MINOR_VIOLATIONS=$(jq '[.violations[] | select(.impact == "minor")] | length' axe-report.json)
+              
+              echo "📊 ACCESSIBILITY VIOLATIONS SUMMARY:"
+              echo "  Total: ${TOTAL_VIOLATIONS}"
+              echo "  🔴 Critical: ${CRITICAL_VIOLATIONS}"
+              echo "  🟠 Serious: ${SERIOUS_VIOLATIONS}"
+              echo "  🟡 Moderate: ${MODERATE_VIOLATIONS}"
+              echo "  🟢 Minor: ${MINOR_VIOLATIONS}"
+              
+              # Export detailed results
+              echo "accessibility_violations=${TOTAL_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "critical_violations=${CRITICAL_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "serious_violations=${SERIOUS_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "moderate_violations=${MODERATE_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "minor_violations=${MINOR_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "accessibility_summary=❌ ${TOTAL_VIOLATIONS} violations: ${CRITICAL_VIOLATIONS} critical, ${SERIOUS_VIOLATIONS} serious, ${MODERATE_VIOLATIONS} moderate, ${MINOR_VIOLATIONS} minor" >> $GITHUB_OUTPUT
+              
+              # Extract top 3 most common violation types
+              TOP_VIOLATIONS=$(jq -r '.violations | group_by(.id) | map({rule: .[0].id, count: length, description: .[0].help}) | sort_by(.count) | reverse | .[0:3] | map("• \(.rule): \(.count) occurrences - \(.description)") | join("\n")' axe-report.json)
+              echo "🔍 TOP VIOLATION TYPES:"
+              echo "${TOP_VIOLATIONS}"
+              
+              # Store top violations for PR comment
+              echo "top_violations<<EOF" >> $GITHUB_OUTPUT
+              echo "${TOP_VIOLATIONS}" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "accessibility_violations=unknown" >> $GITHUB_OUTPUT
+              echo "accessibility_summary=❌ Accessibility test failed - no report generated" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Microsoft Accessibility Insights Scan
@@ -456,13 +511,24 @@ jobs:
             echo "| 🚀 Lighthouse | ❌ Failed | Check logs for details |" >> $GITHUB_STEP_SUMMARY
           fi
           
-          # Accessibility Results
+          # Accessibility Results with detailed violation breakdown
           if [ "${{ needs.accessibility-testing.result }}" = "success" ]; then
-            echo "| ♿ Accessibility | ✅ Success | WCAG 2.1 AA compliance verified |" >> $GITHUB_STEP_SUMMARY
+            echo "| ♿ Accessibility | ✅ Success | ${{ needs.accessibility-testing.outputs.accessibility_summary }} |" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ needs.accessibility-testing.result }}" = "skipped" ]; then
             echo "| ♿ Accessibility | ⏭️ Skipped | Not requested |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| ♿ Accessibility | ❌ Failed | Accessibility issues found |" >> $GITHUB_STEP_SUMMARY
+            echo "| ♿ Accessibility | ❌ Failed | ${{ needs.accessibility-testing.outputs.accessibility_summary }} |" >> $GITHUB_STEP_SUMMARY
+            
+            # Add detailed accessibility violation breakdown to summary
+            if [ -n "${{ needs.accessibility-testing.outputs.top_violations }}" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 🔍 Top Accessibility Violations on ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "${{ needs.accessibility-testing.outputs.top_violations }}" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively." >> $GITHUB_STEP_SUMMARY
+              echo "**🔧 Fix Priority**: Focus on critical and serious violations first." >> $GITHUB_STEP_SUMMARY
+            fi
           fi
           
           # Performance Results
@@ -572,6 +638,31 @@ jobs:
             commentBody += `| Test Type | Status | Details |\n`;
             commentBody += `|-----------|--------|---------|\n`;
             
+            // Add detailed accessibility section if violations found
+            const accessibilityViolations = "${{ needs.accessibility-testing.outputs.accessibility_violations }}";
+            const accessibilityTopViolations = "${{ needs.accessibility-testing.outputs.top_violations }}";
+            const criticalViolations = "${{ needs.accessibility-testing.outputs.critical_violations }}";
+            const seriousViolations = "${{ needs.accessibility-testing.outputs.serious_violations }}";
+            
+            if ("${{ needs.accessibility-testing.result }}" === 'failure' && accessibilityViolations !== "unknown" && parseInt(accessibilityViolations) > 0) {
+              commentBody += `### ♿ Accessibility Issues Detected\n\n`;
+              commentBody += `**🚨 ${accessibilityViolations} WCAG 2.1 AA violations found!**\n\n`;
+              commentBody += `| Severity | Count | Impact |\n`;
+              commentBody += `|----------|-------|--------|\n`;
+              commentBody += `| 🔴 Critical | ${criticalViolations} | Prevents access for users with disabilities |\n`;
+              commentBody += `| 🟠 Serious | ${seriousViolations} | Significant barriers to accessibility |\n`;
+              commentBody += `| 🟡 Moderate | ${{ needs.accessibility-testing.outputs.moderate_violations }} | Some impact on accessibility |\n`;
+              commentBody += `| 🟢 Minor | ${{ needs.accessibility-testing.outputs.minor_violations }} | Minor accessibility concerns |\n\n`;
+              
+              if (accessibilityTopViolations && accessibilityTopViolations.trim()) {
+                commentBody += `**🔍 Most Common Violations:**\n\n`;
+                commentBody += accessibilityTopViolations + '\n\n';
+              }
+              
+              commentBody += `**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively.\n`;
+              commentBody += `**🔧 Priority**: Fix critical and serious violations first for WCAG 2.1 AA compliance.\n\n`;
+            }
+            
             // Add test results using proper JavaScript variables
             const lighthouseStatus = "${{ needs.lighthouse-testing.result }}" === 'success' ? '✅ Success' : 
                                    "${{ needs.lighthouse-testing.result }}" === 'skipped' ? '⏭️ Skipped' : '❌ Failed';
@@ -581,7 +672,7 @@ jobs:
                                      "${{ needs.performance-testing.result }}" === 'skipped' ? '⏭️ Skipped' : '❌ Failed';
             
             commentBody += `| 🚀 Lighthouse | ${lighthouseStatus} | Performance and quality analysis |\n`;
-            commentBody += `| ♿ Accessibility | ${accessibilityStatus} | WCAG 2.1 AA compliance |\n`;
+            commentBody += `| ♿ Accessibility | ${accessibilityStatus} | ${{ needs.accessibility-testing.outputs.accessibility_summary }} |\n`;
             commentBody += `| 📊 Performance | ${performanceStatus} | Core Web Vitals measurement |\n\n`;
             
             commentBody += `🔗 **Alternative Testing**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(targetUrl)})\n\n`;

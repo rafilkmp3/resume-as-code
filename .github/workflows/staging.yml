@@ -161,7 +161,7 @@ jobs:
         run: |
           # Suppress Node.js deprecation warnings to reduce CI log noise
           {
-            echo "NODE_OPTIONS=--no-deprecation --no-warnings"
+            echo 'NODE_OPTIONS=--no-deprecation --no-warnings'
             echo "NODE_NO_WARNINGS=1"
           } >> "$GITHUB_ENV"
 
@@ -318,7 +318,7 @@ jobs:
 
           # Suppress Node.js deprecation warnings
           {
-            echo "NODE_OPTIONS=--no-deprecation --no-warnings"
+            echo 'NODE_OPTIONS=--no-deprecation --no-warnings'
             echo "NODE_NO_WARNINGS=1"
           } >> "$GITHUB_ENV"
 
