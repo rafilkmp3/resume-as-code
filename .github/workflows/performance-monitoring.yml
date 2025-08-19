@@ -173,6 +173,17 @@ jobs:
           if [ "${{ steps.lighthouse.outcome }}" = "success" ]; then
             echo "✅ Lighthouse CI completed successfully"
             echo "LIGHTHOUSE_STATUS=success" >> $GITHUB_ENV
+            
+            # Extract and display Lighthouse report URLs
+            echo "## 🚀 Lighthouse Performance Reports" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 **Report Links:** Check the Lighthouse CI action output for temporary public storage URLs" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Try to extract URLs from the action output (if available in logs)
+            echo "🔗 **Report Access:** Look for 'temporary-public-storage' URLs in the Run Lighthouse CI step logs" >> $GITHUB_STEP_SUMMARY
+            echo "📈 **Metrics Available:** Performance, Accessibility, Best Practices, SEO scores" >> $GITHUB_STEP_SUMMARY
+            
           else
             echo "⚠️ Lighthouse CI encountered issues but build continues"
             echo "LIGHTHOUSE_STATUS=failure" >> $GITHUB_ENV
@@ -183,6 +194,9 @@ jobs:
             else
               echo "🔍 Server appears to be down, this may have caused the Lighthouse failure"
             fi
+            
+            echo "## ⚠️ Lighthouse CI Issues" >> $GITHUB_STEP_SUMMARY
+            echo "Lighthouse CI had issues but this is non-blocking. Check the logs for details." >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Cleanup server
