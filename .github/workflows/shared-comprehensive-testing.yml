@@ -366,14 +366,15 @@ jobs:
             jq -r 'keys[]' "$RESULTS_FILE" 2>/dev/null || echo "Could not list keys"
             echo ""
             
-            VIOLATION_COUNT=$(jq -r '.violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
-            PASSES_COUNT=$(jq -r '.passes | length' "$RESULTS_FILE" 2>/dev/null || echo "0") 
-            INCOMPLETE_COUNT=$(jq -r '.incomplete | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            # Axe-core generates array format, so access first element [0]
+            VIOLATION_COUNT=$(jq -r '.[0].violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            PASSES_COUNT=$(jq -r '.[0].passes | length' "$RESULTS_FILE" 2>/dev/null || echo "0") 
+            INCOMPLETE_COUNT=$(jq -r '.[0].incomplete | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             
-            echo "📊 Raw jq parsing results:"
-            echo "- Violations raw: $(jq -r '.violations' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
-            echo "- Passes raw: $(jq -r '.passes' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
-            echo "- Incomplete raw: $(jq -r '.incomplete' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo "📊 Raw jq parsing results (using .[0] for array format):"
+            echo "- Violations raw: $(jq -r '.[0].violations' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo "- Passes raw: $(jq -r '.[0].passes' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo "- Incomplete raw: $(jq -r '.[0].incomplete' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
             echo ""
             echo "📊 Final parsed counts:"
             echo "- Violations: $VIOLATION_COUNT"
@@ -383,10 +384,10 @@ jobs:
             # Generate detailed violation summary
             if [ "$VIOLATION_COUNT" -gt "0" ]; then
               echo "🔍 Detailed Violations:" 
-              jq -r '.violations[] | "- \(.impact // "unknown") impact: \(.help) (\(.nodes | length) element(s))"' "$RESULTS_FILE" 2>/dev/null || echo "Could not parse violations"
+              jq -r '.[0].violations[] | "- \(.impact // "unknown") impact: \(.help) (\(.nodes | length) element(s))"' "$RESULTS_FILE" 2>/dev/null || echo "Could not parse violations"
               
               # Generate detailed violation breakdown for PR comments
-              VIOLATIONS_DETAIL=$(jq -r '.violations[] | "**\(.id)**: \(.nodes | length) occurrences - \(.help)"' "$RESULTS_FILE" 2>/dev/null | head -10)
+              VIOLATIONS_DETAIL=$(jq -r '.[0].violations[] | "**\(.id)**: \(.nodes | length) occurrences - \(.help)"' "$RESULTS_FILE" 2>/dev/null | head -10)
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT accessibility violations, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
