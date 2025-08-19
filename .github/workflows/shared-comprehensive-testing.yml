@@ -440,9 +440,8 @@ jobs:
               echo "🔍 Processed ${VIOLATIONS_PROCESSED} violation types for collapsible sections"
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
-              echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
-              echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
+              # Use direct assignment instead of EOF syntax to prevent delimiter conflicts
+              echo "violations_detail=$(echo "$VIOLATIONS_DETAIL" | base64 -w 0)" >> $GITHUB_OUTPUT
               # Add collapsible sections for GitHub (base64 encoded to prevent JavaScript syntax errors)
               echo "🔍 VIOLATIONS_COLLAPSIBLE variable length: ${#VIOLATIONS_COLLAPSIBLE}"
               echo "🔍 First 200 characters of VIOLATIONS_COLLAPSIBLE:"
