@@ -769,11 +769,7 @@ jobs:
               }
             }
             
-            commentBody += `### 📊 Test Summary\n\n`;
-            commentBody += `| Test Type | Status | Details |\n`;
-            commentBody += `|-----------|--------|---------|\n`;
-            
-            // Add detailed accessibility section using axe-core results
+            // Add detailed accessibility section using axe-core results (removed generic test table)
             const violationCount = "${{ needs.accessibility-testing.outputs.violation_count }}";
             const passesCount = "${{ needs.accessibility-testing.outputs.passes_count }}";
             const incompleteCount = "${{ needs.accessibility-testing.outputs.incomplete_count }}";
@@ -789,21 +785,34 @@ jobs:
               commentBody += `| ✅ Passes | ${passesCount} | Working correctly |\n`;
               commentBody += `| ⚠️ Incomplete | ${incompleteCount} | Manual review needed |\n\n`;
               // Add detailed violation breakdown with collapsible sections (base64 decoded)
+              console.log('🔍 DEBUG: violations_collapsible value:', ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }});
               try {
                 const violationsCollapsibleBase64 = ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }};
-                if (violationsCollapsibleBase64 && violationsCollapsibleBase64.trim()) {
+                console.log('🔍 DEBUG: base64 string type and length:', typeof violationsCollapsibleBase64, violationsCollapsibleBase64?.length || 'null');
+                
+                if (violationsCollapsibleBase64 && violationsCollapsibleBase64.trim() && violationsCollapsibleBase64 !== 'null') {
                   // Decode base64 content safely
                   const violationsCollapsible = Buffer.from(violationsCollapsibleBase64, 'base64').toString('utf8');
+                  console.log('🔍 DEBUG: decoded content length:', violationsCollapsible.length);
+                  console.log('🔍 DEBUG: first 200 chars of decoded content:', violationsCollapsible.substring(0, 200));
+                  
                   commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
                   commentBody += `Each section below contains specific elements affected and links to WCAG documentation for remediation:\n\n`;
                   commentBody += violationsCollapsible;
                   commentBody += `\n`;
-                  console.log(`✅ Successfully decoded ${violationsCollapsible.length} characters of collapsible violations`);
+                  console.log(`✅ Successfully decoded and added ${violationsCollapsible.length} characters of collapsible violations`);
+                } else {
+                  console.log('❌ DEBUG: violations_collapsible is empty, null, or invalid:', violationsCollapsibleBase64);
+                  commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
+                  commentBody += `⚠️ Detailed breakdown not available - collapsible content is empty.\n`;
+                  commentBody += `Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
                 }
               } catch (e) {
-                console.log('Could not decode violations collapsible content:', e.message);
+                console.log('❌ Could not decode violations collapsible content:', e.message);
+                console.log('❌ Raw violations_collapsible value:', ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }});
                 commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
-                commentBody += `Detailed breakdown available in workflow artifacts.\n\n`;
+                commentBody += `⚠️ Error processing detailed breakdown: ${e.message}\n`;
+                commentBody += `Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
               }
               
               commentBody += `**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively.\n`;
@@ -821,28 +830,7 @@ jobs:
               commentBody += `| ⚠️ Incomplete | ${incompleteCount} | Manual review recommended |\n\n`;
             }
             
-            // Add test results using proper JavaScript variables
-            const lighthouseStatus = "${{ needs.lighthouse-testing.result }}" === 'success' ? '✅ Success' : 
-                                   "${{ needs.lighthouse-testing.result }}" === 'skipped' ? '⏭️ Skipped' : '❌ Failed';
-            const accessibilityStatus = "${{ needs.accessibility-testing.result }}" === 'success' ? '✅ Success' : 
-                                       "${{ needs.accessibility-testing.result }}" === 'skipped' ? '⏭️ Skipped' : '❌ Failed';
-            const performanceStatus = "${{ needs.performance-testing.result }}" === 'success' ? '✅ Success' : 
-                                     "${{ needs.performance-testing.result }}" === 'skipped' ? '⏭️ Skipped' : '❌ Failed';
-            
-            commentBody += `| 🚀 Lighthouse | ${lighthouseStatus} | Performance and quality analysis |\n`;
-            commentBody += `| ♿ Accessibility | ${accessibilityStatus} | ${{ needs.accessibility-testing.outputs.accessibility_summary }} |\n`;
-            
-            // Enhanced performance reporting with actual values
-            const fcpLH = "${{ needs.lighthouse-testing.outputs.fcp }}";
-            const lcpLH = "${{ needs.lighthouse-testing.outputs.lcp }}";
-            const clsLH = "${{ needs.lighthouse-testing.outputs.cls }}";
-            
-            let performanceDetails = "Core Web Vitals measurement";
-            if (fcpLH && fcpLH !== "N/A" && fcpLH !== "") {
-              performanceDetails = `FCP: ${fcpLH}, LCP: ${lcpLH}, CLS: ${clsLH}`;
-            }
-            
-            commentBody += `| 📊 Performance | ${performanceStatus} | ${performanceDetails} |\n\n`;
+            // Add meaningful test status summary (replaced generic table with rich content)
             
             commentBody += `🔗 **Alternative Testing**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(targetUrl)})\n\n`;
             commentBody += `---\n*🤖 Multi-environment testing via reusable workflow - ${environmentName} environment*\n\n`;
