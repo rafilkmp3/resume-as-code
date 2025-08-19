@@ -328,6 +328,12 @@ jobs:
         run: |
           echo "🔍 Processing axe-core accessibility results..."
           
+          # Install jq for JSON parsing
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "📦 Installing jq for JSON parsing..."
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+          
           # Check for axe-report.json first (primary file), then fallback to _accessibility-reports/axe-results.json
           RESULTS_FILE=""
           if [ -f "axe-report.json" ]; then

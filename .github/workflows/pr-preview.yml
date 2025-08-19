@@ -786,7 +786,7 @@ jobs:
       target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
       environment_name: 'preview'
       environment_context: 'PR #${{ github.event.pull_request.number }} - ${{ github.head_ref }} branch'
-      test_types: 'accessibility,performance'
+      test_types: 'lighthouse,accessibility,performance'
       lighthouse_budget_path: './budget.json'
       artifact_retention_days: 7
       post_pr_comment: true
