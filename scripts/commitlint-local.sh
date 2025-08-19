@@ -43,7 +43,13 @@ if echo "$COMMIT_MSG" | commitlint --config "$TEMP_CONFIG" --verbose > /dev/null
 fi
 
 # Parse error output for AI-friendly messages
-ERROR_OUTPUT=$(cat "$TEMP_ERROR" 2>/dev/null || echo "")
+ERROR_OUTPUT=$(cat "$TEMP_ERROR" 2>/dev/null || echo "No error details available")
+
+# Debug: Show what we got from commitlint
+echo "DEBUG: Error output from commitlint:"
+echo "$ERROR_OUTPUT"
+echo "DEBUG: End of error output"
+echo ""
 
 echo ""
 echo "❌ CONVENTIONAL COMMITS VALIDATION FAILED (LOCAL)"
