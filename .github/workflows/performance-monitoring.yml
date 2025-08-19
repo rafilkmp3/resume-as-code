@@ -80,7 +80,7 @@ jobs:
           fi
           
           # Start server with better error handling
-          timeout 120 PORT=3000 npm run serve > server.log 2>&1 &
+          PORT=3000 timeout 120 npm run serve > server.log 2>&1 &
           SERVER_PID=$!
           echo "Started server with PID: $SERVER_PID"
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
