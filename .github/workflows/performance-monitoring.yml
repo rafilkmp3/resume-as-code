@@ -96,7 +96,12 @@ jobs:
           node-version: '22'
 
       - name: Install serve only
-        run: npm install -g serve
+        run: |
+          npm install -g serve
+          echo "🔍 Checking downloaded files..."
+          ls -la
+          echo "🔍 Checking if .lighthouserc.json exists..."
+          ls -la .lighthouserc.json || echo "❌ .lighthouserc.json not found"
 
       - name: Serve site for testing
         run: |
@@ -267,7 +272,8 @@ jobs:
           npm install -g pa11y
           echo "🔍 Running Pa11y accessibility audit..."
           
-          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json > accessibility-report.json; then
+          # Add Chrome flags for CI environment
+          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json --chromeLaunchConfig '{"args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-gpu"]}' > accessibility-report.json; then
             echo "✅ Accessibility audit passed"
             echo "ACCESSIBILITY_STATUS=success" >> $GITHUB_ENV
           else
@@ -303,6 +309,7 @@ jobs:
       - name: Install Playwright
         run: |
           echo "📦 Installing Playwright with chromium..."
+          npm install playwright
           timeout 300 npx playwright install --with-deps chromium || {
             echo "❌ PLAYWRIGHT INSTALLATION FAILED OR TIMED OUT"
             echo "PLAYWRIGHT_STATUS=failed" >> $GITHUB_ENV
