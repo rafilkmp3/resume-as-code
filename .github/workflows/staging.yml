@@ -91,31 +91,54 @@ jobs:
           
           # Find the last release tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$LAST_TAG" ]; then
-            # No tags found, count all commits
-            COMMITS_SINCE_RELEASE=$(git rev-list --count HEAD)
-            echo "📊 No previous releases found"
-            echo "📊 Total commits: ${COMMITS_SINCE_RELEASE}"
-            STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_RELEASE}"
+          
+          # Calculate commits ahead of main (for context-aware display)
+          if [ "${{ github.ref_name }}" != "main" ]; then
+            # For feature branches, show commits ahead of main
+            COMMITS_AHEAD_MAIN=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "0")
+            echo "📊 Branch: ${{ github.ref_name }}"
+            echo "📊 Commits ahead main: ${COMMITS_AHEAD_MAIN}"
+            COMMITS_DISPLAY="Commits ahead main: ${COMMITS_AHEAD_MAIN}"
           else
-            # Count commits since last tag
-            COMMITS_SINCE_RELEASE=$(git rev-list --count ${LAST_TAG}..HEAD)
-            echo "📊 Last release: ${LAST_TAG}"
-            echo "📊 Commits since release: ${COMMITS_SINCE_RELEASE}"
-            if [ "$COMMITS_SINCE_RELEASE" -eq "0" ]; then
-              STAGING_VERSION="${BASE_VERSION}-staging"
+            # For main branch, show commits since last release
+            if [ -z "$LAST_TAG" ]; then
+              # No tags found, count all commits
+              COMMITS_SINCE_RELEASE=$(git rev-list --count HEAD)
+              echo "📊 No previous releases found"
+              echo "📊 Total commits: ${COMMITS_SINCE_RELEASE}"
+              COMMITS_DISPLAY="Total commits: ${COMMITS_SINCE_RELEASE}"
+              COMMITS_AHEAD_MAIN=${COMMITS_SINCE_RELEASE}
             else
-              STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_RELEASE}"
+              # Count commits since last tag
+              COMMITS_SINCE_RELEASE=$(git rev-list --count ${LAST_TAG}..HEAD)
+              echo "📊 Last release: ${LAST_TAG}"
+              echo "📊 Commits since release: ${COMMITS_SINCE_RELEASE}"
+              COMMITS_DISPLAY="Commits since release: ${COMMITS_SINCE_RELEASE}"
+              COMMITS_AHEAD_MAIN=${COMMITS_SINCE_RELEASE}
             fi
           fi
 
+          # Create staging version
+          if [ "${COMMITS_AHEAD_MAIN}" -eq "0" ]; then
+            STAGING_VERSION="${BASE_VERSION}-staging"
+          else
+            STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_AHEAD_MAIN}"
+          fi
+
           echo "📊 Staging Version: ${STAGING_VERSION}"
+          echo "📊 Display: ${COMMITS_DISPLAY}"
+          
+          # Output for other steps
           echo "current-version=${STAGING_VERSION}" >> $GITHUB_OUTPUT
-          echo "commits-since-release=${COMMITS_SINCE_RELEASE}" >> $GITHUB_OUTPUT
+          echo "commits-since-release=${COMMITS_SINCE_RELEASE:-0}" >> $GITHUB_OUTPUT
+          echo "commits-ahead-main=${COMMITS_AHEAD_MAIN}" >> $GITHUB_OUTPUT
+          echo "commits-display=${COMMITS_DISPLAY}" >> $GITHUB_OUTPUT
 
           # Export for use in build - clearly mark as staging
           echo "APP_VERSION=${STAGING_VERSION}" >> $GITHUB_ENV
-          echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE}" >> $GITHUB_ENV
+          echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE:-0}" >> $GITHUB_ENV
+          echo "COMMITS_AHEAD_MAIN=${COMMITS_AHEAD_MAIN}" >> $GITHUB_ENV
+          echo "COMMITS_DISPLAY=${COMMITS_DISPLAY}" >> $GITHUB_ENV
           echo "LAST_RELEASE_TAG=${LAST_TAG}" >> $GITHUB_ENV
 
       - name: Detect build context
