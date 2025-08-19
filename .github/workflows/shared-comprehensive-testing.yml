@@ -302,6 +302,7 @@ jobs:
           axe "${{ inputs.target_url }}" \
             --save "axe-report.json" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 30000 \
             --verbose
           
@@ -316,6 +317,7 @@ jobs:
           # Generate console output for PR comments and summaries
           axe --stdout "${{ inputs.target_url }}" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
           echo "✅ Axe-core accessibility scan completed (exit code: $AXE_EXIT_CODE)"
