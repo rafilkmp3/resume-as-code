@@ -480,8 +480,7 @@ jobs:
                       
                       echo "🔍 Processing $RULE_IMPACT violation: ${RULE_ID} (${RULE_COUNT} occurrences)"
                       
-                      # Get first few example selectors
-                      EXAMPLES=$(echo "$violation" | jq -r '.nodes[:2] | map(.target | join(" > ")) | join("\n   - ")')
+                      # Get element selectors with smart display strategy
                       TOTAL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | length')
                       
                       VIOLATIONS_COLLAPSIBLE+="<details>\n<summary>${IMPACT_EMOJI} <strong>${RULE_ID}</strong> (${RULE_COUNT} elements affected)</summary>\n\n"
@@ -489,10 +488,29 @@ jobs:
                       VIOLATIONS_COLLAPSIBLE+="**📋 WCAG Guidelines**: ${RULE_TAGS}\n"
                       VIOLATIONS_COLLAPSIBLE+="**📚 Fix Guide**: [${RULE_ID} Documentation](${RULE_URL}) *(detailed examples & solutions)*\n\n"
                       VIOLATIONS_COLLAPSIBLE+="**🔍 Affected Elements**:\n"
-                      VIOLATIONS_COLLAPSIBLE+="   - ${EXAMPLES}\n"
-                      if [ "$TOTAL_EXAMPLES" -gt 2 ]; then
-                        VIOLATIONS_COLLAPSIBLE+="   - *...and $((TOTAL_EXAMPLES - 2)) more elements*\n"
+                      
+                      if [ "$TOTAL_EXAMPLES" -le 5 ]; then
+                        # Show all elements if 5 or fewer
+                        ALL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | map(.target | join(" > ")) | join("\n   - ")')
+                        VIOLATIONS_COLLAPSIBLE+="   - ${ALL_EXAMPLES}\n"
+                      elif [ "$TOTAL_EXAMPLES" -le 15 ]; then
+                        # Show first 3 + collapsible section for moderate lists (6-15 elements)
+                        FIRST_EXAMPLES=$(echo "$violation" | jq -r '.nodes[:3] | map(.target | join(" > ")) | join("\n   - ")')
+                        REMAINING_EXAMPLES=$(echo "$violation" | jq -r '.nodes[3:] | map(.target | join(" > ")) | join("\n   - ")')
+                        VIOLATIONS_COLLAPSIBLE+="   - ${FIRST_EXAMPLES}\n"
+                        VIOLATIONS_COLLAPSIBLE+="   <details>\n   <summary><em>📋 View $((TOTAL_EXAMPLES - 3)) more affected elements...</em></summary>\n\n"
+                        VIOLATIONS_COLLAPSIBLE+="   - ${REMAINING_EXAMPLES}\n\n"
+                        VIOLATIONS_COLLAPSIBLE+="   </details>\n"
+                      else
+                        # Show first 5 + collapsible section for large lists (16+ elements)
+                        FIRST_EXAMPLES=$(echo "$violation" | jq -r '.nodes[:5] | map(.target | join(" > ")) | join("\n   - ")')
+                        REMAINING_EXAMPLES=$(echo "$violation" | jq -r '.nodes[5:] | map(.target | join(" > ")) | join("\n   - ")')
+                        VIOLATIONS_COLLAPSIBLE+="   - ${FIRST_EXAMPLES}\n"
+                        VIOLATIONS_COLLAPSIBLE+="   <details>\n   <summary><em>📋 View all $((TOTAL_EXAMPLES - 5)) remaining affected elements...</em></summary>\n\n"
+                        VIOLATIONS_COLLAPSIBLE+="   - ${REMAINING_EXAMPLES}\n\n"
+                        VIOLATIONS_COLLAPSIBLE+="   </details>\n"
                       fi
+                      
                       VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
                     fi
                   fi
