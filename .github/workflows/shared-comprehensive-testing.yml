@@ -296,12 +296,12 @@ jobs:
           # Create output directory
           mkdir -p _accessibility-reports
           
-          # Run axe-core scan with comprehensive output
+          # Run axe-core scan with comprehensive output using same Chrome options as individual test
           set +e  # Don't fail on accessibility violations
           
           axe "${{ inputs.target_url }}" \
             --save "axe-report.json" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 30000 \
             --verbose
           
@@ -315,7 +315,7 @@ jobs:
           
           # Generate console output for PR comments and summaries
           axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
           echo "✅ Axe-core accessibility scan completed (exit code: $AXE_EXIT_CODE)"
@@ -344,6 +344,9 @@ jobs:
           
           if [ -n "$RESULTS_FILE" ]; then
             echo "📁 Found accessibility results in: $RESULTS_FILE"
+            echo "📊 File size: $(wc -c < "$RESULTS_FILE" 2>/dev/null || echo "unknown") bytes"
+            echo "🔍 First 500 characters of JSON:"
+            head -c 500 "$RESULTS_FILE" 2>/dev/null || echo "Could not read file"
             
             # Extract key metrics from axe-core JSON results
             VIOLATION_COUNT=$(jq -r '.violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
