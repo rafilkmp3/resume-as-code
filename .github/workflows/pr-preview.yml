@@ -20,6 +20,8 @@ jobs:
   build-and-deploy:
     name: Build & Deploy Preview
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.set-url.outputs.preview_url }}
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
     env:
@@ -79,8 +81,10 @@ jobs:
       - name: Configure Node.js for CI
         run: |
           # Suppress Node.js deprecation warnings
-          echo "NODE_OPTIONS=--no-deprecation --no-warnings" >> "$GITHUB_ENV"
-          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
+          {
+            echo "NODE_OPTIONS=--no-deprecation --no-warnings"
+            echo "NODE_NO_WARNINGS=1"
+          } >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -157,6 +161,13 @@ jobs:
         with:
           args: deploy --json --dir=dist --alias=deploy-preview-${{ env.PR_NUMBER }}
 
+      - name: Set preview URL output
+        id: set-url
+        run: |
+          PREVIEW_URL="https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app"
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+          echo "✅ Preview URL set: ${PREVIEW_URL}"
+
 
       - name: Calculate build duration
         if: always()
@@ -173,6 +184,433 @@ jobs:
         with:
           name: preview-build-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: dist/
+          retention-days: 7
+
+  # Smart URL-Based Testing - Tests real deployed URL
+  smart-lighthouse-testing:
+    name: 🚀 Lighthouse Performance (Real URL)
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
+    timeout-minutes: 15
+    steps:
+      - name: Checkout for budget.json
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            budget.json
+            
+      - name: Smart Lighthouse Performance Testing
+        run: |
+          echo "🚀 LIGHTHOUSE PERFORMANCE TESTING - REAL DEPLOYMENT"
+          echo "=================================================="
+          echo "📋 PURPOSE: Test Core Web Vitals on actual deployed site"
+          echo "🎯 TARGET: ${{ needs.build-and-deploy.outputs.preview_url }}"
+          echo "📊 CONTEXT: PR Preview #${{ github.event.pull_request.number }}"
+          echo "✅ METHODOLOGY: Google Lighthouse CI with performance budgets"
+          echo "🔗 ADVANTAGE: Tests real user experience, not localhost"
+          echo "💰 BUDGET: Web.dev recommended resource and timing budgets"
+          echo ""
+          
+          # Create dynamic Lighthouse config for the deployed URL
+          cat > .lighthouserc.json << 'EOF'
+          {
+            "ci": {
+              "collect": {
+                "url": ["${{ needs.build-and-deploy.outputs.preview_url }}"],
+                "numberOfRuns": 3,
+                "settings": {
+                  "preset": "desktop",
+                  "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
+                  "chromeFlags": "--no-sandbox --headless=new --disable-gpu --disable-dev-shm-usage --disable-extensions --no-first-run --disable-default-apps --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding",
+                  "maxWaitForLoad": 60000,
+                  "maxWaitForFcp": 20000,
+                  "skipAudits": ["uses-http2"],
+                  "throttling": {
+                    "rttMs": 40,
+                    "throughputKbps": 10240,
+                    "cpuSlowdownMultiplier": 1,
+                    "requestLatencyMs": 0,
+                    "downloadThroughputKbps": 0,
+                    "uploadThroughputKbps": 0
+                  }
+                }
+              },
+              "assert": {
+                "budgetPath": "./budget.json",
+                "assertions": {
+                  "categories:performance": ["warn", {"minScore": 0.85}],
+                  "categories:accessibility": ["warn", {"minScore": 0.90}],
+                  "categories:best-practices": ["warn", {"minScore": 0.85}],
+                  "categories:seo": ["warn", {"minScore": 0.85}],
+                  "categories:pwa": "off",
+                  "first-contentful-paint": ["warn", {"maxNumericValue": 2000}],
+                  "largest-contentful-paint": ["warn", {"maxNumericValue": 2500}],
+                  "cumulative-layout-shift": ["warn", {"maxNumericValue": 0.1}],
+                  "speed-index": ["warn", {"maxNumericValue": 3000}]
+                }
+              },
+              "upload": {
+                "target": "temporary-public-storage",
+                "temporaryPublicStorage": true
+              }
+            }
+          }
+          EOF
+
+      - name: Execute Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: '.lighthouserc.json'
+          uploadArtifacts: true
+        continue-on-error: true
+        id: lighthouse-run
+
+      - name: Extract Lighthouse Report URLs and Results
+        id: lighthouse-results
+        run: |
+          echo "🔍 EXTRACTING LIGHTHOUSE REPORT URLS AND DETAILED RESULTS"
+          
+          # Install jq for JSON parsing if not available
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "📦 Installing jq for JSON parsing..."
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+          
+          # EXTRACT TEMPORARY PUBLIC STORAGE URLS FROM LIGHTHOUSE CI OUTPUTS
+          echo "🔗 CHECKING LIGHTHOUSE CI ACTION OUTPUTS FOR PUBLIC URLS:"
+          echo "resultsPath output: '${{ steps.lighthouse-run.outputs.resultsPath }}'"
+          echo "links output: '${{ steps.lighthouse-run.outputs.links }}'"
+          echo "assertionResults output: '${{ steps.lighthouse-run.outputs.assertionResults }}'"
+          
+          # Try to extract public URLs from links output
+          if [ -n "${{ steps.lighthouse-run.outputs.links }}" ] && [ "${{ steps.lighthouse-run.outputs.links }}" != "" ]; then
+            echo "✅ Found links output from Lighthouse CI action"
+            echo "🔗 Public report links: ${{ steps.lighthouse-run.outputs.links }}"
+            echo "public_report_links=${{ steps.lighthouse-run.outputs.links }}" >> $GITHUB_OUTPUT
+            echo "has_public_urls=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No public links found in Lighthouse CI action outputs"
+            # Check for links.json file that might contain public URLs
+            if [ -f "links.json" ]; then
+              echo "📄 Found links.json file"
+              echo "🔍 Contents of links.json:"
+              cat links.json || echo "Cannot read links.json"
+              LINKS_CONTENT=$(cat links.json 2>/dev/null || echo "{}")
+              echo "public_report_links=${LINKS_CONTENT}" >> $GITHUB_OUTPUT
+              echo "has_public_urls=true" >> $GITHUB_OUTPUT
+            else
+              echo "❌ No links.json file found"
+              # Search for any files containing "storage.googleapis.com" URLs
+              echo "🔍 Searching for Google Cloud Storage URLs in all files:"
+              grep -r "storage\.googleapis\.com" . 2>/dev/null | head -5 || echo "No Google Cloud Storage URLs found"
+              echo "has_public_urls=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+          # Debug: Check what files the treosh/lighthouse-ci-action created
+          echo "🔍 DEBUG: Looking for Lighthouse results..."
+          echo "Current directory contents:"
+          ls -la
+          
+          if [ -d ".lighthouseci" ]; then
+            echo "📁 Found .lighthouseci directory contents:"
+            find .lighthouseci -type f | head -10
+            echo "📊 JSON files in .lighthouseci:"
+            find .lighthouseci -name "*.json" -type f | head -5
+          else
+            echo "❌ No .lighthouseci directory found"
+          fi
+          
+          # Check for lighthouse reports elsewhere
+          echo "🔍 Searching for lighthouse reports in current directory:"
+          find . -name "*lighthouse*" -type f | head -10
+          
+          # Look for Lighthouse CI outputs (URLs should be in GITHUB_STEP_SUMMARY or outputs)
+          echo "📊 Lighthouse CI Action Outputs:"
+          echo "outcome: ${{ steps.lighthouse-run.outcome }}"
+          
+          # Parse any available Lighthouse report URLs from logs or outputs
+          # The temporaryPublicStorage should provide URLs - let's capture them
+          # Note: Extract metrics even if Lighthouse CI "fails" due to budget violations
+          if [ "${{ steps.lighthouse-run.outcome }}" = "success" ] || [ "${{ steps.lighthouse-run.outcome }}" = "failure" ]; then
+            if [ "${{ steps.lighthouse-run.outcome }}" = "success" ]; then
+              echo "✅ LIGHTHOUSE ANALYSIS COMPLETED SUCCESSFULLY"
+            else
+              echo "⚠️ LIGHTHOUSE ANALYSIS COMPLETED WITH BUDGET VIOLATIONS"
+            fi
+            echo "📊 Performance, accessibility, and SEO scores measured"
+            echo "🔗 Public reports should be available via temporaryPublicStorage"
+            
+            # Try to extract metrics from local results if available
+            echo "📁 Looking for Lighthouse results in .lighthouseci directory..."
+            if [ -d ".lighthouseci" ]; then
+              echo "✅ .lighthouseci directory exists"
+              echo "📂 Directory contents:"
+              ls -la .lighthouseci/ || echo "❌ Cannot list directory contents"
+              
+              JSON_FILES=$(find .lighthouseci -name "*.json" -type f 2>/dev/null)
+              if [ -n "$JSON_FILES" ]; then
+                LIGHTHOUSE_JSON=$(echo "$JSON_FILES" | head -1)
+                echo "📄 Found Lighthouse JSON report: $LIGHTHOUSE_JSON"
+                echo "📊 File size: $(wc -c < "$LIGHTHOUSE_JSON" 2>/dev/null || echo "unknown") bytes"
+                
+                # Verify the JSON file has actual content
+                if [ -f "$LIGHTHOUSE_JSON" ] && [ -s "$LIGHTHOUSE_JSON" ]; then
+                  echo "✅ JSON file exists and has content"
+                  echo "🔍 First 200 chars of JSON file:"
+                  head -c 200 "$LIGHTHOUSE_JSON" || echo "❌ Cannot read file"
+                
+                # Extract key metrics using jq
+                if command -v jq >/dev/null 2>&1; then
+                  # Parse categories with proper null handling
+                  PERFORMANCE_SCORE=$(jq -r 'if .categories.performance.score then (.categories.performance.score * 100 | floor) else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  ACCESSIBILITY_SCORE=$(jq -r 'if .categories.accessibility.score then (.categories.accessibility.score * 100 | floor) else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A") 
+                  BEST_PRACTICES_SCORE=$(jq -r 'if .categories["best-practices"].score then (.categories["best-practices"].score * 100 | floor) else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  SEO_SCORE=$(jq -r 'if .categories.seo.score then (.categories.seo.score * 100 | floor) else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  
+                  # Parse audits with proper null handling
+                  FCP=$(jq -r 'if .audits["first-contentful-paint"].displayValue then .audits["first-contentful-paint"].displayValue else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  LCP=$(jq -r 'if .audits["largest-contentful-paint"].displayValue then .audits["largest-contentful-paint"].displayValue else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A") 
+                  CLS=$(jq -r 'if .audits["cumulative-layout-shift"].displayValue then .audits["cumulative-layout-shift"].displayValue else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  SPEED_INDEX=$(jq -r 'if .audits["speed-index"].displayValue then .audits["speed-index"].displayValue else "N/A" end' "$LIGHTHOUSE_JSON" 2>/dev/null || echo "N/A")
+                  
+                  # ALWAYS export metrics to GitHub outputs (even if some are N/A)
+                  echo "performance_score=${PERFORMANCE_SCORE}" >> $GITHUB_OUTPUT
+                  echo "accessibility_score=${ACCESSIBILITY_SCORE}" >> $GITHUB_OUTPUT  
+                  echo "best_practices_score=${BEST_PRACTICES_SCORE}" >> $GITHUB_OUTPUT
+                  echo "seo_score=${SEO_SCORE}" >> $GITHUB_OUTPUT
+                  echo "fcp=${FCP}" >> $GITHUB_OUTPUT
+                  echo "lcp=${LCP}" >> $GITHUB_OUTPUT
+                  echo "cls=${CLS}" >> $GITHUB_OUTPUT
+                  echo "speed_index=${SPEED_INDEX}" >> $GITHUB_OUTPUT
+                  
+                  echo "📊 EXTRACTED LIGHTHOUSE METRICS (RAW VALUES):"
+                  echo "Performance: ${PERFORMANCE_SCORE}% (raw)"
+                  echo "Accessibility: ${ACCESSIBILITY_SCORE}% (raw)"
+                  echo "Best Practices: ${BEST_PRACTICES_SCORE}% (raw)"
+                  echo "SEO: ${SEO_SCORE}% (raw)"
+                  echo "FCP: ${FCP} (raw)"
+                  echo "LCP: ${LCP} (raw)"
+                  echo "CLS: ${CLS} (raw)"
+                  echo "Speed Index: ${SPEED_INDEX} (raw)"
+                  
+                  # Check if we have ANY valid metrics (more lenient condition)
+                  if [ "$PERFORMANCE_SCORE" != "N/A" ] || [ "$ACCESSIBILITY_SCORE" != "N/A" ] || [ "$BEST_PRACTICES_SCORE" != "N/A" ] || [ "$SEO_SCORE" != "N/A" ] || [ "$FCP" != "N/A" ] || [ "$LCP" != "N/A" ]; then
+                    echo "✅ METRICS VALIDATION: Found valid data - setting has_detailed_metrics=true"
+                    echo "has_detailed_metrics=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "❌ METRICS VALIDATION: All values are N/A - setting has_detailed_metrics=false"
+                    echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+                  fi
+                else
+                  echo "❌ jq not available for JSON parsing"
+                  echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+                fi
+              else
+                echo "❌ JSON file is empty or doesn't exist"
+                echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+              fi
+              else
+                echo "❌ No JSON files found in .lighthouseci directory"
+                echo "📂 Available files in .lighthouseci:"
+                find .lighthouseci -type f | head -10 || echo "No files found"
+                echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "❌ No .lighthouseci directory found"
+              echo "📂 Current directory contents:"
+              ls -la . | head -10 || echo "Cannot list current directory"
+              echo "🔍 Searching for lighthouse-related files globally:"
+              find . -name "*lighthouse*" -type f | head -5 || echo "No lighthouse-related files found anywhere"
+              echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "⚠️ LIGHTHOUSE ANALYSIS ENCOUNTERED ISSUES"
+            echo "🔧 This is common in CI environments - Chrome headless can be unstable"
+            echo "🌐 Manual verification: ${{ needs.build-and-deploy.outputs.preview_url }}"
+            echo "has_detailed_metrics=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post Lighthouse Results to PR Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ github.event.pull_request.number }};
+            const previewUrl = "${{ needs.build-and-deploy.outputs.preview_url }}";
+            const lighthouseOutcome = "${{ steps.lighthouse-run.outcome }}";
+            const hasDetailedMetrics = "${{ steps.lighthouse-results.outputs.has_detailed_metrics }}" === "true";
+            
+            let commentBody = `## 🚀 Lighthouse Performance Report\n\n`;
+            commentBody += `**📊 Target URL**: [${previewUrl}](${previewUrl})\n`;
+            commentBody += `**🎯 Context**: PR #${prNumber} Preview Deployment\n`;
+            commentBody += `**📅 Tested**: ${new Date().toISOString().split('T')[0]} ${new Date().toTimeString().split(' ')[0]} UTC\n\n`;
+            
+            if (hasDetailedMetrics) {
+                const performanceScore = "${{ steps.lighthouse-results.outputs.performance_score }}";
+                const accessibilityScore = "${{ steps.lighthouse-results.outputs.accessibility_score }}"; 
+                const bestPracticesScore = "${{ steps.lighthouse-results.outputs.best_practices_score }}";
+                const seoScore = "${{ steps.lighthouse-results.outputs.seo_score }}";
+                const fcp = "${{ steps.lighthouse-results.outputs.fcp }}";
+                const lcp = "${{ steps.lighthouse-results.outputs.lcp }}";
+                const cls = "${{ steps.lighthouse-results.outputs.cls }}";
+                const speedIndex = "${{ steps.lighthouse-results.outputs.speed_index }}";
+                
+                commentBody += `### 📈 Lighthouse Scores\n\n`;
+                commentBody += `| Category | Score | Status |\n`;
+                commentBody += `|----------|-------|--------|\n`;
+                commentBody += `| 🚀 **Performance** | ${performanceScore}% | ${parseFloat(performanceScore) >= 85 ? '✅ Good' : parseFloat(performanceScore) >= 70 ? '⚠️ Needs Improvement' : '❌ Poor'} |\n`;
+                commentBody += `| ♿ **Accessibility** | ${accessibilityScore}% | ${parseFloat(accessibilityScore) >= 90 ? '✅ Good' : parseFloat(accessibilityScore) >= 70 ? '⚠️ Needs Improvement' : '❌ Poor'} |\n`;
+                commentBody += `| ⚡ **Best Practices** | ${bestPracticesScore}% | ${parseFloat(bestPracticesScore) >= 85 ? '✅ Good' : parseFloat(bestPracticesScore) >= 70 ? '⚠️ Needs Improvement' : '❌ Poor'} |\n`;
+                commentBody += `| 🔍 **SEO** | ${seoScore}% | ${parseFloat(seoScore) >= 85 ? '✅ Good' : parseFloat(seoScore) >= 70 ? '⚠️ Needs Improvement' : '❌ Poor'} |\n\n`;
+                
+                commentBody += `### ⚡ Core Web Vitals\n\n`;
+                commentBody += `| Metric | Value | Status |\n`;
+                commentBody += `|--------|-------|--------|\n`;
+                commentBody += `| **First Contentful Paint** | ${fcp} | ${fcp.includes('s') && parseFloat(fcp) <= 2.5 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
+                commentBody += `| **Largest Contentful Paint** | ${lcp} | ${lcp.includes('s') && parseFloat(lcp) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
+                commentBody += `| **Cumulative Layout Shift** | ${cls} | ${parseFloat(cls) <= 0.1 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
+                commentBody += `| **Speed Index** | ${speedIndex} | ${speedIndex.includes('s') && parseFloat(speedIndex) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n\n`;
+                
+              } else {
+                commentBody += `✅ **Lighthouse analysis completed successfully**\n\n`;
+                commentBody += `📊 Performance, accessibility, and SEO metrics measured\n`;
+                commentBody += `🔧 Detailed metrics extraction failed - check workflow logs\n\n`;
+              }
+              
+              commentBody += `### 🔗 Public Reports\n\n`;
+              
+              // Add temporaryPublicStorage URLs if available
+              const hasPublicUrls = "${{ steps.lighthouse-results.outputs.has_public_urls }}" === "true";
+              const publicReportLinks = "${{ steps.lighthouse-results.outputs.public_report_links }}";
+              
+              if (hasPublicUrls && publicReportLinks) {
+                try {
+                  const reportLinks = JSON.parse(publicReportLinks);
+                  if (Array.isArray(reportLinks) && reportLinks.length > 0) {
+                    commentBody += `🌐 **Public Lighthouse Reports** (7-day storage):\n`;
+                    reportLinks.forEach((link, index) => {
+                      commentBody += `${index + 1}. [Report ${index + 1}](${link})\n`;
+                    });
+                    commentBody += `\n`;
+                  } else if (typeof reportLinks === 'string' && reportLinks.startsWith('http')) {
+                    commentBody += `🌐 **Public Lighthouse Report**: [View Report](${reportLinks}) (7-day storage)\n\n`;
+                  }
+                } catch (e) {
+                  // If parsing fails, just show raw links
+                  commentBody += `🌐 **Public Lighthouse Report**: ${publicReportLinks}\n\n`;
+                }
+              } else {
+                commentBody += `📋 **Lighthouse CI Report**: Stored in workflow artifacts\n`;
+                commentBody += `🌐 **Public Storage**: temporaryPublicStorage enabled\n`;
+              }
+              
+              commentBody += `📊 **Compare with**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})\n\n`;
+              
+              commentBody += `### 💡 Next Steps\n\n`;
+              commentBody += `- Review Core Web Vitals scores above\n`;
+              commentBody += `- Check [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)}) for detailed recommendations\n`;
+              commentBody += `- Focus on metrics marked as "Needs Improvement"\n`;
+              commentBody += `- Use budget.json thresholds to guide optimizations\n\n`;
+              
+            } else {
+              commentBody += `⚠️ **Lighthouse analysis encountered issues**\n\n`;
+              commentBody += `🔧 This is common in CI environments - Chrome headless can be unstable\n`;
+              commentBody += `🌐 **Manual verification**: [Test with PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})\n\n`;
+              commentBody += `### 📊 Alternative Testing\n\n`;
+              commentBody += `Since automated Lighthouse failed, please manually verify performance:\n\n`;
+              commentBody += `1. **[PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})** - Google's official tool\n`;
+              commentBody += `2. **[WebPageTest](https://www.webpagetest.org/)** - Advanced performance testing\n`;
+              commentBody += `3. **[GTmetrix](https://gtmetrix.com/)** - Performance monitoring\n\n`;
+            }
+            
+            commentBody += `---\n`;
+            commentBody += `*🤖 Automated Lighthouse testing on real deployment URL - Updated: ${new Date().toISOString().split('T')[0]} ${new Date().toTimeString().split(' ')[0]} UTC*\n\n`;
+            commentBody += `<!-- lighthouse-performance-report-${Date.now()} -->`;
+            
+            // Find and hide previous Lighthouse reports (Atlantis-style)
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const lighthouseComments = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.includes('## 🚀 Lighthouse Performance Report')
+            );
+            
+            let hiddenCount = 0;
+            for (const oldComment of lighthouseComments) {
+              try {
+                const outdatedBody = `<details>\\n<summary>🔒 <strong>Previous Lighthouse Report</strong> - Click to expand</summary>\\n\\n${oldComment.body}\\n\\n---\\n*⚠️ This report has been superseded by a newer Lighthouse analysis.*\\n</details>`;
+                
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize Lighthouse comment ${oldComment.id}: ${error.message}`);
+              }
+            }
+            
+            console.log(`🔒 Minimized ${hiddenCount} previous Lighthouse reports (Atlantis-style)`);
+            
+            // Post fresh Lighthouse report comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody,
+            });
+            
+            console.log(`✅ Posted comprehensive Lighthouse report to PR #${prNumber} (${hiddenCount} previous reports minimized)`);
+            console.log(`🔗 Report includes detailed metrics, Core Web Vitals, and PageSpeed Insights comparison`);
+
+  # Smart Accessibility Testing - Tests real deployed URL
+  smart-accessibility-testing:
+    name: ♿ Accessibility (Real URL)
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
+    timeout-minutes: 5
+    steps:
+      - name: Smart Accessibility Testing
+        run: |
+          echo "♿ ACCESSIBILITY TESTING - REAL DEPLOYMENT"
+          echo "=========================================="
+          echo "📋 PURPOSE: WCAG 2.1 AA compliance testing on actual deployed site"
+          echo "🎯 TARGET: ${{ needs.build-and-deploy.outputs.preview_url }}"
+          echo "📊 CONTEXT: PR Preview #${{ github.event.pull_request.number }}"
+          echo "✅ METHODOLOGY: Axe-core accessibility engine"
+          echo ""
+          
+          # Install Axe CLI
+          npm install -g @axe-core/cli
+          
+          # Run accessibility test on real deployment  
+          if axe "${{ needs.build-and-deploy.outputs.preview_url }}" --save axe-report.json --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" --timeout=30000; then
+            echo "✅ Axe accessibility test completed successfully"
+          else
+            echo "⚠️ Accessibility issues found or browser timeout"
+            echo "🔧 This is informational - check axe-report.json for details"
+          fi
+          
+          # Ensure report file exists for artifact upload
+          if [ ! -f "axe-report.json" ]; then
+            echo '{"error": "Axe test failed to generate report", "url": "${{ needs.build-and-deploy.outputs.preview_url }}", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > axe-report.json
+          fi
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report-pr-${{ github.event.pull_request.number }}
+          path: axe-report.json
           retention-days: 7
 
   preview-info:

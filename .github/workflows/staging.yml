@@ -84,12 +84,11 @@ jobs:
       - name: Calculate version and commit info
         id: version-info
         run: |
-          echo "🔍 Calculating version and commit information..."
+          echo "🔍 Calculating STAGING version and commit information..."
 
-          # Get current version from package.json
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "current-version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
-
+          # Get current version from package.json but mark as staging
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          
           # Find the last release tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LAST_TAG" ]; then
@@ -97,17 +96,25 @@ jobs:
             COMMITS_SINCE_RELEASE=$(git rev-list --count HEAD)
             echo "📊 No previous releases found"
             echo "📊 Total commits: ${COMMITS_SINCE_RELEASE}"
+            STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_RELEASE}"
           else
             # Count commits since last tag
             COMMITS_SINCE_RELEASE=$(git rev-list --count ${LAST_TAG}..HEAD)
             echo "📊 Last release: ${LAST_TAG}"
             echo "📊 Commits since release: ${COMMITS_SINCE_RELEASE}"
+            if [ "$COMMITS_SINCE_RELEASE" -eq "0" ]; then
+              STAGING_VERSION="${BASE_VERSION}-staging"
+            else
+              STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_RELEASE}"
+            fi
           fi
 
+          echo "📊 Staging Version: ${STAGING_VERSION}"
+          echo "current-version=${STAGING_VERSION}" >> $GITHUB_OUTPUT
           echo "commits-since-release=${COMMITS_SINCE_RELEASE}" >> $GITHUB_OUTPUT
 
-          # Export for use in build
-          echo "APP_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
+          # Export for use in build - clearly mark as staging
+          echo "APP_VERSION=${STAGING_VERSION}" >> $GITHUB_ENV
           echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE}" >> $GITHUB_ENV
           echo "LAST_RELEASE_TAG=${LAST_TAG}" >> $GITHUB_ENV
 
@@ -414,3 +421,22 @@ jobs:
             echo "3. 📋 Document emergency cause" >> $GITHUB_STEP_SUMMARY
             echo "4. 🔄 Use normal pipeline for next changes" >> $GITHUB_STEP_SUMMARY
           fi
+
+  # Comprehensive staging environment testing
+  staging-comprehensive-testing:
+    name: 🧪 Comprehensive Staging Testing
+    if: github.ref == 'refs/heads/main' && github.event.inputs.deployment_mode != 'emergency'
+    needs: [deploy]
+    uses: ./.github/workflows/shared-comprehensive-testing.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    with:
+      target_url: 'https://resume-as-code.netlify.app/'
+      environment_name: 'staging'
+      environment_context: '${{ github.ref_name }} branch deployment to Netlify'
+      test_types: 'lighthouse,accessibility,performance'
+      lighthouse_budget_path: './budget.json'
+      artifact_retention_days: 30
+      post_pr_comment: false
