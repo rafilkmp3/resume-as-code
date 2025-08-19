@@ -45,15 +45,14 @@ permissions:
   checks: write
 
 jobs:
-  lighthouse-ci:
-    name: 🚀 Lighthouse CI Performance
+  # Build once, test many - efficient CI architecture
+  build-site:
+    name: 🏗️ Build Site for Testing
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -69,6 +68,34 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-site-${{ github.sha }}
+          path: dist/
+          retention-days: 1
+
+  lighthouse-ci:
+    name: 🚀 Lighthouse CI Performance
+    runs-on: ubuntu-latest
+    needs: build-site
+    if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
+    steps:
+      - name: Download built site
+        uses: actions/download-artifact@v4
+        with:
+          name: built-site-${{ github.sha }}
+          path: dist/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install serve only
+        run: npm install -g serve
+
       - name: Serve site for testing
         run: |
           echo "🚀 Starting production server on port 3000..."
@@ -79,8 +106,8 @@ jobs:
             exit 1
           fi
           
-          # Start server with better error handling
-          PORT=3000 timeout 120 npm run serve > server.log 2>&1 &
+          # Start server with better error handling  
+          serve -s dist -l 3000 > server.log 2>&1 &
           SERVER_PID=$!
           echo "Started server with PID: $SERVER_PID"
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
@@ -170,19 +197,17 @@ jobs:
   bundle-analysis:
     name: 📦 Bundle Size Analysis
     runs-on: ubuntu-latest
+    needs: build-site
     if: github.event_name == 'pull_request' && github.event.inputs.run_all_tests == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download built site
+        uses: actions/download-artifact@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+          name: built-site-${{ github.sha }}
+          path: dist/
 
       - name: Analyze Bundle Size
         uses: preactjs/compressed-size-action@v2
@@ -194,23 +219,22 @@ jobs:
   accessibility-audit:
     name: ♿ Accessibility Audit
     runs-on: ubuntu-latest
+    needs: build-site
     if: github.event.inputs.run_all_tests == 'true' || github.event_name == 'schedule'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Download built site
+        uses: actions/download-artifact@v4
+        with:
+          name: built-site-${{ github.sha }}
+          path: dist/
 
-      - name: Setup Node.js
+      - name: Setup Node.js and serve
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build and serve
+      - name: Install and start server
         run: |
-          npm run build
           npm install -g serve
           serve -s dist -l 3000 &
           SERVER_PID=$!
@@ -240,25 +264,22 @@ jobs:
   core-web-vitals:
     name: 📊 Core Web Vitals
     runs-on: ubuntu-latest
+    needs: build-site
     if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Download built site
+        uses: actions/download-artifact@v4
+        with:
+          name: built-site-${{ github.sha }}
+          path: dist/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
-
-      - name: Build site
-        run: npm run build
 
       - name: Measure Core Web Vitals
         run: |
