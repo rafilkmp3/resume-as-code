@@ -401,14 +401,24 @@ jobs:
               
               # Generate collapsible violation sections for GitHub
               VIOLATIONS_COLLAPSIBLE=""
+              VIOLATIONS_PROCESSED=0
+              echo "🔍 Starting to build VIOLATIONS_COLLAPSIBLE sections..."
+              echo "🔍 Testing jq command for violations:"
+              jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null | head -n 2
+              echo "🔍 Total violation objects available:"
+              jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null | wc -l
+              echo ""
               while IFS= read -r violation; do
                 if [ -n "$violation" ]; then
+                  VIOLATIONS_PROCESSED=$((VIOLATIONS_PROCESSED + 1))
                   RULE_ID=$(echo "$violation" | jq -r '.id')
                   RULE_HELP=$(echo "$violation" | jq -r '.help')
                   RULE_URL=$(echo "$violation" | jq -r '.helpUrl')
                   RULE_IMPACT=$(echo "$violation" | jq -r '.impact // "unknown"')
                   RULE_COUNT=$(echo "$violation" | jq -r '.nodes | length')
                   RULE_TAGS=$(echo "$violation" | jq -r '.tags | join(", ")')
+                  
+                  echo "🔍 Processing violation #${VIOLATIONS_PROCESSED}: ${RULE_ID} (${RULE_COUNT} occurrences)"
                   
                   # Get first few example selectors
                   EXAMPLES=$(echo "$violation" | jq -r '.nodes[:3] | map(.target | join(" > ")) | join("\n     - ")')
@@ -427,15 +437,35 @@ jobs:
                   VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
                 fi
               done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
+              echo "🔍 Processed ${VIOLATIONS_PROCESSED} violation types for collapsible sections"
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
               echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
               # Add collapsible sections for GitHub (base64 encoded to prevent JavaScript syntax errors)
-              echo "violations_collapsible<<EOF" >> $GITHUB_OUTPUT
-              echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0 >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
+              echo "🔍 VIOLATIONS_COLLAPSIBLE variable length: ${#VIOLATIONS_COLLAPSIBLE}"
+              echo "🔍 First 200 characters of VIOLATIONS_COLLAPSIBLE:"
+              echo "$VIOLATIONS_COLLAPSIBLE" | head -c 200
+              echo ""
+              
+              # Test base64 encoding
+              ENCODED_VIOLATIONS=$(echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0)
+              echo "🔍 Base64 encoded length: ${#ENCODED_VIOLATIONS}"
+              echo "🔍 First 100 characters of base64:"
+              echo "$ENCODED_VIOLATIONS" | head -c 100
+              echo ""
+              
+              # Set output with proper debugging
+              if [ -n "$VIOLATIONS_COLLAPSIBLE" ]; then
+                echo "violations_collapsible<<EOF" >> $GITHUB_OUTPUT
+                echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0 >> $GITHUB_OUTPUT
+                echo "EOF" >> $GITHUB_OUTPUT
+                echo "✅ violations_collapsible output set successfully"
+              else
+                echo "⚠️ VIOLATIONS_COLLAPSIBLE is empty, setting empty output"
+                echo "violations_collapsible=" >> $GITHUB_OUTPUT
+              fi
             else
               ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail=" >> $GITHUB_OUTPUT
