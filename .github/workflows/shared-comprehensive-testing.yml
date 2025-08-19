@@ -365,7 +365,6 @@ jobs:
             echo "accessibility_summary=❌ Accessibility scan failed - no results generated" >> $GITHUB_OUTPUT
             echo "has_accessibility_results=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Upload Accessibility Artifacts
         uses: actions/upload-artifact@v4
         if: always()

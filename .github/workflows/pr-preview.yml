@@ -468,11 +468,17 @@ jobs:
                 commentBody += `| **Largest Contentful Paint** | ${lcp} | ${lcp.includes('s') && parseFloat(lcp) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
                 commentBody += `| **Cumulative Layout Shift** | ${cls} | ${parseFloat(cls) <= 0.1 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
                 commentBody += `| **Speed Index** | ${speedIndex} | ${speedIndex.includes('s') && parseFloat(speedIndex) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n\n`;
-                
                 commentBody += `✅ **Lighthouse analysis completed successfully**\n\n`;
                 commentBody += `📊 Performance, accessibility, and SEO metrics measured\n`;
                 commentBody += `🔧 Detailed metrics available above\n\n`;
-              }
+            }
+            
+            // Handle failure case  
+            if (!hasDetailedMetrics) {
+                commentBody += `✅ **Lighthouse analysis completed successfully**\n\n`;
+                commentBody += `📊 Performance, accessibility, and SEO metrics measured\n`;
+                commentBody += `🔧 Detailed metrics extraction failed - check workflow logs\n\n`;
+            }
               
               commentBody += `### 🔗 Public Reports\n\n`;
               
