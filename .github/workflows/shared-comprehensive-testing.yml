@@ -836,7 +836,44 @@ jobs:
             commentBody += `---\n*🤖 Multi-environment testing via reusable workflow - ${environmentName} environment*\n\n`;
             commentBody += `<!-- comprehensive-testing-${environmentName}-${Date.now()} -->`;
             
-            // Post comment
+            // Atlantis-style comment management: Hide/minimize ALL previous comprehensive testing comments
+            console.log(`🔍 Finding previous comprehensive testing comments for ${environmentName} environment...`);
+            const { data: existingComments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            // Find all previous comprehensive testing comments for this environment
+            const comprehensiveTestingComments = existingComments.filter(comment =>
+              comment.body.includes(`comprehensive-testing-${environmentName}`) ||
+              (comment.body.includes('🧪 Comprehensive Testing Results') && comment.body.includes(`Environment**: ${environmentName}`))
+            );
+            
+            console.log(`🔍 Found ${comprehensiveTestingComments.length} previous comprehensive testing comments for ${environmentName}`);
+            
+            // Hide/minimize ALL previous comprehensive testing comments (Atlantis behavior) 
+            let hiddenCount = 0;
+            for (const oldComment of comprehensiveTestingComments) {
+              try {
+                // Add "outdated" marker to hide previous comments
+                const outdatedBody = `<details>\n<summary>🔒 <strong>Outdated Testing Results (${environmentName})</strong> - Click to expand</summary>\n\n${oldComment.body}\n\n---\n*⚠️ This testing report has been superseded by a newer analysis.*\n</details>`;
+                
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize testing comment ${oldComment.id}: ${error.message}`);
+              }
+            }
+            
+            console.log(`🔒 Minimized ${hiddenCount} previous comprehensive testing comments (Atlantis-style)`);
+            
+            // Always create fresh comment (never update existing)
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -844,4 +881,5 @@ jobs:
               body: commentBody,
             });
             
-            console.log(`✅ Posted comprehensive testing results to PR #${prNumber} for ${environmentName} environment`);
+            console.log(`✅ Posted fresh comprehensive testing results to PR #${prNumber} for ${environmentName} environment (${hiddenCount} old reports minimized)`);
+            console.log(`🎯 Atlantis-style management: Only latest testing results visible, previous reports collapsed`);
