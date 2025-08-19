@@ -300,8 +300,7 @@ jobs:
           set +e  # Don't fail on accessibility violations
           
           axe "${{ inputs.target_url }}" \
-            --format json \
-            --output "_accessibility-reports/axe-results.json" \
+            --save "_accessibility-reports/axe-results.json" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
             --timeout 30000 \
             --verbose
@@ -309,19 +308,10 @@ jobs:
           AXE_EXIT_CODE=$?
           echo "axe_exit_code=$AXE_EXIT_CODE" >> $GITHUB_OUTPUT
           
-          # Also generate human-readable report
-          axe "${{ inputs.target_url }}" \
-            --format html \
-            --output "_accessibility-reports/axe-report.html" \
+          # Generate console output for PR comments and summaries
+          axe --stdout "${{ inputs.target_url }}" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
-            --timeout 30000 || true
-          
-          # Generate text summary for PR comments
-          axe "${{ inputs.target_url }}" \
-            --format text \
-            --output "_accessibility-reports/axe-summary.txt" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
-            --timeout 30000 || true
+            --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
           echo "✅ Axe-core accessibility scan completed (exit code: $AXE_EXIT_CODE)"
           echo "📁 Reports generated in _accessibility-reports/"
