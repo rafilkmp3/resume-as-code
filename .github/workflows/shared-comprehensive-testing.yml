@@ -274,6 +274,8 @@ jobs:
       passes_count: ${{ steps.process-axe-results.outputs.passes_count }}
       incomplete_count: ${{ steps.process-axe-results.outputs.incomplete_count }}
       has_accessibility_results: ${{ steps.process-axe-results.outputs.has_accessibility_results }}
+      violations_detail: ${{ steps.process-axe-results.outputs.violations_detail }}
+      violations_collapsible: ${{ steps.process-axe-results.outputs.violations_collapsible }}
       axe_exit_code: ${{ steps.axe-scan.outputs.axe_exit_code }}
     steps:
       - name: Setup Node.js for Axe Core
@@ -394,16 +396,51 @@ jobs:
               echo "🔍 Detailed Violations:" 
               jq -r '.[0].violations[] | "- \(.impact // "unknown") impact: \(.help) (\(.nodes | length) element(s))"' "$RESULTS_FILE" 2>/dev/null || echo "Could not parse violations"
               
-              # Generate detailed violation breakdown for PR comments
-              VIOLATIONS_DETAIL=$(jq -r '.[0].violations[] | "**\(.id)**: \(.nodes | length) occurrences - \(.help)"' "$RESULTS_FILE" 2>/dev/null | head -10)
+              # Generate enhanced violation breakdown for PR comments with URLs and details
+              VIOLATIONS_DETAIL=$(jq -r '.[0].violations[] | "**\(.id)**: \(.nodes | length) occurrences\n- **Description**: \(.help)\n- **Impact**: \(.impact // "unknown")\n- **Help URL**: \(.helpUrl)\n- **WCAG Tags**: \(.tags | join(", "))\n"' "$RESULTS_FILE" 2>/dev/null)
+              
+              # Generate collapsible violation sections for GitHub
+              VIOLATIONS_COLLAPSIBLE=""
+              while IFS= read -r violation; do
+                if [ -n "$violation" ]; then
+                  RULE_ID=$(echo "$violation" | jq -r '.id')
+                  RULE_HELP=$(echo "$violation" | jq -r '.help')
+                  RULE_URL=$(echo "$violation" | jq -r '.helpUrl')
+                  RULE_IMPACT=$(echo "$violation" | jq -r '.impact // "unknown"')
+                  RULE_COUNT=$(echo "$violation" | jq -r '.nodes | length')
+                  RULE_TAGS=$(echo "$violation" | jq -r '.tags | join(", ")')
+                  
+                  # Get first few example selectors
+                  EXAMPLES=$(echo "$violation" | jq -r '.nodes[:3] | map(.target | join(" > ")) | join("\n     - ")')
+                  TOTAL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | length')
+                  
+                  VIOLATIONS_COLLAPSIBLE+="<details>\n<summary><strong>${RULE_ID}</strong>: ${RULE_COUNT} occurrences (${RULE_IMPACT} impact)</summary>\n\n"
+                  VIOLATIONS_COLLAPSIBLE+="**Description**: ${RULE_HELP}\n\n"
+                  VIOLATIONS_COLLAPSIBLE+="**Impact Level**: ${RULE_IMPACT}\n"
+                  VIOLATIONS_COLLAPSIBLE+="**WCAG Guidelines**: ${RULE_TAGS}\n"
+                  VIOLATIONS_COLLAPSIBLE+="**Documentation**: [${RULE_ID} Rule Details](${RULE_URL})\n\n"
+                  VIOLATIONS_COLLAPSIBLE+="**Example Affected Elements** (${TOTAL_EXAMPLES} total):\n"
+                  VIOLATIONS_COLLAPSIBLE+="     - ${EXAMPLES}\n"
+                  if [ "$TOTAL_EXAMPLES" -gt 3 ]; then
+                    VIOLATIONS_COLLAPSIBLE+="     - ... and $((TOTAL_EXAMPLES - 3)) more\n"
+                  fi
+                  VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
+                fi
+              done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
               echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
+              
+              # Add collapsible sections for GitHub
+              echo "violations_collapsible<<EOF" >> $GITHUB_OUTPUT
+              echo -e "$VIOLATIONS_COLLAPSIBLE" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
             else
               ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail=" >> $GITHUB_OUTPUT
+              echo "violations_collapsible=" >> $GITHUB_OUTPUT
             fi
             
             # Export results for other steps
@@ -725,8 +762,21 @@ jobs:
               commentBody += `| ✅ Passes | ${passesCount} | Working correctly |\n`;
               commentBody += `| ⚠️ Incomplete | ${incompleteCount} | Manual review needed |\n\n`;
               
+              // Add detailed violation breakdown with collapsible sections
+              const violationsCollapsible = "${{ needs.accessibility-testing.outputs.violations_collapsible }}";
+              if (violationsCollapsible && violationsCollapsible.trim()) {
+                commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
+                commentBody += `Each section below contains specific elements affected and links to WCAG documentation for remediation:\n\n`;
+                commentBody += violationsCollapsible;
+                commentBody += `\n`;
+              }
+              
               commentBody += `**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively.\n`;
-              commentBody += `**🔧 Next Steps**: Review detailed HTML report in workflow artifacts for specific violation details.\n\n`;
+              commentBody += `**🔧 Next Steps**: \n`;
+              commentBody += `- Click on each violation type above for detailed remediation guidance\n`;
+              commentBody += `- Use the provided WCAG documentation links for implementation details\n`;
+              commentBody += `- Test with screen readers and keyboard navigation after fixes\n`;
+              commentBody += `- Consider running accessibility tests locally during development\n\n`;
             } else if (hasAccessibilityResults === 'true' && violationCount === "0") {
               commentBody += `### ♿ Accessibility Status: EXCELLENT! 🎉\n\n`;
               commentBody += `**✅ No accessibility violations found!**\n\n`;
