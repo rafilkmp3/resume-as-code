@@ -301,10 +301,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        continue-on-error: true
 
       - name: Configure Git and Node.js for CI
-        continue-on-error: true
         run: |
           # Configure git to suppress warnings
           git config --global init.defaultBranch main
@@ -322,11 +320,9 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-        continue-on-error: true
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit || echo "Dependency installation failed"
-        continue-on-error: true
+        run: npm ci --prefer-offline --no-audit
 
       - name: Run quality gate
         run: |
@@ -347,7 +343,6 @@ jobs:
               ls -lah dist/ | grep -E '\.(css|js|html)$' || echo "Build artifacts checked"
               ;;
           esac
-        continue-on-error: true
 
       - name: Upload test results
         if: always() && hashFiles('coverage/**/*', 'test-results/**/*') != ''
@@ -358,7 +353,6 @@ jobs:
             coverage/
             test-results/
           retention-days: 7
-        continue-on-error: true
 
   # Staging deployment to Netlify (guaranteed to work)
   deploy:
