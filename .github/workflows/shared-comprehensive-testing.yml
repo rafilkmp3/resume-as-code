@@ -371,6 +371,8 @@ jobs:
         with:
           name: accessibility-${{ inputs.environment_name }}-${{ github.run_id }}
           path: |
+            axe-report.json
+            axe-report.html
             _accessibility-reports/
           retention-days: ${{ inputs.artifact_retention_days }}
 
