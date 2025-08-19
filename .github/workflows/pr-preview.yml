@@ -443,6 +443,7 @@ jobs:
             commentBody += `**🎯 Context**: PR #${prNumber} Preview Deployment\n`;
             commentBody += `**📅 Tested**: ${new Date().toISOString().split('T')[0]} ${new Date().toTimeString().split(' ')[0]} UTC\n\n`;
             
+            // Handle detailed metrics section
             if (hasDetailedMetrics) {
                 const performanceScore = "${{ steps.lighthouse-results.outputs.performance_score }}";
                 const accessibilityScore = "${{ steps.lighthouse-results.outputs.accessibility_score }}"; 
@@ -469,46 +470,42 @@ jobs:
                 commentBody += `| **Cumulative Layout Shift** | ${cls} | ${parseFloat(cls) <= 0.1 ? '✅ Good' : '⚠️ Needs Improvement'} |\n`;
                 commentBody += `| **Speed Index** | ${speedIndex} | ${speedIndex.includes('s') && parseFloat(speedIndex) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n\n`;
                 
-                commentBody += `✅ **Lighthouse analysis completed successfully**\n\n`;
-                commentBody += `📊 Performance, accessibility, and SEO metrics measured\n`;
-                commentBody += `🔧 Detailed metrics available above\n\n`;
-              }
-              
-              commentBody += `### 🔗 Public Reports\n\n`;
-              
-              // Add temporaryPublicStorage URLs if available
-              const hasPublicUrls = "${{ steps.lighthouse-results.outputs.has_public_urls }}" === "true";
-              const publicReportLinks = "${{ steps.lighthouse-results.outputs.public_report_links }}";
-              
-              if (hasPublicUrls && publicReportLinks) {
-                try {
-                  const reportLinks = JSON.parse(publicReportLinks);
-                  if (Array.isArray(reportLinks) && reportLinks.length > 0) {
-                    commentBody += `🌐 **Public Lighthouse Reports** (7-day storage):\n`;
-                    reportLinks.forEach((link, index) => {
-                      commentBody += `${index + 1}. [Report ${index + 1}](${link})\n`;
-                    });
-                    commentBody += `\n`;
-                  } else if (typeof reportLinks === 'string' && reportLinks.startsWith('http')) {
-                    commentBody += `🌐 **Public Lighthouse Report**: [View Report](${reportLinks}) (7-day storage)\n\n`;
+                
+                commentBody += `### 🔗 Public Reports\n\n`;
+                
+                // Add temporaryPublicStorage URLs if available
+                const hasPublicUrls = "${{ steps.lighthouse-results.outputs.has_public_urls }}" === "true";
+                const publicReportLinks = "${{ steps.lighthouse-results.outputs.public_report_links }}";
+                
+                if (hasPublicUrls && publicReportLinks) {
+                  try {
+                    const reportLinks = JSON.parse(publicReportLinks);
+                    if (Array.isArray(reportLinks) && reportLinks.length > 0) {
+                      commentBody += `🌐 **Public Lighthouse Reports** (7-day storage):\n`;
+                      reportLinks.forEach((link, index) => {
+                        commentBody += `${index + 1}. [Report ${index + 1}](${link})\n`;
+                      });
+                      commentBody += `\n`;
+                    } else if (typeof reportLinks === 'string' && reportLinks.startsWith('http')) {
+                      commentBody += `🌐 **Public Lighthouse Report**: [View Report](${reportLinks}) (7-day storage)\n\n`;
+                    }
+                  } catch (e) {
+                    // If parsing fails, just show raw links
+                    commentBody += `🌐 **Public Lighthouse Report**: ${publicReportLinks}\n\n`;
                   }
-                } catch (e) {
-                  // If parsing fails, just show raw links
-                  commentBody += `🌐 **Public Lighthouse Report**: ${publicReportLinks}\n\n`;
+                } else {
+                  commentBody += `📋 **Lighthouse CI Report**: Stored in workflow artifacts\n`;
+                  commentBody += `🌐 **Public Storage**: temporaryPublicStorage enabled\n`;
                 }
-              } else {
-                commentBody += `📋 **Lighthouse CI Report**: Stored in workflow artifacts\n`;
-                commentBody += `🌐 **Public Storage**: temporaryPublicStorage enabled\n`;
-              }
-              
-              commentBody += `📊 **Compare with**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})\n\n`;
-              
-              commentBody += `### 💡 Next Steps\n\n`;
-              commentBody += `- Review Core Web Vitals scores above\n`;
-              commentBody += `- Check [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)}) for detailed recommendations\n`;
-              commentBody += `- Focus on metrics marked as "Needs Improvement"\n`;
-              commentBody += `- Use budget.json thresholds to guide optimizations\n\n`;
-              
+                
+                commentBody += `📊 **Compare with**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})\n\n`;
+                
+                commentBody += `### 💡 Next Steps\n\n`;
+                commentBody += `- Review Core Web Vitals scores above\n`;
+                commentBody += `- Check [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)}) for detailed recommendations\n`;
+                commentBody += `- Focus on metrics marked as "Needs Improvement"\n`;
+                commentBody += `- Use budget.json thresholds to guide optimizations\n\n`;
+                
             } else {
               commentBody += `⚠️ **Lighthouse analysis encountered issues**\n\n`;
               commentBody += `🔧 This is common in CI environments - Chrome headless can be unstable\n`;

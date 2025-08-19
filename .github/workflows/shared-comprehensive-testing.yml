@@ -300,8 +300,7 @@ jobs:
           set +e  # Don't fail on accessibility violations
           
           axe "${{ inputs.target_url }}" \
-            --format json \
-            --output "_accessibility-reports/axe-results.json" \
+            --save "axe-report.json" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
             --timeout 30000 \
             --verbose
@@ -309,19 +308,15 @@ jobs:
           AXE_EXIT_CODE=$?
           echo "axe_exit_code=$AXE_EXIT_CODE" >> $GITHUB_OUTPUT
           
-          # Also generate human-readable report
-          axe "${{ inputs.target_url }}" \
-            --format html \
-            --output "_accessibility-reports/axe-report.html" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
-            --timeout 30000 || true
+          # Copy the report to the expected location for artifact upload
+          if [ -f "axe-report.json" ]; then
+            cp "axe-report.json" "_accessibility-reports/axe-results.json"
+          fi
           
-          # Generate text summary for PR comments
-          axe "${{ inputs.target_url }}" \
-            --format text \
-            --output "_accessibility-reports/axe-summary.txt" \
+          # Generate console output for PR comments and summaries
+          axe --stdout "${{ inputs.target_url }}" \
             --tags wcag2a,wcag2aa,wcag21aa,best-practice \
-            --timeout 30000 || true
+            --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
           echo "✅ Axe-core accessibility scan completed (exit code: $AXE_EXIT_CODE)"
           echo "📁 Reports generated in _accessibility-reports/"
@@ -333,11 +328,27 @@ jobs:
         run: |
           echo "🔍 Processing axe-core accessibility results..."
           
-          if [ -f "_accessibility-reports/axe-results.json" ]; then
+          # Install jq for JSON parsing
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "📦 Installing jq for JSON parsing..."
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+          
+          # Check for axe-report.json first (primary file), then fallback to _accessibility-reports/axe-results.json
+          RESULTS_FILE=""
+          if [ -f "axe-report.json" ]; then
+            RESULTS_FILE="axe-report.json"
+          elif [ -f "_accessibility-reports/axe-results.json" ]; then
+            RESULTS_FILE="_accessibility-reports/axe-results.json"
+          fi
+          
+          if [ -n "$RESULTS_FILE" ]; then
+            echo "📁 Found accessibility results in: $RESULTS_FILE"
+            
             # Extract key metrics from axe-core JSON results
-            VIOLATION_COUNT=$(jq -r '.violations | length' _accessibility-reports/axe-results.json 2>/dev/null || echo "0")
-            PASSES_COUNT=$(jq -r '.passes | length' _accessibility-reports/axe-results.json 2>/dev/null || echo "0") 
-            INCOMPLETE_COUNT=$(jq -r '.incomplete | length' _accessibility-reports/axe-results.json 2>/dev/null || echo "0")
+            VIOLATION_COUNT=$(jq -r '.violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            PASSES_COUNT=$(jq -r '.passes | length' "$RESULTS_FILE" 2>/dev/null || echo "0") 
+            INCOMPLETE_COUNT=$(jq -r '.incomplete | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             
             echo "📊 Accessibility Results:"
             echo "- Violations: $VIOLATION_COUNT"
@@ -347,11 +358,18 @@ jobs:
             # Generate detailed violation summary
             if [ "$VIOLATION_COUNT" -gt "0" ]; then
               echo "🔍 Detailed Violations:" 
-              jq -r '.violations[] | "- \(.impact // "unknown") impact: \(.help) (\(.nodes | length) element(s))"' _accessibility-reports/axe-results.json 2>/dev/null || echo "Could not parse violations"
+              jq -r '.violations[] | "- \(.impact // "unknown") impact: \(.help) (\(.nodes | length) element(s))"' "$RESULTS_FILE" 2>/dev/null || echo "Could not parse violations"
+              
+              # Generate detailed violation breakdown for PR comments
+              VIOLATIONS_DETAIL=$(jq -r '.violations[] | "**\(.id)**: \(.nodes | length) occurrences - \(.help)"' "$RESULTS_FILE" 2>/dev/null | head -10)
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT accessibility violations, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
+              echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
+              echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
             else
-              ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete" 
+              ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
+              echo "violations_detail=" >> $GITHUB_OUTPUT
             fi
             
             # Export results for other steps
@@ -365,13 +383,14 @@ jobs:
             echo "accessibility_summary=❌ Accessibility scan failed - no results generated" >> $GITHUB_OUTPUT
             echo "has_accessibility_results=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Upload Accessibility Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: accessibility-${{ inputs.environment_name }}-${{ github.run_id }}
           path: |
+            axe-report.json
+            axe-report.html
             _accessibility-reports/
           retention-days: ${{ inputs.artifact_retention_days }}
 
