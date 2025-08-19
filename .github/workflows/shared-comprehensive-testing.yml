@@ -583,9 +583,20 @@ jobs:
             fi
           fi
           
-          # Performance Results
+          # Performance Results with actual Core Web Vitals values
           if [ "${{ needs.performance-testing.result }}" = "success" ]; then
-            echo "| 📊 Performance | ✅ Success | Core Web Vitals measured |" >> $GITHUB_STEP_SUMMARY
+            # Try to get Core Web Vitals from Lighthouse first (more reliable)
+            FCP_LH="${{ needs.lighthouse-testing.outputs.fcp }}"
+            LCP_LH="${{ needs.lighthouse-testing.outputs.lcp }}"
+            CLS_LH="${{ needs.lighthouse-testing.outputs.cls }}"
+            
+            if [ -n "$FCP_LH" ] && [ "$FCP_LH" != "N/A" ] && [ "$FCP_LH" != "" ]; then
+              # Show Lighthouse Core Web Vitals (more reliable than standalone performance test)
+              echo "| 📊 Performance | ✅ Success | FCP: ${FCP_LH}, LCP: ${LCP_LH}, CLS: ${CLS_LH} |" >> $GITHUB_STEP_SUMMARY
+            else
+              # Fallback to generic message if no Core Web Vitals available
+              echo "| 📊 Performance | ✅ Success | Performance measurement completed |" >> $GITHUB_STEP_SUMMARY
+            fi
           elif [ "${{ needs.performance-testing.result }}" = "skipped" ]; then
             echo "| 📊 Performance | ⏭️ Skipped | Not requested |" >> $GITHUB_STEP_SUMMARY
           else
@@ -727,7 +738,18 @@ jobs:
             
             commentBody += `| 🚀 Lighthouse | ${lighthouseStatus} | Performance and quality analysis |\n`;
             commentBody += `| ♿ Accessibility | ${accessibilityStatus} | ${{ needs.accessibility-testing.outputs.accessibility_summary }} |\n`;
-            commentBody += `| 📊 Performance | ${performanceStatus} | Core Web Vitals measurement |\n\n`;
+            
+            // Enhanced performance reporting with actual values
+            const fcpLH = "${{ needs.lighthouse-testing.outputs.fcp }}";
+            const lcpLH = "${{ needs.lighthouse-testing.outputs.lcp }}";
+            const clsLH = "${{ needs.lighthouse-testing.outputs.cls }}";
+            
+            let performanceDetails = "Core Web Vitals measurement";
+            if (fcpLH && fcpLH !== "N/A" && fcpLH !== "") {
+              performanceDetails = `FCP: ${fcpLH}, LCP: ${lcpLH}, CLS: ${clsLH}`;
+            }
+            
+            commentBody += `| 📊 Performance | ${performanceStatus} | ${performanceDetails} |\n\n`;
             
             commentBody += `🔗 **Alternative Testing**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(targetUrl)})\n\n`;
             commentBody += `---\n*🤖 Multi-environment testing via reusable workflow - ${environmentName} environment*\n\n`;

@@ -224,16 +224,38 @@ jobs:
             echo "- **SEO:** $SEO_SCORE/100" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            # Core Web Vitals
+            # Core Web Vitals with Performance Status
             FCP="${{ needs.call-comprehensive-tests.outputs.fcp }}"
             LCP="${{ needs.call-comprehensive-tests.outputs.lcp }}"
             CLS="${{ needs.call-comprehensive-tests.outputs.cls }}"
+            SPEED_INDEX="${{ needs.call-comprehensive-tests.outputs.speed_index }}"
             
-            if [ -n "$FCP" ]; then
-              echo "### Core Web Vitals" >> $GITHUB_STEP_SUMMARY
-              echo "- **First Contentful Paint (FCP):** ${FCP}ms" >> $GITHUB_STEP_SUMMARY
-              echo "- **Largest Contentful Paint (LCP):** ${LCP}ms" >> $GITHUB_STEP_SUMMARY
-              echo "- **Cumulative Layout Shift (CLS):** $CLS" >> $GITHUB_STEP_SUMMARY
+            if [ -n "$FCP" ] && [ "$FCP" != "N/A" ] && [ "$FCP" != "" ]; then
+              echo "### ⚡ Core Web Vitals Performance" >> $GITHUB_STEP_SUMMARY
+              echo "- **First Contentful Paint (FCP):** $FCP $([ "${FCP%ms*}" -le "1800" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")" >> $GITHUB_STEP_SUMMARY
+              echo "- **Largest Contentful Paint (LCP):** $LCP $([ "${LCP%ms*}" -le "2500" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")" >> $GITHUB_STEP_SUMMARY
+              echo "- **Cumulative Layout Shift (CLS):** $CLS $(echo "$CLS" | awk '{if($1 <= 0.1) print "✅ Good"; else print "⚠️ Needs Improvement"}')" >> $GITHUB_STEP_SUMMARY
+              if [ -n "$SPEED_INDEX" ] && [ "$SPEED_INDEX" != "N/A" ]; then
+                echo "- **Speed Index:** $SPEED_INDEX $([ "${SPEED_INDEX%ms*}" -le "3400" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")" >> $GITHUB_STEP_SUMMARY
+              fi
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Overall Performance Assessment
+              FCP_NUM="${FCP%ms*}"
+              LCP_NUM="${LCP%ms*}" 
+              CLS_NUM="$CLS"
+              
+              if [ "${FCP_NUM:-9999}" -le "1800" ] 2>/dev/null && [ "${LCP_NUM:-9999}" -le "2500" ] 2>/dev/null && echo "$CLS_NUM" | awk '{exit !($1 <= 0.1)}'; then
+                echo "🎉 **Overall Performance:** ✅ EXCELLENT - All Core Web Vitals targets met!" >> $GITHUB_STEP_SUMMARY
+              elif [ "${FCP_NUM:-0}" -le "3000" ] 2>/dev/null && [ "${LCP_NUM:-0}" -le "4000" ] 2>/dev/null; then
+                echo "📈 **Overall Performance:** ⚠️ GOOD - Minor optimizations recommended" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "🚨 **Overall Performance:** ❌ NEEDS IMPROVEMENT - Significant optimization required" >> $GITHUB_STEP_SUMMARY
+              fi
+              echo "" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### 📊 Performance Analysis" >> $GITHUB_STEP_SUMMARY
+              echo "⚠️ Core Web Vitals data not available - using alternative performance metrics from Lighthouse" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
             fi
           else
