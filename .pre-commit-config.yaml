@@ -3,13 +3,25 @@
 # Focus: Only essential quality gates that add real value
 
 repos:
-  # NON-NEGOTIABLE: Conventional Commits validation for release-please
+  # NON-NEGOTIABLE: Conventional Commits validation (SYNCHRONIZED with CI)
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.2.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: [optional-scope]
+        verbose: true
+
+  # Add AI-friendly commitlint validation (matches CI exactly)
+  - repo: local
+    hooks:
+      - id: commitlint-ai-friendly
+        name: 🎯 AI-Friendly Commit Validation (Post-validation Help)
+        entry: scripts/commitlint-local.sh
+        language: script
+        stages: [commit-msg]
+        pass_filenames: true
+        always_run: false
 
   # Essential JSON validation (prevents broken builds)
   - repo: https://github.com/pre-commit/pre-commit-hooks
