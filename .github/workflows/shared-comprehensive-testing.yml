@@ -432,10 +432,9 @@ jobs:
               echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
               echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
-              
-              # Add collapsible sections for GitHub
+              # Add collapsible sections for GitHub (base64 encoded to prevent JavaScript syntax errors)
               echo "violations_collapsible<<EOF" >> $GITHUB_OUTPUT
-              echo -e "$VIOLATIONS_COLLAPSIBLE" >> $GITHUB_OUTPUT
+              echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0 >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
             else
               ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
@@ -761,14 +760,22 @@ jobs:
               commentBody += `| ❌ Violations | ${violationCount} | Need fixing |\n`;
               commentBody += `| ✅ Passes | ${passesCount} | Working correctly |\n`;
               commentBody += `| ⚠️ Incomplete | ${incompleteCount} | Manual review needed |\n\n`;
-              
-              // Add detailed violation breakdown with collapsible sections
-              const violationsCollapsible = "${{ needs.accessibility-testing.outputs.violations_collapsible }}";
-              if (violationsCollapsible && violationsCollapsible.trim()) {
+              // Add detailed violation breakdown with collapsible sections (base64 decoded)
+              try {
+                const violationsCollapsibleBase64 = ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }};
+                if (violationsCollapsibleBase64 && violationsCollapsibleBase64.trim()) {
+                  // Decode base64 content safely
+                  const violationsCollapsible = Buffer.from(violationsCollapsibleBase64, 'base64').toString('utf8');
+                  commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
+                  commentBody += `Each section below contains specific elements affected and links to WCAG documentation for remediation:\n\n`;
+                  commentBody += violationsCollapsible;
+                  commentBody += `\n`;
+                  console.log(`✅ Successfully decoded ${violationsCollapsible.length} characters of collapsible violations`);
+                }
+              } catch (e) {
+                console.log('Could not decode violations collapsible content:', e.message);
                 commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
-                commentBody += `Each section below contains specific elements affected and links to WCAG documentation for remediation:\n\n`;
-                commentBody += violationsCollapsible;
-                commentBody += `\n`;
+                commentBody += `Detailed breakdown available in workflow artifacts.\n\n`;
               }
               
               commentBody += `**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively.\n`;
