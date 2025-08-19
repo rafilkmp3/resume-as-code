@@ -456,12 +456,11 @@ jobs:
               echo "$ENCODED_VIOLATIONS" | head -c 100
               echo ""
               
-              # Set output with proper debugging
+              # Set output with direct assignment to avoid EOF delimiter issues
               if [ -n "$VIOLATIONS_COLLAPSIBLE" ]; then
-                echo "violations_collapsible<<EOF" >> $GITHUB_OUTPUT
-                echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0 >> $GITHUB_OUTPUT
-                echo "EOF" >> $GITHUB_OUTPUT
-                echo "✅ violations_collapsible output set successfully"
+                # Use direct assignment instead of EOF syntax to prevent delimiter conflicts
+                echo "violations_collapsible=$ENCODED_VIOLATIONS" >> $GITHUB_OUTPUT
+                echo "✅ violations_collapsible output set successfully (${#ENCODED_VIOLATIONS} chars)"
               else
                 echo "⚠️ VIOLATIONS_COLLAPSIBLE is empty, setting empty output"
                 echo "violations_collapsible=" >> $GITHUB_OUTPUT
