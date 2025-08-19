@@ -179,16 +179,12 @@ jobs:
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
 
-  staging-tests:
-    name: Staging Comprehensive Tests
+  wait-for-deployment:
+    name: Wait for Staging Deployment
     runs-on: ubuntu-latest
     needs: deploy-staging
-    timeout-minutes: 10
-    if: always()
+    timeout-minutes: 5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
       - name: Wait for Staging Deployment
         run: |
           echo "⏳ Waiting for staging deployment to be live..."
@@ -205,26 +201,51 @@ jobs:
             fi
           done
 
-      - name: Run Comprehensive Staging Tests
-        uses: ./.github/workflows/shared-comprehensive-testing.yml
-        with:
-          target_url: 'https://resume-as-code.netlify.app'
-          environment_name: 'staging'
-          environment_context: 'Main Branch - Staging Deployment'
-          test_types: 'lighthouse,accessibility,performance'
-          lighthouse_budget_path: './budget.json'
-          artifact_retention_days: 7
-          post_pr_comment: false
-        secrets: inherit
+  call-comprehensive-tests:
+    name: Staging Comprehensive Tests
+    needs: [deploy-staging, wait-for-deployment]
+    uses: ./.github/workflows/shared-comprehensive-testing.yml
+    with:
+      target_url: 'https://resume-as-code.netlify.app'
+      environment_name: 'staging'
+      environment_context: 'Main Branch - Staging Deployment'
+      test_types: 'lighthouse,accessibility,performance'
+      lighthouse_budget_path: './budget.json'
+      artifact_retention_days: 7
+      post_pr_comment: false
+    secrets: inherit
 
-      - name: Staging Tests Summary
-        if: always()
+  staging-summary:
+    name: Staging Test Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, call-comprehensive-tests]
+    if: always()
+    steps:
+      - name: Create Comprehensive Staging Summary
         run: |
-          echo "## 🧪 Staging Tests Complete" >> $GITHUB_STEP_SUMMARY
+          echo "# 🚀 Staging Deployment & Testing Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Staging (Netlify)" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Accessibility Status
+          VIOLATION_COUNT="${{ needs.call-comprehensive-tests.outputs.violation_count }}"
+          if [ "$VIOLATION_COUNT" = "0" ] || [ -z "$VIOLATION_COUNT" ]; then
+            echo "## ✅ Accessibility Status: EXCELLENT" >> $GITHUB_STEP_SUMMARY
+            echo "- **Violations:** 0 detected" >> $GITHUB_STEP_SUMMARY
+          elif [ "$VIOLATION_COUNT" -lt "10" ]; then
+            echo "## ⚠️ Accessibility Status: GOOD" >> $GITHUB_STEP_SUMMARY
+            echo "- **Violations:** $VIOLATION_COUNT minor issues detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Accessibility Status: NEEDS ATTENTION" >> $GITHUB_STEP_SUMMARY
+            echo "- **Violations:** $VIOLATION_COUNT issues detected" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Lighthouse Performance Testing**" >> $GITHUB_STEP_SUMMARY  
           echo "✅ **Accessibility Validation (WCAG 2.1 AA)**" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Core Web Vitals Analysis**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 **Test Results:** Available in workflow artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "🌐 **Tested URL:** https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Detailed Results:** Available in workflow artifacts" >> $GITHUB_STEP_SUMMARY
