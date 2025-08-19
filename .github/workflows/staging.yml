@@ -159,11 +159,8 @@ jobs:
 
       - name: Configure Node.js for CI
         run: |
-          # Suppress Node.js deprecation warnings to reduce CI log noise
-          {
-            echo 'NODE_OPTIONS=--no-deprecation --no-warnings'
-            echo "NODE_NO_WARNINGS=1"
-          } >> "$GITHUB_ENV"
+          # Suppress Node.js warnings for cleaner CI output
+          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
 
       - name: Emergency deployment notice
         if: env.IS_EMERGENCY == 'true'
@@ -238,8 +235,7 @@ jobs:
             --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder,mode=max \
             --cache-to type=registry,ref=ghcr.io/${{ github.repository }}-cache:builder-${{ github.ref_name }},mode=max \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
-            --tag resume:build-${{ github.sha }} \
-            --load \
+            --output type=local,dest=./dist \
             .
 
           # Update local cache atomically (fallback for registry cache)
@@ -271,17 +267,15 @@ jobs:
             --build-arg NETLIFY_ENV=staging \
             --build-arg CONTEXT=staging \
             --build-arg DEPLOY_URL=https://resume-as-code.netlify.app/ \
-            --tag resume:build-${{ github.sha }} \
             --no-cache \
-            --load \
+            --output type=local,dest=./dist \
             .
 
-      - name: Extract build artifacts
+      - name: Verify build artifacts
         run: |
-          mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" resume:build-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
-          echo "📁 Build artifacts:"
+          echo "📁 Build artifacts extracted directly from Docker build:"
           ls -la dist/
+          echo "✅ Artifacts ready for deployment"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -316,11 +310,8 @@ jobs:
           git config --global advice.defaultBranchName false
           git config --global advice.detachedHead false
 
-          # Suppress Node.js deprecation warnings
-          {
-            echo 'NODE_OPTIONS=--no-deprecation --no-warnings'
-            echo "NODE_NO_WARNINGS=1"
-          } >> "$GITHUB_ENV"
+          # Suppress Node.js warnings for cleaner CI output
+          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

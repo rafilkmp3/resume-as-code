@@ -62,10 +62,8 @@ jobs:
 
       - name: Configure Node.js for CI
         run: |
-          {
-            echo 'NODE_OPTIONS=--no-deprecation --no-warnings'
-            echo "NODE_NO_WARNINGS=1"
-          } >> "$GITHUB_ENV"
+          # Suppress Node.js warnings for cleaner CI output
+          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -103,16 +101,14 @@ jobs:
             --build-arg URL=https://rafilkmp3.github.io/resume-as-code/ \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            --tag resume:build-${{ github.sha }} \
-            --load \
+            --output type=local,dest=./dist \
             .
 
-      - name: Extract build artifacts
+      - name: Verify build artifacts
         run: |
-          mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" resume:build-${{ github.sha }} sh -c "cp -r /app/dist/* /tmp/dist/"
-          echo "📁 Build artifacts:"
+          echo "📁 Build artifacts extracted directly from Docker build:"
           ls -la dist/
+          echo "✅ Production artifacts ready for GitHub Pages"
 
       - name: Upload Production Artifacts
         uses: actions/upload-artifact@v4
