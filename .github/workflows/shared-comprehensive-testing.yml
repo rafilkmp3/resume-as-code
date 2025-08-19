@@ -356,10 +356,14 @@ jobs:
 
       - name: Microsoft Accessibility Insights Scan
         uses: microsoft/accessibility-insights-action@v3
-        continue-on-error: true  # Don't fail the job if this step fails
         with:
-          repo-token: ${{ github.token }}
-          static-site-url: ${{ inputs.target_url }}
+          url: ${{ inputs.target_url }}
+          output-dir: _accessibility-reports
+          static-site-url-relative-path: /
+          max-urls: 100
+          scan-timeout: 90000
+          single-worker: true
+          fail-on-accessibility-error: true
 
       - name: Upload Accessibility Artifacts
         uses: actions/upload-artifact@v4
@@ -368,7 +372,8 @@ jobs:
           name: accessibility-${{ inputs.environment_name }}-${{ github.run_id }}
           path: |
             axe-report.json
-            accessibility-insights-report.html
+            axe-report.html
+            _accessibility-reports/
           retention-days: ${{ inputs.artifact_retention_days }}
 
   # Environment-Agnostic Performance Testing
