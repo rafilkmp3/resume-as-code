@@ -399,44 +399,105 @@ jobs:
               # Generate enhanced violation breakdown for PR comments with URLs and details
               VIOLATIONS_DETAIL=$(jq -r '.[0].violations[] | "**\(.id)**: \(.nodes | length) occurrences\n- **Description**: \(.help)\n- **Impact**: \(.impact // "unknown")\n- **Help URL**: \(.helpUrl)\n- **WCAG Tags**: \(.tags | join(", "))\n"' "$RESULTS_FILE" 2>/dev/null)
               
-              # Generate collapsible violation sections for GitHub
+              # Generate creative, organized violation sections by impact level
               VIOLATIONS_COLLAPSIBLE=""
               VIOLATIONS_PROCESSED=0
-              echo "🔍 Starting to build VIOLATIONS_COLLAPSIBLE sections..."
-              echo "🔍 Testing jq command for violations:"
-              jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null | head -n 2
+              
+              # Initialize counters by impact level
+              CRITICAL_COUNT=0
+              SERIOUS_COUNT=0 
+              MODERATE_COUNT=0
+              MINOR_COUNT=0
+              
+              echo "🔍 Building organized violations by impact level..."
               echo "🔍 Total violation objects available:"
               jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null | wc -l
               echo ""
+              
+              # First pass: count violations by impact
               while IFS= read -r violation; do
                 if [ -n "$violation" ]; then
-                  VIOLATIONS_PROCESSED=$((VIOLATIONS_PROCESSED + 1))
-                  RULE_ID=$(echo "$violation" | jq -r '.id')
-                  RULE_HELP=$(echo "$violation" | jq -r '.help')
-                  RULE_URL=$(echo "$violation" | jq -r '.helpUrl')
-                  RULE_IMPACT=$(echo "$violation" | jq -r '.impact // "unknown"')
-                  RULE_COUNT=$(echo "$violation" | jq -r '.nodes | length')
-                  RULE_TAGS=$(echo "$violation" | jq -r '.tags | join(", ")')
-                  
-                  echo "🔍 Processing violation #${VIOLATIONS_PROCESSED}: ${RULE_ID} (${RULE_COUNT} occurrences)"
-                  
-                  # Get first few example selectors
-                  EXAMPLES=$(echo "$violation" | jq -r '.nodes[:3] | map(.target | join(" > ")) | join("\n     - ")')
-                  TOTAL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | length')
-                  
-                  VIOLATIONS_COLLAPSIBLE+="<details>\n<summary><strong>${RULE_ID}</strong>: ${RULE_COUNT} occurrences (${RULE_IMPACT} impact)</summary>\n\n"
-                  VIOLATIONS_COLLAPSIBLE+="**Description**: ${RULE_HELP}\n\n"
-                  VIOLATIONS_COLLAPSIBLE+="**Impact Level**: ${RULE_IMPACT}\n"
-                  VIOLATIONS_COLLAPSIBLE+="**WCAG Guidelines**: ${RULE_TAGS}\n"
-                  VIOLATIONS_COLLAPSIBLE+="**Documentation**: [${RULE_ID} Rule Details](${RULE_URL})\n\n"
-                  VIOLATIONS_COLLAPSIBLE+="**Example Affected Elements** (${TOTAL_EXAMPLES} total):\n"
-                  VIOLATIONS_COLLAPSIBLE+="     - ${EXAMPLES}\n"
-                  if [ "$TOTAL_EXAMPLES" -gt 3 ]; then
-                    VIOLATIONS_COLLAPSIBLE+="     - ... and $((TOTAL_EXAMPLES - 3)) more\n"
-                  fi
-                  VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
+                  IMPACT=$(echo "$violation" | jq -r '.impact // "minor"')
+                  case "$IMPACT" in
+                    "critical") CRITICAL_COUNT=$((CRITICAL_COUNT + 1)) ;;
+                    "serious") SERIOUS_COUNT=$((SERIOUS_COUNT + 1)) ;;
+                    "moderate") MODERATE_COUNT=$((MODERATE_COUNT + 1)) ;;
+                    *) MINOR_COUNT=$((MINOR_COUNT + 1)) ;;
+                  esac
                 fi
               done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
+              
+              echo "📊 Impact distribution: Critical($CRITICAL_COUNT), Serious($SERIOUS_COUNT), Moderate($MODERATE_COUNT), Minor($MINOR_COUNT)"
+              
+              # Create organized sections by impact level (most severe first)
+              for IMPACT_LEVEL in "critical" "serious" "moderate" "minor"; do
+                case "$IMPACT_LEVEL" in
+                  "critical") 
+                    if [ "$CRITICAL_COUNT" -gt 0 ]; then
+                      VIOLATIONS_COLLAPSIBLE+="\n#### 🚨 Critical Issues ($CRITICAL_COUNT violations)\n"
+                      VIOLATIONS_COLLAPSIBLE+="> **Must fix immediately** - These violations completely block users with disabilities\n\n"
+                    fi
+                    ;;
+                  "serious")
+                    if [ "$SERIOUS_COUNT" -gt 0 ]; then
+                      VIOLATIONS_COLLAPSIBLE+="\n#### ⚡ Serious Issues ($SERIOUS_COUNT violations)\n"
+                      VIOLATIONS_COLLAPSIBLE+="> **High priority** - Major barriers that significantly impact accessibility\n\n"
+                    fi
+                    ;;
+                  "moderate")
+                    if [ "$MODERATE_COUNT" -gt 0 ]; then
+                      VIOLATIONS_COLLAPSIBLE+="\n#### ⚠️ Moderate Issues ($MODERATE_COUNT violations)\n"
+                      VIOLATIONS_COLLAPSIBLE+="> **Medium priority** - Usability problems that affect user experience\n\n"
+                    fi
+                    ;;
+                  "minor")
+                    if [ "$MINOR_COUNT" -gt 0 ]; then
+                      VIOLATIONS_COLLAPSIBLE+="\n#### 📝 Minor Issues ($MINOR_COUNT violations)\n"
+                      VIOLATIONS_COLLAPSIBLE+="> **When time permits** - Polish improvements and best practices\n\n"
+                    fi
+                    ;;
+                esac
+                
+                # Process violations for this impact level
+                while IFS= read -r violation; do
+                  if [ -n "$violation" ]; then
+                    RULE_IMPACT=$(echo "$violation" | jq -r '.impact // "minor"')
+                    if [ "$RULE_IMPACT" = "$IMPACT_LEVEL" ] || ([ "$IMPACT_LEVEL" = "minor" ] && [ "$RULE_IMPACT" != "critical" ] && [ "$RULE_IMPACT" != "serious" ] && [ "$RULE_IMPACT" != "moderate" ]); then
+                      VIOLATIONS_PROCESSED=$((VIOLATIONS_PROCESSED + 1))
+                      RULE_ID=$(echo "$violation" | jq -r '.id')
+                      RULE_HELP=$(echo "$violation" | jq -r '.help')
+                      RULE_URL=$(echo "$violation" | jq -r '.helpUrl')
+                      RULE_COUNT=$(echo "$violation" | jq -r '.nodes | length')
+                      RULE_TAGS=$(echo "$violation" | jq -r '.tags | join(", ")')
+                      
+                      # Get impact emoji
+                      case "$RULE_IMPACT" in
+                        "critical") IMPACT_EMOJI="🚨" ;;
+                        "serious") IMPACT_EMOJI="⚡" ;;
+                        "moderate") IMPACT_EMOJI="⚠️" ;;
+                        *) IMPACT_EMOJI="📝" ;;
+                      esac
+                      
+                      echo "🔍 Processing $RULE_IMPACT violation: ${RULE_ID} (${RULE_COUNT} occurrences)"
+                      
+                      # Get first few example selectors
+                      EXAMPLES=$(echo "$violation" | jq -r '.nodes[:2] | map(.target | join(" > ")) | join("\n   - ")')
+                      TOTAL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | length')
+                      
+                      VIOLATIONS_COLLAPSIBLE+="<details>\n<summary>${IMPACT_EMOJI} <strong>${RULE_ID}</strong> (${RULE_COUNT} elements affected)</summary>\n\n"
+                      VIOLATIONS_COLLAPSIBLE+="**🎯 Issue**: ${RULE_HELP}\n\n"
+                      VIOLATIONS_COLLAPSIBLE+="**📋 WCAG Guidelines**: ${RULE_TAGS}\n"
+                      VIOLATIONS_COLLAPSIBLE+="**📚 Fix Guide**: [${RULE_ID} Documentation](${RULE_URL}) *(detailed examples & solutions)*\n\n"
+                      VIOLATIONS_COLLAPSIBLE+="**🔍 Affected Elements**:\n"
+                      VIOLATIONS_COLLAPSIBLE+="   - ${EXAMPLES}\n"
+                      if [ "$TOTAL_EXAMPLES" -gt 2 ]; then
+                        VIOLATIONS_COLLAPSIBLE+="   - *...and $((TOTAL_EXAMPLES - 2)) more elements*\n"
+                      fi
+                      VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
+                    fi
+                  fi
+                done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
+              done
               echo "🔍 Processed ${VIOLATIONS_PROCESSED} violation types for collapsible sections"
               
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
@@ -777,13 +838,20 @@ jobs:
             const accessibilitySummary = "${{ needs.accessibility-testing.outputs.accessibility_summary }}";
             
             if (hasAccessibilityResults === 'true' && violationCount !== "0" && violationCount !== "") {
-              commentBody += `### ♿ Accessibility Issues Detected\n\n`;
-              commentBody += `**🚨 ${violationCount} WCAG 2.1 AA violations found using axe-core!**\n\n`;
-              commentBody += `| Result Type | Count | Status |\n`;
-              commentBody += `|-------------|-------|--------|\n`;
-              commentBody += `| ❌ Violations | ${violationCount} | Need fixing |\n`;
-              commentBody += `| ✅ Passes | ${passesCount} | Working correctly |\n`;
-              commentBody += `| ⚠️ Incomplete | ${incompleteCount} | Manual review needed |\n\n`;
+              commentBody += `## 🚨 Accessibility Report\n\n`;
+              commentBody += `> **${violationCount} WCAG violations detected** across ${passesCount + parseInt(violationCount)} total checks\n\n`;
+              
+              // Create impact-based summary with visual indicators
+              commentBody += `### 📊 Impact Summary\n\n`;
+              commentBody += `| 🚨 **${violationCount}** Critical Issues | ✅ **${passesCount}** Passing Checks | ⚠️ **${incompleteCount}** Need Review |\n`;
+              commentBody += `|:---:|:---:|:---:|\n`;
+              commentBody += `| **Fix Required** | **Working Well** | **Manual Check** |\n\n`;
+              
+              commentBody += `### 🎯 Priority Actions Required\n\n`;
+              commentBody += `1. **🔥 Critical Impact**: Fix high-severity violations first\n`;
+              commentBody += `2. **⚡ Moderate Impact**: Address usability issues\n`;
+              commentBody += `3. **📝 Minor Impact**: Polish and perfect\n`;
+              commentBody += `4. **🔍 Review Items**: Manually verify ${incompleteCount} incomplete checks\n\n`;
               // Add detailed violation breakdown with collapsible sections (base64 decoded)
               console.log('🔍 DEBUG: violations_collapsible value:', ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }});
               try {
@@ -796,16 +864,29 @@ jobs:
                   console.log('🔍 DEBUG: decoded content length:', violationsCollapsible.length);
                   console.log('🔍 DEBUG: first 200 chars of decoded content:', violationsCollapsible.substring(0, 200));
                   
-                  commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
-                  commentBody += `Each section below contains specific elements affected and links to WCAG documentation for remediation:\n\n`;
+                  commentBody += `<details>\n<summary><strong>🔍 View All ${violationCount} Violations</strong> (Organized by Impact Level)</summary>\n\n`;
+                  commentBody += `### 📋 Complete Violation Analysis\n\n`;
+                  commentBody += `> 💡 **Pro Tip**: Start with **Critical** and **Serious** violations first - they have the biggest impact on users with disabilities.\n\n`;
+                  commentBody += `#### 🔥 Violations by Severity (Most Important First)\n\n`;
                   commentBody += violationsCollapsible;
-                  commentBody += `\n`;
-                  console.log(`✅ Successfully decoded and added ${violationsCollapsible.length} characters of collapsible violations`);
+                  commentBody += `\n### 🛠️ Quick Fix Guide\n\n`;
+                  commentBody += `- **Critical**: These break core functionality - fix immediately\n`;
+                  commentBody += `- **Serious**: Major barriers for disabled users - high priority\n`;
+                  commentBody += `- **Moderate**: Usability issues - medium priority\n`;
+                  commentBody += `- **Minor**: Polish improvements - when time permits\n\n`;
+                  commentBody += `📚 **Need Help?** Each violation above links to detailed WCAG documentation with examples.\n\n`;
+                  commentBody += `</details>\n\n`;
+                  console.log(`✅ Successfully decoded and added ${violationsCollapsible.length} characters of organized violations`);
                 } else {
                   console.log('❌ DEBUG: violations_collapsible is empty, null, or invalid:', violationsCollapsibleBase64);
-                  commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
-                  commentBody += `⚠️ Detailed breakdown not available - collapsible content is empty.\n`;
-                  commentBody += `Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
+                  commentBody += `<details>\n<summary><strong>🔍 Detailed Analysis</strong> (Processing...)</summary>\n\n`;
+                  commentBody += `### ⚠️ Detailed Analysis In Progress\n\n`;
+                  commentBody += `The detailed breakdown is being processed. Meanwhile:\n\n`;
+                  commentBody += `- **Download** the full accessibility report from workflow artifacts\n`;
+                  commentBody += `- **Check** the workflow logs for detailed violation information\n`;
+                  commentBody += `- **Focus** on the ${violationCount} total violations found\n\n`;
+                  commentBody += `📊 **Status**: ${violationCount} violations detected, ${passesCount} checks passed\n\n`;
+                  commentBody += `</details>\n\n`;
                 }
               } catch (e) {
                 console.log('❌ Could not decode violations collapsible content:', e.message);

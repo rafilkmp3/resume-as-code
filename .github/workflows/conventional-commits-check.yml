@@ -279,8 +279,8 @@ jobs:
             - Trigger appropriate version bumps
             - Create organized GitHub releases
 
-            ### 📊 Workflow Summary
-            ![Workflow Summary](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/workflow-summary.svg)
+            ### 📊 Workflow Details
+            🔗 [View Complete Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
 
             `;
             }
