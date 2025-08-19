@@ -166,7 +166,6 @@ jobs:
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
-        continue-on-error: true
         id: lighthouse
         
       - name: Handle Lighthouse CI Results
@@ -274,11 +273,12 @@ jobs:
           else
             echo "❌ ACCESSIBILITY AUDIT FAILED"
             echo "ACCESSIBILITY_STATUS=failed" >> $GITHUB_ENV
-            # Still continue to upload the report
+            exit 1  # Fail the job properly
           fi
 
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
+        if: always()  # Upload even if audit failed
         with:
           name: accessibility-report
           path: accessibility-report.json
@@ -371,6 +371,7 @@ jobs:
           else
             echo "❌ CORE WEB VITALS MEASUREMENT FAILED"
             echo "VITALS_STATUS=failed" >> $GITHUB_ENV
+            exit 1  # Fail the job properly
           fi
           
           # Cleanup
