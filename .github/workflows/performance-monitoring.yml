@@ -76,6 +76,7 @@ jobs:
             dist/
             .lighthouserc.json
             package.json
+            jest.config.js
           retention-days: 1
 
   lighthouse-ci:
@@ -272,8 +273,8 @@ jobs:
           npm install -g pa11y
           echo "🔍 Running Pa11y accessibility audit..."
           
-          # Add Chrome flags for CI environment
-          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json --chromeLaunchConfig '{"args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-extensions", "--disable-gpu"]}' > accessibility-report.json; then
+          # Add Chrome flags for CI environment using proper Pa11y syntax
+          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json --chrome-flags="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-extensions --disable-gpu" > accessibility-report.json; then
             echo "✅ Accessibility audit passed"
             echo "ACCESSIBILITY_STATUS=success" >> $GITHUB_ENV
           else
@@ -310,7 +311,8 @@ jobs:
         run: |
           echo "📦 Installing Playwright with chromium..."
           npm install playwright
-          timeout 300 npx playwright install --with-deps chromium || {
+          echo "🔍 Installing browser dependencies only (no system deps)..."
+          timeout 600 npx playwright install chromium || {
             echo "❌ PLAYWRIGHT INSTALLATION FAILED OR TIMED OUT"
             echo "PLAYWRIGHT_STATUS=failed" >> $GITHUB_ENV
             exit 1
