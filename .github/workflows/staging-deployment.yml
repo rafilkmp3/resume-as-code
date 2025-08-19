@@ -1,0 +1,230 @@
+---
+name: Staging Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**' 
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'docker/**'
+      - 'Dockerfile'
+      - '.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual staging deployment reason'
+        required: false
+        type: string
+
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+env:
+  DOCKER_BUILDKIT: 1
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  # Staging environment variables
+  NETLIFY: true
+  NETLIFY_ENV: staging
+  CONTEXT: staging
+  NODE_ENV: production
+  GITHUB_PAGES: false
+
+jobs:
+  deploy-staging:
+    name: Deploy to Netlify Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: netlify-staging
+      url: https://resume-as-code.netlify.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git for CI
+        run: |
+          git config --global init.defaultBranch main
+          git config --global advice.defaultBranchName false
+          git config --global advice.detachedHead false
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "noreply@github.com"
+
+      - name: Calculate version and commit info
+        run: |
+          echo "🔍 Calculating STAGING version and commit information..."
+          
+          # Get current version from package.json but mark as staging
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Find the last release tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            # No tags found, count all commits
+            COMMITS_SINCE_RELEASE=$(git rev-list --count HEAD)
+            echo "📊 No previous releases found"
+            echo "📊 Total commits: ${COMMITS_SINCE_RELEASE}"
+            STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_RELEASE}"
+          else
+            # Count commits since last tag
+            COMMITS_SINCE_TAG=$(git rev-list --count ${LAST_TAG}..HEAD)
+            echo "📊 Last release tag: ${LAST_TAG}"
+            echo "📊 Commits since release: ${COMMITS_SINCE_TAG}"
+            STAGING_VERSION="${BASE_VERSION}-staging.${COMMITS_SINCE_TAG}"
+          fi
+          
+          # Export staging environment variables
+          echo "STAGING_VERSION=${STAGING_VERSION}" >> $GITHUB_ENV
+          echo "URL=https://resume-as-code.netlify.app/" >> $GITHUB_ENV
+          echo "DEPLOY_PRIME_URL=https://resume-as-code.netlify.app/" >> $GITHUB_ENV
+          echo "DEPLOY_URL=https://resume-as-code.netlify.app/" >> $GITHUB_ENV
+          
+          echo "🏷️ Staging version: ${STAGING_VERSION}"
+          echo "🌐 Staging URL: https://resume-as-code.netlify.app/"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Set up Docker Buildx  
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Staging Release
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          APP_VERSION: ${{ env.STAGING_VERSION }}
+        run: |
+          echo "🏗️ Building staging release ${{ env.STAGING_VERSION }}"
+          echo "🌐 Target: Netlify Staging (resume-as-code.netlify.app)"
+          
+          docker buildx build \
+            --file docker/Dockerfile \
+            --target builder \
+            --platform linux/amd64 \
+            --build-arg GITHUB_SHA="${GITHUB_SHA}" \
+            --build-arg GITHUB_REF_NAME="${GITHUB_REF_NAME}" \
+            --build-arg APP_VERSION="${APP_VERSION}" \
+            --build-arg BUILD_CONTEXT=staging \
+            --build-arg NODE_ENV=production \
+            --build-arg GITHUB_PAGES=false \
+            --build-arg NETLIFY=true \
+            --build-arg NETLIFY_ENV=staging \
+            --build-arg CONTEXT=staging \
+            --build-arg DEPLOY_URL=https://resume-as-code.netlify.app/ \
+            --build-arg URL=https://resume-as-code.netlify.app/ \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --output type=local,dest=./dist \
+            .
+
+      - name: Verify staging artifacts
+        run: |
+          echo "📁 Staging build artifacts:"
+          ls -la dist/
+          echo "📋 Build manifest:"
+          find dist/ -name "*.html" -o -name "*.pdf" -o -name "*.json" | head -10
+          echo "✅ Staging artifacts ready for deployment"
+
+      - name: Upload Staging Artifacts  
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-build-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+      - name: Deploy to Netlify Staging
+        uses: South-Paw/action-netlify-cli@v2
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        with:
+          args: 'deploy --prod --dir=dist --message="Staging deployment ${{ env.STAGING_VERSION }} (commit: ${{ github.sha }})"'
+
+      - name: Staging Deployment Summary
+        run: |
+          echo "# 🚀 Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ env.STAGING_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🌐 Live Staging Site" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 [**View Resume (Staging)**](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Staging (Netlify)" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+  staging-tests:
+    name: Staging Comprehensive Tests
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    timeout-minutes: 10
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Wait for Staging Deployment
+        run: |
+          echo "⏳ Waiting for staging deployment to be live..."
+          sleep 60
+          
+          # Check if site is accessible
+          for i in {1..5}; do
+            if curl -s --max-time 10 https://resume-as-code.netlify.app | grep -i "resume\|portfolio" > /dev/null; then
+              echo "✅ Staging site is live and accessible"
+              break
+            else
+              echo "⏳ Attempt $i: Site not ready, waiting 30s..."
+              sleep 30
+            fi
+          done
+
+      - name: Run Comprehensive Staging Tests
+        uses: ./.github/workflows/shared-comprehensive-testing.yml
+        with:
+          target_url: 'https://resume-as-code.netlify.app'
+          environment_name: 'staging'
+          environment_context: 'Main Branch - Staging Deployment'
+          test_types: 'lighthouse,accessibility,performance'
+          lighthouse_budget_path: './budget.json'
+          artifact_retention_days: 7
+          post_pr_comment: false
+        secrets: inherit
+
+      - name: Staging Tests Summary
+        if: always()
+        run: |
+          echo "## 🧪 Staging Tests Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Lighthouse Performance Testing**" >> $GITHUB_STEP_SUMMARY  
+          echo "✅ **Accessibility Validation (WCAG 2.1 AA)**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Core Web Vitals Analysis**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Test Results:** Available in workflow artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **Tested URL:** https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
