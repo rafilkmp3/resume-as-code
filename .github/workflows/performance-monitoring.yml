@@ -79,140 +79,71 @@ jobs:
             jest.config.js
           retention-days: 1
 
-  lighthouse-ci:
-    name: 🚀 Lighthouse CI Performance
+  lighthouse-check:
+    name: 🚀 Lighthouse Performance Audit
     runs-on: ubuntu-latest
     needs: build-site
     if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
-      - name: Download built site and config
+      - name: Download built site
         uses: actions/download-artifact@v4
         with:
           name: built-site-${{ github.sha }}
           path: ./
 
-      - name: Setup Node.js
+      - name: Setup Node.js and serve site
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Install serve only
+      - name: Start development server
         run: |
           npm install -g serve
-          echo "🔍 Checking downloaded files..."
-          ls -la
-          echo "🔍 Checking if .lighthouserc.json exists..."
-          ls -la .lighthouserc.json || echo "❌ .lighthouserc.json not found"
-
-      - name: Serve site for testing
-        run: |
           echo "🚀 Starting production server on port 3000..."
           
-          # Check if dist directory exists and has content
+          # Check if dist directory exists
           if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
             echo "❌ dist directory is missing or empty"
             exit 1
           fi
           
-          # Start server with better error handling  
-          serve -s dist -l 3000 > server.log 2>&1 &
+          # Start server in background
+          serve -s dist -l 3000 &
           SERVER_PID=$!
-          echo "Started server with PID: $SERVER_PID"
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           
-          # Wait for server to be ready with comprehensive health check
+          # Wait for server to be ready
           echo "⏳ Waiting for server to be ready..."
-          SERVER_READY=false
-          for i in {1..60}; do
+          for i in {1..30}; do
             if curl -f -s http://localhost:3000 >/dev/null 2>&1; then
-              echo "✅ Server is ready and responding!"
-              echo "📊 Server response check:"
-              curl -I http://localhost:3000
-              
-              # Verify content is being served correctly
-              CONTENT_LENGTH=$(curl -s http://localhost:3000 | wc -c)
-              if [ "$CONTENT_LENGTH" -gt 1000 ]; then
-                echo "✅ Content validation passed (${CONTENT_LENGTH} bytes)"
-                SERVER_READY=true
-                break
-              else
-                echo "⚠️ Content seems too small (${CONTENT_LENGTH} bytes), retrying..."
-              fi
+              echo "✅ Server is ready!"
+              break
             fi
-            echo "Attempt $i/60: Server not ready yet, waiting 2s..."
+            echo "Attempt $i/30: Server not ready yet, waiting 2s..."
             sleep 2
           done
           
-          # Enhanced error reporting if server failed
-          if [ "$SERVER_READY" = "false" ]; then
-            echo "❌ Server failed to start or respond properly"
-            echo "🔍 Detailed diagnostics:"
-            echo "=== Process Status ==="
-            ps aux | grep -E "(node|npm)" || echo "No Node.js processes found"
-            echo "=== Network Status ==="
-            netstat -an | grep 3000 || echo "Port 3000 not listening"
-            echo "=== Server Logs ==="
-            if [ -f "server.log" ]; then
-              cat server.log
-            else
-              echo "No server.log file found"
-            fi
-            echo "=== Directory Contents ==="
-            ls -la dist/ || echo "No dist directory found"
-            echo "=== Error Summary ==="
-            echo "Server may have crashed or failed to bind to port 3000"
+          # Verify server is actually serving content
+          CONTENT_LENGTH=$(curl -s http://localhost:3000 | wc -c)
+          if [ "$CONTENT_LENGTH" -gt 1000 ]; then
+            echo "✅ Content validation passed (${CONTENT_LENGTH} bytes)"
+          else
+            echo "❌ Content seems too small (${CONTENT_LENGTH} bytes)"
             exit 1
           fi
-          
-          echo "🎉 Server ready for Lighthouse CI testing"
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse Check
         uses: treosh/lighthouse-ci-action@v12
         with:
-          configPath: './.lighthouserc.json'
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-        id: lighthouse
-        
-      - name: Handle Lighthouse CI Results
-        if: always()
-        run: |
-          if [ "${{ steps.lighthouse.outcome }}" = "success" ]; then
-            echo "✅ Lighthouse CI completed successfully"
-            echo "LIGHTHOUSE_STATUS=success" >> $GITHUB_ENV
-            
-            # Extract and display Lighthouse report URLs
-            echo "## 🚀 Lighthouse Performance Reports" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "📊 **Report Links:** Check the Lighthouse CI action output for temporary public storage URLs" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Try to extract URLs from the action output (if available in logs)
-            echo "🔗 **Report Access:** Look for 'temporary-public-storage' URLs in the Run Lighthouse CI step logs" >> $GITHUB_STEP_SUMMARY
-            echo "📈 **Metrics Available:** Performance, Accessibility, Best Practices, SEO scores" >> $GITHUB_STEP_SUMMARY
-            
-          else
-            echo "⚠️ Lighthouse CI encountered issues but build continues"
-            echo "LIGHTHOUSE_STATUS=failure" >> $GITHUB_ENV
-            
-            # Check if server is still running
-            if curl -f http://localhost:3000 >/dev/null 2>&1; then
-              echo "🔍 Server is still running, Lighthouse CI issue may be configuration-related"
-            else
-              echo "🔍 Server appears to be down, this may have caused the Lighthouse failure"
-            fi
-            
-            echo "## ⚠️ Lighthouse CI Issues" >> $GITHUB_STEP_SUMMARY
-            echo "Lighthouse CI had issues but this is non-blocking. Check the logs for details." >> $GITHUB_STEP_SUMMARY
-          fi
-
+          urls: |
+            http://localhost:3000
+          uploadArtifacts: false
+          
       - name: Cleanup server
         if: always()
         run: |
-          echo "🧹 Cleaning up server process..."
           if [ -n "$SERVER_PID" ]; then
             kill $SERVER_PID || echo "Server process already terminated"
-            echo "Server process $SERVER_PID terminated"
           fi
 
   bundle-analysis:
@@ -234,61 +165,24 @@ jobs:
           pattern: './dist/**/*.{js,css,html}'
           strip-hash: "\\b\\w{8}\\."
 
-  accessibility-audit:
-    name: ♿ Accessibility Audit
-    runs-on: ubuntu-latest
+  # Use shared comprehensive testing workflow for real URL testing
+  staging-comprehensive-testing:
+    name: 🧪 Comprehensive Testing (Real Staging URL)
     needs: build-site
     if: github.event.inputs.run_all_tests == 'true' || github.event_name == 'schedule'
-    steps:
-      - name: Download built site and config
-        uses: actions/download-artifact@v4
-        with:
-          name: built-site-${{ github.sha }}
-          path: ./
-
-      - name: Setup Node.js and serve
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install and start server
-        run: |
-          npm install -g serve
-          serve -s dist -l 3000 &
-          SERVER_PID=$!
-          
-          # Wait for server to be ready with health check
-          echo "Waiting for server to be ready..."
-          for i in {1..30}; do
-            if curl -f http://localhost:3000 >/dev/null 2>&1; then
-              echo "✅ Server is ready!"
-              break
-            fi
-            echo "Attempt $i/30: Server not ready yet, waiting..."
-            sleep 2
-          done
-
-      - name: Pa11y Accessibility Audit
-        run: |
-          npm install -g pa11y
-          echo "🔍 Running Pa11y accessibility audit..."
-          
-          # Add Chrome flags for CI environment using proper Pa11y syntax
-          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json --chrome-flags="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-extensions --disable-gpu" > accessibility-report.json; then
-            echo "✅ Accessibility audit passed"
-            echo "ACCESSIBILITY_STATUS=success" >> $GITHUB_ENV
-          else
-            echo "❌ ACCESSIBILITY AUDIT FAILED"
-            echo "ACCESSIBILITY_STATUS=failed" >> $GITHUB_ENV
-            exit 1  # Fail the job properly
-          fi
-
-      - name: Upload accessibility report
-        uses: actions/upload-artifact@v4
-        if: always()  # Upload even if audit failed
-        with:
-          name: accessibility-report
-          path: accessibility-report.json
+    uses: ./.github/workflows/shared-comprehensive-testing.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    with:
+      target_url: 'https://resume-as-code.netlify.app/'
+      environment_name: 'performance-monitoring'
+      environment_context: 'Scheduled performance monitoring'
+      test_types: 'lighthouse,accessibility,performance'
+      lighthouse_budget_path: './budget.json'
+      artifact_retention_days: 14
+      post_pr_comment: false
 
   core-web-vitals:
     name: 📊 Core Web Vitals
@@ -387,27 +281,27 @@ jobs:
           kill $SERVER_PID || true
 
   quality-summary:
-    name: 📈 Quality Summary
+    name: 📈 Enterprise Quality Summary
     runs-on: ubuntu-latest
-    needs: [lighthouse-ci, bundle-analysis, accessibility-audit, core-web-vitals]
+    needs: [lighthouse-check, bundle-analysis, staging-comprehensive-testing, core-web-vitals]
     if: always()
     steps:
       - name: Quality Gates Summary
         run: |
-          echo "## 📈 Quality & Performance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 📈 Enterprise Quality & Performance Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Quality Gate | Status | Details |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Gate | Status | Tool | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|--------|------|---------|" >> $GITHUB_STEP_SUMMARY
           
-          # Lighthouse CI Status
-          if [ "${{ needs.lighthouse-ci.result }}" = "success" ]; then
+          # Lighthouse Check Status
+          if [ "${{ needs.lighthouse-check.result }}" = "success" ]; then
             LIGHTHOUSE_STATUS="✅ Passed"
-          elif [ "${{ needs.lighthouse-ci.result }}" = "skipped" ]; then
+          elif [ "${{ needs.lighthouse-check.result }}" = "skipped" ]; then
             LIGHTHOUSE_STATUS="⏭️ Skipped"
           else
             LIGHTHOUSE_STATUS="❌ FAILED"
           fi
-          echo "| 🚀 Lighthouse CI | $LIGHTHOUSE_STATUS | Performance, Best Practices, SEO |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 Performance | $LIGHTHOUSE_STATUS | Lighthouse (foo-software) | Performance, Best Practices, SEO |" >> $GITHUB_STEP_SUMMARY
           
           # Bundle Analysis Status
           if [ "${{ needs.bundle-analysis.result }}" = "success" ]; then
@@ -419,13 +313,15 @@ jobs:
           fi
           echo "| 📦 Bundle Size | $BUNDLE_STATUS | Asset size tracking |" >> $GITHUB_STEP_SUMMARY
           
-          # Accessibility Status
-          if [ "${{ needs.accessibility-audit.result }}" = "success" ]; then
-            ACCESSIBILITY_STATUS="✅ Passed"
+          # Comprehensive Testing Status (Real URL)
+          if [ "${{ needs.staging-comprehensive-testing.result }}" = "success" ]; then
+            COMPREHENSIVE_STATUS="✅ Passed"
+          elif [ "${{ needs.staging-comprehensive-testing.result }}" = "skipped" ]; then
+            COMPREHENSIVE_STATUS="⏭️ Skipped"
           else
-            ACCESSIBILITY_STATUS="❌ FAILED"
+            COMPREHENSIVE_STATUS="❌ FAILED"
           fi
-          echo "| ♿ Accessibility | $ACCESSIBILITY_STATUS | WCAG 2.1 AA compliance |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Comprehensive Testing | $COMPREHENSIVE_STATUS | Real URL Testing | Lighthouse + Accessibility + Performance on Staging |" >> $GITHUB_STEP_SUMMARY
           
           # Core Web Vitals Status
           if [ "${{ needs.core-web-vitals.result }}" = "success" ]; then
@@ -439,10 +335,10 @@ jobs:
           
           # Overall status
           FAILED_TESTS=0
-          if [ "${{ needs.lighthouse-ci.result }}" != "success" ] && [ "${{ needs.lighthouse-ci.result }}" != "skipped" ]; then
+          if [ "${{ needs.lighthouse-check.result }}" != "success" ] && [ "${{ needs.lighthouse-check.result }}" != "skipped" ]; then
             FAILED_TESTS=$((FAILED_TESTS + 1))
           fi
-          if [ "${{ needs.accessibility-audit.result }}" != "success" ]; then
+          if [ "${{ needs.staging-comprehensive-testing.result }}" != "success" ] && [ "${{ needs.staging-comprehensive-testing.result }}" != "skipped" ]; then
             FAILED_TESTS=$((FAILED_TESTS + 1))
           fi
           if [ "${{ needs.core-web-vitals.result }}" != "success" ]; then

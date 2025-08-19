@@ -265,3 +265,23 @@ jobs:
           else
             echo "⚠️ Release verification failed, but deployment continues"
           fi
+
+  # Comprehensive production testing after deployment
+  production-comprehensive-testing:
+    name: 🧪 Production Validation Testing
+    needs: [release-please, deploy]
+    if: needs.release-please.outputs.release_created
+    uses: ./.github/workflows/shared-comprehensive-testing.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    with:
+      target_url: 'https://rafilkmp3.github.io/resume-as-code/'
+      environment_name: 'production'
+      environment_context: 'Release ${{ needs.release-please.outputs.tag_name }} deployed to GitHub Pages'
+      test_types: 'lighthouse,accessibility,performance'
+      lighthouse_budget_path: './budget.json'
+      artifact_retention_days: 90
+      post_pr_comment: true
+      pr_number: '${{ github.event.pull_request.number }}'
