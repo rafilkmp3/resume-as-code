@@ -349,13 +349,33 @@ jobs:
             echo "📊 File size: $(wc -c < "$RESULTS_FILE" 2>/dev/null || echo "unknown") bytes"
             echo "🔍 First 500 characters of JSON:"
             head -c 500 "$RESULTS_FILE" 2>/dev/null || echo "Could not read file"
+            echo ""
+            echo "🔍 JSON validation check:"
+            if jq empty "$RESULTS_FILE" 2>/dev/null; then
+              echo "✅ JSON is valid"
+            else
+              echo "❌ JSON is invalid or malformed"
+              echo "📄 Raw file content:"
+              cat "$RESULTS_FILE" || echo "Could not read file"
+            fi
+            echo ""
             
-            # Extract key metrics from axe-core JSON results
+            # Extract key metrics from axe-core JSON results with enhanced debugging
+            echo "🔍 Parsing JSON structure..."
+            echo "Available top-level keys:"
+            jq -r 'keys[]' "$RESULTS_FILE" 2>/dev/null || echo "Could not list keys"
+            echo ""
+            
             VIOLATION_COUNT=$(jq -r '.violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             PASSES_COUNT=$(jq -r '.passes | length' "$RESULTS_FILE" 2>/dev/null || echo "0") 
             INCOMPLETE_COUNT=$(jq -r '.incomplete | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             
-            echo "📊 Accessibility Results:"
+            echo "📊 Raw jq parsing results:"
+            echo "- Violations raw: $(jq -r '.violations' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo "- Passes raw: $(jq -r '.passes' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo "- Incomplete raw: $(jq -r '.incomplete' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
+            echo ""
+            echo "📊 Final parsed counts:"
             echo "- Violations: $VIOLATION_COUNT"
             echo "- Passes: $PASSES_COUNT" 
             echo "- Incomplete: $INCOMPLETE_COUNT"
