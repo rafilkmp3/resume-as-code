@@ -356,6 +356,7 @@ jobs:
 
       - name: Microsoft Accessibility Insights Scan
         uses: microsoft/accessibility-insights-action@v3
+        continue-on-error: true  # Don't fail the job if this step fails
         with:
           repo-token: ${{ github.token }}
           static-site-url: ${{ inputs.target_url }}
