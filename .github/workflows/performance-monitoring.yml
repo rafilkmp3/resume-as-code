@@ -72,7 +72,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: built-site-${{ github.sha }}
-          path: dist/
+          path: |
+            dist/
+            .lighthouserc.json
+            package.json
           retention-days: 1
 
   lighthouse-ci:
@@ -81,17 +84,16 @@ jobs:
     needs: build-site
     if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
-      - name: Download built site
+      - name: Download built site and config
         uses: actions/download-artifact@v4
         with:
           name: built-site-${{ github.sha }}
-          path: dist/
+          path: ./
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install serve only
         run: npm install -g serve
@@ -214,14 +216,11 @@ jobs:
     needs: build-site
     if: github.event_name == 'pull_request' && github.event.inputs.run_all_tests == 'true'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Download built site
+      - name: Download built site and config
         uses: actions/download-artifact@v4
         with:
           name: built-site-${{ github.sha }}
-          path: dist/
+          path: ./
 
       - name: Analyze Bundle Size
         uses: preactjs/compressed-size-action@v2
@@ -236,11 +235,11 @@ jobs:
     needs: build-site
     if: github.event.inputs.run_all_tests == 'true' || github.event_name == 'schedule'
     steps:
-      - name: Download built site
+      - name: Download built site and config
         uses: actions/download-artifact@v4
         with:
           name: built-site-${{ github.sha }}
-          path: dist/
+          path: ./
 
       - name: Setup Node.js and serve
         uses: actions/setup-node@v4
@@ -267,7 +266,16 @@ jobs:
       - name: Pa11y Accessibility Audit
         run: |
           npm install -g pa11y
-          pa11y http://localhost:3000 --standard WCAG2AA --reporter json > accessibility-report.json || true
+          echo "🔍 Running Pa11y accessibility audit..."
+          
+          if pa11y http://localhost:3000 --standard WCAG2AA --reporter json > accessibility-report.json; then
+            echo "✅ Accessibility audit passed"
+            echo "ACCESSIBILITY_STATUS=success" >> $GITHUB_ENV
+          else
+            echo "❌ ACCESSIBILITY AUDIT FAILED"
+            echo "ACCESSIBILITY_STATUS=failed" >> $GITHUB_ENV
+            # Still continue to upload the report
+          fi
 
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
@@ -281,11 +289,11 @@ jobs:
     needs: build-site
     if: github.event_name != 'schedule' && (github.event.inputs.run_all_tests == 'true' || github.event_name == 'push')
     steps:
-      - name: Download built site
+      - name: Download built site and config
         uses: actions/download-artifact@v4
         with:
           name: built-site-${{ github.sha }}
-          path: dist/
+          path: ./
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -293,7 +301,14 @@ jobs:
           node-version: '22'
 
       - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+        run: |
+          echo "📦 Installing Playwright with chromium..."
+          timeout 300 npx playwright install --with-deps chromium || {
+            echo "❌ PLAYWRIGHT INSTALLATION FAILED OR TIMED OUT"
+            echo "PLAYWRIGHT_STATUS=failed" >> $GITHUB_ENV
+            exit 1
+          }
+          echo "✅ Playwright installation completed"
 
       - name: Measure Core Web Vitals
         run: |
@@ -350,7 +365,13 @@ jobs:
           })();
           EOF
           
-          node measure-vitals.js || echo "Core Web Vitals measurement completed"
+          if node measure-vitals.js; then
+            echo "✅ Core Web Vitals measurement completed successfully"
+            echo "VITALS_STATUS=success" >> $GITHUB_ENV
+          else
+            echo "❌ CORE WEB VITALS MEASUREMENT FAILED"
+            echo "VITALS_STATUS=failed" >> $GITHUB_ENV
+          fi
           
           # Cleanup
           kill $SERVER_PID || true
@@ -367,9 +388,62 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Quality Gate | Status | Details |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------|--------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🚀 Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅ Passed' || needs.lighthouse-ci.result == 'skipped' && '⏭️ Skipped' || '⚠️ Issues (Non-blocking)' }} | Performance, Best Practices, SEO |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Bundle Size | ${{ needs.bundle-analysis.result == 'success' && '✅ Passed' || needs.bundle-analysis.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} | Asset size tracking |" >> $GITHUB_STEP_SUMMARY
-          echo "| ♿ Accessibility | ${{ needs.accessibility-audit.result == 'success' && '✅ Passed' || '❌ Failed' }} | WCAG 2.1 AA compliance |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Web Vitals | ${{ needs.core-web-vitals.result == 'success' && '✅ Passed' || '❌ Failed' }} | Core performance metrics |" >> $GITHUB_STEP_SUMMARY
+          
+          # Lighthouse CI Status
+          if [ "${{ needs.lighthouse-ci.result }}" = "success" ]; then
+            LIGHTHOUSE_STATUS="✅ Passed"
+          elif [ "${{ needs.lighthouse-ci.result }}" = "skipped" ]; then
+            LIGHTHOUSE_STATUS="⏭️ Skipped"
+          else
+            LIGHTHOUSE_STATUS="❌ FAILED"
+          fi
+          echo "| 🚀 Lighthouse CI | $LIGHTHOUSE_STATUS | Performance, Best Practices, SEO |" >> $GITHUB_STEP_SUMMARY
+          
+          # Bundle Analysis Status
+          if [ "${{ needs.bundle-analysis.result }}" = "success" ]; then
+            BUNDLE_STATUS="✅ Passed"
+          elif [ "${{ needs.bundle-analysis.result }}" = "skipped" ]; then
+            BUNDLE_STATUS="⏭️ Skipped"
+          else
+            BUNDLE_STATUS="❌ FAILED"
+          fi
+          echo "| 📦 Bundle Size | $BUNDLE_STATUS | Asset size tracking |" >> $GITHUB_STEP_SUMMARY
+          
+          # Accessibility Status
+          if [ "${{ needs.accessibility-audit.result }}" = "success" ]; then
+            ACCESSIBILITY_STATUS="✅ Passed"
+          else
+            ACCESSIBILITY_STATUS="❌ FAILED"
+          fi
+          echo "| ♿ Accessibility | $ACCESSIBILITY_STATUS | WCAG 2.1 AA compliance |" >> $GITHUB_STEP_SUMMARY
+          
+          # Core Web Vitals Status
+          if [ "${{ needs.core-web-vitals.result }}" = "success" ]; then
+            VITALS_STATUS="✅ Passed"
+          else
+            VITALS_STATUS="❌ FAILED"
+          fi
+          echo "| 📊 Web Vitals | $VITALS_STATUS | Core performance metrics |" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall status
+          FAILED_TESTS=0
+          if [ "${{ needs.lighthouse-ci.result }}" != "success" ] && [ "${{ needs.lighthouse-ci.result }}" != "skipped" ]; then
+            FAILED_TESTS=$((FAILED_TESTS + 1))
+          fi
+          if [ "${{ needs.accessibility-audit.result }}" != "success" ]; then
+            FAILED_TESTS=$((FAILED_TESTS + 1))
+          fi
+          if [ "${{ needs.core-web-vitals.result }}" != "success" ]; then
+            FAILED_TESTS=$((FAILED_TESTS + 1))
+          fi
+          
+          if [ $FAILED_TESTS -eq 0 ]; then
+            echo "🎉 **All quality gates passed!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **$FAILED_TESTS quality gate(s) failed - see logs above for details**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🎯 **Performance Target**: All quality gates should pass for optimal user experience." >> $GITHUB_STEP_SUMMARY
