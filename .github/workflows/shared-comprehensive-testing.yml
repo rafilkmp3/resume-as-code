@@ -367,7 +367,9 @@ jobs:
             echo ""
             
             # Axe-core generates array format, so access first element [0]
-            VIOLATION_COUNT=$(jq -r '.[0].violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            # Count total individual violations (sum of all nodes arrays)
+            VIOLATION_COUNT=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+            VIOLATION_TYPES=$(jq -r '.[0].violations | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             PASSES_COUNT=$(jq -r '.[0].passes | length' "$RESULTS_FILE" 2>/dev/null || echo "0") 
             INCOMPLETE_COUNT=$(jq -r '.[0].incomplete | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
             
@@ -377,9 +379,15 @@ jobs:
             echo "- Incomplete raw: $(jq -r '.[0].incomplete' "$RESULTS_FILE" 2>/dev/null | head -c 100 || echo "failed")"
             echo ""
             echo "📊 Final parsed counts:"
-            echo "- Violations: $VIOLATION_COUNT"
+            echo "- Total Individual Violations: $VIOLATION_COUNT (across $VIOLATION_TYPES violation types)"
             echo "- Passes: $PASSES_COUNT" 
             echo "- Incomplete: $INCOMPLETE_COUNT"
+            
+            # Debug: Show breakdown of violation types and their counts
+            if [ "$VIOLATION_COUNT" -gt "0" ]; then
+              echo "🔍 Violation breakdown by type:"
+              jq -r '.[0].violations[] | "  - \(.id): \(.nodes | length) occurrences"' "$RESULTS_FILE" 2>/dev/null || echo "  Could not parse breakdown"
+            fi
             
             # Generate detailed violation summary
             if [ "$VIOLATION_COUNT" -gt "0" ]; then
@@ -389,7 +397,7 @@ jobs:
               # Generate detailed violation breakdown for PR comments
               VIOLATIONS_DETAIL=$(jq -r '.[0].violations[] | "**\(.id)**: \(.nodes | length) occurrences - \(.help)"' "$RESULTS_FILE" 2>/dev/null | head -10)
               
-              ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT accessibility violations, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
+              ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
               echo "violations_detail<<EOF" >> $GITHUB_OUTPUT
               echo "$VIOLATIONS_DETAIL" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
