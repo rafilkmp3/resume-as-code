@@ -47,6 +47,8 @@ jobs:
     environment:
       name: netlify-staging
       url: https://resume-as-code.netlify.app
+    outputs:
+      staging_version: ${{ env.STAGING_VERSION }}
 
     steps:
       - name: Checkout
@@ -193,3 +195,80 @@ jobs:
       artifact_retention_days: 7
       post_pr_comment: false
     secrets: inherit
+
+  staging-summary:
+    name: Staging Test Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, call-comprehensive-tests]
+    if: always()
+    steps:
+      - name: Create Comprehensive Staging Summary
+        run: |
+          echo "# 🚀 Staging Deployment & Testing Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.deploy-staging.outputs.staging_version || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** 🌐 [Staging (Netlify)](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Lighthouse Performance Results
+          echo "## 🚀 Lighthouse Performance" >> $GITHUB_STEP_SUMMARY
+          PERF_SCORE="${{ needs.call-comprehensive-tests.outputs.performance_score }}"
+          ACCESS_SCORE="${{ needs.call-comprehensive-tests.outputs.accessibility_score }}"
+          BEST_PRACTICES_SCORE="${{ needs.call-comprehensive-tests.outputs.best_practices_score }}"
+          SEO_SCORE="${{ needs.call-comprehensive-tests.outputs.seo_score }}"
+          
+          if [ -n "$PERF_SCORE" ] && [ "$PERF_SCORE" != "N/A" ]; then
+            echo "- **Performance:** $PERF_SCORE/100" >> $GITHUB_STEP_SUMMARY
+            echo "- **Accessibility:** $ACCESS_SCORE/100" >> $GITHUB_STEP_SUMMARY  
+            echo "- **Best Practices:** $BEST_PRACTICES_SCORE/100" >> $GITHUB_STEP_SUMMARY
+            echo "- **SEO:** $SEO_SCORE/100" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Core Web Vitals
+            FCP="${{ needs.call-comprehensive-tests.outputs.fcp }}"
+            LCP="${{ needs.call-comprehensive-tests.outputs.lcp }}"
+            CLS="${{ needs.call-comprehensive-tests.outputs.cls }}"
+            
+            if [ -n "$FCP" ]; then
+              echo "### Core Web Vitals" >> $GITHUB_STEP_SUMMARY
+              echo "- **First Contentful Paint (FCP):** ${FCP}ms" >> $GITHUB_STEP_SUMMARY
+              echo "- **Largest Contentful Paint (LCP):** ${LCP}ms" >> $GITHUB_STEP_SUMMARY
+              echo "- **Cumulative Layout Shift (CLS):** $CLS" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ Lighthouse results not available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Accessibility Results  
+          echo "## ♿ Accessibility Analysis" >> $GITHUB_STEP_SUMMARY
+          VIOLATION_COUNT="${{ needs.call-comprehensive-tests.outputs.violation_count }}"
+          PASSES_COUNT="${{ needs.call-comprehensive-tests.outputs.passes_count }}"
+          
+          if [ -n "$VIOLATION_COUNT" ] && [ "$VIOLATION_COUNT" != "N/A" ]; then
+            echo "- **Violations Found:** $VIOLATION_COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed Checks:** $PASSES_COUNT" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$VIOLATION_COUNT" -eq 0 ]; then
+              echo "- **Status:** ✅ EXCELLENT - No accessibility violations detected!" >> $GITHUB_STEP_SUMMARY
+            elif [ "$VIOLATION_COUNT" -lt 10 ]; then
+              echo "- **Status:** ⚠️ GOOD - Minor accessibility issues found" >> $GITHUB_STEP_SUMMARY
+            elif [ "$VIOLATION_COUNT" -lt 50 ]; then
+              echo "- **Status:** ⚠️ NEEDS IMPROVEMENT - Multiple accessibility issues" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Status:** ❌ POOR - Significant accessibility improvements needed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ Accessibility results not available" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Test Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Lighthouse reports and performance data available in workflow artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Accessibility JSON reports with detailed violation information" >> $GITHUB_STEP_SUMMARY
+          echo "- Core Web Vitals analysis and recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔗 Links:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Staging Site](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Test Reports](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
