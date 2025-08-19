@@ -160,18 +160,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        continue-on-error: true
         with:
           ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        continue-on-error: true
         with:
           node-version: '22'
 
       - name: Production Site Health Check
-        continue-on-error: true
         run: |
           echo "🏥 Running production health checks..."
           
