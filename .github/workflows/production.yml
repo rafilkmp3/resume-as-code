@@ -85,6 +85,7 @@ jobs:
         run: |
           echo "🏗️ Building production release ${{ github.event.release.tag_name }}"
           
+          # Build container with production artifacts
           docker buildx build \
             --file docker/Dockerfile \
             --target builder \
@@ -101,8 +102,13 @@ jobs:
             --build-arg URL=https://rafilkmp3.github.io/resume-as-code/ \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            --output type=local,dest=./dist \
+            --tag "resume:production-${APP_VERSION}" \
+            --load \
             .
+          
+          # Extract ONLY the built application directory from container
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:production-${APP_VERSION}" sh -c "cp -r /app/dist/* /tmp/dist/"
 
       - name: Verify build artifacts
         run: |
