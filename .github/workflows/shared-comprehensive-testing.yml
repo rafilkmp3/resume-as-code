@@ -274,8 +274,7 @@ jobs:
       passes_count: ${{ steps.process-axe-results.outputs.passes_count }}
       incomplete_count: ${{ steps.process-axe-results.outputs.incomplete_count }}
       has_accessibility_results: ${{ steps.process-axe-results.outputs.has_accessibility_results }}
-      violations_detail: ${{ steps.process-axe-results.outputs.violations_detail }}
-      violations_collapsible: ${{ steps.process-axe-results.outputs.violations_collapsible }}
+      violations_json: ${{ steps.process-axe-results.outputs.violations_json }}
       axe_exit_code: ${{ steps.axe-scan.outputs.axe_exit_code }}
     steps:
       - name: Setup Node.js for Axe Core
@@ -409,165 +408,15 @@ jobs:
               MODERATE_COUNT=0
               MINOR_COUNT=0
               
-              echo "🔍 Building organized violations by impact level..."
-              echo "🔍 Total violation objects available:"
-              jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null | wc -l
-              echo ""
-              
-              # First pass: count violations by impact
-              while IFS= read -r violation; do
-                if [ -n "$violation" ]; then
-                  IMPACT=$(echo "$violation" | jq -r '.impact // "minor"')
-                  case "$IMPACT" in
-                    "critical") CRITICAL_COUNT=$((CRITICAL_COUNT + 1)) ;;
-                    "serious") SERIOUS_COUNT=$((SERIOUS_COUNT + 1)) ;;
-                    "moderate") MODERATE_COUNT=$((MODERATE_COUNT + 1)) ;;
-                    *) MINOR_COUNT=$((MINOR_COUNT + 1)) ;;
-                  esac
-                fi
-              done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
-              
-              echo "📊 Impact distribution: Critical($CRITICAL_COUNT), Serious($SERIOUS_COUNT), Moderate($MODERATE_COUNT), Minor($MINOR_COUNT)"
-              
-              # Create organized sections by impact level (most severe first)
-              for IMPACT_LEVEL in "critical" "serious" "moderate" "minor"; do
-                case "$IMPACT_LEVEL" in
-                  "critical") 
-                    if [ "$CRITICAL_COUNT" -gt 0 ]; then
-                      VIOLATIONS_COLLAPSIBLE+="\n#### 🚨 Critical Issues ($CRITICAL_COUNT violations)\n"
-                      VIOLATIONS_COLLAPSIBLE+="> **Must fix immediately** - These violations completely block users with disabilities\n\n"
-                    fi
-                    ;;
-                  "serious")
-                    if [ "$SERIOUS_COUNT" -gt 0 ]; then
-                      VIOLATIONS_COLLAPSIBLE+="\n#### ⚡ Serious Issues ($SERIOUS_COUNT violations)\n"
-                      VIOLATIONS_COLLAPSIBLE+="> **High priority** - Major barriers that significantly impact accessibility\n\n"
-                    fi
-                    ;;
-                  "moderate")
-                    if [ "$MODERATE_COUNT" -gt 0 ]; then
-                      VIOLATIONS_COLLAPSIBLE+="\n#### ⚠️ Moderate Issues ($MODERATE_COUNT violations)\n"
-                      VIOLATIONS_COLLAPSIBLE+="> **Medium priority** - Usability problems that affect user experience\n\n"
-                    fi
-                    ;;
-                  "minor")
-                    if [ "$MINOR_COUNT" -gt 0 ]; then
-                      VIOLATIONS_COLLAPSIBLE+="\n#### 📝 Minor Issues ($MINOR_COUNT violations)\n"
-                      VIOLATIONS_COLLAPSIBLE+="> **When time permits** - Polish improvements and best practices\n\n"
-                    fi
-                    ;;
-                esac
-                
-                # Process violations for this impact level
-                while IFS= read -r violation; do
-                  if [ -n "$violation" ]; then
-                    RULE_IMPACT=$(echo "$violation" | jq -r '.impact // "minor"')
-                    if [ "$RULE_IMPACT" = "$IMPACT_LEVEL" ] || ([ "$IMPACT_LEVEL" = "minor" ] && [ "$RULE_IMPACT" != "critical" ] && [ "$RULE_IMPACT" != "serious" ] && [ "$RULE_IMPACT" != "moderate" ]); then
-                      VIOLATIONS_PROCESSED=$((VIOLATIONS_PROCESSED + 1))
-                      RULE_ID=$(echo "$violation" | jq -r '.id')
-                      RULE_HELP=$(echo "$violation" | jq -r '.help')
-                      RULE_URL=$(echo "$violation" | jq -r '.helpUrl')
-                      RULE_COUNT=$(echo "$violation" | jq -r '.nodes | length')
-                      RULE_TAGS=$(echo "$violation" | jq -r '.tags | join(", ")')
-                      
-                      # Get impact emoji
-                      case "$RULE_IMPACT" in
-                        "critical") IMPACT_EMOJI="🚨" ;;
-                        "serious") IMPACT_EMOJI="⚡" ;;
-                        "moderate") IMPACT_EMOJI="⚠️" ;;
-                        *) IMPACT_EMOJI="📝" ;;
-                      esac
-                      
-                      echo "🔍 Processing $RULE_IMPACT violation: ${RULE_ID} (${RULE_COUNT} occurrences)"
-                      
-                      # Get element selectors with smart display strategy
-                      TOTAL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | length')
-                      
-                      VIOLATIONS_COLLAPSIBLE+="<details>\n<summary>${IMPACT_EMOJI} <strong>${RULE_ID}</strong> (${RULE_COUNT} elements affected)</summary>\n\n"
-                      VIOLATIONS_COLLAPSIBLE+="**🎯 Issue**: ${RULE_HELP}\n\n"
-                      VIOLATIONS_COLLAPSIBLE+="**📋 WCAG Guidelines**: ${RULE_TAGS}\n"
-                      VIOLATIONS_COLLAPSIBLE+="**📚 Fix Guide**: [${RULE_ID} Documentation](${RULE_URL}) *(detailed examples & solutions)*\n\n"
-                      VIOLATIONS_COLLAPSIBLE+="**🔍 Affected Elements**:\n"
-                      
-                      if [ "$TOTAL_EXAMPLES" -le 5 ]; then
-                        # Show all elements if 5 or fewer
-                        ALL_EXAMPLES=$(echo "$violation" | jq -r '.nodes | map(.target | join(" > ")) | join("\n   - ")')
-                        VIOLATIONS_COLLAPSIBLE+="   - ${ALL_EXAMPLES}\n"
-                      elif [ "$TOTAL_EXAMPLES" -le 15 ]; then
-                        # Show first 3 + collapsible section for moderate lists (6-15 elements)
-                        FIRST_EXAMPLES=$(echo "$violation" | jq -r '.nodes[:3] | map(.target | join(" > ")) | join("\n   - ")')
-                        REMAINING_EXAMPLES=$(echo "$violation" | jq -r '.nodes[3:] | map(.target | join(" > ")) | join("\n   - ")')
-                        VIOLATIONS_COLLAPSIBLE+="   - ${FIRST_EXAMPLES}\n"
-                        VIOLATIONS_COLLAPSIBLE+="   <details>\n   <summary><em>📋 View $((TOTAL_EXAMPLES - 3)) more affected elements...</em></summary>\n\n"
-                        VIOLATIONS_COLLAPSIBLE+="   - ${REMAINING_EXAMPLES}\n\n"
-                        VIOLATIONS_COLLAPSIBLE+="   </details>\n"
-                      else
-                        # Show first 5 + collapsible section for large lists (16+ elements)
-                        FIRST_EXAMPLES=$(echo "$violation" | jq -r '.nodes[:5] | map(.target | join(" > ")) | join("\n   - ")')
-                        REMAINING_EXAMPLES=$(echo "$violation" | jq -r '.nodes[5:] | map(.target | join(" > ")) | join("\n   - ")')
-                        VIOLATIONS_COLLAPSIBLE+="   - ${FIRST_EXAMPLES}\n"
-                        VIOLATIONS_COLLAPSIBLE+="   <details>\n   <summary><em>📋 View all $((TOTAL_EXAMPLES - 5)) remaining affected elements...</em></summary>\n\n"
-                        VIOLATIONS_COLLAPSIBLE+="   - ${REMAINING_EXAMPLES}\n\n"
-                        VIOLATIONS_COLLAPSIBLE+="   </details>\n"
-                      fi
-                      
-                      VIOLATIONS_COLLAPSIBLE+="\n</details>\n\n"
-                    fi
-                  fi
-                done < <(jq -c '.[0].violations[]' "$RESULTS_FILE" 2>/dev/null)
-              done
-              echo "🔍 Processed ${VIOLATIONS_PROCESSED} violation types for collapsible sections"
-              
               ACCESSIBILITY_SUMMARY="❌ Found $VIOLATION_COUNT individual accessibility violations across $VIOLATION_TYPES violation types, $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
-              # Use direct assignment instead of EOF syntax to prevent delimiter conflicts
-              echo "violations_detail=$(echo "$VIOLATIONS_DETAIL" | base64 -w 0)" >> $GITHUB_OUTPUT
-              # Add collapsible sections for GitHub (base64 encoded to prevent JavaScript syntax errors)
-              echo "🔍 VIOLATIONS_COLLAPSIBLE variable length: ${#VIOLATIONS_COLLAPSIBLE}"
-              echo "🔍 First 200 characters of VIOLATIONS_COLLAPSIBLE:"
-              echo "$VIOLATIONS_COLLAPSIBLE" | head -c 200
-              echo ""
               
-              # Check content length before encoding to prevent GitHub Actions output limits
-              echo "🔍 VIOLATIONS_COLLAPSIBLE length: ${#VIOLATIONS_COLLAPSIBLE} characters"
-              echo "🔍 First 300 characters preview:"
-              echo "$VIOLATIONS_COLLAPSIBLE" | head -c 300
-              echo ""
-              echo "🔍 Last 300 characters preview:"
-              echo "$VIOLATIONS_COLLAPSIBLE" | tail -c 300
-              echo ""
-              
-              # Verify all impact levels are included
-              echo "🔍 Content verification:"
-              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Critical Issues" || echo "  - No Critical Issues sections found"
-              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Serious Issues" || echo "  - No Serious Issues sections found"
-              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Moderate Issues" || echo "  - No Moderate Issues sections found"  
-              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Minor Issues" || echo "  - No Minor Issues sections found"
-              
-              # Set output with direct assignment to avoid EOF delimiter issues
-              if [ -n "$VIOLATIONS_COLLAPSIBLE" ] && [ ${#VIOLATIONS_COLLAPSIBLE} -gt 10 ]; then
-                # Test base64 encoding
-                ENCODED_VIOLATIONS=$(echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0)
-                echo "🔍 Base64 encoded length: ${#ENCODED_VIOLATIONS}"
-                
-                # GitHub Actions has output limits (~1MB), check if we're within bounds
-                if [ ${#ENCODED_VIOLATIONS} -lt 900000 ]; then
-                  echo "violations_collapsible=$ENCODED_VIOLATIONS" >> $GITHUB_OUTPUT
-                  echo "✅ violations_collapsible output set successfully (${#ENCODED_VIOLATIONS} chars base64)"
-                else
-                  echo "⚠️ Content too large for GitHub Actions output (${#ENCODED_VIOLATIONS} chars), truncating..."
-                  # Take first 800K characters of base64 to stay within limits
-                  TRUNCATED_ENCODED=$(echo "$ENCODED_VIOLATIONS" | head -c 800000)
-                  echo "violations_collapsible=$TRUNCATED_ENCODED" >> $GITHUB_OUTPUT
-                  echo "⚠️ violations_collapsible truncated to fit GitHub Actions limits (800K chars)"
-                fi
-              else
-                echo "⚠️ VIOLATIONS_COLLAPSIBLE is empty or too short, setting empty output"
-                echo "violations_collapsible=" >> $GITHUB_OUTPUT
-              fi
+              # Simply pass the violations JSON to JavaScript for processing - much simpler!
+              VIOLATIONS_JSON=$(jq -c '.[0].violations' "$RESULTS_FILE" 2>/dev/null || echo "[]")
+              echo "violations_json=$VIOLATIONS_JSON" >> $GITHUB_OUTPUT
+              echo "✅ Violations JSON passed (${#VIOLATIONS_JSON} chars) - will be processed in JavaScript"
             else
               ACCESSIBILITY_SUMMARY="✅ No accessibility violations found! $PASSES_COUNT checks passed, $INCOMPLETE_COUNT incomplete"
-              echo "violations_detail=" >> $GITHUB_OUTPUT
-              echo "violations_collapsible=" >> $GITHUB_OUTPUT
+              echo "violations_json=[]" >> $GITHUB_OUTPUT
             fi
             
             # Export results for other steps
@@ -891,23 +740,69 @@ jobs:
               commentBody += `2. **⚡ Moderate Impact**: Address usability issues\n`;
               commentBody += `3. **📝 Minor Impact**: Polish and perfect\n`;
               commentBody += `4. **🔍 Review Items**: Manually verify ${incompleteCount} incomplete checks\n\n`;
-              // Add detailed violation breakdown with collapsible sections (base64 decoded)
-              console.log('🔍 DEBUG: violations_collapsible value:', ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }});
+              // Generate detailed violation breakdown directly from JSON - much simpler!
               try {
-                const violationsCollapsibleBase64 = ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }};
-                console.log('🔍 DEBUG: base64 string type and length:', typeof violationsCollapsibleBase64, violationsCollapsibleBase64?.length || 'null');
+                const violationsJson = ${{ toJSON(needs.accessibility-testing.outputs.violations_json) }};
+                console.log('🔍 Processing violations JSON:', typeof violationsJson, violationsJson?.length || 'no length');
                 
-                if (violationsCollapsibleBase64 && violationsCollapsibleBase64.trim() && violationsCollapsibleBase64 !== 'null') {
-                  // Decode base64 content safely
-                  const violationsCollapsible = Buffer.from(violationsCollapsibleBase64, 'base64').toString('utf8');
-                  console.log('🔍 DEBUG: decoded content length:', violationsCollapsible.length);
-                  console.log('🔍 DEBUG: first 200 chars of decoded content:', violationsCollapsible.substring(0, 200));
+                if (violationsJson && violationsJson.length > 0) {
+                  // Group violations by impact level
+                  const violationsByImpact = {
+                    critical: violationsJson.filter(v => v.impact === 'critical'),
+                    serious: violationsJson.filter(v => v.impact === 'serious'),
+                    moderate: violationsJson.filter(v => v.impact === 'moderate'),
+                    minor: violationsJson.filter(v => !v.impact || v.impact === 'minor' || !['critical', 'serious', 'moderate'].includes(v.impact))
+                  };
                   
                   commentBody += `<details>\n<summary><strong>🔍 View All ${violationCount} Violations</strong> (Organized by Impact Level)</summary>\n\n`;
                   commentBody += `### 📋 Complete Violation Analysis\n\n`;
                   commentBody += `> 💡 **Pro Tip**: Start with **Critical** and **Serious** violations first - they have the biggest impact on users with disabilities.\n\n`;
                   commentBody += `#### 🔥 Violations by Severity (Most Important First)\n\n`;
-                  commentBody += violationsCollapsible;
+                  
+                  // Process each impact level
+                  const impacts = [
+                    { key: 'critical', emoji: '🚨', title: 'Critical Issues', desc: 'Must fix immediately - These violations completely block users with disabilities' },
+                    { key: 'serious', emoji: '⚡', title: 'Serious Issues', desc: 'High priority - Major barriers that significantly impact accessibility' },
+                    { key: 'moderate', emoji: '⚠️', title: 'Moderate Issues', desc: 'Medium priority - Usability problems that affect user experience' },
+                    { key: 'minor', emoji: '📝', title: 'Minor Issues', desc: 'When time permits - Polish improvements and best practices' }
+                  ];
+                  
+                  for (const impact of impacts) {
+                    const violations = violationsByImpact[impact.key];
+                    if (violations.length > 0) {
+                      commentBody += `\n#### ${impact.emoji} ${impact.title} (${violations.length} violations)\n`;
+                      commentBody += `> **${impact.desc}**\n\n`;
+                      
+                      for (const violation of violations) {
+                        const elementCount = violation.nodes?.length || 0;
+                        commentBody += `<details>\n<summary>${impact.emoji} <strong>${violation.id}</strong> (${elementCount} elements affected)</summary>\n\n`;
+                        commentBody += `**🎯 Issue**: ${violation.help}\n\n`;
+                        commentBody += `**📋 WCAG Guidelines**: ${violation.tags?.join(', ') || 'N/A'}\n`;
+                        commentBody += `**📚 Fix Guide**: [${violation.id} Documentation](${violation.helpUrl}) *(detailed examples & solutions)*\n\n`;
+                        
+                        if (violation.nodes && violation.nodes.length > 0) {
+                          commentBody += `**🔍 Affected Elements**:\n`;
+                          const elements = violation.nodes.slice(0, 5); // Show first 5
+                          for (const node of elements) {
+                            if (node.target && node.target.length > 0) {
+                              commentBody += `   - ${node.target.join(' > ')}\n`;
+                            }
+                          }
+                          if (violation.nodes.length > 5) {
+                            commentBody += `   <details><summary><em>📋 View ${violation.nodes.length - 5} more affected elements...</em></summary>\n\n`;
+                            for (const node of violation.nodes.slice(5)) {
+                              if (node.target && node.target.length > 0) {
+                                commentBody += `   - ${node.target.join(' > ')}\n`;
+                              }
+                            }
+                            commentBody += `   </details>\n`;
+                          }
+                        }
+                        commentBody += `\n</details>\n\n`;
+                      }
+                    }
+                  }
+                  
                   commentBody += `\n### 🛠️ Quick Fix Guide\n\n`;
                   commentBody += `- **Critical**: These break core functionality - fix immediately\n`;
                   commentBody += `- **Serious**: Major barriers for disabled users - high priority\n`;
@@ -915,9 +810,9 @@ jobs:
                   commentBody += `- **Minor**: Polish improvements - when time permits\n\n`;
                   commentBody += `📚 **Need Help?** Each violation above links to detailed WCAG documentation with examples.\n\n`;
                   commentBody += `</details>\n\n`;
-                  console.log(`✅ Successfully decoded and added ${violationsCollapsible.length} characters of organized violations`);
+                  console.log(`✅ Successfully generated ${violationsJson.length} violations organized by impact level`);
                 } else {
-                  console.log('❌ DEBUG: violations_collapsible is empty, null, or invalid:', violationsCollapsibleBase64);
+                  console.log('⚠️ No violations JSON data available');
                   commentBody += `<details>\n<summary><strong>🔍 Detailed Analysis</strong> (Processing...)</summary>\n\n`;
                   commentBody += `### ⚠️ Detailed Analysis In Progress\n\n`;
                   commentBody += `The detailed breakdown is being processed. Meanwhile:\n\n`;
@@ -928,8 +823,7 @@ jobs:
                   commentBody += `</details>\n\n`;
                 }
               } catch (e) {
-                console.log('❌ Could not decode violations collapsible content:', e.message);
-                console.log('❌ Raw violations_collapsible value:', ${{ toJSON(needs.accessibility-testing.outputs.violations_collapsible) }});
+                console.log('❌ Could not process violations JSON:', e.message);
                 commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
                 commentBody += `⚠️ Error processing detailed breakdown: ${e.message}\n`;
                 commentBody += `Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
