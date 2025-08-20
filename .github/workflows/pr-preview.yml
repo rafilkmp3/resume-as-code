@@ -782,6 +782,7 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
+      security-events: write
     with:
       target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
       environment_name: 'preview'

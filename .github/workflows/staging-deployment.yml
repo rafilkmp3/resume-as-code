@@ -28,6 +28,8 @@ permissions:
   contents: read
   packages: write
   pull-requests: write
+  checks: write
+  security-events: write
 
 env:
   DOCKER_BUILDKIT: 1

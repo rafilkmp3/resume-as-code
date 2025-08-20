@@ -276,6 +276,7 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
+      security-events: write
     with:
       target_url: 'https://rafilkmp3.github.io/resume-as-code/'
       environment_name: 'production'
