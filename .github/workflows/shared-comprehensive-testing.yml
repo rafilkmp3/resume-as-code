@@ -873,7 +873,7 @@ jobs:
             
             if (hasAccessibilityResults === 'true' && violationCount !== "0" && violationCount !== "") {
               commentBody += `## 🚨 Accessibility Report\n\n`;
-              commentBody += `> **${violationCount} WCAG violations detected** across ${passesCount + parseInt(violationCount)} total checks\n\n`;
+              commentBody += `> **${violationCount} WCAG violations detected** across ${parseInt(passesCount) + parseInt(violationCount)} total checks\n\n`;
               
               // Create impact-based summary with visual indicators
               commentBody += `### 📊 Impact Summary\n\n`;
