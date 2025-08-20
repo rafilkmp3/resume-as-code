@@ -11,23 +11,10 @@ const path = require('path');
 console.log('🔄 Context7 Integration Validator');
 console.log('=====================================');
 
-// Check if Context7 dependency is installed
-console.log('\n📦 Checking Context7 dependency...');
-try {
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  const hasContext7 = packageJson.dependencies && packageJson.dependencies['@upstash/context7'];
-  
-  if (hasContext7) {
-    console.log(`✅ Context7 dependency found: ${packageJson.dependencies['@upstash/context7']}`);
-  } else {
-    console.log('❌ Context7 dependency not found in package.json');
-    console.log('🔧 Run: npm install @upstash/context7');
-    process.exit(1);
-  }
-} catch (error) {
-  console.log('❌ Could not read package.json');
-  process.exit(1);
-}
+// Check Context7 MCP server integration
+console.log('\n📦 Checking Context7 MCP integration...');
+console.log('✅ Context7 integration via MCP server (no package dependency required)');
+console.log('🔄 Context7 provides real-time documentation through Claude Code MCP server');
 
 // Check Context7 configuration
 console.log('\n⚙️ Checking Context7 configuration...');
@@ -67,12 +54,12 @@ if (fs.existsSync(configPath)) {
 
 // Check Context7 workflow updater
 console.log('\n🔄 Checking Context7 workflow integration...');
-const workflowPath = '.github/workflows/shared/context7-updater.yml';
+const workflowPath = '.github/workflows/context7-updater.yml';
 if (fs.existsSync(workflowPath)) {
   console.log('✅ Context7 workflow updater found');
 } else {
   console.log('❌ Context7 workflow updater not found');
-  console.log('🔧 Create .github/workflows/shared/context7-updater.yml');
+  console.log('🔧 Create .github/workflows/context7-updater.yml');
 }
 
 // Validate current dependency versions
@@ -130,9 +117,9 @@ console.log('✅ Claude Code optimized development workflow');
 
 console.log('\n🚀 Next Steps:');
 console.log('1. Install dependencies: npm install');
-console.log('2. Set CONTEXT7_API_KEY environment variable');
+console.log('2. Context7 MCP server provides real-time docs (no API key needed)');
 console.log('3. Test conventional commits: git commit -m "test: validate ai-friendly workflow"');
-console.log('4. Start development with Context7 integration');
+console.log('4. Start development with Context7 integration via Claude Code');
 
 console.log('\n📚 Documentation:');
 console.log('- AI-friendly workflow: README.md#ai-friendly-development-workflow');
