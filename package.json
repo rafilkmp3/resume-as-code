@@ -36,7 +36,10 @@
     "resume:update": "node scripts/resume-auto-updater.js",
     "resume:update:dry-run": "node scripts/resume-auto-updater.js --dry-run",
     "resume:update:config": "node scripts/resume-auto-updater.js --config",
-    "resume:update:pr": "node -e \"const ResumeAutoUpdater = require('./scripts/resume-auto-updater.js'); const updater = new ResumeAutoUpdater(); updater.updateReleasePleasePR();\""
+    "resume:update:pr": "node -e \"const ResumeAutoUpdater = require('./scripts/resume-auto-updater.js'); const updater = new ResumeAutoUpdater(); updater.updateReleasePleasePR();\"",
+    "context7:validate": "node scripts/context7-integration.js",
+    "context7:docs": "echo 'Context7 real-time documentation available via MCP server integration'",
+    "ai:commithelp": "echo 'Use conventional commits: feat|fix|chore|docs|style|refactor|perf|test|ci: description'"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.0",
@@ -44,7 +47,8 @@
     "handlebars": "^4.7.8",
     "puppeteer": "^24.16.2",
     "qrcode": "^1.5.4",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "@upstash/context7": "^1.0.0"
   },
   "jest": {
     "preset": "./config/jest.config.js"

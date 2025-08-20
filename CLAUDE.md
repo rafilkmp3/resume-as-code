@@ -254,6 +254,119 @@ chore: update
 
 This conventional commits implementation ensures **consistent, automated, and professional release management** throughout the entire development lifecycle.
 
+## 🤖 AI-Friendly Development Workflow (Claude Code Optimized)
+
+This project is optimized for AI-assisted development with Claude Code. Here are the streamlined workflows:
+
+### ✅ Conventional Commits for AI Assistants
+
+**CRITICAL**: Always use conventional commit format. The pre-commit hooks will guide you with AI-friendly error messages.
+
+```bash
+# 🎯 Perfect commit patterns for AI assistants:
+git commit -m "feat: add user authentication system"
+git commit -m "fix: resolve login button accessibility issue"  
+git commit -m "chore: update dependencies to latest versions"
+git commit -m "docs: improve api documentation with examples"
+git commit -m "refactor: simplify user validation logic"
+git commit -m "test: add comprehensive e2e user flow tests"
+
+# ❌ Common AI assistant mistakes to avoid:
+git commit -m "feat: Add User Authentication"     # Wrong: uppercase in subject
+git commit -m "update: change some stuff"         # Wrong: invalid type  
+git commit -m "fix"                               # Wrong: no description
+git commit -m "feat: implement comprehensive user authentication system with OAuth2, SAML, and multi-factor authentication support including biometric verification"  # Wrong: too long (>100 chars)
+```
+
+### 🔧 Emergency Override for Broken Commits
+
+If you get stuck with conventional commits validation:
+
+```bash
+# Use SKIP to bypass pre-commit hooks in emergencies
+SKIP=conventional-pre-commit git commit -m "emergency: fix critical production issue"
+
+# Then immediately fix with proper conventional commit:
+git commit --amend -m "fix: resolve critical production deployment failure"
+```
+
+### 🚀 Context7 Integration for Real-Time Documentation
+
+This project includes Context7 MCP integration for enhanced AI assistance:
+
+**Key Dependencies with Real-Time Docs:**
+- **handlebars ^4.7.8**: Template engine with Context7 real-time documentation
+- **puppeteer ^24.16.2**: PDF generation with up-to-date best practices  
+- **sharp ^0.34.3**: Image optimization with latest technique guidance
+- **playwright ^1.54.2**: E2E testing with current pattern recommendations
+
+**Context7 Commands for Claude Code:**
+```bash
+# Get real-time documentation for any dependency
+/context7 handlebars template helpers
+/context7 puppeteer pdf generation best practices
+/context7 sharp image optimization performance
+/context7 playwright accessibility testing
+```
+
+### 📋 Pre-Commit Hook Validation
+
+The pre-commit hooks are designed to be AI-assistant friendly:
+
+**What Happens:**
+1. **conventional-pre-commit**: Fast validation using compilerla/conventional-pre-commit
+2. **claude-friendly-commitlint**: Detailed AI-friendly error messages if validation fails
+
+**AI-Friendly Error Messages:**
+- Clear problem identification with examples
+- Copy-paste fix commands
+- Links to documentation
+- Specific guidance for each rule violation
+
+### 🛠️ Development Commands for AI Assistants
+
+```bash
+# Essential commands for AI-assisted development:
+git pull --rebase                    # ALWAYS before any git push
+make clean                           # Clean environment (matches CI)
+make test-fast                       # Quick validation before commit
+npm run test:local                   # Fast local tests (<2 min)
+npm run test:ci                      # Comprehensive CI tests
+
+# Context7 enhanced development:
+npm run dev:health                   # Environment validation with Context7 docs
+npm run build                        # Template + PDF generation
+npm run serve                        # Production preview
+```
+
+### 💡 AI Assistant Guidelines
+
+**For Claude Code Users:**
+1. **Always use conventional commits** - the hooks will guide you with helpful errors
+2. **Run `git pull --rebase` before any push** - prevents merge conflicts
+3. **Use `make test-fast` for quick validation** - saves time during development
+4. **Leverage Context7 integration** - get real-time docs for any dependency
+5. **Use emergency SKIP only when truly stuck** - then fix immediately
+
+**Common Workflow:**
+```bash
+# 1. Start development
+git pull --rebase
+make clean
+
+# 2. Make changes, then validate
+make test-fast
+
+# 3. Commit with conventional format (AI-friendly validation)
+git commit -m "feat: implement new feature with proper description"
+
+# 4. Push (after rebase)
+git pull --rebase
+git push
+```
+
+This setup ensures smooth AI-assisted development while maintaining code quality and automated releases.
+
 ## Architecture Overview
 
 This is a **resume generation system** built with infrastructure-as-code principles:

@@ -1,0 +1,181 @@
+name: 🚀 Lighthouse Performance Testing
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        description: 'URL to test for performance'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      budget_path:
+        description: 'Path to Lighthouse budget.json file'
+        required: false
+        type: string
+        default: './budget.json'
+      artifact_retention_days:
+        description: 'How many days to retain lighthouse artifacts'
+        required: false
+        type: number
+        default: 7
+    outputs:
+      performance_score:
+        description: 'Lighthouse performance score'
+        value: ${{ jobs.lighthouse-test.outputs.performance_score }}
+      accessibility_score:
+        description: 'Lighthouse accessibility score'
+        value: ${{ jobs.lighthouse-test.outputs.accessibility_score }}
+      best_practices_score:
+        description: 'Lighthouse best practices score'
+        value: ${{ jobs.lighthouse-test.outputs.best_practices_score }}
+      seo_score:
+        description: 'Lighthouse SEO score'
+        value: ${{ jobs.lighthouse-test.outputs.seo_score }}
+      fcp:
+        description: 'First Contentful Paint'
+        value: ${{ jobs.lighthouse-test.outputs.fcp }}
+      lcp:
+        description: 'Largest Contentful Paint'
+        value: ${{ jobs.lighthouse-test.outputs.lcp }}
+      cls:
+        description: 'Cumulative Layout Shift'
+        value: ${{ jobs.lighthouse-test.outputs.cls }}
+      speed_index:
+        description: 'Speed Index'
+        value: ${{ jobs.lighthouse-test.outputs.speed_index }}
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse-test:
+    name: 🚀 Lighthouse Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      performance_score: ${{ steps.lighthouse-results.outputs.performance_score }}
+      accessibility_score: ${{ steps.lighthouse-results.outputs.accessibility_score }}
+      best_practices_score: ${{ steps.lighthouse-results.outputs.best_practices_score }}
+      seo_score: ${{ steps.lighthouse-results.outputs.seo_score }}
+      fcp: ${{ steps.lighthouse-results.outputs.fcp }}
+      lcp: ${{ steps.lighthouse-results.outputs.lcp }}
+      cls: ${{ steps.lighthouse-results.outputs.cls }}
+      speed_index: ${{ steps.lighthouse-results.outputs.speed_index }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Wait for site availability
+        run: |
+          echo "🌐 Testing site availability: ${{ inputs.target_url }}"
+          
+          # Wait up to 5 minutes for site to be available
+          timeout 300 bash -c 'until curl -f -s "${{ inputs.target_url }}" > /dev/null; do 
+            echo "⏳ Waiting for site to be available..."
+            sleep 10
+          done'
+          
+          echo "✅ Site is available and ready for testing"
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        id: lighthouse-ci
+        with:
+          urls: ${{ inputs.target_url }}
+          configPath: ./lighthouserc.json
+          budgetPath: ${{ inputs.budget_path }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Extract Lighthouse Results
+        id: lighthouse-results
+        run: |
+          echo "📊 Extracting Lighthouse performance metrics..."
+          
+          # Find the latest lighthouse results file
+          RESULTS_FILE=$(find .lighthouseci -name "*.json" | head -1)
+          
+          if [[ -f "$RESULTS_FILE" ]]; then
+            echo "📄 Processing results from: $RESULTS_FILE"
+            
+            # Extract scores (0-100)
+            PERFORMANCE=$(jq -r '.categories.performance.score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
+            ACCESSIBILITY=$(jq -r '.categories.accessibility.score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
+            BEST_PRACTICES=$(jq -r '.categories["best-practices"].score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
+            SEO=$(jq -r '.categories.seo.score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
+            
+            # Extract Core Web Vitals
+            FCP=$(jq -r '.audits["first-contentful-paint"].numericValue' "$RESULTS_FILE" 2>/dev/null | awk '{printf "%.0fms", $1}' || echo "N/A")
+            LCP=$(jq -r '.audits["largest-contentful-paint"].numericValue' "$RESULTS_FILE" 2>/dev/null | awk '{printf "%.0fms", $1}' || echo "N/A")
+            CLS=$(jq -r '.audits["cumulative-layout-shift"].numericValue' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
+            SPEED_INDEX=$(jq -r '.audits["speed-index"].numericValue' "$RESULTS_FILE" 2>/dev/null | awk '{printf "%.0fms", $1}' || echo "N/A")
+            
+            # Output results
+            echo "performance_score=$PERFORMANCE" >> $GITHUB_OUTPUT
+            echo "accessibility_score=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+            echo "best_practices_score=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+            echo "seo_score=$SEO" >> $GITHUB_OUTPUT
+            echo "fcp=$FCP" >> $GITHUB_OUTPUT
+            echo "lcp=$LCP" >> $GITHUB_OUTPUT
+            echo "cls=$CLS" >> $GITHUB_OUTPUT
+            echo "speed_index=$SPEED_INDEX" >> $GITHUB_OUTPUT
+            
+            echo "📊 Lighthouse Results Summary:"
+            echo "  Performance: $PERFORMANCE/100"
+            echo "  Accessibility: $ACCESSIBILITY/100"
+            echo "  Best Practices: $BEST_PRACTICES/100"
+            echo "  SEO: $SEO/100"
+            echo "  FCP: $FCP"
+            echo "  LCP: $LCP"
+            echo "  CLS: $CLS"
+            echo "  Speed Index: $SPEED_INDEX"
+          else
+            echo "⚠️ No Lighthouse results file found"
+            echo "performance_score=N/A" >> $GITHUB_OUTPUT
+            echo "accessibility_score=N/A" >> $GITHUB_OUTPUT
+            echo "best_practices_score=N/A" >> $GITHUB_OUTPUT
+            echo "seo_score=N/A" >> $GITHUB_OUTPUT
+            echo "fcp=N/A" >> $GITHUB_OUTPUT
+            echo "lcp=N/A" >> $GITHUB_OUTPUT
+            echo "cls=N/A" >> $GITHUB_OUTPUT
+            echo "speed_index=N/A" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Lighthouse Summary
+        run: |
+          echo "# 🚀 Lighthouse Performance Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 📊 Lighthouse Scores" >> $GITHUB_STEP_SUMMARY
+          echo "| Category | Score | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance | ${{ steps.lighthouse-results.outputs.performance_score }}/100 | $([ "${{ steps.lighthouse-results.outputs.performance_score }}" -ge "90" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Improvement") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility | ${{ steps.lighthouse-results.outputs.accessibility_score }}/100 | $([ "${{ steps.lighthouse-results.outputs.accessibility_score }}" -ge "90" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Improvement") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Best Practices | ${{ steps.lighthouse-results.outputs.best_practices_score }}/100 | $([ "${{ steps.lighthouse-results.outputs.best_practices_score }}" -ge "90" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Improvement") |" >> $GITHUB_STEP_SUMMARY
+          echo "| SEO | ${{ steps.lighthouse-results.outputs.seo_score }}/100 | $([ "${{ steps.lighthouse-results.outputs.seo_score }}" -ge "90" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Improvement") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## ⚡ Core Web Vitals" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value | Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| First Contentful Paint | ${{ steps.lighthouse-results.outputs.fcp }} | ≤1.8s | $(echo "${{ steps.lighthouse-results.outputs.fcp }}" | sed 's/ms//' | awk '{if($1 <= 1800) print "✅ Good"; else print "⚠️ Needs Improvement"}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Largest Contentful Paint | ${{ steps.lighthouse-results.outputs.lcp }} | ≤2.5s | $(echo "${{ steps.lighthouse-results.outputs.lcp }}" | sed 's/ms//' | awk '{if($1 <= 2500) print "✅ Good"; else print "⚠️ Needs Improvement"}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cumulative Layout Shift | ${{ steps.lighthouse-results.outputs.cls }} | ≤0.1 | $(echo "${{ steps.lighthouse-results.outputs.cls }}" | awk '{if($1 <= 0.1) print "✅ Good"; else print "⚠️ Needs Improvement"}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Speed Index | ${{ steps.lighthouse-results.outputs.speed_index }} | ≤3.4s | $(echo "${{ steps.lighthouse-results.outputs.speed_index }}" | sed 's/ms//' | awk '{if($1 <= 3400) print "✅ Good"; else print "⚠️ Needs Improvement"}') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Lighthouse Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports-${{ inputs.environment_name }}-${{ github.run_id }}
+          path: |
+            .lighthouseci/
+            lhci_reports/
+          retention-days: ${{ inputs.artifact_retention_days }}

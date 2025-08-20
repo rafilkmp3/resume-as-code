@@ -1,0 +1,306 @@
+name: 🚀 Deployment Core
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment (preview, staging, production)'
+        required: true
+        type: string
+      target_url:
+        description: 'Expected deployment URL'
+        required: true
+        type: string
+      deployment_context:
+        description: 'Additional deployment context (PR number, release tag, etc.)'
+        required: false
+        type: string
+        default: ''
+      build_directory:
+        description: 'Directory containing built assets'
+        required: false
+        type: string
+        default: './dist'
+      enable_comments:
+        description: 'Whether to post deployment status comments'
+        required: false
+        type: boolean
+        default: true
+      pr_number:
+        description: 'PR number for comment posting (auto-detected if not provided)'
+        required: false
+        type: string
+        default: ''
+    outputs:
+      deployment_url:
+        description: 'Actual deployment URL'
+        value: ${{ jobs.deploy.outputs.deployment_url }}
+      deployment_status:
+        description: 'Deployment status (success, failed, skipped)'
+        value: ${{ jobs.deploy.outputs.deployment_status }}
+      deployment_duration:
+        description: 'Deployment duration in seconds'
+        value: ${{ jobs.deploy.outputs.deployment_duration }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      deployment_url: ${{ steps.deploy-result.outputs.deployment_url }}
+      deployment_status: ${{ steps.deploy-result.outputs.deployment_status }}
+      deployment_duration: ${{ steps.deploy-result.outputs.deployment_duration }}
+    
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ inputs.target_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate Deployment Environment
+        id: env-validation
+        run: |
+          echo "🔍 Validating deployment environment: ${{ inputs.environment }}"
+          
+          case "${{ inputs.environment }}" in
+            "preview"|"staging")
+              echo "deployment_type=netlify" >> $GITHUB_OUTPUT
+              echo "requires_secrets=true" >> $GITHUB_OUTPUT
+              ;;
+            "production")
+              echo "deployment_type=github-pages" >> $GITHUB_OUTPUT
+              echo "requires_secrets=false" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "❌ Invalid environment: ${{ inputs.environment }}"
+              echo "Valid environments: preview, staging, production"
+              exit 1
+              ;;
+          esac
+          
+          echo "✅ Environment validation passed"
+
+      - name: Validate Secrets (Netlify deployments)
+        if: steps.env-validation.outputs.requires_secrets == 'true'
+        run: |
+          echo "🔐 Validating Netlify deployment secrets..."
+          
+          if [[ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ]]; then
+            echo "❌ NETLIFY_AUTH_TOKEN secret is missing"
+            echo "🔧 Add it in GitHub repository settings: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          
+          if [[ -z "${{ secrets.NETLIFY_SITE_ID }}" ]]; then
+            echo "❌ NETLIFY_SITE_ID secret is missing"
+            echo "🔧 Add it in GitHub repository settings: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          
+          echo "✅ All required secrets are configured"
+
+      - name: Detect PR Number (Auto-detection)
+        id: pr-detection
+        if: inputs.enable_comments == true && inputs.pr_number == ''
+        run: |
+          echo "🔍 Auto-detecting PR number..."
+          
+          # Try multiple methods to detect PR number
+          PR_NUMBER=""
+          
+          # Method 1: GitHub event data (for pull_request events)
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER="${{ github.event.number }}"
+            echo "📝 Found PR number from event: $PR_NUMBER"
+          fi
+          
+          # Method 2: Git commit search (for push events)
+          if [[ -z "$PR_NUMBER" ]]; then
+            COMMIT_SHA="${{ github.sha }}"
+            echo "🔍 Searching for PR associated with commit: $COMMIT_SHA"
+            
+            # Use GitHub CLI to find PR
+            PR_SEARCH=$(gh pr list --search "$COMMIT_SHA" --json number,headRefOid --jq '.[] | select(.headRefOid | startswith("'$COMMIT_SHA'")) | .number' 2>/dev/null || echo "")
+            
+            if [[ -n "$PR_SEARCH" ]]; then
+              PR_NUMBER="$PR_SEARCH"
+              echo "📝 Found PR number from commit search: $PR_NUMBER"
+            fi
+          fi
+          
+          # Output result
+          if [[ -n "$PR_NUMBER" ]]; then
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+            echo "✅ PR number detected: $PR_NUMBER"
+          else
+            echo "pr_number=" >> $GITHUB_OUTPUT
+            echo "ℹ️ No PR number detected (not a PR deployment)"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Post Deployment Status (Building)
+        if: inputs.enable_comments == true
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ inputs.pr_number || steps.pr-detection.outputs.pr_number }}
+          body: |
+            ## 🚀 Deployment Status: ${{ inputs.environment }}
+            
+            **Status:** 🔄 Building and deploying...
+            **Environment:** ${{ inputs.environment }}
+            **Commit:** `${{ github.sha }}`
+            **Started:** ${{ steps.deployment-start.outputs.timestamp }}
+            
+            ---
+            *Building your changes...*
+
+      - name: Record Deployment Start
+        id: deployment-start
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          START_TIME=$(date +%s)
+          
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "start_time=$START_TIME" >> $GITHUB_OUTPUT
+          echo "🚀 Deployment started at: $TIMESTAMP"
+
+      - name: Prepare Build Directory
+        run: |
+          echo "📁 Preparing build directory: ${{ inputs.build_directory }}"
+          
+          if [[ ! -d "${{ inputs.build_directory }}" ]]; then
+            echo "❌ Build directory not found: ${{ inputs.build_directory }}"
+            echo "🔧 Make sure to run the build step before deployment"
+            exit 1
+          fi
+          
+          # Check if directory has content
+          FILE_COUNT=$(find "${{ inputs.build_directory }}" -type f | wc -l)
+          if [[ $FILE_COUNT -eq 0 ]]; then
+            echo "❌ Build directory is empty: ${{ inputs.build_directory }}"
+            exit 1
+          fi
+          
+          echo "✅ Build directory ready with $FILE_COUNT files"
+
+      - name: Deploy to Netlify
+        if: steps.env-validation.outputs.deployment_type == 'netlify'
+        id: netlify-deploy
+        uses: South-Paw/action-netlify-cli@v2
+        with:
+          args: deploy --json --dir=${{ inputs.build_directory }} --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} ${{ inputs.environment == 'staging' && '--prod' || '' }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Deploy to GitHub Pages
+        if: steps.env-validation.outputs.deployment_type == 'github-pages'
+        id: pages-deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ inputs.build_directory }}
+          enable_jekyll: false
+          allow_empty_commit: false
+
+      - name: Process Deployment Results
+        id: deploy-result
+        run: |
+          echo "📊 Processing deployment results..."
+          
+          END_TIME=$(date +%s)
+          START_TIME="${{ steps.deployment-start.outputs.start_time }}"
+          DURATION=$((END_TIME - START_TIME))
+          
+          DEPLOYMENT_STATUS="success"
+          DEPLOYMENT_URL="${{ inputs.target_url }}"
+          
+          # Parse Netlify deployment results if available
+          if [[ "${{ steps.env-validation.outputs.deployment_type }}" == "netlify" ]]; then
+            echo "📄 Parsing Netlify deployment results..."
+            
+            # Extract URL from Netlify CLI output
+            if [[ -n "${{ steps.netlify-deploy.outputs.url }}" ]]; then
+              DEPLOYMENT_URL="${{ steps.netlify-deploy.outputs.url }}"
+            fi
+          fi
+          
+          # Output results
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "deployment_status=$DEPLOYMENT_STATUS" >> $GITHUB_OUTPUT
+          echo "deployment_duration=$DURATION" >> $GITHUB_OUTPUT
+          
+          echo "✅ Deployment completed successfully"
+          echo "🌐 URL: $DEPLOYMENT_URL"
+          echo "⏱️ Duration: ${DURATION}s"
+
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying deployment accessibility..."
+          
+          DEPLOYMENT_URL="${{ steps.deploy-result.outputs.deployment_url }}"
+          MAX_ATTEMPTS=30
+          ATTEMPT=1
+          
+          while [[ $ATTEMPT -le $MAX_ATTEMPTS ]]; do
+            echo "🌐 Attempt $ATTEMPT/$MAX_ATTEMPTS: Testing $DEPLOYMENT_URL"
+            
+            if curl -f -s -L "$DEPLOYMENT_URL" > /dev/null; then
+              echo "✅ Deployment is accessible"
+              break
+            fi
+            
+            if [[ $ATTEMPT -eq $MAX_ATTEMPTS ]]; then
+              echo "❌ Deployment verification failed after $MAX_ATTEMPTS attempts"
+              exit 1
+            fi
+            
+            echo "⏳ Waiting 10 seconds before retry..."
+            sleep 10
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+      - name: Post Deployment Status (Success)
+        if: inputs.enable_comments == true && success()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ inputs.pr_number || steps.pr-detection.outputs.pr_number }}
+          body: |
+            ## 🚀 Deployment Status: ${{ inputs.environment }}
+            
+            **Status:** ✅ Deployed successfully
+            **Environment:** ${{ inputs.environment }}
+            **URL:** ${{ steps.deploy-result.outputs.deployment_url }}
+            **Commit:** `${{ github.sha }}`
+            **Duration:** ${{ steps.deploy-result.outputs.deployment_duration }}s
+            **Completed:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            
+            ---
+            🎉 Your changes are now live!
+
+      - name: Post Deployment Status (Failure)
+        if: inputs.enable_comments == true && failure()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ inputs.pr_number || steps.pr-detection.outputs.pr_number }}
+          body: |
+            ## 🚀 Deployment Status: ${{ inputs.environment }}
+            
+            **Status:** ❌ Deployment failed
+            **Environment:** ${{ inputs.environment }}
+            **Commit:** `${{ github.sha }}`
+            **Failed:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            
+            ---
+            💥 Deployment failed. Check the workflow logs for details.

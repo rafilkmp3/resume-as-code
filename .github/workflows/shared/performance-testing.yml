@@ -1,0 +1,237 @@
+name: ⚡ Performance Testing
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        description: 'URL to test for performance'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      budget_path:
+        description: 'Path to performance budget JSON file'
+        required: false
+        type: string
+        default: './budget.json'
+      artifact_retention_days:
+        description: 'How many days to retain performance artifacts'
+        required: false
+        type: number
+        default: 7
+    outputs:
+      fcp:
+        description: 'First Contentful Paint'
+        value: ${{ jobs.performance-test.outputs.fcp }}
+      lcp:
+        description: 'Largest Contentful Paint'
+        value: ${{ jobs.performance-test.outputs.lcp }}
+      cls:
+        description: 'Cumulative Layout Shift'
+        value: ${{ jobs.performance-test.outputs.cls }}
+      fid:
+        description: 'First Input Delay'
+        value: ${{ jobs.performance-test.outputs.fid }}
+      speed_index:
+        description: 'Speed Index'
+        value: ${{ jobs.performance-test.outputs.speed_index }}
+      performance_score:
+        description: 'Overall performance score (0-100)'
+        value: ${{ jobs.performance-test.outputs.performance_score }}
+
+permissions:
+  contents: read
+
+jobs:
+  performance-test:
+    name: ⚡ Performance Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      fcp: ${{ steps.performance-results.outputs.fcp }}
+      lcp: ${{ steps.performance-results.outputs.lcp }}
+      cls: ${{ steps.performance-results.outputs.cls }}
+      fid: ${{ steps.performance-results.outputs.fid }}
+      speed_index: ${{ steps.performance-results.outputs.speed_index }}
+      performance_score: ${{ steps.performance-results.outputs.performance_score }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for site availability
+        run: |
+          echo "🌐 Testing site availability: ${{ inputs.target_url }}"
+          
+          # Wait up to 5 minutes for site to be available
+          timeout 300 bash -c 'until curl -f -s "${{ inputs.target_url }}" > /dev/null; do 
+            echo "⏳ Waiting for site to be available..."
+            sleep 10
+          done'
+          
+          echo "✅ Site is available and ready for performance testing"
+
+      - name: Run Performance Tests
+        run: |
+          echo "⚡ Running comprehensive performance analysis..."
+          
+          # Create performance results directory
+          mkdir -p performance-results
+          
+          # Run Node.js performance monitoring script
+          node scripts/performance-monitor.js test --url "${{ inputs.target_url }}" --output performance-results/ --budget "${{ inputs.budget_path }}"
+          
+          echo "✅ Performance testing completed"
+
+      - name: Extract Performance Results
+        id: performance-results
+        run: |
+          echo "📊 Extracting performance metrics..."
+          
+          # Check if results file exists
+          if [[ -f "performance-results/performance-report.json" ]]; then
+            echo "📄 Processing results from performance-report.json"
+            
+            # Extract Core Web Vitals using jq
+            FCP=$(jq -r '.metrics.fcp // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            LCP=$(jq -r '.metrics.lcp // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            CLS=$(jq -r '.metrics.cls // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            FID=$(jq -r '.metrics.fid // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            SPEED_INDEX=$(jq -r '.metrics.speedIndex // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            PERFORMANCE_SCORE=$(jq -r '.score // "N/A"' performance-results/performance-report.json 2>/dev/null)
+            
+            # Format timing values
+            if [[ "$FCP" != "N/A" ]]; then
+              FCP="${FCP}ms"
+            fi
+            if [[ "$LCP" != "N/A" ]]; then
+              LCP="${LCP}ms"
+            fi
+            if [[ "$SPEED_INDEX" != "N/A" ]]; then
+              SPEED_INDEX="${SPEED_INDEX}ms"
+            fi
+            if [[ "$FID" != "N/A" ]]; then
+              FID="${FID}ms"
+            fi
+            
+            # Output results
+            echo "fcp=$FCP" >> $GITHUB_OUTPUT
+            echo "lcp=$LCP" >> $GITHUB_OUTPUT
+            echo "cls=$CLS" >> $GITHUB_OUTPUT
+            echo "fid=$FID" >> $GITHUB_OUTPUT
+            echo "speed_index=$SPEED_INDEX" >> $GITHUB_OUTPUT
+            echo "performance_score=$PERFORMANCE_SCORE" >> $GITHUB_OUTPUT
+            
+            echo "⚡ Performance Results Summary:"
+            echo "  First Contentful Paint: $FCP"
+            echo "  Largest Contentful Paint: $LCP"
+            echo "  Cumulative Layout Shift: $CLS"
+            echo "  First Input Delay: $FID"
+            echo "  Speed Index: $SPEED_INDEX"
+            echo "  Performance Score: $PERFORMANCE_SCORE/100"
+            
+          else
+            echo "⚠️ No performance results file found"
+            echo "fcp=N/A" >> $GITHUB_OUTPUT
+            echo "lcp=N/A" >> $GITHUB_OUTPUT
+            echo "cls=N/A" >> $GITHUB_OUTPUT
+            echo "fid=N/A" >> $GITHUB_OUTPUT
+            echo "speed_index=N/A" >> $GITHUB_OUTPUT
+            echo "performance_score=N/A" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Performance Summary
+        run: |
+          echo "# ⚡ Performance Analysis Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          FCP="${{ steps.performance-results.outputs.fcp }}"
+          LCP="${{ steps.performance-results.outputs.lcp }}"
+          CLS="${{ steps.performance-results.outputs.cls }}"
+          FID="${{ steps.performance-results.outputs.fid }}"
+          SPEED_INDEX="${{ steps.performance-results.outputs.speed_index }}"
+          SCORE="${{ steps.performance-results.outputs.performance_score }}"
+          
+          echo "## 📊 Core Web Vitals" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value | Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # FCP Assessment
+          if [[ "$FCP" != "N/A" ]]; then
+            FCP_NUM=$(echo "$FCP" | sed 's/ms//')
+            FCP_STATUS=$([ "$FCP_NUM" -le "1800" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")
+          else
+            FCP_STATUS="❓ Unknown"
+          fi
+          echo "| First Contentful Paint | $FCP | ≤1.8s | $FCP_STATUS |" >> $GITHUB_STEP_SUMMARY
+          
+          # LCP Assessment
+          if [[ "$LCP" != "N/A" ]]; then
+            LCP_NUM=$(echo "$LCP" | sed 's/ms//')
+            LCP_STATUS=$([ "$LCP_NUM" -le "2500" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")
+          else
+            LCP_STATUS="❓ Unknown"
+          fi
+          echo "| Largest Contentful Paint | $LCP | ≤2.5s | $LCP_STATUS |" >> $GITHUB_STEP_SUMMARY
+          
+          # CLS Assessment
+          if [[ "$CLS" != "N/A" ]]; then
+            CLS_STATUS=$(echo "$CLS" | awk '{if($1 <= 0.1) print "✅ Good"; else print "⚠️ Needs Improvement"}')
+          else
+            CLS_STATUS="❓ Unknown"
+          fi
+          echo "| Cumulative Layout Shift | $CLS | ≤0.1 | $CLS_STATUS |" >> $GITHUB_STEP_SUMMARY
+          
+          # FID Assessment (if available)
+          if [[ "$FID" != "N/A" ]]; then
+            FID_NUM=$(echo "$FID" | sed 's/ms//')
+            FID_STATUS=$([ "$FID_NUM" -le "100" ] 2>/dev/null && echo "✅ Good" || echo "⚠️ Needs Improvement")
+            echo "| First Input Delay | $FID | ≤100ms | $FID_STATUS |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall Performance Assessment
+          echo "## 🎯 Overall Performance" >> $GITHUB_STEP_SUMMARY
+          if [[ "$SCORE" != "N/A" ]]; then
+            if [[ "$SCORE" -ge "90" ]] 2>/dev/null; then
+              echo "🎉 **EXCELLENT** - Performance score: $SCORE/100" >> $GITHUB_STEP_SUMMARY
+            elif [[ "$SCORE" -ge "70" ]] 2>/dev/null; then
+              echo "📈 **GOOD** - Performance score: $SCORE/100" >> $GITHUB_STEP_SUMMARY
+            elif [[ "$SCORE" -ge "50" ]] 2>/dev/null; then
+              echo "⚠️ **NEEDS IMPROVEMENT** - Performance score: $SCORE/100" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "🚨 **POOR** - Performance score: $SCORE/100" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❓ **UNKNOWN** - Performance data not available" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Performance Budget Check
+          if [[ -f "${{ inputs.budget_path }}" ]]; then
+            echo "## 💰 Budget Compliance" >> $GITHUB_STEP_SUMMARY
+            echo "Performance budget validation results will be available in artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Performance Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-reports-${{ inputs.environment_name }}-${{ github.run_id }}
+          path: performance-results/
+          retention-days: ${{ inputs.artifact_retention_days }}

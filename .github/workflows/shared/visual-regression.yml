@@ -1,0 +1,259 @@
+name: 📸 Visual Regression Testing
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        description: 'URL to test for visual regression'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      test_matrix:
+        description: 'Test matrix to run (full, mobile, desktop, quick)'
+        required: false
+        type: string
+        default: 'full'
+      artifact_retention_days:
+        description: 'How many days to retain visual test artifacts'
+        required: false
+        type: number
+        default: 7
+    outputs:
+      tests_passed:
+        description: 'Number of visual tests that passed'
+        value: ${{ jobs.visual-test.outputs.tests_passed }}
+      tests_failed:
+        description: 'Number of visual tests that failed'
+        value: ${{ jobs.visual-test.outputs.tests_failed }}
+      total_screenshots:
+        description: 'Total number of screenshots captured'
+        value: ${{ jobs.visual-test.outputs.total_screenshots }}
+      regression_detected:
+        description: 'Whether visual regression was detected (true/false)'
+        value: ${{ jobs.visual-test.outputs.regression_detected }}
+
+permissions:
+  contents: read
+
+jobs:
+  visual-test:
+    name: 📸 Visual Regression Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      tests_passed: ${{ steps.visual-results.outputs.tests_passed }}
+      tests_failed: ${{ steps.visual-results.outputs.tests_failed }}
+      total_screenshots: ${{ steps.visual-results.outputs.total_screenshots }}
+      regression_detected: ${{ steps.visual-results.outputs.regression_detected }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Wait for site availability
+        run: |
+          echo "🌐 Testing site availability: ${{ inputs.target_url }}"
+          
+          # Wait up to 5 minutes for site to be available
+          timeout 300 bash -c 'until curl -f -s "${{ inputs.target_url }}" > /dev/null; do 
+            echo "⏳ Waiting for site to be available..."
+            sleep 10
+          done'
+          
+          echo "✅ Site is available and ready for visual testing"
+
+      - name: Configure Test Matrix
+        id: test-config
+        run: |
+          echo "📋 Configuring visual test matrix: ${{ inputs.test_matrix }}"
+          
+          case "${{ inputs.test_matrix }}" in
+            "quick")
+              VIEWPORTS='[{"name":"desktop","width":1920,"height":1080},{"name":"mobile","width":375,"height":667}]'
+              THEMES='["light","dark"]'
+              ;;
+            "mobile")
+              VIEWPORTS='[{"name":"iphone-se","width":375,"height":667},{"name":"iphone-15","width":393,"height":852},{"name":"iphone-15-pro-max","width":430,"height":932},{"name":"pixel-7","width":412,"height":915},{"name":"galaxy-s21","width":384,"height":854}]'
+              THEMES='["light","dark"]'
+              ;;
+            "desktop")
+              VIEWPORTS='[{"name":"hd","width":1366,"height":768},{"name":"fhd","width":1920,"height":1080},{"name":"qhd","width":2560,"height":1440}]'
+              THEMES='["light","dark"]'
+              ;;
+            "full"|*)
+              VIEWPORTS='[{"name":"iphone-se","width":375,"height":667},{"name":"iphone-15","width":393,"height":852},{"name":"iphone-15-pro-max","width":430,"height":932},{"name":"pixel-7","width":412,"height":915},{"name":"galaxy-s21","width":384,"height":854},{"name":"ipad","width":768,"height":1024},{"name":"ipad-pro","width":1024,"height":1366},{"name":"hd","width":1366,"height":768},{"name":"fhd","width":1920,"height":1080},{"name":"qhd","width":2560,"height":1440}]'
+              THEMES='["light","dark"]'
+              ;;
+          esac
+          
+          echo "viewports=$VIEWPORTS" >> $GITHUB_OUTPUT
+          echo "themes=$THEMES" >> $GITHUB_OUTPUT
+          
+          # Calculate total tests
+          VIEWPORT_COUNT=$(echo "$VIEWPORTS" | jq 'length')
+          THEME_COUNT=$(echo "$THEMES" | jq 'length')
+          TOTAL_TESTS=$((VIEWPORT_COUNT * THEME_COUNT))
+          
+          echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "📊 Will run $TOTAL_TESTS visual regression tests"
+
+      - name: Run Visual Regression Tests
+        run: |
+          echo "📸 Running visual regression tests..."
+          
+          # Create visual evidence directory
+          mkdir -p visual-evidence
+          
+          # Parse test configuration
+          VIEWPORTS='${{ steps.test-config.outputs.viewports }}'
+          THEMES='${{ steps.test-config.outputs.themes }}'
+          
+          TESTS_PASSED=0
+          TESTS_FAILED=0
+          TOTAL_SCREENSHOTS=0
+          
+          # Iterate through each viewport and theme combination
+          echo "$VIEWPORTS" | jq -c '.[]' | while read viewport; do
+            VIEWPORT_NAME=$(echo "$viewport" | jq -r '.name')
+            VIEWPORT_WIDTH=$(echo "$viewport" | jq -r '.width')
+            VIEWPORT_HEIGHT=$(echo "$viewport" | jq -r '.height')
+            
+            echo "$THEMES" | jq -c '.[]' | while read theme; do
+              THEME_NAME=$(echo "$theme" | tr -d '"')
+              
+              echo "📱 Testing: $VIEWPORT_NAME ($VIEWPORT_WIDTH x $VIEWPORT_HEIGHT) - $THEME_NAME theme"
+              
+              # Create output filename
+              OUTPUT_FILE="visual-evidence/${VIEWPORT_NAME}-${THEME_NAME}-${{ inputs.environment_name }}.png"
+              
+              # Run Playwright screenshot capture with error handling
+              npx playwright screenshot \
+                --viewport-size="${VIEWPORT_WIDTH},${VIEWPORT_HEIGHT}" \
+                --full-page \
+                --wait-for-selector="body" \
+                --wait-for-timeout=3000 \
+                "${{ inputs.target_url }}?theme=${THEME_NAME}" \
+                "$OUTPUT_FILE" || {
+                echo "❌ Failed to capture: $VIEWPORT_NAME - $THEME_NAME"
+                echo "1" >> visual-evidence/failed-tests.txt
+                continue
+              }
+              
+              if [[ -f "$OUTPUT_FILE" ]]; then
+                FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
+                if [[ $FILE_SIZE -gt 10000 ]]; then
+                  echo "✅ Captured: $OUTPUT_FILE (${FILE_SIZE} bytes)"
+                  echo "1" >> visual-evidence/passed-tests.txt
+                  echo "1" >> visual-evidence/total-screenshots.txt
+                else
+                  echo "❌ Screenshot too small: $OUTPUT_FILE (${FILE_SIZE} bytes)"
+                  echo "1" >> visual-evidence/failed-tests.txt
+                fi
+              else
+                echo "❌ Screenshot not created: $OUTPUT_FILE"
+                echo "1" >> visual-evidence/failed-tests.txt
+              fi
+            done
+          done
+          
+          echo "📸 Visual regression testing completed"
+
+      - name: Process Visual Test Results
+        id: visual-results
+        run: |
+          echo "📊 Processing visual test results..."
+          
+          # Count results
+          TESTS_PASSED=$(wc -l < visual-evidence/passed-tests.txt 2>/dev/null || echo "0")
+          TESTS_FAILED=$(wc -l < visual-evidence/failed-tests.txt 2>/dev/null || echo "0")
+          TOTAL_SCREENSHOTS=$(wc -l < visual-evidence/total-screenshots.txt 2>/dev/null || echo "0")
+          
+          # Clean up count files
+          rm -f visual-evidence/passed-tests.txt visual-evidence/failed-tests.txt visual-evidence/total-screenshots.txt
+          
+          # Determine if regression detected
+          REGRESSION_DETECTED="false"
+          if [[ $TESTS_FAILED -gt 0 ]]; then
+            REGRESSION_DETECTED="true"
+          fi
+          
+          # Check for actual screenshot files
+          ACTUAL_SCREENSHOTS=$(find visual-evidence -name "*.png" -type f | wc -l)
+          
+          # Output results
+          echo "tests_passed=$TESTS_PASSED" >> $GITHUB_OUTPUT
+          echo "tests_failed=$TESTS_FAILED" >> $GITHUB_OUTPUT
+          echo "total_screenshots=$ACTUAL_SCREENSHOTS" >> $GITHUB_OUTPUT
+          echo "regression_detected=$REGRESSION_DETECTED" >> $GITHUB_OUTPUT
+          
+          echo "📊 Visual Test Results Summary:"
+          echo "  Tests passed: $TESTS_PASSED"
+          echo "  Tests failed: $TESTS_FAILED"
+          echo "  Screenshots captured: $ACTUAL_SCREENSHOTS"
+          echo "  Regression detected: $REGRESSION_DETECTED"
+
+      - name: Create Visual Test Summary
+        run: |
+          echo "# 📸 Visual Regression Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Matrix:** ${{ inputs.test_matrix }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          PASSED="${{ steps.visual-results.outputs.tests_passed }}"
+          FAILED="${{ steps.visual-results.outputs.tests_failed }}"
+          SCREENSHOTS="${{ steps.visual-results.outputs.total_screenshots }}"
+          REGRESSION="${{ steps.visual-results.outputs.regression_detected }}"
+          
+          echo "## 📊 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Passed | $PASSED | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Failed | $FAILED | $([ "$FAILED" == "0" ] && echo "✅ None" || echo "❌ Issues") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Screenshots | $SCREENSHOTS | 📸 |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🎯 Visual Regression Assessment" >> $GITHUB_STEP_SUMMARY
+          if [[ "$REGRESSION" == "false" ]]; then
+            echo "🎉 **NO VISUAL REGRESSION DETECTED** - All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚨 **VISUAL REGRESSION DETECTED** - $FAILED tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Action Required:** Review failed screenshots in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # List captured screenshots
+          if [[ $SCREENSHOTS -gt 0 ]]; then
+            echo "## 📸 Captured Screenshots" >> $GITHUB_STEP_SUMMARY
+            echo "The following screenshots were captured and are available in artifacts:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            find visual-evidence -name "*.png" -type f | sort | while read file; do
+              filename=$(basename "$file")
+              echo "- $filename" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      - name: Upload Visual Evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-regression-evidence-${{ inputs.environment_name }}-${{ github.run_id }}
+          path: visual-evidence/
+          retention-days: ${{ inputs.artifact_retention_days }}

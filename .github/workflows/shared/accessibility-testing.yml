@@ -1,0 +1,182 @@
+name: ♿ Accessibility Testing
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        description: 'URL to test for accessibility'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      artifact_retention_days:
+        description: 'How many days to retain accessibility artifacts'
+        required: false
+        type: number
+        default: 7
+    outputs:
+      violation_count:
+        description: 'Number of accessibility violations found'
+        value: ${{ jobs.accessibility-test.outputs.violation_count }}
+      passes_count:
+        description: 'Number of accessibility checks that passed'
+        value: ${{ jobs.accessibility-test.outputs.passes_count }}
+      incomplete_count:
+        description: 'Number of incomplete accessibility checks'
+        value: ${{ jobs.accessibility-test.outputs.incomplete_count }}
+      accessibility_score:
+        description: 'Overall accessibility score (0-100)'
+        value: ${{ jobs.accessibility-test.outputs.accessibility_score }}
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility-test:
+    name: ♿ Accessibility Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      violation_count: ${{ steps.accessibility-results.outputs.violation_count }}
+      passes_count: ${{ steps.accessibility-results.outputs.passes_count }}
+      incomplete_count: ${{ steps.accessibility-results.outputs.incomplete_count }}
+      accessibility_score: ${{ steps.accessibility-results.outputs.accessibility_score }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for site availability
+        run: |
+          echo "🌐 Testing site availability: ${{ inputs.target_url }}"
+          
+          # Wait up to 3 minutes for site to be available
+          timeout 180 bash -c 'until curl -f -s "${{ inputs.target_url }}" > /dev/null; do 
+            echo "⏳ Waiting for site to be available..."
+            sleep 10
+          done'
+          
+          echo "✅ Site is available and ready for accessibility testing"
+
+      - name: Run Accessibility Audit
+        run: |
+          echo "♿ Running comprehensive accessibility audit..."
+          
+          # Create accessibility results directory
+          mkdir -p accessibility-results
+          
+          # Run Node.js accessibility audit script
+          node scripts/accessibility-audit.js --url "${{ inputs.target_url }}" --output accessibility-results/
+          
+          echo "✅ Accessibility audit completed"
+
+      - name: Process Accessibility Results
+        id: accessibility-results
+        run: |
+          echo "📊 Processing accessibility audit results..."
+          
+          # Check if results file exists
+          if [[ -f "accessibility-results/accessibility-report.json" ]]; then
+            echo "📄 Processing results from accessibility-report.json"
+            
+            # Extract violation counts using jq
+            VIOLATIONS=$(jq -r '.violations | length' accessibility-results/accessibility-report.json 2>/dev/null || echo "0")
+            PASSES=$(jq -r '.passes | length' accessibility-results/accessibility-report.json 2>/dev/null || echo "0")
+            INCOMPLETE=$(jq -r '.incomplete | length' accessibility-results/accessibility-report.json 2>/dev/null || echo "0")
+            
+            # Calculate accessibility score (0-100)
+            TOTAL_CHECKS=$((VIOLATIONS + PASSES + INCOMPLETE))
+            if [[ $TOTAL_CHECKS -gt 0 ]]; then
+              ACCESSIBILITY_SCORE=$(echo "scale=0; ($PASSES * 100) / $TOTAL_CHECKS" | bc 2>/dev/null || echo "0")
+            else
+              ACCESSIBILITY_SCORE="0"
+            fi
+            
+            # Output results
+            echo "violation_count=$VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "passes_count=$PASSES" >> $GITHUB_OUTPUT
+            echo "incomplete_count=$INCOMPLETE" >> $GITHUB_OUTPUT
+            echo "accessibility_score=$ACCESSIBILITY_SCORE" >> $GITHUB_OUTPUT
+            
+            echo "♿ Accessibility Results Summary:"
+            echo "  Violations: $VIOLATIONS"
+            echo "  Passes: $PASSES"
+            echo "  Incomplete: $INCOMPLETE"
+            echo "  Score: $ACCESSIBILITY_SCORE/100"
+            
+            # Extract violation details for summary
+            if [[ $VIOLATIONS -gt 0 ]]; then
+              echo "🚨 Accessibility Violations Found:"
+              jq -r '.violations[] | "  - \(.impact | ascii_upcase): \(.help)"' accessibility-results/accessibility-report.json 2>/dev/null | head -10
+            fi
+            
+          else
+            echo "⚠️ No accessibility results file found"
+            echo "violation_count=N/A" >> $GITHUB_OUTPUT
+            echo "passes_count=N/A" >> $GITHUB_OUTPUT
+            echo "incomplete_count=N/A" >> $GITHUB_OUTPUT
+            echo "accessibility_score=N/A" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Accessibility Summary
+        run: |
+          echo "# ♿ Accessibility Analysis Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          VIOLATIONS="${{ steps.accessibility-results.outputs.violation_count }}"
+          PASSES="${{ steps.accessibility-results.outputs.passes_count }}"
+          SCORE="${{ steps.accessibility-results.outputs.accessibility_score }}"
+          
+          echo "## 📊 Accessibility Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Violations | $VIOLATIONS | $([ "$VIOLATIONS" == "0" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Attention") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed Checks | $PASSES | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Overall Score | $SCORE/100 | $([ "$SCORE" -ge "90" ] 2>/dev/null && echo "✅ Excellent" || echo "⚠️ Needs Improvement") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # WCAG 2.1 AA Compliance Assessment
+          echo "## 🎯 WCAG 2.1 AA Compliance" >> $GITHUB_STEP_SUMMARY
+          if [[ "$VIOLATIONS" == "0" ]]; then
+            echo "🎉 **WCAG 2.1 AA COMPLIANT** - No accessibility violations detected!" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$VIOLATIONS" -le "5" ]] 2>/dev/null; then
+            echo "⚠️ **MINOR ISSUES** - $VIOLATIONS violations found, generally WCAG 2.1 AA compliant" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$VIOLATIONS" -le "15" ]] 2>/dev/null; then
+            echo "⚠️ **MODERATE ISSUES** - $VIOLATIONS violations found, improvements needed for full compliance" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **SIGNIFICANT ISSUES** - $VIOLATIONS violations found, major improvements required" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Show top violations if any exist
+          if [[ -f "accessibility-results/accessibility-report.json" ]] && [[ "$VIOLATIONS" != "0" ]] && [[ "$VIOLATIONS" != "N/A" ]]; then
+            echo "## 🚨 Top Accessibility Issues" >> $GITHUB_STEP_SUMMARY
+            echo "| Impact | Issue | Description |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
+            
+            # Extract and format violations
+            jq -r '.violations | sort_by(.impact) | reverse | .[:5] | .[] | "| \(.impact | ascii_upcase) | \(.id) | \(.help) |"' accessibility-results/accessibility-report.json 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "| N/A | N/A | Could not parse violations |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Accessibility Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-reports-${{ inputs.environment_name }}-${{ github.run_id }}
+          path: accessibility-results/
+          retention-days: ${{ inputs.artifact_retention_days }}

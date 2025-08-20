@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    }
+  },
+  "libraryMonitoring": {
+    "handlebars": {
+      "version": "^4.7.8",
+      "documentation": "template-engine",
+      "updateFrequency": "weekly",
+      "criticalUpdates": true
+    },
+    "puppeteer": {
+      "version": "^24.16.2", 
+      "documentation": "pdf-generation",
+      "updateFrequency": "weekly",
+      "criticalUpdates": true
+    },
+    "sharp": {
+      "version": "^0.34.3",
+      "documentation": "image-optimization", 
+      "updateFrequency": "weekly",
+      "criticalUpdates": true
+    },
+    "playwright": {
+      "version": "^1.54.2",
+      "documentation": "e2e-testing",
+      "updateFrequency": "weekly", 
+      "criticalUpdates": true
+    }
+  },
+  "automationSettings": {
+    "enableRealTimeDocumentation": true,
+    "enableDependencyUpdates": true,
+    "enableBestPracticesIntegration": true,
+    "enableAIAssistanceEnhancement": true
+  }
+}
