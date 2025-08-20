@@ -836,7 +836,17 @@ jobs:
             
             if (hasAccessibilityResults === 'true' && violationCount !== "0" && violationCount !== "") {
               commentBody += `## 🚨 Accessibility Report\n\n`;
-              commentBody += `> **${violationCount} WCAG violations detected** across ${parseInt(passesCount) + parseInt(violationCount)} total checks\n\n`;
+              // Fix the odd numbers issue - use correct calculation for total checks
+              console.log(`🔍 Debug values: violationCount="${violationCount}", passesCount="${passesCount}", incompleteCount="${incompleteCount}"`);
+              
+              // The issue: we were adding individual element violations (83) + rule types that passed (39)
+              // This creates nonsensical totals. Let's be clear about what we're reporting.
+              const totalRulesTested = parseInt(passesCount || '0') + parseInt(incompleteCount || '0');
+              
+              console.log(`📊 Accessibility scan found ${violationCount} individual violations across multiple rule types`);
+              console.log(`📊 Additional rules tested: ${passesCount} passed, ${incompleteCount} need manual review`);
+              
+              commentBody += `> **${violationCount} accessibility violations** detected | **${passesCount} rules passed** | **${incompleteCount} need manual review**\n\n`;
               
               // Create impact-based summary with visual indicators
               commentBody += `### 📊 Impact Summary\n\n`;
