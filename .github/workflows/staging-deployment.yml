@@ -221,17 +221,6 @@ jobs:
             ~/.cache
           key: ${{ runner.os }}-arm64-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
 
-      - name: 💾 Save Build Artifacts to Cache (Speedlight Strategy)
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: |
-            dist/
-            node_modules/.cache
-            ~/.npm
-            ~/.cache
-          key: ${{ runner.os }}-arm64-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
-
       - name: Verify staging artifacts
         run: |
           echo "📁 Staging build artifacts:"
