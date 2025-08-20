@@ -887,36 +887,13 @@ jobs:
               commentBody += `3. **📝 Minor Impact**: Polish and perfect\n`;
               commentBody += `4. **🔍 Review Items**: Manually verify ${incompleteCount} incomplete checks\n\n`;
               
-              // Enhanced WCAG 2.2 Compliance Analysis
+              // Simplified WCAG 2.2 Compliance (space-optimized for GitHub Actions)
               const wcag22aViolations = "${{ needs.accessibility-testing.outputs.wcag22a_violations }}";
               const wcag22aaViolations = "${{ needs.accessibility-testing.outputs.wcag22aa_violations }}";
-              const wcag22aaaViolations = "${{ needs.accessibility-testing.outputs.wcag22aaa_violations }}";
-              const bestPracticeViolations = "${{ needs.accessibility-testing.outputs.best_practice_violations }}";
-              const criticalRuleViolations = "${{ needs.accessibility-testing.outputs.critical_rule_violations }}";
               
-              commentBody += `### 🏆 WCAG 2.2 Compliance Analysis (2023 Standard)\n\n`;
-              commentBody += `| Compliance Level | Violations | Status | Business Impact |\n`;
-              commentBody += `|------------------|------------|---------|------------------|\n`;
-              
-              // WCAG 2.2 Level A
-              const wcag22aStatus = (wcag22aViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aViolations} issues`;
-              const wcag22aImpact = (wcag22aViolations === "0") ? "Legal compliance met" : "⚠️ Legal risk";
-              commentBody += `| **🥉 WCAG 2.2 Level A** | ${wcag22aViolations} | ${wcag22aStatus} | ${wcag22aImpact} |\n`;
-              
-              // WCAG 2.2 Level AA (most common target)
-              const wcag22aaStatus = (wcag22aaViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aaViolations} issues`;
-              const wcag22aaImpact = (wcag22aaViolations === "0") ? "Industry standard met" : "⚠️ Accessibility gaps";
-              commentBody += `| **🥈 WCAG 2.2 Level AA** | ${wcag22aaViolations} | ${wcag22aaStatus} | ${wcag22aaImpact} |\n`;
-              
-              // WCAG 2.2 Level AAA (gold standard)
-              const wcag22aaaStatus = (wcag22aaaViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aaaViolations} issues`;
-              const wcag22aaaImpact = (wcag22aaaViolations === "0") ? "Gold standard achieved" : "Enhancement opportunities";
-              commentBody += `| **🥇 WCAG 2.2 Level AAA** | ${wcag22aaaViolations} | ${wcag22aaaStatus} | ${wcag22aaaImpact} |\n`;
-              
-              // Best Practices
-              const bestPracticeStatus = (bestPracticeViolations === "0") ? "✅ Excellent" : `⚠️ ${bestPracticeViolations} improvements`;
-              const bestPracticeImpact = (bestPracticeViolations === "0") ? "Beyond compliance" : "User experience improvements";
-              commentBody += `| **⭐ Best Practices** | ${bestPracticeViolations} | ${bestPracticeStatus} | ${bestPracticeImpact} |\n`;
+              commentBody += `### 🏆 WCAG 2.2 Compliance\n\n`;
+              commentBody += `- **Level A**: ${wcag22aViolations || '0'} violations\n`;
+              commentBody += `- **Level AA**: ${wcag22aaViolations || '0'} violations\n`;
               
               // Critical Rules
               const criticalRuleStatus = (criticalRuleViolations === "0") ? "✅ Secure" : `🚨 ${criticalRuleViolations} critical`;
@@ -937,121 +914,18 @@ jobs:
               commentBody += `| 📝 **Forms & Interactive** | ${formViolations} | Labels, buttons, form controls | Interaction accessibility |\n`;
               commentBody += `| 🏷️ **ARIA & Semantic** | ${ariaViolations} | ARIA attributes, semantics | Assistive technology |\n\n`;
               
-              // Automation vs Manual Review Analysis
+              // Simplified Analysis (space-optimized)
               const automatedViolations = "${{ needs.accessibility-testing.outputs.automated_violations }}";
               const manualReviewViolations = "${{ needs.accessibility-testing.outputs.manual_review_violations }}";
               
-              commentBody += `### 🤖 Development Strategy\n\n`;
-              commentBody += `| Detection Method | Issues | Action Required | Timeline |\n`;
-              commentBody += `|------------------|---------|-----------------|----------|\n`;
-              commentBody += `| ✅ **Automated Detection** | ${automatedViolations} | Code fixes, automated testing | Sprint 1-2 |\n`;
-              commentBody += `| 👁️ **Manual Review Required** | ${manualReviewViolations} | UX review, user testing | Sprint 2-3 |\n\n`;
+              commentBody += `### 🤖 Quick Analysis\n`;
+              commentBody += `- **Automated**: ${automatedViolations || '0'} violations\n`;
+              commentBody += `- **Manual Review**: ${manualReviewViolations || '0'} violations\n\n`;
               
-              if (parseInt(automatedViolations) > 0) {
-                commentBody += `> 🔧 **Quick Wins**: ${automatedViolations} issues can be automatically detected and fixed with code changes.\n\n`;
-              }
-              if (parseInt(manualReviewViolations) > 0) {
-                commentBody += `> 👥 **UX Review Needed**: ${manualReviewViolations} issues require human judgment and usability testing.\n\n`;
-              }
-              
-              // Generate detailed violation breakdown directly from JSON - much simpler!
-              try {
-                const violationsJsonString = ${{ toJSON(needs.accessibility-testing.outputs.violations_json) }};
-                console.log('🔍 Raw violations JSON string:', typeof violationsJsonString, violationsJsonString?.length || 'no length');
-                
-                // Parse the JSON string to get actual array
-                const violationsJson = JSON.parse(violationsJsonString || '[]');
-                console.log('🔍 Parsed violations array:', typeof violationsJson, Array.isArray(violationsJson), violationsJson?.length || 'no length');
-                if (violationsJson && violationsJson.length > 0) {
-                  // Group violations by impact level
-                  const violationsByImpact = {
-                    critical: violationsJson.filter(v => v.impact === 'critical'),
-                    serious: violationsJson.filter(v => v.impact === 'serious'),
-                    moderate: violationsJson.filter(v => v.impact === 'moderate'),
-                    minor: violationsJson.filter(v => !v.impact || v.impact === 'minor' || !['critical', 'serious', 'moderate'].includes(v.impact))
-                  };
-                  
-                  commentBody += `<details>\n<summary><strong>🔍 View All ${violationCount} Violations</strong> (Organized by Impact Level)</summary>\n\n`;
-                  commentBody += `### 📋 Complete Violation Analysis\n\n`;
-                  commentBody += `> 💡 **Pro Tip**: Start with **Critical** and **Serious** violations first - they have the biggest impact on users with disabilities.\n\n`;
-                  commentBody += `#### 🔥 Violations by Severity (Most Important First)\n\n`;
-                  
-                  // Process each impact level
-                  const impacts = [
-                    { key: 'critical', emoji: '🚨', title: 'Critical Issues', desc: 'Must fix immediately - These violations completely block users with disabilities' },
-                    { key: 'serious', emoji: '⚡', title: 'Serious Issues', desc: 'High priority - Major barriers that significantly impact accessibility' },
-                    { key: 'moderate', emoji: '⚠️', title: 'Moderate Issues', desc: 'Medium priority - Usability problems that affect user experience' },
-                    { key: 'minor', emoji: '📝', title: 'Minor Issues', desc: 'When time permits - Polish improvements and best practices' }
-                  ];
-                  
-                  for (const impact of impacts) {
-                    const violations = violationsByImpact[impact.key];
-                    if (violations.length > 0) {
-                      commentBody += `\n#### ${impact.emoji} ${impact.title} (${violations.length} violations)\n`;
-                      commentBody += `> **${impact.desc}**\n\n`;
-                      
-                      for (const violation of violations) {
-                        const elementCount = violation.nodes?.length || 0;
-                        commentBody += `<details>\n<summary>${impact.emoji} <strong>${violation.id}</strong> (${elementCount} elements affected)</summary>\n\n`;
-                        commentBody += `**🎯 Issue**: ${violation.help}\n\n`;
-                        commentBody += `**📋 WCAG Guidelines**: ${violation.tags?.join(', ') || 'N/A'}\n`;
-                        commentBody += `**📚 Fix Guide**: [${violation.id} Documentation](${violation.helpUrl}) *(detailed examples & solutions)*\n\n`;
-                        
-                        if (violation.nodes && violation.nodes.length > 0) {
-                          commentBody += `**🔍 Affected Elements**:\n`;
-                          const elements = violation.nodes.slice(0, 5); // Show first 5
-                          for (const node of elements) {
-                            if (node.target && node.target.length > 0) {
-                              commentBody += `   - ${node.target.join(' > ')}\n`;
-                            }
-                          }
-                          if (violation.nodes.length > 5) {
-                            commentBody += `   <details><summary><em>📋 View ${violation.nodes.length - 5} more affected elements...</em></summary>\n\n`;
-                            for (const node of violation.nodes.slice(5)) {
-                              if (node.target && node.target.length > 0) {
-                                commentBody += `   - ${node.target.join(' > ')}\n`;
-                              }
-                            }
-                            commentBody += `   </details>\n`;
-                          }
-                        }
-                        commentBody += `\n</details>\n\n`;
-                      }
-                    }
-                  }
-                  
-                  commentBody += `\n### 🛠️ Quick Fix Guide\n\n`;
-                  commentBody += `- **Critical**: These break core functionality - fix immediately\n`;
-                  commentBody += `- **Serious**: Major barriers for disabled users - high priority\n`;
-                  commentBody += `- **Moderate**: Usability issues - medium priority\n`;
-                  commentBody += `- **Minor**: Polish improvements - when time permits\n\n`;
-                  commentBody += `📚 **Need Help?** Each violation above links to detailed WCAG documentation with examples.\n\n`;
-                  commentBody += `</details>\n\n`;
-                  console.log(`✅ Successfully generated ${violationsJson.length} violations organized by impact level`);
-                } else {
-                  console.log('⚠️ No violations JSON data available');
-                  commentBody += `<details>\n<summary><strong>🔍 Detailed Analysis</strong> (Processing...)</summary>\n\n`;
-                  commentBody += `### ⚠️ Detailed Analysis In Progress\n\n`;
-                  commentBody += `The detailed breakdown is being processed. Meanwhile:\n\n`;
-                  commentBody += `- **Download** the full accessibility report from workflow artifacts\n`;
-                  commentBody += `- **Check** the workflow logs for detailed violation information\n`;
-                  commentBody += `- **Focus** on the ${violationCount} total violations found\n\n`;
-                  commentBody += `📊 **Status**: ${violationCount} violations detected, ${passesCount} checks passed\n\n`;
-                  commentBody += `</details>\n\n`;
-                }
-              } catch (e) {
-                console.log('❌ Could not process violations JSON:', e.message);
-                commentBody += `### 🔍 Detailed Violation Breakdown\n\n`;
-                commentBody += `⚠️ Error processing detailed breakdown: ${e.message}\n`;
-                commentBody += `Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
-              }
-              
-              commentBody += `**💡 Action Required**: These violations prevent users with disabilities from accessing the site effectively.\n`;
-              commentBody += `**🔧 Next Steps**: \n`;
-              commentBody += `- Click on each violation type above for detailed remediation guidance\n`;
-              commentBody += `- Use the provided WCAG documentation links for implementation details\n`;
-              commentBody += `- Test with screen readers and keyboard navigation after fixes\n`;
-              commentBody += `- Consider running accessibility tests locally during development\n\n`;
+              // Simplified violation info (space-optimized for GitHub Actions limits)
+              commentBody += `### 🔍 Detailed Information\n\n`;
+              commentBody += `📊 **${violationCount} violations** detected across **${parseInt(passesCount) + parseInt(violationCount)} total checks**\n\n`;
+              commentBody += `💡 **Next Steps**: Download full accessibility report from workflow artifacts for complete analysis.\n\n`;
             } else if (hasAccessibilityResults === 'true' && violationCount === "0") {
               commentBody += `### ♿ Accessibility Status: EXCELLENT! 🎉\n\n`;
               commentBody += `**✅ No accessibility violations found!**\n\n`;
