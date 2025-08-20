@@ -36,19 +36,58 @@ EOF
 
 # Run commitlint with detailed error capture
 TEMP_ERROR="/tmp/commitlint_error.txt"
-if echo "$COMMIT_MSG" | commitlint --config "$TEMP_CONFIG" --verbose > /dev/null 2>"$TEMP_ERROR"; then
+TEMP_OUTPUT="/tmp/commitlint_output.txt"
+
+# Run with both stdout and stderr capture
+if echo "$COMMIT_MSG" | commitlint --config "$TEMP_CONFIG" --verbose >"$TEMP_OUTPUT" 2>"$TEMP_ERROR"; then
   echo "✅ Commit message follows conventional commits format!"
-  rm -f "$TEMP_CONFIG" "$TEMP_ERROR"
+  rm -f "$TEMP_CONFIG" "$TEMP_ERROR" "$TEMP_OUTPUT"
   exit 0
 fi
 
 # Parse error output for AI-friendly messages
 ERROR_OUTPUT=$(cat "$TEMP_ERROR" 2>/dev/null || echo "No error details available")
+STDOUT_OUTPUT=$(cat "$TEMP_OUTPUT" 2>/dev/null || echo "No stdout available")
+
+# Enhanced debugging with commit message analysis
+echo "🔍 DETAILED COMMIT ANALYSIS:"
+echo "📝 Original commit message: '$COMMIT_MSG'"
+echo "📏 Message length: $(echo "$COMMIT_MSG" | wc -c | tr -d ' ') characters"
+echo ""
+
+# Basic format analysis
+if [[ "$COMMIT_MSG" =~ ^[a-z]+(\([a-z0-9-]+\))?: ]]; then
+  echo "✅ Basic format looks correct: type(scope): description"
+else
+  echo "❌ Basic format issue detected"
+  echo "   Expected: type: description  OR  type(scope): description"
+  echo "   Got: '$COMMIT_MSG'"
+fi
+
+# Check specific patterns
+COMMIT_TYPE=$(echo "$COMMIT_MSG" | sed -n 's/^\([a-z]*\).*/\1/p')
+if [ -n "$COMMIT_TYPE" ]; then
+  echo "🏷️  Detected type: '$COMMIT_TYPE'"
+  case "$COMMIT_TYPE" in
+    feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert)
+      echo "✅ Valid commit type"
+      ;;
+    *)
+      echo "❌ Invalid commit type - must be one of: feat, fix, chore, docs, style, refactor, perf, test, ci, build, revert"
+      ;;
+  esac
+else
+  echo "❌ No commit type detected"
+fi
 
 # Debug: Show what we got from commitlint
-echo "DEBUG: Error output from commitlint:"
+echo ""
+echo "🐛 DEBUG: commitlint stderr:"
 echo "$ERROR_OUTPUT"
-echo "DEBUG: End of error output"
+echo ""
+echo "🐛 DEBUG: commitlint stdout:"
+echo "$STDOUT_OUTPUT"
+echo "🐛 DEBUG: End of commitlint output"
 echo ""
 
 echo ""
@@ -59,9 +98,12 @@ echo ""
 # Clear, actionable error messages for everyone  
 if echo "$ERROR_OUTPUT" | grep -q "subject-case"; then
   echo "❌ PROBLEM: Your subject text has uppercase letters"
-  echo "✅ SOLUTION: Make everything after the colon lowercase"
-  echo "   WRONG: 'feat: Add New Feature'"
+  echo "✅ SOLUTION: Make everything after the colon lowercase (including proper nouns)"
+  echo "   WRONG: 'test: verify Chrome options fix'"
+  echo "   RIGHT: 'test: verify chrome options fix'"
+  echo "   WRONG: 'feat: Add New Feature'"  
   echo "   RIGHT: 'feat: add new feature'"
+  echo "💡 TIP: Even product names like 'Chrome', 'Docker', 'GitHub' should be lowercase in subject"
   echo ""
 fi
 
@@ -105,5 +147,5 @@ echo "- 🎯 Project Guidelines: https://github.com/rafilkmp3/resume-as-code/blo
 echo ""
 
 # Clean up
-rm -f "$TEMP_CONFIG" "$TEMP_ERROR"
+rm -f "$TEMP_CONFIG" "$TEMP_ERROR" "$TEMP_OUTPUT"
 exit 1

@@ -279,8 +279,8 @@ jobs:
             - Trigger appropriate version bumps
             - Create organized GitHub releases
 
-            ### 📊 Workflow Summary
-            ![Workflow Summary](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/workflow-summary.svg)
+            ### 📊 Workflow Details
+            🔗 [View Complete Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
 
             `;
             }
@@ -302,28 +302,48 @@ jobs:
               issue_number: prNumber,
             });
 
-            const existingComment = comments.data.find(comment =>
+            // Find all previous conventional commits validation comments
+            const conventionalCommitsComments = comments.data.filter(comment =>
               comment.user.login === 'github-actions[bot]' &&
-              comment.body.includes('Conventional Commits Validation')
+              (comment.body.includes('Conventional Commits Validation') || comment.body.includes('conventional-commits-validation-'))
             );
 
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existingComment.id,
-                body: commentBody,
-              });
-              console.log('Updated existing conventional commits comment');
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: commentBody,
-              });
-              console.log('Created new conventional commits comment');
+            console.log(`🔍 Found ${conventionalCommitsComments.length} previous conventional commits validation comments`);
+
+            // Hide/minimize ALL previous conventional commits comments (Atlantis behavior)
+            let hiddenCount = 0;
+            for (const oldComment of conventionalCommitsComments) {
+              try {
+                // Add "outdated" marker to hide previous comments
+                const outdatedBody = `<details>\n<summary>🔒 <strong>Outdated Validation Results</strong> - Click to expand</summary>\n\n${oldComment.body}\n\n---\n*⚠️ This validation report has been superseded by a newer analysis.*\n</details>`;
+                
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: oldComment.id,
+                  body: outdatedBody,
+                });
+                hiddenCount++;
+              } catch (error) {
+                console.log(`⚠️ Could not minimize validation comment ${oldComment.id}: ${error.message}`);
+              }
             }
+
+            console.log(`🔒 Minimized ${hiddenCount} previous conventional commits comments (Atlantis-style)`);
+
+            // Add unique comment identifier for atlantis-style management
+            commentBody += `\n<!-- conventional-commits-validation-${Date.now()} -->`;
+
+            // Always create fresh comment (never update existing)
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody,
+            });
+            
+            console.log(`✅ Posted fresh conventional commits validation to PR #${prNumber} (${hiddenCount} old comments minimized)`);
+            console.log(`🎯 Atlantis-style management: Only latest validation visible, previous comments collapsed`);
 
       - name: Generate step summary
         if: always()

@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "version": "1.0.0",
+    "created": "2025-08-20T03:00:00Z",
+    "description": "Accessibility baseline for regression prevention",
+    "environment": "production",
+    "url": "https://rafilkmp3.github.io/resume-as-code/",
+    "axe_version": "4.10.3",
+    "wcag_tags": ["wcag2a", "wcag2aa", "wcag21aa", "best-practice"]
+  },
+  "violations": {
+    "total_count": 83,
+    "violation_types": {
+      "aria-allowed-role": 28,
+      "color-contrast": 11,
+      "list": 5,
+      "region": 39
+    },
+    "severity_breakdown": {
+      "critical": 0,
+      "serious": 39,
+      "moderate": 44,
+      "minor": 0
+    }
+  },
+  "passes": {
+    "total_count": 39
+  },
+  "incomplete": {
+    "total_count": 2
+  },
+  "regression_thresholds": {
+    "max_total_violations": 85,
+    "max_new_violation_types": 5,
+    "critical_violations_allowed": 0,
+    "comment": "Baseline allows small increases but prevents major regressions"
+  }
+}
