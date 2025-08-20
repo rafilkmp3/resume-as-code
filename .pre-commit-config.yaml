@@ -1,9 +1,9 @@
 ---
-# Practical pre-commit hooks for resume-as-code
-# Focus: Only essential quality gates that add real value
+# AI-Friendly pre-commit hooks for resume-as-code
+# Optimized for Claude Code development workflow
 
 repos:
-  # NON-NEGOTIABLE: Conventional Commits validation (SYNCHRONIZED with CI)
+  # ESSENTIAL: Conventional Commits validation (AI-Assistant Friendly)
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.2.0
     hooks:
@@ -11,17 +11,20 @@ repos:
         stages: [commit-msg]
         args: [optional-scope]
         verbose: true
-
-  # Add AI-friendly commitlint validation (matches CI exactly)
+        # Skip when using SKIP environment variable for emergency commits
+        exclude: ^$
+        
+  # AI-FRIENDLY: Enhanced commit validation with helpful error messages
   - repo: local
     hooks:
-      - id: commitlint-ai-friendly
-        name: 🎯 AI-Friendly Commit Validation (Post-validation Help)
+      - id: claude-friendly-commitlint
+        name: 🤖 Claude Code - Conventional Commits Helper
         entry: scripts/commitlint-local.sh
         language: script
         stages: [commit-msg]
         pass_filenames: true
         always_run: false
+        # This provides detailed AI-friendly error messages matching CI exactly
 
   # Essential JSON validation (prevents broken builds)
   - repo: https://github.com/pre-commit/pre-commit-hooks
