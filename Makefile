@@ -1,4 +1,4 @@
-.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal monitor
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal monitor act-check act-list act-production act-staging act-release act-lighthouse act-security act-visual act-pr-preview act-test-all act-setup act-workflow act-dry-run
 
 # Colors for output
 RED=\033[0;31m
@@ -57,10 +57,17 @@ help:
 	@echo "  $(CYAN)npm run dev:setup$(NC)   - Quick development environment setup"
 	@echo ""
 	@echo "$(GREEN)⚡ Local GitHub Actions Testing (act):$(NC)"
-	@echo "  $(CYAN)make act-production$(NC)  - Test production workflow locally"
-	@echo "  $(CYAN)make act-release$(NC)     - Test release workflow locally"
-	@echo "  $(CYAN)make act-list$(NC)        - List all available workflows"
 	@echo "  $(CYAN)make act-check$(NC)       - Check act installation and setup"
+	@echo "  $(CYAN)make act-list$(NC)        - List all available workflows"
+	@echo "  $(CYAN)make act-production$(NC)  - Test production workflow locally"
+	@echo "  $(CYAN)make act-staging$(NC)     - Test staging deployment locally"
+	@echo "  $(CYAN)make act-release$(NC)     - Test release workflow locally"
+	@echo "  $(CYAN)make act-lighthouse$(NC)  - Test Lighthouse performance locally"
+	@echo "  $(CYAN)make act-security$(NC)    - Test security scanning locally"
+	@echo "  $(CYAN)make act-visual$(NC)      - Test visual regression locally"
+	@echo "  $(CYAN)make act-pr-preview$(NC)  - Test PR preview workflow locally"
+	@echo "  $(CYAN)make act-setup$(NC)       - Create .actrc and .env.act configuration"
+	@echo "  $(CYAN)make act-test-all$(NC)    - Test all workflows (dry-run)"
 	@echo ""
 	@echo "$(GREEN)📊 Performance & UX Monitoring:$(NC)"
 	@echo "  $(CYAN)npm run perf:report$(NC) - Full performance analysis report"
@@ -500,3 +507,68 @@ act-workflow: act-check
 	fi
 	@echo "$(PURPLE)⚡ Testing workflow: $(WORKFLOW)$(NC)"
 	@act push $(ACT_FLAGS) --workflows $(WORKFLOW) --verbose
+
+# Test staging deployment workflow locally
+act-staging: act-check
+	@echo "$(PURPLE)🌐 Testing Staging Deployment locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This tests staging build and Netlify deployment$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/staging-deployment.yml --verbose
+
+# Test Lighthouse performance workflow locally
+act-lighthouse: act-check
+	@echo "$(PURPLE)🚀 Testing Lighthouse Performance locally with act...$(NC)"
+	@echo "$(CYAN)💡 Requires TARGET_URL environment variable$(NC)"
+	@act workflow_call $(ACT_FLAGS) --workflows .github/workflows/lighthouse-testing.yml --verbose
+
+# Test security scanning workflow locally
+act-security: act-check
+	@echo "$(PURPLE)🔒 Testing Security Scanning locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This runs comprehensive security validation$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/security-scanning.yml --verbose
+
+# Test visual regression workflow locally
+act-visual: act-check
+	@echo "$(PURPLE)📸 Testing Visual Regression locally with act...$(NC)"
+	@echo "$(CYAN)💡 Tests visual differences across viewports$(NC)"
+	@act push $(ACT_FLAGS) --workflows .github/workflows/visual-regression.yml --verbose
+
+# Test PR preview workflow locally (requires PR event)
+act-pr-preview: act-check
+	@echo "$(PURPLE)🔍 Testing PR Preview locally with act...$(NC)"
+	@echo "$(YELLOW)⚠️  This simulates a pull request event$(NC)"
+	@act pull_request $(ACT_FLAGS) --workflows .github/workflows/pr-preview.yml --verbose
+
+# Test all modular workflows quickly (dry-run)
+act-test-all: act-check
+	@echo "$(CYAN)🧪 Testing all workflows (dry-run)...$(NC)"
+	@for workflow in .github/workflows/*.yml; do \
+		echo "$(BLUE)Testing: $$workflow$(NC)"; \
+		act push $(ACT_FLAGS) --workflows $$workflow --dry-run || echo "$(YELLOW)⚠️ $$workflow failed dry-run$(NC)"; \
+	done
+	@echo "$(GREEN)✅ All workflows tested$(NC)"
+
+# Setup act configuration files
+act-setup: act-check
+	@echo "$(CYAN)⚙️  Setting up act configuration...$(NC)"
+	@if [ ! -f ".actrc" ]; then \
+		echo "$(CYAN)Creating .actrc configuration...$(NC)"; \
+		echo "# Act configuration for resume-as-code" > .actrc; \
+		echo "--platform ubuntu-latest=catthehacker/ubuntu:act-latest" >> .actrc; \
+		echo "--container-architecture linux/amd64" >> .actrc; \
+		echo "--artifact-server-path /tmp/artifacts" >> .actrc; \
+		echo "$(GREEN)✅ .actrc created$(NC)"; \
+	else \
+		echo "$(GREEN)✅ .actrc already exists$(NC)"; \
+	fi
+	@if [ ! -f ".env.act" ]; then \
+		echo "$(CYAN)Creating .env.act environment file...$(NC)"; \
+		echo "# Environment variables for act" > .env.act; \
+		echo "GITHUB_TOKEN=your_github_token_here" >> .env.act; \
+		echo "NODE_ENV=test" >> .env.act; \
+		echo "NETLIFY_AUTH_TOKEN=your_netlify_token_here" >> .env.act; \
+		echo "NETLIFY_SITE_ID=your_netlify_site_id_here" >> .env.act; \
+		echo "$(GREEN)✅ .env.act created - Please update with your tokens$(NC)"; \
+		echo "$(YELLOW)⚠️  Remember to add your actual tokens to .env.act$(NC)"; \
+	else \
+		echo "$(GREEN)✅ .env.act already exists$(NC)"; \
+	fi

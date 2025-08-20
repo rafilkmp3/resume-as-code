@@ -142,8 +142,13 @@ jobs:
             --build-arg URL=https://resume-as-code.netlify.app/ \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            --output type=local,dest=./dist \
+            --tag "resume:staging-${APP_VERSION}" \
+            --load \
             .
+          
+          # Extract ONLY the built application directory from container
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:staging-${APP_VERSION}" sh -c "cp -r /app/dist/* /tmp/dist/"
 
       - name: Verify staging artifacts
         run: |
@@ -187,7 +192,7 @@ jobs:
     name: Comprehensive Staging Tests
     uses: ./.github/workflows/shared-comprehensive-testing.yml
     needs: deploy-staging
-    if: always()
+    if: success()
     with:
       target_url: 'https://resume-as-code.netlify.app'
       environment_name: 'staging'
