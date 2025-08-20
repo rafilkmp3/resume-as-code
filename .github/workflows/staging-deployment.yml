@@ -140,6 +140,7 @@ jobs:
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
         with:
           task: start-measurement
+          label: speedlight-build
 
       - name: 🚀 Speedlight Build with Intelligent Caching (ARM64)
         env:
@@ -204,10 +205,21 @@ jobs:
           echo "  - Dependencies: $([ -d 'node_modules' ] && echo 'Cached' || echo 'Fresh')"
           echo "  - Build Artifacts: $([ '$BUILD_CACHE_VALID' = 'true' ] && echo 'Cache Hit' || echo 'Cache Miss')"
 
-      - name: End Energy Consumption Monitoring
+      - name: Display Energy Results
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
         with:
-          task: end-measurement
+          task: display-results
+
+      - name: 💾 Save Build Artifacts to Cache (Speedlight Strategy)
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            dist/
+            node_modules/.cache
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-arm64-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
 
       - name: 💾 Save Build Artifacts to Cache (Speedlight Strategy)
         uses: actions/cache/save@v4
