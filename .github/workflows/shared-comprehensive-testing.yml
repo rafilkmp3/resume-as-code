@@ -742,9 +742,12 @@ jobs:
               commentBody += `4. **🔍 Review Items**: Manually verify ${incompleteCount} incomplete checks\n\n`;
               // Generate detailed violation breakdown directly from JSON - much simpler!
               try {
-                const violationsJson = ${{ toJSON(needs.accessibility-testing.outputs.violations_json) }};
-                console.log('🔍 Processing violations JSON:', typeof violationsJson, violationsJson?.length || 'no length');
+                const violationsJsonString = ${{ toJSON(needs.accessibility-testing.outputs.violations_json) }};
+                console.log('🔍 Raw violations JSON string:', typeof violationsJsonString, violationsJsonString?.length || 'no length');
                 
+                // Parse the JSON string to get actual array
+                const violationsJson = JSON.parse(violationsJsonString || '[]');
+                console.log('🔍 Parsed violations array:', typeof violationsJson, Array.isArray(violationsJson), violationsJson?.length || 'no length');
                 if (violationsJson && violationsJson.length > 0) {
                   // Group violations by impact level
                   const violationsByImpact = {
