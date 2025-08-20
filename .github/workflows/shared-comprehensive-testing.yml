@@ -527,20 +527,41 @@ jobs:
               echo "$VIOLATIONS_COLLAPSIBLE" | head -c 200
               echo ""
               
-              # Test base64 encoding
-              ENCODED_VIOLATIONS=$(echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0)
-              echo "🔍 Base64 encoded length: ${#ENCODED_VIOLATIONS}"
-              echo "🔍 First 100 characters of base64:"
-              echo "$ENCODED_VIOLATIONS" | head -c 100
+              # Check content length before encoding to prevent GitHub Actions output limits
+              echo "🔍 VIOLATIONS_COLLAPSIBLE length: ${#VIOLATIONS_COLLAPSIBLE} characters"
+              echo "🔍 First 300 characters preview:"
+              echo "$VIOLATIONS_COLLAPSIBLE" | head -c 300
+              echo ""
+              echo "🔍 Last 300 characters preview:"
+              echo "$VIOLATIONS_COLLAPSIBLE" | tail -c 300
               echo ""
               
+              # Verify all impact levels are included
+              echo "🔍 Content verification:"
+              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Critical Issues" || echo "  - No Critical Issues sections found"
+              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Serious Issues" || echo "  - No Serious Issues sections found"
+              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Moderate Issues" || echo "  - No Moderate Issues sections found"  
+              echo "$VIOLATIONS_COLLAPSIBLE" | grep -c "Minor Issues" || echo "  - No Minor Issues sections found"
+              
               # Set output with direct assignment to avoid EOF delimiter issues
-              if [ -n "$VIOLATIONS_COLLAPSIBLE" ]; then
-                # Use direct assignment instead of EOF syntax to prevent delimiter conflicts
-                echo "violations_collapsible=$ENCODED_VIOLATIONS" >> $GITHUB_OUTPUT
-                echo "✅ violations_collapsible output set successfully (${#ENCODED_VIOLATIONS} chars)"
+              if [ -n "$VIOLATIONS_COLLAPSIBLE" ] && [ ${#VIOLATIONS_COLLAPSIBLE} -gt 10 ]; then
+                # Test base64 encoding
+                ENCODED_VIOLATIONS=$(echo -e "$VIOLATIONS_COLLAPSIBLE" | base64 -w 0)
+                echo "🔍 Base64 encoded length: ${#ENCODED_VIOLATIONS}"
+                
+                # GitHub Actions has output limits (~1MB), check if we're within bounds
+                if [ ${#ENCODED_VIOLATIONS} -lt 900000 ]; then
+                  echo "violations_collapsible=$ENCODED_VIOLATIONS" >> $GITHUB_OUTPUT
+                  echo "✅ violations_collapsible output set successfully (${#ENCODED_VIOLATIONS} chars base64)"
+                else
+                  echo "⚠️ Content too large for GitHub Actions output (${#ENCODED_VIOLATIONS} chars), truncating..."
+                  # Take first 800K characters of base64 to stay within limits
+                  TRUNCATED_ENCODED=$(echo "$ENCODED_VIOLATIONS" | head -c 800000)
+                  echo "violations_collapsible=$TRUNCATED_ENCODED" >> $GITHUB_OUTPUT
+                  echo "⚠️ violations_collapsible truncated to fit GitHub Actions limits (800K chars)"
+                fi
               else
-                echo "⚠️ VIOLATIONS_COLLAPSIBLE is empty, setting empty output"
+                echo "⚠️ VIOLATIONS_COLLAPSIBLE is empty or too short, setting empty output"
                 echo "violations_collapsible=" >> $GITHUB_OUTPUT
               fi
             else

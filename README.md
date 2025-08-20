@@ -5,7 +5,7 @@
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Resume-Visit_Site-success?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
 [![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production.yml)
 [![Release Please](https://img.shields.io/badge/📦_Automated_Releases-Release_Please-purple?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/releases)
-[![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging.yml)
+[![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
 
 > **Infrastructure-as-Code approach to resume generation**  
 > Demonstrating modern platform engineering practices, enterprise CI/CD architectures, and production-grade automation
@@ -112,14 +112,36 @@ make test-performance       # Core Web Vitals monitoring
 
 ### **Test Coverage Matrix**
 
-| Test Type | Coverage | Framework |
-|-----------|----------|-----------|
-| **Unit Tests** | Build utilities, theme handling, data validation | Jest + jsdom |
-| **Integration** | Build process, deployment validation | Playwright |
-| **E2E Tests** | User interactions, responsive behavior | Playwright |
-| **Visual Regression** | 20 viewport/theme combinations | Playwright |
-| **Accessibility** | WCAG 2.1 AA compliance | Axe + Playwright |
-| **Performance** | Core Web Vitals, load optimization | Lighthouse |
+| Test Type | Coverage | Framework | PR Comments |
+|-----------|----------|-----------|-------------|
+| **Unit Tests** | Build utilities, theme handling, data validation | Jest + jsdom | ✅ Results summary |
+| **Integration** | Build process, deployment validation | Playwright | ✅ Build artifacts |
+| **E2E Tests** | User interactions, responsive behavior | Playwright | ✅ Screenshots |
+| **Visual Regression** | 20 viewport/theme combinations | Playwright | ✅ Visual evidence |
+| **Accessibility** | WCAG 2.1 AA compliance with impact analysis | Axe + Playwright | ✅ **Enhanced violations display** |
+| **Performance** | Core Web Vitals, load optimization | Lighthouse | ✅ Performance metrics |
+| **Security** | Dependency scanning, secret detection | TruffleHog + NPM | ✅ Vulnerability reports |
+
+### **🎯 Enhanced Testing Features**
+
+#### **💬 Atlantis-Style PR Comments**
+- **Clean Conversation Flow**: Only latest test results visible by default
+- **Historical Preservation**: Previous comments collapsed into expandable sections  
+- **Real-Time Updates**: Fresh comments on every build/test cycle
+- **Zero Noise**: Eliminates repetitive bot spam in PR conversations
+
+#### **♿ Advanced Accessibility Reporting**
+- **Impact-Based Organization**: Critical → Serious → Moderate → Minor violations
+- **Visual Hierarchy**: Professional formatting with emojis and collapsible sections
+- **Actionable Guidance**: Direct links to WCAG documentation with fix examples
+- **Element-Level Details**: Specific CSS selectors and affected elements
+- **Creative Presentation**: Summary tables, priority actions, and comprehensive analysis
+
+#### **📊 Comprehensive Performance Monitoring**  
+- **Core Web Vitals**: FCP, LCP, CLS measurements with pass/fail indicators
+- **Budget Enforcement**: Performance budget validation with detailed breakdowns
+- **Alternative Testing**: Fallback links to PageSpeed Insights when CI fails
+- **Multi-Environment**: Testing across preview, staging, and production deployments
 
 ## 🔄 Three-Tier CI/CD Pipeline
 
