@@ -64,7 +64,7 @@ jobs:
   lighthouse-testing:
     name: 🚀 Lighthouse (${{ inputs.environment_name }})
     if: contains(inputs.test_types, 'lighthouse')
-    uses: ./.github/workflows/shared/lighthouse-testing.yml
+    uses: ./.github/workflows/lighthouse-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: ${{ inputs.environment_name }}
@@ -75,7 +75,7 @@ jobs:
   accessibility-testing:
     name: ♿ Accessibility (${{ inputs.environment_name }})
     if: contains(inputs.test_types, 'accessibility')
-    uses: ./.github/workflows/shared/accessibility-testing.yml
+    uses: ./.github/workflows/accessibility-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: ${{ inputs.environment_name }}
@@ -85,7 +85,7 @@ jobs:
   performance-testing:
     name: 📊 Performance (${{ inputs.environment_name }})
     if: contains(inputs.test_types, 'performance')
-    uses: ./.github/workflows/shared/performance-testing.yml
+    uses: ./.github/workflows/performance-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: ${{ inputs.environment_name }}
@@ -96,7 +96,7 @@ jobs:
   security-scanning:
     name: 🔒 Security (${{ inputs.environment_name }})
     if: contains(inputs.test_types, 'security')
-    uses: ./.github/workflows/shared/security-scanning.yml
+    uses: ./.github/workflows/security-scanning.yml
     with:
       scan_target: 'dependencies'
       severity_threshold: ${{ inputs.security_severity_threshold }}
@@ -106,7 +106,7 @@ jobs:
   visual-regression:
     name: 📸 Visual (${{ inputs.environment_name }})
     if: contains(inputs.test_types, 'visual')
-    uses: ./.github/workflows/shared/visual-regression.yml
+    uses: ./.github/workflows/visual-regression.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: ${{ inputs.environment_name }}

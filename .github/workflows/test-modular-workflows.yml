@@ -28,7 +28,7 @@ jobs:
   test-lighthouse:
     if: inputs.test_target == 'lighthouse' || inputs.test_target == 'all'
     name: 🚀 Test Lighthouse Module
-    uses: ./.github/workflows/shared/lighthouse-testing.yml
+    uses: ./.github/workflows/lighthouse-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: 'testing'
@@ -38,7 +38,7 @@ jobs:
   test-accessibility:
     if: inputs.test_target == 'accessibility' || inputs.test_target == 'all'
     name: ♿ Test Accessibility Module
-    uses: ./.github/workflows/shared/accessibility-testing.yml
+    uses: ./.github/workflows/accessibility-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: 'testing'
@@ -47,7 +47,7 @@ jobs:
   test-performance:
     if: inputs.test_target == 'performance' || inputs.test_target == 'all'
     name: ⚡ Test Performance Module
-    uses: ./.github/workflows/shared/performance-testing.yml
+    uses: ./.github/workflows/performance-testing.yml
     with:
       target_url: ${{ inputs.target_url }}
       environment_name: 'testing'
@@ -57,7 +57,7 @@ jobs:
   test-context7:
     if: inputs.test_target == 'context7' || inputs.test_target == 'all'
     name: 🔄 Test Context7 Module
-    uses: ./.github/workflows/shared/context7-updater.yml
+    uses: ./.github/workflows/context7-updater.yml
     with:
       update_target: 'dependencies'
       dry_run: true
