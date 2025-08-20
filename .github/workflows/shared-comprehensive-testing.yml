@@ -315,9 +315,48 @@ jobs:
             cp "axe-report.json" "_accessibility-reports/axe-results.json"
           fi
           
-          # Generate console output for PR comments and summaries
+          # Enhanced axe-core testing with WCAG 2.2 compliance levels and rule-specific testing
+          echo "🎯 Running enhanced axe-core accessibility testing with WCAG 2.2 (2023)..."
+          
+          # 1. WCAG 2.2 Level A Testing
+          echo "📋 WCAG 2.2 Level A Testing..."
           axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --tags wcag2a,wcag22a \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout 30000 > "_accessibility-reports/axe-wcag22a.json" || true
+          
+          # 2. WCAG 2.2 Level AA Testing (Most Common Compliance Target)
+          echo "📋 WCAG 2.2 Level AA Testing..."
+          axe --stdout "${{ inputs.target_url }}" \
+            --tags wcag2aa,wcag21aa,wcag22aa \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout 30000 > "_accessibility-reports/axe-wcag22aa.json" || true
+          
+          # 3. WCAG 2.2 Level AAA Testing (Gold Standard)
+          echo "📋 WCAG 2.2 Level AAA Testing..."
+          axe --stdout "${{ inputs.target_url }}" \
+            --tags wcag2aaa,wcag21aaa,wcag22aaa \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout 30000 > "_accessibility-reports/axe-wcag22aaa.json" || true
+          
+          # 4. Best Practices Testing (Beyond WCAG Requirements)
+          echo "📋 Best Practices Testing..."
+          axe --stdout "${{ inputs.target_url }}" \
+            --tags best-practice \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout 30000 > "_accessibility-reports/axe-best-practices.json" || true
+          
+          # 5. Rule-Specific Critical Testing for Common Issues
+          echo "🚨 Critical Rule-Specific Testing..."
+          axe --stdout "${{ inputs.target_url }}" \
+            --rules color-contrast,html-has-lang,landmark-one-main,label,button-name,aria-label-button,aria-required-attr,aria-required-children,aria-required-parent,aria-valid-attr,aria-valid-attr-value,region,skip-link,heading-order,image-alt,link-name,meta-viewport,focus-order-semantics,scrollable-region-focusable \
+            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
+            --timeout 30000 > "_accessibility-reports/axe-critical-rules.json" || true
+          
+          # 6. Comprehensive scan for PR comments and summaries (WCAG 2.2 all levels)
+          echo "📊 Comprehensive WCAG 2.2 Accessibility Scan..."
+          axe --stdout "${{ inputs.target_url }}" \
+            --tags wcag2a,wcag2aa,wcag2aaa,wcag21aa,wcag21aaa,wcag22a,wcag22aa,wcag22aaa,best-practice \
             --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
@@ -419,11 +458,106 @@ jobs:
               echo "violations_json=[]" >> $GITHUB_OUTPUT
             fi
             
-            # Export results for other steps
+            # Enhanced WCAG Level Analysis and Rule Category Processing
+            echo "🎯 Processing enhanced WCAG 2.2 compliance analysis..."
+            
+            # Process WCAG Level-based results if files exist
+            WCAG22A_VIOLATIONS=0
+            WCAG22AA_VIOLATIONS=0
+            WCAG22AAA_VIOLATIONS=0
+            BEST_PRACTICE_VIOLATIONS=0
+            CRITICAL_RULE_VIOLATIONS=0
+            
+            # WCAG 2.2 Level A Analysis
+            if [ -f "_accessibility-reports/axe-wcag22a.json" ]; then
+              WCAG22A_VIOLATIONS=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "_accessibility-reports/axe-wcag22a.json" 2>/dev/null || echo "0")
+              echo "📋 WCAG 2.2 Level A: $WCAG22A_VIOLATIONS violations"
+            fi
+            
+            # WCAG 2.2 Level AA Analysis
+            if [ -f "_accessibility-reports/axe-wcag22aa.json" ]; then
+              WCAG22AA_VIOLATIONS=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "_accessibility-reports/axe-wcag22aa.json" 2>/dev/null || echo "0")
+              echo "📋 WCAG 2.2 Level AA: $WCAG22AA_VIOLATIONS violations"
+            fi
+            
+            # WCAG 2.2 Level AAA Analysis
+            if [ -f "_accessibility-reports/axe-wcag22aaa.json" ]; then
+              WCAG22AAA_VIOLATIONS=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "_accessibility-reports/axe-wcag22aaa.json" 2>/dev/null || echo "0")
+              echo "📋 WCAG 2.2 Level AAA: $WCAG22AAA_VIOLATIONS violations"
+            fi
+            
+            # Best Practices Analysis
+            if [ -f "_accessibility-reports/axe-best-practices.json" ]; then
+              BEST_PRACTICE_VIOLATIONS=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "_accessibility-reports/axe-best-practices.json" 2>/dev/null || echo "0")
+              echo "📋 Best Practices: $BEST_PRACTICE_VIOLATIONS violations"
+            fi
+            
+            # Critical Rules Analysis
+            if [ -f "_accessibility-reports/axe-critical-rules.json" ]; then
+              CRITICAL_RULE_VIOLATIONS=$(jq -r '.[0].violations | map(.nodes | length) | add // 0' "_accessibility-reports/axe-critical-rules.json" 2>/dev/null || echo "0")
+              echo "🚨 Critical Rules: $CRITICAL_RULE_VIOLATIONS violations"
+            fi
+            
+            # Rule Category Analysis (group by WCAG principle)
+            if [ -n "$RESULTS_FILE" ] && [ -f "$RESULTS_FILE" ]; then
+              echo "🔍 Analyzing rule categories..."
+              
+              # Color & Visual violations
+              COLOR_VIOLATIONS=$(jq -r '.[0].violations | map(select(.tags[] | contains("color") or contains("contrast"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              # Navigation & Structure violations  
+              NAVIGATION_VIOLATIONS=$(jq -r '.[0].violations | map(select(.tags[] | contains("landmark") or contains("region") or contains("navigation"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              # Form & Interactive violations
+              FORM_VIOLATIONS=$(jq -r '.[0].violations | map(select(.tags[] | contains("form") or contains("label") or contains("button"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              # ARIA & Semantic violations
+              ARIA_VIOLATIONS=$(jq -r '.[0].violations | map(select(.id | contains("aria"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              echo "📊 Rule Category Breakdown:"
+              echo "- 🎨 Color/Visual: $COLOR_VIOLATIONS violations"
+              echo "- 🧭 Navigation/Structure: $NAVIGATION_VIOLATIONS violations"
+              echo "- 📝 Forms/Interactive: $FORM_VIOLATIONS violations"
+              echo "- 🏷️ ARIA/Semantic: $ARIA_VIOLATIONS violations"
+            fi
+            
+            # Automation vs Manual Review Categorization
+            if [ -n "$RESULTS_FILE" ] && [ -f "$RESULTS_FILE" ]; then
+              echo "🤖 Categorizing automation vs manual review requirements..."
+              
+              # Count automated violations (can be detected and verified automatically)
+              AUTOMATED_VIOLATIONS=$(jq -r '.[0].violations | map(select(.id | test("color-contrast|html-has-lang|image-alt|label|button-name|aria-required|duplicate-id"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              # Count manual review violations (require human judgment)
+              MANUAL_REVIEW_VIOLATIONS=$(jq -r '.[0].violations | map(select(.id | test("region|landmark|heading-order|skip-link|focus-order"))) | map(.nodes | length) | add // 0' "$RESULTS_FILE" 2>/dev/null || echo "0")
+              
+              echo "🤖 Automation Analysis:"
+              echo "- ✅ Automated Detection: $AUTOMATED_VIOLATIONS violations"
+              echo "- 👁️ Manual Review Required: $MANUAL_REVIEW_VIOLATIONS violations"
+            fi
+            
+            # Export enhanced results for other steps
             echo "violation_count=$VIOLATION_COUNT" >> $GITHUB_OUTPUT
             echo "passes_count=$PASSES_COUNT" >> $GITHUB_OUTPUT
             echo "incomplete_count=$INCOMPLETE_COUNT" >> $GITHUB_OUTPUT
             echo "accessibility_summary=$ACCESSIBILITY_SUMMARY" >> $GITHUB_OUTPUT
+            
+            # Export WCAG 2.2 level-based results
+            echo "wcag22a_violations=$WCAG22A_VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "wcag22aa_violations=$WCAG22AA_VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "wcag22aaa_violations=$WCAG22AAA_VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "best_practice_violations=$BEST_PRACTICE_VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "critical_rule_violations=$CRITICAL_RULE_VIOLATIONS" >> $GITHUB_OUTPUT
+            
+            # Export rule category analysis
+            echo "color_violations=${COLOR_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
+            echo "navigation_violations=${NAVIGATION_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
+            echo "form_violations=${FORM_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
+            echo "aria_violations=${ARIA_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
+            
+            # Export automation analysis
+            echo "automated_violations=${AUTOMATED_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
+            echo "manual_review_violations=${MANUAL_REVIEW_VIOLATIONS:-0}" >> $GITHUB_OUTPUT
             echo "has_accessibility_results=true" >> $GITHUB_OUTPUT
           else
             echo "❌ Axe results file not found"
@@ -740,6 +874,74 @@ jobs:
               commentBody += `2. **⚡ Moderate Impact**: Address usability issues\n`;
               commentBody += `3. **📝 Minor Impact**: Polish and perfect\n`;
               commentBody += `4. **🔍 Review Items**: Manually verify ${incompleteCount} incomplete checks\n\n`;
+              
+              // Enhanced WCAG 2.2 Compliance Analysis
+              const wcag22aViolations = "${{ needs.accessibility-testing.outputs.wcag22a_violations }}";
+              const wcag22aaViolations = "${{ needs.accessibility-testing.outputs.wcag22aa_violations }}";
+              const wcag22aaaViolations = "${{ needs.accessibility-testing.outputs.wcag22aaa_violations }}";
+              const bestPracticeViolations = "${{ needs.accessibility-testing.outputs.best_practice_violations }}";
+              const criticalRuleViolations = "${{ needs.accessibility-testing.outputs.critical_rule_violations }}";
+              
+              commentBody += `### 🏆 WCAG 2.2 Compliance Analysis (2023 Standard)\n\n`;
+              commentBody += `| Compliance Level | Violations | Status | Business Impact |\n`;
+              commentBody += `|------------------|------------|---------|------------------|\n`;
+              
+              // WCAG 2.2 Level A
+              const wcag22aStatus = (wcag22aViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aViolations} issues`;
+              const wcag22aImpact = (wcag22aViolations === "0") ? "Legal compliance met" : "⚠️ Legal risk";
+              commentBody += `| **🥉 WCAG 2.2 Level A** | ${wcag22aViolations} | ${wcag22aStatus} | ${wcag22aImpact} |\n`;
+              
+              // WCAG 2.2 Level AA (most common target)
+              const wcag22aaStatus = (wcag22aaViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aaViolations} issues`;
+              const wcag22aaImpact = (wcag22aaViolations === "0") ? "Industry standard met" : "⚠️ Accessibility gaps";
+              commentBody += `| **🥈 WCAG 2.2 Level AA** | ${wcag22aaViolations} | ${wcag22aaStatus} | ${wcag22aaImpact} |\n`;
+              
+              // WCAG 2.2 Level AAA (gold standard)
+              const wcag22aaaStatus = (wcag22aaaViolations === "0") ? "✅ Compliant" : `❌ ${wcag22aaaViolations} issues`;
+              const wcag22aaaImpact = (wcag22aaaViolations === "0") ? "Gold standard achieved" : "Enhancement opportunities";
+              commentBody += `| **🥇 WCAG 2.2 Level AAA** | ${wcag22aaaViolations} | ${wcag22aaaStatus} | ${wcag22aaaImpact} |\n`;
+              
+              // Best Practices
+              const bestPracticeStatus = (bestPracticeViolations === "0") ? "✅ Excellent" : `⚠️ ${bestPracticeViolations} improvements`;
+              const bestPracticeImpact = (bestPracticeViolations === "0") ? "Beyond compliance" : "User experience improvements";
+              commentBody += `| **⭐ Best Practices** | ${bestPracticeViolations} | ${bestPracticeStatus} | ${bestPracticeImpact} |\n`;
+              
+              // Critical Rules
+              const criticalRuleStatus = (criticalRuleViolations === "0") ? "✅ Secure" : `🚨 ${criticalRuleViolations} critical`;
+              const criticalRuleImpact = (criticalRuleViolations === "0") ? "Core accessibility solid" : "⚠️ Immediate attention needed";
+              commentBody += `| **🚨 Critical Rules** | ${criticalRuleViolations} | ${criticalRuleStatus} | ${criticalRuleImpact} |\n\n`;
+              
+              // Rule Category Breakdown
+              const colorViolations = "${{ needs.accessibility-testing.outputs.color_violations }}";
+              const navigationViolations = "${{ needs.accessibility-testing.outputs.navigation_violations }}";
+              const formViolations = "${{ needs.accessibility-testing.outputs.form_violations }}";
+              const ariaViolations = "${{ needs.accessibility-testing.outputs.aria_violations }}";
+              
+              commentBody += `### 📊 Violation Categories (By WCAG Principle)\n\n`;
+              commentBody += `| Category | Violations | Focus Area | Impact |\n`;
+              commentBody += `|----------|------------|------------|--------|\n`;
+              commentBody += `| 🎨 **Color & Visual** | ${colorViolations} | Color contrast, visual design | Vision accessibility |\n`;
+              commentBody += `| 🧭 **Navigation & Structure** | ${navigationViolations} | Landmarks, headings, layout | Screen reader navigation |\n`;
+              commentBody += `| 📝 **Forms & Interactive** | ${formViolations} | Labels, buttons, form controls | Interaction accessibility |\n`;
+              commentBody += `| 🏷️ **ARIA & Semantic** | ${ariaViolations} | ARIA attributes, semantics | Assistive technology |\n\n`;
+              
+              // Automation vs Manual Review Analysis
+              const automatedViolations = "${{ needs.accessibility-testing.outputs.automated_violations }}";
+              const manualReviewViolations = "${{ needs.accessibility-testing.outputs.manual_review_violations }}";
+              
+              commentBody += `### 🤖 Development Strategy\n\n`;
+              commentBody += `| Detection Method | Issues | Action Required | Timeline |\n`;
+              commentBody += `|------------------|---------|-----------------|----------|\n`;
+              commentBody += `| ✅ **Automated Detection** | ${automatedViolations} | Code fixes, automated testing | Sprint 1-2 |\n`;
+              commentBody += `| 👁️ **Manual Review Required** | ${manualReviewViolations} | UX review, user testing | Sprint 2-3 |\n\n`;
+              
+              if (parseInt(automatedViolations) > 0) {
+                commentBody += `> 🔧 **Quick Wins**: ${automatedViolations} issues can be automatically detected and fixed with code changes.\n\n`;
+              }
+              if (parseInt(manualReviewViolations) > 0) {
+                commentBody += `> 👥 **UX Review Needed**: ${manualReviewViolations} issues require human judgment and usability testing.\n\n`;
+              }
+              
               // Generate detailed violation breakdown directly from JSON - much simpler!
               try {
                 const violationsJsonString = ${{ toJSON(needs.accessibility-testing.outputs.violations_json) }};
