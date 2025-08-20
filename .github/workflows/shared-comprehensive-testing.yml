@@ -853,6 +853,7 @@ jobs:
               // Simplified WCAG 2.2 Compliance (space-optimized for GitHub Actions)
               const wcag22aViolations = "${{ needs.accessibility-testing.outputs.wcag22a_violations }}";
               const wcag22aaViolations = "${{ needs.accessibility-testing.outputs.wcag22aa_violations }}";
+              const criticalRuleViolations = "${{ needs.accessibility-testing.outputs.critical_rule_violations }}";
               
               commentBody += `### 🏆 WCAG 2.2 Compliance\n\n`;
               commentBody += `- **Level A**: ${wcag22aViolations || '0'} violations\n`;
