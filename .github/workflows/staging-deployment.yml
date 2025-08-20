@@ -44,7 +44,7 @@ env:
 jobs:
   deploy-staging:
     name: Deploy to Netlify Staging
-    runs-on: ubuntu-arm64-latest  # ARM64 for native Mac M1/M2 performance
+    runs-on: ubuntu-latest  # Standard runner for maximum compatibility
     timeout-minutes: 15
     environment:
       name: netlify-staging
@@ -103,53 +103,31 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          architecture: 'arm64'  # Native ARM64 Node.js for maximum performance
 
-      - name: Set up Docker Buildx (Multi-arch)
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/arm64,linux/amd64  # Native ARM64 + AMD64 compatibility
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Staging Release
+      - name: Build Staging Release (Docker-Free)
         env:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
           APP_VERSION: ${{ env.STAGING_VERSION }}
+          NODE_ENV: production
+          GITHUB_PAGES: false
+          NETLIFY: true
+          NETLIFY_ENV: staging
+          CONTEXT: staging
+          DEPLOY_URL: https://resume-as-code.netlify.app/
+          URL: https://resume-as-code.netlify.app/
         run: |
-          echo "🏗️ Building staging release ${{ env.STAGING_VERSION }}"
+          echo "🏗️ Building staging release ${{ env.STAGING_VERSION }} (Docker-Free)"
           echo "🌐 Target: Netlify Staging (resume-as-code.netlify.app)"
+          echo "⚡ Using native Node.js build (no Docker overhead)"
           
-          docker buildx build \
-            --file docker/Dockerfile \
-            --target builder \
-            --platform linux/arm64 \
-            --build-arg GITHUB_SHA="${GITHUB_SHA}" \
-            --build-arg GITHUB_REF_NAME="${GITHUB_REF_NAME}" \
-            --build-arg APP_VERSION="${APP_VERSION}" \
-            --build-arg BUILD_CONTEXT=staging \
-            --build-arg NODE_ENV=production \
-            --build-arg GITHUB_PAGES=false \
-            --build-arg NETLIFY=true \
-            --build-arg NETLIFY_ENV=staging \
-            --build-arg CONTEXT=staging \
-            --build-arg DEPLOY_URL=https://resume-as-code.netlify.app/ \
-            --build-arg URL=https://resume-as-code.netlify.app/ \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
-            --tag "resume:staging-${APP_VERSION}" \
-            --load \
-            .
+          # Build directly with Node.js (much faster)
+          npm run build
           
-          # Extract ONLY the built application directory from container
-          mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:staging-${APP_VERSION}" sh -c "cp -r /app/dist/* /tmp/dist/"
+          echo "✅ Docker-free build completed successfully!"
 
       - name: Verify staging artifacts
         run: |
