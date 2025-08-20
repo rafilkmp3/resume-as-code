@@ -136,11 +136,12 @@ jobs:
           
           echo "📊 Dependency installation completed"
 
-      - name: Start Energy Consumption Monitoring
-        uses: green-coding-solutions/eco-ci-energy-estimation@v4
-        with:
-          task: start-measurement
-          label: speedlight-build
+      # Energy monitoring temporarily disabled - investigating measurement data issues
+      # - name: Start Energy Consumption Monitoring
+      #   uses: green-coding-solutions/eco-ci-energy-estimation@v4
+      #   with:
+      #     task: start-measurement
+      #     label: speedlight-build
 
       - name: 🚀 Speedlight Build with Intelligent Caching (ARM64)
         env:
@@ -205,10 +206,11 @@ jobs:
           echo "  - Dependencies: $([ -d 'node_modules' ] && echo 'Cached' || echo 'Fresh')"
           echo "  - Build Artifacts: $([ '$BUILD_CACHE_VALID' = 'true' ] && echo 'Cache Hit' || echo 'Cache Miss')"
 
-      - name: Display Energy Results
-        uses: green-coding-solutions/eco-ci-energy-estimation@v4
-        with:
-          task: display-results
+      # Energy monitoring temporarily disabled - investigating measurement data issues
+      # - name: Display Energy Results
+      #   uses: green-coding-solutions/eco-ci-energy-estimation@v4
+      #   with:
+      #     task: display-results
 
       - name: 💾 Save Build Artifacts to Cache (Speedlight Strategy)
         uses: actions/cache/save@v4
