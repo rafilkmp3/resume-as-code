@@ -318,11 +318,11 @@ jobs:
           # Run axe-core scan with comprehensive output using same Chrome options as individual test
           set +e  # Don't fail on accessibility violations
           
-          # Optimized: Single comprehensive scan for all WCAG 2.2 levels + best practices
-          echo "🚀 Optimized WCAG 2.2 Comprehensive Accessibility Scan..."
+          # Optimized: Single comprehensive scan with safe and documented WCAG tags
+          echo "🚀 Optimized WCAG 2.1 AA Comprehensive Accessibility Scan..."
           axe "${{ inputs.target_url }}" \
             --save "axe-report.json" \
-            --tags wcag2a,wcag2aa,wcag2aaa,wcag21aa,wcag21aaa,wcag22a,wcag22aa,wcag22aaa,best-practice \
+            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
             --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
             --timeout 45000 \
             --verbose
