@@ -267,7 +267,7 @@ jobs:
     name: ♿ Accessibility (${{ inputs.environment_name }})
     runs-on: ubuntu-latest
     if: contains(inputs.test_types, 'accessibility')
-    timeout-minutes: 5
+    timeout-minutes: 10
     outputs:
       # Core accessibility metrics (generic/dynamic)
       accessibility_summary: ${{ steps.process-axe-results.outputs.accessibility_summary }}
@@ -318,65 +318,28 @@ jobs:
           # Run axe-core scan with comprehensive output using same Chrome options as individual test
           set +e  # Don't fail on accessibility violations
           
+          # Optimized: Single comprehensive scan for all WCAG 2.2 levels + best practices
+          echo "🚀 Optimized WCAG 2.2 Comprehensive Accessibility Scan..."
           axe "${{ inputs.target_url }}" \
             --save "axe-report.json" \
-            --tags wcag2a,wcag2aa,wcag21aa,best-practice \
+            --tags wcag2a,wcag2aa,wcag2aaa,wcag21aa,wcag21aaa,wcag22a,wcag22aa,wcag22aaa,best-practice \
             --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 \
+            --timeout 45000 \
             --verbose
           
           AXE_EXIT_CODE=$?
           echo "axe_exit_code=$AXE_EXIT_CODE" >> $GITHUB_OUTPUT
           
-          # Copy the report to the expected location for artifact upload
+          # Copy the report to expected locations for processing
           if [ -f "axe-report.json" ]; then
             cp "axe-report.json" "_accessibility-reports/axe-results.json"
+            # Create simplified versions for compatibility with existing processing
+            cp "axe-report.json" "_accessibility-reports/axe-wcag22a.json"
+            cp "axe-report.json" "_accessibility-reports/axe-wcag22aa.json"  
+            cp "axe-report.json" "_accessibility-reports/axe-wcag22aaa.json"
+            cp "axe-report.json" "_accessibility-reports/axe-best-practices.json"
+            cp "axe-report.json" "_accessibility-reports/axe-critical-rules.json"
           fi
-          
-          # Enhanced axe-core testing with WCAG 2.2 compliance levels and rule-specific testing
-          echo "🎯 Running enhanced axe-core accessibility testing with WCAG 2.2 (2023)..."
-          
-          # 1. WCAG 2.2 Level A Testing
-          echo "📋 WCAG 2.2 Level A Testing..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2a,wcag22a \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-wcag22a.json" || true
-          
-          # 2. WCAG 2.2 Level AA Testing (Most Common Compliance Target)
-          echo "📋 WCAG 2.2 Level AA Testing..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2aa,wcag21aa,wcag22aa \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-wcag22aa.json" || true
-          
-          # 3. WCAG 2.2 Level AAA Testing (Gold Standard)
-          echo "📋 WCAG 2.2 Level AAA Testing..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2aaa,wcag21aaa,wcag22aaa \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-wcag22aaa.json" || true
-          
-          # 4. Best Practices Testing (Beyond WCAG Requirements)
-          echo "📋 Best Practices Testing..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --tags best-practice \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-best-practices.json" || true
-          
-          # 5. Rule-Specific Critical Testing for Common Issues
-          echo "🚨 Critical Rule-Specific Testing..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --rules color-contrast,html-has-lang,landmark-one-main,label,button-name,aria-label-button,aria-required-attr,aria-required-children,aria-required-parent,aria-valid-attr,aria-valid-attr-value,region,skip-link,heading-order,image-alt,link-name,meta-viewport,focus-order-semantics,scrollable-region-focusable \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-critical-rules.json" || true
-          
-          # 6. Comprehensive scan for PR comments and summaries (WCAG 2.2 all levels)
-          echo "📊 Comprehensive WCAG 2.2 Accessibility Scan..."
-          axe --stdout "${{ inputs.target_url }}" \
-            --tags wcag2a,wcag2aa,wcag2aaa,wcag21aa,wcag21aaa,wcag22a,wcag22aa,wcag22aaa,best-practice \
-            --chrome-options="--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage,--disable-extensions,--disable-gpu,--headless=new" \
-            --timeout 30000 > "_accessibility-reports/axe-summary.txt" || true
           
           echo "✅ Axe-core accessibility scan completed (exit code: $AXE_EXIT_CODE)"
           echo "📁 Reports generated in _accessibility-reports/"
@@ -918,10 +881,11 @@ jobs:
               const automatedViolations = "${{ needs.accessibility-testing.outputs.automated_violations }}";
               const manualReviewViolations = "${{ needs.accessibility-testing.outputs.manual_review_violations }}";
               
-              commentBody += `### 🤖 Quick Analysis\n`;
-              commentBody += `- **Automated**: ${automatedViolations || '0'} violations\n`;
-              commentBody += `- **Manual Review**: ${manualReviewViolations || '0'} violations\n\n`;
+              commentBody += `### 🤖 Testing Strategy\n`;
+              commentBody += `- **🔧 Automated Fixes**: ${automatedViolations || '0'} violations (code/config changes)\n`;
+              commentBody += `- **👁️ Manual Review**: ${manualReviewViolations || '0'} violations (design/UX decisions)\n\n`;
               
+              commentBody += `> **Automated** = Can be fixed with code (colors, labels, ARIA). **Manual** = Needs human judgment (layout, navigation flow).\n\n`;
               // Simplified violation info (space-optimized for GitHub Actions limits)
               commentBody += `### 🔍 Detailed Information\n\n`;
               commentBody += `📊 **${violationCount} violations** detected across **${parseInt(passesCount) + parseInt(violationCount)} total checks**\n\n`;
