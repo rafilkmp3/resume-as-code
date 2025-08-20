@@ -104,15 +104,44 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: 🚀 Aggressive Caching Setup (Speedlight Builds)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+            .next/cache
+            node_modules/.cache
+            dist/assets/images
+            dist/assets/optimized
+          key: ${{ runner.os }}-arm64-speedlight-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          restore-keys: |
+            ${{ runner.os }}-arm64-speedlight-
+            ${{ runner.os }}-arm64-
+
+      - name: 📦 Fast Dependency Installation (ARM64)
+        run: |
+          echo "🚀 SPEEDLIGHT BUILD: Leveraging aggressive caching for ultra-fast builds"
+          echo "💡 Docker-free advantage: Can cache everything without container limitations"
+          
+          # Check cache hit status
+          if [ -d "node_modules" ] && [ -f "node_modules/.package-lock.json" ]; then
+            echo "✅ CACHE HIT: node_modules already exists from cache"
+            # Verify cache integrity
+            npm ls --depth=0 > /dev/null 2>&1 && echo "✅ Cache integrity verified" || npm ci
+          else
+            echo "🔄 CACHE MISS: Installing dependencies"
+            time npm ci
+          fi
+          
+          echo "📊 Dependency installation completed"
 
       - name: Start Energy Consumption Monitoring
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
         with:
           task: start-measurement
 
-      - name: Build Staging Release (ARM64 + Docker-Free)
+      - name: 🚀 Speedlight Build with Intelligent Caching (ARM64)
         env:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
@@ -125,7 +154,7 @@ jobs:
           DEPLOY_URL: https://resume-as-code.netlify.app/
           URL: https://resume-as-code.netlify.app/
         run: |
-          echo "🏗️ Building staging release ${{ env.STAGING_VERSION }} (ARM64 + Docker-Free)"
+          echo "🚀 SPEEDLIGHT BUILD: ARM64 Docker-Free with Aggressive Caching"
           echo "🌐 Target: Netlify Staging (resume-as-code.netlify.app)"
           echo "⚡ Using ARM64 native Node.js build (40% performance boost + 37% cost savings)"
           echo "🌱 Energy-efficient ARM64 architecture (30-40% less power consumption)"
@@ -137,15 +166,59 @@ jobs:
           echo "  - Node.js Arch: $(node -p 'process.arch')"
           echo "  - Platform: $(node -p 'process.platform')"
           
-          # Build directly with Node.js (much faster on ARM64)
-          npm run build
+          # Smart build with cache awareness
+          echo "🔍 Checking for cached build artifacts..."
           
-          echo "✅ ARM64 Docker-free build completed successfully!"
+          # Check if we can skip expensive operations
+          BUILD_CACHE_VALID=false
+          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+            echo "✅ Previous build artifacts found in cache"
+            
+            # Check if source files changed (simple heuristic)
+            if [ "src/resume-data.json" -ot "dist/index.html" ] && [ "src/templates/template.html" -ot "dist/index.html" ]; then
+              echo "✅ Source files unchanged - using cached build artifacts"
+              BUILD_CACHE_VALID=true
+            else
+              echo "🔄 Source files changed - rebuilding required"
+            fi
+          else
+            echo "🔄 No cached build artifacts - full build required"
+          fi
+          
+          # Execute build (full or incremental)
+          if [ "$BUILD_CACHE_VALID" = "true" ]; then
+            echo "⚡ SPEEDLIGHT: Skipping expensive build operations"
+            echo "📦 Verifying cached artifacts..."
+            ls -la dist/ | head -10
+          else
+            echo "🏗️ Executing full ARM64 native build..."
+            time npm run build
+          fi
+          
+          echo "✅ ARM64 Speedlight build completed successfully!"
+          
+          # Cache performance metrics
+          echo "📊 Build Performance Summary:"
+          echo "  - Cache Strategy: Aggressive multi-layer caching"
+          echo "  - Architecture: Native ARM64 (no emulation)"
+          echo "  - Dependencies: $([ -d 'node_modules' ] && echo 'Cached' || echo 'Fresh')"
+          echo "  - Build Artifacts: $([ '$BUILD_CACHE_VALID' = 'true' ] && echo 'Cache Hit' || echo 'Cache Miss')"
 
       - name: End Energy Consumption Monitoring
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
         with:
           task: end-measurement
+
+      - name: 💾 Save Build Artifacts to Cache (Speedlight Strategy)
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            dist/
+            node_modules/.cache
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-arm64-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
 
       - name: Verify staging artifacts
         run: |
