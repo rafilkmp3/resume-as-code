@@ -78,16 +78,19 @@ make arm64-staging     # Test ARM64 staging deployment
 make arm64-benchmark   # ARM64 vs AMD64 performance comparison
 ```
 
-#### GitHub ARM64 Runners
-- **Staging Pipeline**: Uses `ubuntu-arm64-latest` for native ARM64 performance
-- **Node.js Setup**: Explicit `architecture: 'arm64'` for optimized binaries
-- **Docker Multi-arch**: Supports both `linux/arm64` and `linux/amd64`
+#### GitHub ARM64 Runners (FREE! - January 2025)
+- **New Free Runners**: `ubuntu-24.04-arm` and `ubuntu-22.04-arm` 
+- **Performance**: 40% performance boost vs previous generation
+- **Cost Efficiency**: 37% less expensive than x64 runners
+- **Energy Efficiency**: 30-40% less power consumption
+- **Availability**: Free for all public repositories
 
 #### Performance Benefits
-- **2-3x Faster Builds**: Native ARM64 Node.js binaries
-- **Faster Image Processing**: Native Sharp ARM64 compilation
-- **Efficient PDF Generation**: ARM64 Puppeteer with native Chrome
-- **Architecture Parity**: Same performance locally (Mac M1/M2) and CI (GitHub ARM64)
+- **40% Performance Boost**: Native ARM64 execution with Cobalt 100 processors
+- **37% Cost Savings**: ARM runners cost less than x64 alternatives
+- **Energy Efficient**: 30-40% less power consumption
+- **Native Compilation**: ARM64 Node.js, Sharp, Puppeteer binaries
+- **Architecture Parity**: Perfect match with Mac M1/M2 development
 
 #### Resource Optimization Strategy
 

@@ -9,9 +9,10 @@ on:
         required: false
         type: choice
         options:
-          - 'ubuntu-arm64-latest'  # ARM64 native
-          - 'ubuntu-latest'        # AMD64 for compatibility
-        default: 'ubuntu-arm64-latest'
+          - 'ubuntu-24.04-arm'    # Free ARM64 runner (NEW!)
+          - 'ubuntu-22.04-arm'    # Alternative ARM64 runner
+          - 'ubuntu-latest'       # AMD64 for compatibility
+        default: 'ubuntu-24.04-arm'
       build_mode:
         description: 'Build mode'
         required: false
@@ -33,7 +34,7 @@ env:
 jobs:
   environment-analysis:
     name: 🔍 Architecture Analysis
-    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
     outputs:
       architecture: ${{ steps.analyze.outputs.architecture }}
       runner_type: ${{ steps.analyze.outputs.runner_type }}
@@ -84,7 +85,7 @@ jobs:
 
   native-arm64-build:
     name: 🏗️ Native ARM64 Build
-    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
     needs: environment-analysis
     if: needs.environment-analysis.outputs.build_mode == 'native'
     steps:
@@ -167,7 +168,7 @@ jobs:
 
   docker-multi-arch-build:
     name: 🐳 Docker Multi-Arch Build
-    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
     needs: environment-analysis
     if: needs.environment-analysis.outputs.build_mode == 'docker'
     steps:
@@ -199,7 +200,7 @@ jobs:
 
   performance-comparison:
     name: 📊 Performance Analysis
-    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
     needs: [environment-analysis, native-arm64-build]
     if: always() && !cancelled()
     steps:

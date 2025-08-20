@@ -674,8 +674,13 @@ arm64-staging: act-check
 # ARM64 performance comparison
 arm64-benchmark: act-check
 	@echo "$(CYAN)📊 ARM64 vs AMD64 Performance Analysis$(NC)"
-	@echo "$(BLUE)Local Mac ARM64 build...$(NC)"
+	@echo "$(BLUE)🏠 Local Mac ARM64 build (native)...$(NC)"
 	@time $(MAKE) build-local > /dev/null 2>&1 || echo "$(YELLOW)ARM64 build failed$(NC)"
-	@echo "$(BLUE)Simulated CI ARM64 build...$(NC)"
+	@echo "$(BLUE)☁️  GitHub ubuntu-24.04-arm simulation...$(NC)"
 	@time $(MAKE) arm64-test > /dev/null 2>&1 || echo "$(YELLOW)CI ARM64 simulation failed$(NC)"
 	@echo "$(GREEN)✅ ARM64 benchmark completed!$(NC)"
+	@echo "$(CYAN)💡 GitHub ARM64 Benefits:$(NC)"
+	@echo "  - 40% performance boost vs previous generation"
+	@echo "  - 37% cost savings vs x64 runners"  
+	@echo "  - 30-40% less power consumption"
+	@echo "  - FREE for public repositories"
