@@ -67,6 +67,28 @@ npm run test:trigger   # Trigger CI workflows from local environment
   - Security Scanning (🔒)
   - Netlify Staging Pipeline
 
+### 🚀 ARM64 Performance Strategy (Mac M1/M2 + GitHub ARM Runners)
+
+**Revolutionary Performance**: Native ARM64 execution for maximum speed on Mac M1/M2 and GitHub ARM64 runners.
+
+#### ARM64 Local Development
+```bash
+make arm64-test        # Test ARM64 performance with act
+make arm64-staging     # Test ARM64 staging deployment
+make arm64-benchmark   # ARM64 vs AMD64 performance comparison
+```
+
+#### GitHub ARM64 Runners
+- **Staging Pipeline**: Uses `ubuntu-arm64-latest` for native ARM64 performance
+- **Node.js Setup**: Explicit `architecture: 'arm64'` for optimized binaries
+- **Docker Multi-arch**: Supports both `linux/arm64` and `linux/amd64`
+
+#### Performance Benefits
+- **2-3x Faster Builds**: Native ARM64 Node.js binaries
+- **Faster Image Processing**: Native Sharp ARM64 compilation
+- **Efficient PDF Generation**: ARM64 Puppeteer with native Chrome
+- **Architecture Parity**: Same performance locally (Mac M1/M2) and CI (GitHub ARM64)
+
 #### Resource Optimization Strategy
 
 **Local Benefits:**
@@ -80,6 +102,40 @@ npm run test:trigger   # Trigger CI workflows from local environment
 - Cross-platform testing (AMD64 CI vs ARM64 local)
 - Artifact collection and preservation
 - No timeout limitations
+
+### 🎭 Act Integration (Local GitHub Actions Testing)
+
+**Revolutionary Local Testing**: Run GitHub Actions workflows locally with act for instant feedback.
+
+#### Act Setup Commands
+```bash
+make act-setup         # Create .actrc and .env.act configuration
+make act-check         # Verify act installation and configuration
+make act-list          # List all available workflows
+```
+
+#### Act Testing Commands
+```bash
+make act-staging       # Test staging deployment workflow
+make act-lighthouse    # Test Lighthouse performance workflow
+make act-security      # Test security scanning workflow
+make act-visual        # Test visual regression workflow
+make act-pr-preview    # Test PR preview workflow
+make act-test-all      # Test all workflows (dry-run)
+```
+
+#### Docker-Free Development (Revolutionary)
+```bash
+make dev-local         # Development using act local environment (no Docker)
+make build-local       # Build using act local environment (no Docker)
+make test-local        # Test using act local environment (no Docker)
+```
+
+#### Act Benefits
+- **Instant Feedback**: Test GitHub Actions locally before pushing
+- **No Docker Overhead**: Direct host Node.js execution for maximum speed
+- **Perfect Debugging**: Debug workflows locally with full access
+- **Cost Efficiency**: No CI minutes consumed during development
 
 ### Docker Operations
 

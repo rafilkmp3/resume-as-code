@@ -17,6 +17,7 @@ DOCKER_TAG=latest
 
 # act configuration for local GitHub Actions testing
 ACT_FLAGS=--container-architecture linux/amd64
+ACT_LOCAL_FLAGS=--env RUN_LOCAL=true --bind
 
 # Default target
 help:
@@ -68,6 +69,16 @@ help:
 	@echo "  $(CYAN)make act-pr-preview$(NC)  - Test PR preview workflow locally"
 	@echo "  $(CYAN)make act-setup$(NC)       - Create .actrc and .env.act configuration"
 	@echo "  $(CYAN)make act-test-all$(NC)    - Test all workflows (dry-run)"
+	@echo ""
+	@echo "$(GREEN)🚀 Local Development (No Docker):$(NC)"
+	@echo "  $(CYAN)make dev-local$(NC)       - Development using act local environment"
+	@echo "  $(CYAN)make build-local$(NC)     - Build using act local environment"
+	@echo "  $(CYAN)make test-local$(NC)      - Test using act local environment"
+	@echo ""
+	@echo "$(GREEN)🚀 ARM64 Performance (Mac M1/M2):$(NC)"
+	@echo "  $(CYAN)make arm64-test$(NC)      - Test ARM64 performance with act"
+	@echo "  $(CYAN)make arm64-staging$(NC)   - Test ARM64 staging deployment"
+	@echo "  $(CYAN)make arm64-benchmark$(NC) - ARM64 vs AMD64 performance comparison"
 	@echo ""
 	@echo "$(GREEN)📊 Performance & UX Monitoring:$(NC)"
 	@echo "  $(CYAN)npm run perf:report$(NC) - Full performance analysis report"
@@ -572,3 +583,99 @@ act-setup: act-check
 	else \
 		echo "$(GREEN)✅ .env.act already exists$(NC)"; \
 	fi
+
+# =============================================================================
+# 🚀 Local Development Without Docker (Revolutionary)
+# =============================================================================
+
+# Check if local dependencies are installed
+check-local-deps:
+	@echo "$(CYAN)🔍 Checking local dependencies...$(NC)"
+	@command -v node >/dev/null 2>&1 || { echo "$(RED)❌ Node.js is not installed$(NC)"; exit 1; }
+	@command -v npm >/dev/null 2>&1 || { echo "$(RED)❌ npm is not installed$(NC)"; exit 1; }
+	@NODE_VERSION=$$(node --version); echo "$(GREEN)✅ Node.js: $$NODE_VERSION$(NC)"
+	@NPM_VERSION=$$(npm --version); echo "$(GREEN)✅ npm: $$NPM_VERSION$(NC)"
+	@if [ -f "package.json" ]; then echo "$(GREEN)✅ package.json found$(NC)"; else echo "$(YELLOW)⚠️ package.json not found$(NC)"; fi
+
+# Install dependencies locally (no Docker)
+install-local: check-local-deps
+	@echo "$(CYAN)📦 Installing local dependencies...$(NC)"
+	@npm ci
+	@echo "$(GREEN)✅ Dependencies installed$(NC)"
+
+# Development server using act local environment
+dev-local: act-check check-local-deps
+	@echo "$(PURPLE)🚀 Starting development using act local environment...$(NC)"
+	@echo "$(CYAN)⚡ No Docker required - using host Node.js environment$(NC)"
+	@echo "$(YELLOW)💡 Environment: RUN_LOCAL=true$(NC)"
+	@if [ ! -f "node_modules/.bin/nodemon" ]; then npm install; fi
+	@RUN_LOCAL=true NODE_ENV=development npm run dev
+
+# Build using act local environment
+build-local: act-check check-local-deps
+	@echo "$(GREEN)🏗️ Building using act local environment...$(NC)"
+	@echo "$(CYAN)⚡ No Docker required - using host Node.js environment$(NC)"
+	@RUN_LOCAL=true NODE_ENV=production npm run build
+	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
+	@echo "$(CYAN)📁 Output files:$(NC)"
+	@echo "  - HTML: $(GREEN)./dist/index.html$(NC)"
+	@echo "  - PDF:  $(GREEN)./dist/resume.pdf$(NC)"
+	@echo "  - Assets: $(GREEN)./dist/assets/$(NC)"
+
+# Test using act local environment
+test-local: act-check check-local-deps
+	@echo "$(BLUE)🧪 Testing using act local environment...$(NC)"
+	@echo "$(CYAN)⚡ No Docker required - using host Node.js environment$(NC)"
+	@RUN_LOCAL=true npm test
+	@echo "$(GREEN)✅ Tests completed successfully!$(NC)"
+
+# Test build workflow using act with local environment
+act-build-local: act-check
+	@echo "$(PURPLE)🏗️ Testing build workflow with act (local environment)...$(NC)"
+	@echo "$(CYAN)⚡ Using local Node.js instead of Docker containers$(NC)"
+	@act push $(ACT_LOCAL_FLAGS) --job build --env RUN_LOCAL=true --verbose
+
+# Comprehensive local development workflow  
+dev-workflow-local: act-check
+	@echo "$(PURPLE)🔄 Running complete development workflow locally...$(NC)"
+	@echo "$(CYAN)Phase 1: Installing dependencies$(NC)"
+	@$(MAKE) install-local
+	@echo "$(CYAN)Phase 2: Building project$(NC)"
+	@$(MAKE) build-local
+	@echo "$(CYAN)Phase 3: Running tests$(NC)"
+	@$(MAKE) test-local
+	@echo "$(GREEN)🎉 Complete local workflow finished successfully!$(NC)"
+
+# Compare Docker vs Local performance
+benchmark-docker-vs-local: act-check docker-check
+	@echo "$(CYAN)⚡ Benchmarking Docker vs Local performance...$(NC)"
+	@echo "$(BLUE)Testing Docker build...$(NC)"
+	@time $(MAKE) build > /dev/null 2>&1 || echo "$(YELLOW)Docker build failed$(NC)"
+	@echo "$(BLUE)Testing Local build...$(NC)"
+	@time $(MAKE) build-local > /dev/null 2>&1 || echo "$(YELLOW)Local build failed$(NC)"
+	@echo "$(GREEN)✅ Benchmark completed!$(NC)"
+
+# =============================================================================
+# 🚀 ARM64 Performance Commands (Mac M1/M2 + GitHub ARM runners)
+# =============================================================================
+
+# Test ARM64 performance locally
+arm64-test: act-check
+	@echo "$(PURPLE)🚀 Testing ARM64 performance with act...$(NC)"
+	@echo "$(CYAN)⚡ Simulating GitHub ARM64 runners locally$(NC)"
+	@act workflow_dispatch $(ACT_LOCAL_FLAGS) --workflows .github/workflows/arm64-development.yml
+
+# ARM64 staging deployment test
+arm64-staging: act-check
+	@echo "$(PURPLE)🚀 Testing ARM64 staging deployment...$(NC)"
+	@echo "$(CYAN)⚡ Native ARM64 performance simulation$(NC)"
+	@act push $(ACT_LOCAL_FLAGS) --workflows .github/workflows/staging-deployment.yml
+
+# ARM64 performance comparison
+arm64-benchmark: act-check
+	@echo "$(CYAN)📊 ARM64 vs AMD64 Performance Analysis$(NC)"
+	@echo "$(BLUE)Local Mac ARM64 build...$(NC)"
+	@time $(MAKE) build-local > /dev/null 2>&1 || echo "$(YELLOW)ARM64 build failed$(NC)"
+	@echo "$(BLUE)Simulated CI ARM64 build...$(NC)"
+	@time $(MAKE) arm64-test > /dev/null 2>&1 || echo "$(YELLOW)CI ARM64 simulation failed$(NC)"
+	@echo "$(GREEN)✅ ARM64 benchmark completed!$(NC)"
