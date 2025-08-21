@@ -104,13 +104,25 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: 🚀 Aggressive Caching Setup (Speedlight Builds)
+      - name: 🌐 Setup Chrome (Professional Action)
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-dependencies: true
+        id: setup-chrome
+
+      - name: Configure Puppeteer Chrome Path
+        run: |
+          echo "PUPPETEER_EXECUTABLE_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+          echo "✅ Chrome ready for PDF generation: ${{ steps.setup-chrome.outputs.chrome-version }}"
+
+      - name: 🚀 Speedlight Caching (Dependencies + Build Artifacts)
         uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             ~/.cache
-            .next/cache
+            node_modules
             node_modules/.cache
             dist/assets/images
             dist/assets/optimized

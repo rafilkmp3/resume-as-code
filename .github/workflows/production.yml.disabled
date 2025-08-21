@@ -1,15 +1,18 @@
----
-name: GitHub Pages Production Pipeline
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      emergency_reason:
-        description: 'Emergency production deployment reason'
-        required: false
-        type: string
+# DISABLED: Old Docker-based production pipeline
+# Use speedlight staging-deployment.yml for all deployments now
+# 
+# ---
+# name: GitHub Pages Production Pipeline (DISABLED - Docker Legacy)
+# 
+# on:
+#   release:
+#     types: [published]
+#   workflow_dispatch:
+#     inputs:
+#       emergency_reason:
+#         description: 'Emergency production deployment reason'
+#         required: false
+#         type: string
 
 concurrency:
   group: production-${{ github.ref }}
