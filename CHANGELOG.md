@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.4.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.3.0...v4.4.0) (2025-08-21)
+
+
+### Features
+
+* add speedlight github actions achievements to professional summary ([32b8101](https://github.com/rafilkmp3/resume-as-code/commit/32b81010f18d14f6d875cc10199e0c689cd828cc))
+* enhance lighthouse ci reporting with public storage url extraction ([d47e44a](https://github.com/rafilkmp3/resume-as-code/commit/d47e44ace6351a16e192a28a965af089fb32f842))
+
 ## [4.3.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.1...v4.3.0) (2025-08-21)
 
 
