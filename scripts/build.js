@@ -346,6 +346,37 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   fs.writeFileSync('./dist/index.html', html);
 
+  // Generate /version endpoint for environment tracking
+  const versionEndpointData = {
+    version: appVersion,
+    environment: environment,
+    environmentDetails: environmentDetails,
+    buildBranch: buildBranch,
+    commitHash: commitShort,
+    commitsSinceRelease: commitsSinceRelease,
+    lastReleaseTag: lastReleaseTag,
+    buildTimestamp: buildTimestamp,
+    deployUrl: deployUrl,
+    prNumber: prNumber || null,
+    buildContext: process.env.BUILD_CONTEXT || 'main',
+    contextUrl: process.env.CONTEXT_URL || '',
+    compareUrl: process.env.COMPARE_URL || '',
+    isProduction: isProduction,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  };
+
+  fs.writeFileSync('./dist/version.json', JSON.stringify(versionEndpointData, null, 2));
+  
+  // Also create a simple version.txt for easy checking
+  const versionTextContent = `${appVersion}\n${environment}\n${commitShort}\n${buildTimestamp}\n${deployUrl}`;
+  fs.writeFileSync('./dist/version.txt', versionTextContent);
+  
+  console.log(`🔗 Version endpoints generated:`);
+  console.log(`   📄 /version.json - Detailed version information`);
+  console.log(`   📝 /version.txt - Simple version text (${appVersion})`);
+  console.log(`   Environment: ${environment} (${environmentDetails})`);
+  console.log(`   Version: ${appVersion} | Commit: ${commitShort} | Build: ${buildTimestamp}`);
+
   console.log('✅ HTML generated successfully!');
 }
 
