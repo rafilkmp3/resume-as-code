@@ -243,8 +243,9 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   // Smart environment detection
   const isNetlifyPreview = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'deploy-preview';
   const isNetlifyBranch = process.env.NETLIFY === 'true' && process.env.CONTEXT === 'branch-deploy';
-  const isGitHubPages = process.env.GITHUB_PAGES === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  const isProduction = (buildBranch === 'main' && !isNetlifyPreview) || process.env.NODE_ENV === 'production';
+  const isNetlifyStaging = process.env.DEPLOY_URL && process.env.DEPLOY_URL.includes('resume-as-code.netlify.app');
+  const isGitHubPages = process.env.GITHUB_PAGES === 'true' || (process.env.GITHUB_ACTIONS === 'true' && !isNetlifyStaging);
+  const isProduction = (buildBranch === 'main' && !isNetlifyPreview && !isNetlifyStaging) || process.env.NODE_ENV === 'production';
 
   // Environment classification with detailed context
   let environment, environmentDetails;
@@ -254,6 +255,9 @@ async function generateHTML(resumeData, templatePath, options = {}) {
   } else if (isNetlifyBranch) {
     environment = 'netlify-branch';
     environmentDetails = `Netlify Branch Deploy (${buildBranch})`;
+  } else if (isNetlifyStaging) {
+    environment = 'netlify-staging';
+    environmentDetails = `Netlify Staging (${buildBranch})`;
   } else if (isGitHubPages && buildBranch === 'main') {
     environment = 'production';
     environmentDetails = 'GitHub Pages Production';

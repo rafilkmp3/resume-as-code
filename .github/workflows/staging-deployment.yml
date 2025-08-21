@@ -95,6 +95,15 @@ jobs:
           echo "DEPLOY_PRIME_URL=https://resume-as-code.netlify.app/" >> $GITHUB_ENV
           echo "DEPLOY_URL=https://resume-as-code.netlify.app/" >> $GITHUB_ENV
           
+          # Export version tracking variables for build script
+          if [ -z "$LAST_TAG" ]; then
+            echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_RELEASE}" >> $GITHUB_ENV
+            echo "LAST_RELEASE_TAG=none" >> $GITHUB_ENV
+          else
+            echo "COMMITS_SINCE_RELEASE=${COMMITS_SINCE_TAG}" >> $GITHUB_ENV
+            echo "LAST_RELEASE_TAG=${LAST_TAG}" >> $GITHUB_ENV
+          fi
+          
           echo "🏷️ Staging version: ${STAGING_VERSION}"
           echo "🌐 Staging URL: https://resume-as-code.netlify.app/"
 
