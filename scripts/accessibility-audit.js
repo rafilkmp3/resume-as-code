@@ -28,8 +28,32 @@ class AccessibilityAuditor {
   auditHTML() {
     console.log('🔍 Analyzing HTML structure...');
 
-    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
-    const htmlContent = fs.readFileSync(templatePath, 'utf8');
+    // Try multiple possible template locations for speedlight architecture compatibility
+    const possiblePaths = [
+      path.join(__dirname, '..', 'src', 'templates', 'template.html'),  // Speedlight architecture
+      path.join(__dirname, '..', 'templates', 'template.html'),          // Legacy path
+      path.join(__dirname, '..', 'dist', 'index.html'),                  // Built HTML fallback
+    ];
+    
+    let htmlContent = '';
+    let templatePath = '';
+    
+    for (const possiblePath of possiblePaths) {
+      try {
+        if (fs.existsSync(possiblePath)) {
+          htmlContent = fs.readFileSync(possiblePath, 'utf8');
+          templatePath = possiblePath;
+          console.log(`✅ Using template from: ${templatePath}`);
+          break;
+        }
+      } catch (error) {
+        console.log(`⚠️  Could not read ${possiblePath}: ${error.message}`);
+      }
+    }
+    
+    if (!htmlContent) {
+      throw new Error(`❌ Could not find template file in any of these locations:\n${possiblePaths.map(p => `  - ${p}`).join('\n')}`);
+    }
 
     // 1. Language and Document Structure
     this.checkDocumentStructure(htmlContent);
@@ -263,9 +287,30 @@ class AccessibilityAuditor {
   checkCSS() {
     console.log('🎨 Analyzing CSS for accessibility...');
 
-    // Look for CSS files in the template
-    const templatePath = path.join(__dirname, '..', 'templates', 'template.html');
-    const htmlContent = fs.readFileSync(templatePath, 'utf8');
+    // Look for CSS files in the template - reuse the same path resolution logic
+    const possiblePaths = [
+      path.join(__dirname, '..', 'src', 'templates', 'template.html'),  // Speedlight architecture
+      path.join(__dirname, '..', 'templates', 'template.html'),          // Legacy path
+      path.join(__dirname, '..', 'dist', 'index.html'),                  // Built HTML fallback
+    ];
+    
+    let htmlContent = '';
+    
+    for (const possiblePath of possiblePaths) {
+      try {
+        if (fs.existsSync(possiblePath)) {
+          htmlContent = fs.readFileSync(possiblePath, 'utf8');
+          break;
+        }
+      } catch (error) {
+        // Continue to next path
+      }
+    }
+    
+    if (!htmlContent) {
+      console.log('⚠️  Could not find template for CSS analysis - skipping CSS checks');
+      return;
+    }
 
     // Check for color contrast considerations
     this.checkColorContrast(htmlContent);
