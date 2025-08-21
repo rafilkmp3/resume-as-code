@@ -233,7 +233,6 @@ jobs:
             --body "$PR_BODY" \
             --base main \
             --head "${{ needs.initialize-e2e-controller.outputs.test_branch }}" \
-            --label "e2e-test" \
             --label "automated" | grep -o '#[0-9]*' | tr -d '#')
           
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
@@ -377,31 +376,84 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Validate Staging Version Endpoints
+      - name: Validate Version Against Git and Node
         id: version-validation
         run: |
-          echo "🔍 Validating staging version endpoints..."
+          echo "🔍 Validating version information against git and node commands..."
           
-          STAGING_URL="https://resume-as-code.netlify.app"
+          # Get current git information
+          GIT_COMMIT=$(git rev-parse HEAD)
+          GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          GIT_SHORT_COMMIT=$(git rev-parse --short HEAD)
+          
+          # Get package.json version
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          echo "📋 Local Environment Information:"
+          echo "  Git Commit: $GIT_COMMIT"
+          echo "  Git Branch: $GIT_BRANCH"
+          echo "  Package Version: $PACKAGE_VERSION"
+          echo ""
           
           # Test staging version.json
+          STAGING_URL="https://resume-as-code.netlify.app"
           echo "📋 Testing $STAGING_URL/version.json..."
+          
           if curl -f -s "$STAGING_URL/version.json" | jq . > /dev/null; then
             VERSION_DATA=$(curl -s "$STAGING_URL/version.json")
             echo "✅ Staging version.json is accessible"
             echo "📄 Version data: $VERSION_DATA"
             
-            # Validate required fields
-            ENVIRONMENT=$(echo "$VERSION_DATA" | jq -r '.environment // "unknown"')
-            VERSION=$(echo "$VERSION_DATA" | jq -r '.version // "unknown"')
+            # Extract version information from endpoint
+            ENDPOINT_VERSION=$(echo "$VERSION_DATA" | jq -r '.version // "unknown"')
+            ENDPOINT_COMMIT=$(echo "$VERSION_DATA" | jq -r '.commitHash // "unknown"')
+            ENDPOINT_BRANCH=$(echo "$VERSION_DATA" | jq -r '.buildBranch // "unknown"')
+            ENDPOINT_ENV=$(echo "$VERSION_DATA" | jq -r '.environment // "unknown"')
             
-            if [[ "$ENVIRONMENT" != "unknown" && "$VERSION" != "unknown" ]]; then
-              echo "✅ Version endpoint validation passed"
+            echo ""
+            echo "📋 Version Endpoint Information:"
+            echo "  Version: $ENDPOINT_VERSION"
+            echo "  Commit: $ENDPOINT_COMMIT"
+            echo "  Branch: $ENDPOINT_BRANCH"
+            echo "  Environment: $ENDPOINT_ENV"
+            echo ""
+            
+            # Validation logic
+            VALIDATION_ISSUES=0
+            
+            # Check if version matches package.json
+            if [[ "$ENDPOINT_VERSION" == "$PACKAGE_VERSION" ]]; then
+              echo "✅ Version matches package.json ($PACKAGE_VERSION)"
+            else
+              echo "⚠️ Version mismatch: endpoint=$ENDPOINT_VERSION, package.json=$PACKAGE_VERSION"
+              VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+            fi
+            
+            # Check if commit hash matches (at least first 7 characters)
+            if [[ "$ENDPOINT_COMMIT" == "$GIT_SHORT_COMMIT"* ]] || [[ "$ENDPOINT_COMMIT" == "$GIT_COMMIT" ]]; then
+              echo "✅ Commit hash matches git ($GIT_SHORT_COMMIT)"
+            else
+              echo "⚠️ Commit hash mismatch: endpoint=$ENDPOINT_COMMIT, git=$GIT_SHORT_COMMIT"
+              VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+            fi
+            
+            # Check environment field exists
+            if [[ "$ENDPOINT_ENV" != "unknown" ]]; then
+              echo "✅ Environment field present ($ENDPOINT_ENV)"
+            else
+              echo "⚠️ Environment field missing"
+              VALIDATION_ISSUES=$((VALIDATION_ISSUES + 1))
+            fi
+            
+            # Final validation result
+            if [[ $VALIDATION_ISSUES -eq 0 ]]; then
+              echo "✅ All version validation checks passed"
               echo "status=success" >> $GITHUB_OUTPUT
             else
-              echo "⚠️ Version endpoint missing required fields"
+              echo "⚠️ $VALIDATION_ISSUES validation issue(s) found"
               echo "status=partial" >> $GITHUB_OUTPUT
             fi
+            
           else
             echo "❌ Staging version endpoint not accessible"
             echo "status=failed" >> $GITHUB_OUTPUT
@@ -421,32 +473,31 @@ jobs:
         run: |
           echo "🌐 Monitoring all deployment endpoints..."
           
-          ENDPOINTS='${{ needs.initialize-e2e-controller.outputs.endpoints_to_test }}'
-          RESULTS="[]"
+          # Simple endpoint monitoring without complex JSON construction
+          STAGING_URL="https://resume-as-code.netlify.app/version.json"
+          PROD_URL="https://rafilkmp3.github.io/resume-as-code/version.json"
           
-          for endpoint in $(echo "$ENDPOINTS" | jq -r '.[]'); do
-            echo "🔍 Testing endpoint: $endpoint"
-            
-            if curl -f -s -L "$endpoint" > /dev/null; then
-              echo "✅ $endpoint is accessible"
-              STATUS="success"
-            else
-              echo "❌ $endpoint is not accessible"
-              STATUS="failed"
-            fi
-            
-            # Build JSON properly using jq
-            RESULT=$(jq -n \
-              --arg url "$endpoint" \
-              --arg status "$STATUS" \
-              --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-              '{url: $url, status: $status, timestamp: $timestamp}')
-            
-            RESULTS=$(echo "$RESULTS" | jq ". + [$RESULT]")
-          done
+          echo "🔍 Testing staging endpoint: $STAGING_URL"
+          if curl -f -s -L "$STAGING_URL" > /dev/null; then
+            echo "✅ Staging endpoint is accessible"
+            STAGING_STATUS="success"
+          else
+            echo "❌ Staging endpoint is not accessible"
+            STAGING_STATUS="failed"
+          fi
           
-          # Use printf to avoid newline issues with GitHub Actions output
-          printf "results=%s\n" "$RESULTS" >> $GITHUB_OUTPUT
+          echo "🔍 Testing production endpoint: $PROD_URL"
+          if curl -f -s -L "$PROD_URL" > /dev/null; then
+            echo "✅ Production endpoint is accessible"
+            PROD_STATUS="success"
+          else
+            echo "❌ Production endpoint is not accessible (expected for non-release branches)"
+            PROD_STATUS="expected_fail"
+          fi
+          
+          # Create simple JSON results
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "results={\"staging\":\"$STAGING_STATUS\",\"production\":\"$PROD_STATUS\",\"timestamp\":\"$TIMESTAMP\"}" >> $GITHUB_OUTPUT
           echo "📊 Endpoint monitoring completed"
 
   e2e-summary-report:
