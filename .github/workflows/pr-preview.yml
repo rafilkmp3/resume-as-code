@@ -25,9 +25,7 @@ jobs:
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
     env:
-      DOCKER_BUILDKIT: 1
-      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-      # Preview environment variables
+      # Speedlight preview environment variables (Docker-free)
       NETLIFY: 'true'
       NETLIFY_ENV: 'deploy-preview'
       REVIEW_ID: ${{ github.event.pull_request.number }}
@@ -35,7 +33,7 @@ jobs:
       BRANCH: ${{ github.event.pull_request.head.ref }}
       CONTEXT: 'deploy-preview'
       DEPLOY_URL: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
-      NODE_ENV: 'preview'
+      NODE_ENV: 'production'
       GITHUB_PAGES: 'false'
 
     steps:
@@ -59,10 +57,30 @@ jobs:
           echo "✅ NETLIFY_SITE_ID secret configured"
           echo "🎉 Netlify deployment ready"
 
-      - name: Setup Node.js for Netlify CLI test
+      - name: 🚀 Speedlight Caching (Dependencies + Build Artifacts)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+            node_modules
+            node_modules/.cache
+            dist/assets/images
+            dist/assets/optimized
+          key: ${{ runner.os }}-speedlight-preview-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          restore-keys: |
+            ${{ runner.os }}-speedlight-preview-
+            ${{ runner.os }}-speedlight-
+
+      - name: Setup Node.js (Speedlight)
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+
+      - name: Configure Node.js for CI
+        run: |
+          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
 
       - name: Test Netlify CLI functionality
         env:
@@ -73,75 +91,61 @@ jobs:
         with:
           args: status --json
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: 🌐 Setup Chrome (Professional Action)
+        uses: browser-actions/setup-chrome@v2
         with:
-          node-version: '22'
+          chrome-version: stable
+          install-dependencies: true
+        id: setup-chrome
 
-      - name: Configure Node.js for CI
+      - name: Configure Puppeteer Chrome Path
         run: |
-          echo "NODE_NO_WARNINGS=1" >> "$GITHUB_ENV"
+          echo "PUPPETEER_EXECUTABLE_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+          echo "✅ Chrome ready for PDF generation: ${{ steps.setup-chrome.outputs.chrome-version }}"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64
+      - name: ⚡ Install Dependencies (with speedlight cache)
+        run: |
+          echo "📦 Installing dependencies with speedlight cache optimization..."
+          if [ -d "node_modules" ] && [ -f "package-lock.json" ]; then
+            echo "⚡ SPEEDLIGHT: Dependencies cached and available!"
+            npm list >/dev/null 2>&1 || npm ci --prefer-offline --no-audit
+          else
+            npm ci --prefer-offline --no-audit
+          fi
 
-      - name: Log in to Container Registry for cache
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-preview-${{ hashFiles('package*.json', 'docker/Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build Preview with Docker
+      - name: ⚡ Speedlight Build (Docker-free)
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          APP_VERSION: "preview-${{ github.event.pull_request.number }}"
+          BUILD_CONTEXT: "pr"
+          URL: "https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app"
+          DEPLOY_URL: "https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app"
         run: |
-          echo "🏗️ Building preview for PR #${PR_NUMBER}"
-          docker buildx build \
-            --file docker/Dockerfile \
-            --target builder \
-            --platform linux/amd64 \
-            --build-arg GITHUB_SHA="${HEAD_SHA}" \
-            --build-arg GITHUB_REF_NAME="${HEAD_REF}" \
-            --build-arg APP_VERSION="preview-${PR_NUMBER}" \
-            --build-arg BUILD_CONTEXT=pr \
-            --build-arg PR_NUMBER="${PR_NUMBER}" \
-            --build-arg NODE_ENV=preview \
-            --build-arg NETLIFY=true \
-            --build-arg NETLIFY_ENV=deploy-preview \
-            --build-arg CONTEXT=deploy-preview \
-            --build-arg DEPLOY_URL="${DEPLOY_URL}" \
-            --cache-from type=registry,ref=ghcr.io/${{ github.repository }}-cache:golden-base \
-            --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
-            --tag "resume:preview-${PR_NUMBER}" \
-            --load \
-            .
-
-          # Update cache atomically
-          if [[ -d "/tmp/.buildx-cache-new" ]]; then
-            rm -rf /tmp/.buildx-cache
-            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          echo "🚀 SPEEDLIGHT BUILD: PR Preview #${PR_NUMBER}"
+          echo "=========================================="
+          echo "📋 Build Context: ${BUILD_CONTEXT}"
+          echo "🎯 Target URL: ${DEPLOY_URL}"
+          echo "📦 Chrome: ${{ steps.setup-chrome.outputs.chrome-version }}"
+          echo "⚡ Strategy: Docker-free Node.js with aggressive caching"
+          echo ""
+          
+          # Intelligent build detection
+          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+            SOURCE_NEWER=$(find src/ assets/ -newer dist/index.html 2>/dev/null | wc -l)
+            if [ "$SOURCE_NEWER" -eq 0 ]; then
+              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
+              echo "📁 Preview build artifacts (cached):"
+              ls -la dist/
+              exit 0
+            fi
           fi
-
-      - name: Extract build artifacts
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          mkdir -p dist
-          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:preview-${PR_NUMBER}" sh -c "cp -r /app/dist/* /tmp/dist/"
+          
+          # Execute build with timing
+          echo "🏗️ Building preview with speedlight cache optimization..."
+          time npm run build
+          
           echo "📁 Preview build artifacts:"
           ls -la dist/
 
@@ -782,6 +786,7 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
+      security-events: write
     with:
       target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
       environment_name: 'preview'

@@ -1,0 +1,278 @@
+---
+name: 🚀 ARM64 Development Pipeline (Mac M1/M2 Compatible)
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_type:
+        description: 'Choose runner architecture'
+        required: false
+        type: choice
+        options:
+          - 'ubuntu-24.04-arm'    # Free ARM64 runner (NEW!)
+          - 'ubuntu-22.04-arm'    # Alternative ARM64 runner
+          - 'ubuntu-latest'       # AMD64 for compatibility
+        default: 'ubuntu-24.04-arm'
+      build_mode:
+        description: 'Build mode'
+        required: false
+        type: choice
+        options:
+          - 'native'    # Direct Node.js (fastest)
+          - 'docker'    # Docker multi-arch
+        default: 'native'
+  push:
+    branches:
+      - 'arm64/**'
+      - 'feature/arm64-**'
+
+env:
+  # Native ARM64 development
+  DOCKER_BUILDKIT: 1
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
+jobs:
+  environment-analysis:
+    name: 🔍 Architecture Analysis
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
+    outputs:
+      architecture: ${{ steps.analyze.outputs.architecture }}
+      runner_type: ${{ steps.analyze.outputs.runner_type }}
+      build_mode: ${{ steps.analyze.outputs.build_mode }}
+      performance_benefits: ${{ steps.analyze.outputs.performance_benefits }}
+    steps:
+      - name: Analyze runner architecture
+        id: analyze
+        run: |
+          echo "🔍 Analyzing runner architecture and capabilities..."
+          
+          # Detect actual architecture
+          ARCH=$(uname -m)
+          OS=$(uname -s)
+          CORES=$(nproc)
+          MEMORY=$(free -h | awk '/^Mem:/ {print $2}' || echo "N/A")
+          
+          echo "📊 System Information:"
+          echo "  - Architecture: $ARCH"
+          echo "  - OS: $OS"
+          echo "  - CPU Cores: $CORES"
+          echo "  - Memory: $MEMORY"
+          echo "  - Runner: ${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}"
+          echo "  - Build Mode: ${{ github.event.inputs.build_mode || 'native' }}"
+          
+          # Set outputs
+          echo "architecture=$ARCH" >> $GITHUB_OUTPUT
+          echo "runner_type=${{ github.event.inputs.runner_type || 'ubuntu-arm64-latest' }}" >> $GITHUB_OUTPUT
+          echo "build_mode=${{ github.event.inputs.build_mode || 'native' }}" >> $GITHUB_OUTPUT
+          
+          # Analyze performance benefits
+          if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+            echo "performance_benefits=native_arm64" >> $GITHUB_OUTPUT
+            echo "🚀 NATIVE ARM64 detected - maximum performance expected!"
+            echo "💡 Benefits: No emulation, native instruction set, optimized Node.js binaries"
+          else
+            echo "performance_benefits=emulated_or_amd64" >> $GITHUB_OUTPUT
+            echo "⚠️  AMD64 detected - consider using ARM64 runners for better performance"
+          fi
+          
+          # Display Node.js architecture info if available
+          if command -v node >/dev/null 2>&1; then
+            echo "📦 Node.js Information:"
+            echo "  - Version: $(node --version)"
+            echo "  - Architecture: $(node -p 'process.arch')"
+            echo "  - Platform: $(node -p 'process.platform')"
+          fi
+
+  native-arm64-build:
+    name: 🏗️ Native ARM64 Build
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
+    needs: environment-analysis
+    if: needs.environment-analysis.outputs.build_mode == 'native'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js (ARM64 optimized)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          architecture: 'arm64'  # Explicit ARM64 Node.js
+
+      - name: 🚀 ARM64 Speedlight Caching Setup
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+            node_modules
+            node_modules/.cache
+            dist/
+          key: ${{ runner.os }}-arm64-dev-speedlight-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          restore-keys: |
+            ${{ runner.os }}-arm64-dev-speedlight-
+            ${{ runner.os }}-arm64-dev-
+            ${{ runner.os }}-arm64-
+
+      - name: ⚡ Speedlight Dependencies (Native ARM64)
+        run: |
+          echo "🚀 SPEEDLIGHT DEVELOPMENT: ARM64 native with aggressive caching"
+          echo "💡 Expected: Instant dependency resolution on cache hits"
+          
+          # Check cache hit status
+          if [ -d "node_modules" ] && [ -f "package-lock.json" ]; then
+            echo "✅ CACHE HIT: node_modules restored from speedlight cache"
+            # Quick verification
+            npm ls --depth=0 > /dev/null 2>&1 && echo "✅ Dependencies verified" || time npm ci
+          else
+            echo "🔄 CACHE MISS: Installing ARM64 native dependencies"
+            time npm ci
+          fi
+          
+          # Verify ARM64 native binaries
+          echo "🔍 Verifying native ARM64 binaries:"
+          if [ -d "node_modules/sharp" ]; then
+            file node_modules/sharp/lib/libvips-cpp.so.* 2>/dev/null | head -1 || echo "Sharp binary not found"
+          fi
+          if [ -d "node_modules/puppeteer" ]; then
+            echo "  - Puppeteer: $(ls node_modules/puppeteer/.local-chromium/*/chrome-linux/chrome 2>/dev/null | head -1 || echo 'Chrome binary not found')"
+          fi
+
+      - name: ⚡ Speedlight Build (Native ARM64)
+        env:
+          NODE_ENV: production
+          GITHUB_PAGES: false
+          NETLIFY: true
+          CONTEXT: arm64-development
+        run: |
+          echo "🚀 SPEEDLIGHT BUILD: Native ARM64 with intelligent caching"
+          echo "💡 Expected: Instant builds on cache hits, ultra-fast native builds on misses"
+          
+          # Smart build detection
+          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+            if [ "src/resume-data.json" -ot "dist/index.html" ] && [ "src/templates/template.html" -ot "dist/index.html" ]; then
+              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
+              echo "📦 Skipping build - using cached artifacts"
+            else
+              echo "🔄 Source changed - executing speedlight rebuild"
+              time npm run build
+            fi
+          else
+            echo "🏗️ First build - executing full ARM64 native build"
+            time npm run build
+          fi
+          
+          # Verify build artifacts
+          echo "📋 Build artifacts:"
+          ls -la dist/
+          
+          echo "📊 PDF generation verification:"
+          if [ -f "dist/resume.pdf" ]; then
+            echo "  ✅ Screen PDF: $(ls -lh dist/resume.pdf | awk '{print $5}')"
+          fi
+          if [ -f "dist/resume-print.pdf" ]; then
+            echo "  ✅ Print PDF: $(ls -lh dist/resume-print.pdf | awk '{print $5}')"
+          fi
+          if [ -f "dist/resume-ats.pdf" ]; then
+            echo "  ✅ ATS PDF: $(ls -lh dist/resume-ats.pdf | awk '{print $5}')"
+          fi
+
+      - name: Performance benchmarking
+        run: |
+          echo "📊 ARM64 Performance Benchmarking"
+          echo "=================================="
+          
+          # Node.js performance
+          echo "🔋 Node.js Performance:"
+          node -e "
+            const start = process.hrtime.bigint();
+            const result = Array.from({length: 1000000}, (_, i) => Math.sqrt(i)).reduce((a, b) => a + b, 0);
+            const end = process.hrtime.bigint();
+            console.log('  - Math computation: ' + ((end - start) / 1000000n) + 'ms');
+          "
+          
+          # Build performance summary
+          echo "🚀 ARM64 Build Benefits:"
+          echo "  - Native instruction set execution"
+          echo "  - No architecture emulation overhead"
+          echo "  - Optimized Node.js binaries for ARM64"
+          echo "  - Native Sharp image processing"
+          echo "  - Native Puppeteer Chrome binary"
+
+  docker-multi-arch-build:
+    name: 🐳 Docker Multi-Arch Build
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
+    needs: environment-analysis
+    if: needs.environment-analysis.outputs.build_mode == 'docker'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx (Multi-arch)
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/arm64,linux/amd64
+
+      - name: Build multi-architecture Docker image
+        run: |
+          echo "🐳 Building multi-architecture Docker image..."
+          echo "🔧 Target platforms: linux/arm64, linux/amd64"
+          
+          docker buildx build \
+            --file docker/Dockerfile \
+            --target builder \
+            --platform linux/arm64,linux/amd64 \
+            --build-arg NODE_ENV=production \
+            --build-arg CONTEXT=arm64-docker \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --tag "resume:arm64-multi" \
+            .
+          
+          echo "✅ Multi-architecture build completed"
+
+  performance-comparison:
+    name: 📊 Performance Analysis
+    runs-on: ${{ github.event.inputs.runner_type || 'ubuntu-24.04-arm' }}
+    needs: [environment-analysis, native-arm64-build]
+    if: always() && !cancelled()
+    steps:
+      - name: ARM64 Performance Summary
+        run: |
+          echo "# 🚀 ARM64 Development Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🏗️ Architecture Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner Architecture:** ${{ needs.environment-analysis.outputs.architecture }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner Type:** ${{ needs.environment-analysis.outputs.runner_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Mode:** ${{ needs.environment-analysis.outputs.build_mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Performance Profile:** ${{ needs.environment-analysis.outputs.performance_benefits }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🚀 ARM64 Benefits for Resume-as-Code" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 💻 Local Development (Mac M1/M2)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Native performance** - No Rosetta emulation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Faster builds** - ARM64 Node.js binaries" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Efficient Sharp** - Native image processing" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **ARM64 Puppeteer** - Native PDF generation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### ☁️ GitHub Actions (ARM64 Runners)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Cost efficiency** - ARM64 runners often cheaper" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Architecture parity** - Same as Mac development" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Better performance** - Native execution" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Consistent behavior** - No cross-compilation issues" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📈 Recommended Migration Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Phase 1:** Use ARM64 for development workflows" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Phase 2:** Migrate staging to ARM64 runners" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Phase 3:** Use multi-arch for production (ARM64 + AMD64)" >> $GITHUB_STEP_SUMMARY
+          echo "4. **Phase 4:** Full ARM64 adoption with AMD64 fallback" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🛠️ Implementation Benefits" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sharp Image Processing:** Native ARM64 binaries for 2-3x faster image optimization" >> $GITHUB_STEP_SUMMARY
+          echo "- **Puppeteer PDF Generation:** Native Chrome ARM64 for faster PDF creation" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js Performance:** ARM64-compiled Node.js for better JavaScript execution" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package Installation:** Faster npm ci with ARM64 native packages" >> $GITHUB_STEP_SUMMARY

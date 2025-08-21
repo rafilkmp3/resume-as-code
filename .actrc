@@ -5,8 +5,12 @@
 -P ubuntu-latest=catthehacker/ubuntu:act-latest
 -P ubuntu-22.04=catthehacker/ubuntu:act-22.04
 
-# Container architecture for Apple Silicon compatibility
---container-architecture linux/amd64
+# ARM64 GitHub runner simulation (NEW!)
+-P ubuntu-24.04-arm=ubuntu:24.04
+-P ubuntu-22.04-arm=ubuntu:22.04
+
+# Container architecture for Apple Silicon (ARM64 native)
+--container-architecture linux/arm64
 
 # Default settings
 --artifact-server-path /tmp/act-artifacts

@@ -1,15 +1,18 @@
----
-name: GitHub Pages Production Pipeline
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      emergency_reason:
-        description: 'Emergency production deployment reason'
-        required: false
-        type: string
+# DISABLED: Old Docker-based production pipeline
+# Use speedlight staging-deployment.yml for all deployments now
+# 
+# ---
+# name: GitHub Pages Production Pipeline (DISABLED - Docker Legacy)
+# 
+# on:
+#   release:
+#     types: [published]
+#   workflow_dispatch:
+#     inputs:
+#       emergency_reason:
+#         description: 'Emergency production deployment reason'
+#         required: false
+#         type: string
 
 concurrency:
   group: production-${{ github.ref }}
@@ -85,6 +88,7 @@ jobs:
         run: |
           echo "🏗️ Building production release ${{ github.event.release.tag_name }}"
           
+          # Build container with production artifacts
           docker buildx build \
             --file docker/Dockerfile \
             --target builder \
@@ -101,8 +105,13 @@ jobs:
             --build-arg URL=https://rafilkmp3.github.io/resume-as-code/ \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            --output type=local,dest=./dist \
+            --tag "resume:production-${APP_VERSION}" \
+            --load \
             .
+          
+          # Extract ONLY the built application directory from container
+          mkdir -p dist
+          docker run --rm -v "$PWD/dist:/tmp/dist" "resume:production-${APP_VERSION}" sh -c "cp -r /app/dist/* /tmp/dist/"
 
       - name: Verify build artifacts
         run: |
