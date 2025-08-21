@@ -27,7 +27,7 @@ jobs:
   # Check if this is a release-please commit to avoid duplicate deployments
   check-release-context:
     name: 🔍 Detect Release Commits (Skip Staging if Release-Please)
-    runs-on: ubuntu-latest-arm64
+    runs-on: ubuntu-latest
     outputs:
       should_deploy_staging: ${{ steps.check.outputs.should_deploy }}
     steps:
@@ -59,7 +59,7 @@ jobs:
     name: 🚀 Deploy to Netlify Staging  
     needs: check-release-context
     if: needs.check-release-context.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest-arm64
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
