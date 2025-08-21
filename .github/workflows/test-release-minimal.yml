@@ -8,6 +8,9 @@ jobs:
   test-release:
     name: Test Release Job
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Test basic step
         run: echo "Testing release workflow basics"
@@ -28,3 +31,12 @@ jobs:
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-deploy:
+    name: Test Deploy Job
+    needs: test-release
+    if: needs.test-release.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test deploy step
+        run: echo "Testing deploy step"
