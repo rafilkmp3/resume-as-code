@@ -346,29 +346,64 @@ async function generateHTML(resumeData, templatePath, options = {}) {
 
   fs.writeFileSync('./dist/index.html', html);
 
-  // Generate /version endpoint for environment tracking
+  // Generate /version endpoint for environment tracking with validation
+  // CRITICAL: Never allow empty or invalid data in version endpoints
+  const safeAppVersion = appVersion || packageJson.version || 'unknown';
+  const safeEnvironment = environment || 'unknown';
+  const safeEnvironmentDetails = environmentDetails || 'Unknown Environment';
+  const safeBuildBranch = buildBranch || 'unknown';
+  const safeCommitShort = commitShort || 'unknown';
+  const safeBuildTimestamp = buildTimestamp || new Date().toISOString();
+  const safeDeployUrl = deployUrl || qrCodeUrl || 'unknown';
+  
+  // Enhanced environment classification based on NODE_ENV and deployment context
+  let enhancedEnvironment = safeEnvironment;
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  
+  if (nodeEnv === 'development' && !process.env.CI) {
+    enhancedEnvironment = 'development';
+  } else if (process.env.NETLIFY === 'true' && process.env.CONTEXT === 'deploy-preview') {
+    enhancedEnvironment = 'preview';
+  } else if (process.env.NETLIFY === 'true' && (process.env.CONTEXT === 'deploy' || safeDeployUrl.includes('resume-as-code.netlify.app'))) {
+    enhancedEnvironment = 'staging';
+  } else if (process.env.GITHUB_PAGES === 'true' || safeDeployUrl.includes('rafilkmp3.github.io')) {
+    enhancedEnvironment = 'production';
+  }
+
   const versionEndpointData = {
-    version: appVersion,
-    environment: environment,
-    environmentDetails: environmentDetails,
-    buildBranch: buildBranch,
-    commitHash: commitShort,
-    commitsSinceRelease: commitsSinceRelease,
-    lastReleaseTag: lastReleaseTag,
-    buildTimestamp: buildTimestamp,
-    deployUrl: deployUrl,
+    version: safeAppVersion,
+    environment: enhancedEnvironment,
+    environmentDetails: safeEnvironmentDetails,
+    buildBranch: safeBuildBranch,
+    commitHash: safeCommitShort,
+    commitsSinceRelease: commitsSinceRelease || '0',
+    lastReleaseTag: lastReleaseTag || 'none',
+    buildTimestamp: safeBuildTimestamp,
+    deployUrl: safeDeployUrl,
     prNumber: prNumber || null,
     buildContext: process.env.BUILD_CONTEXT || 'main',
     contextUrl: process.env.CONTEXT_URL || '',
     compareUrl: process.env.COMPARE_URL || '',
-    isProduction: isProduction,
-    nodeEnv: process.env.NODE_ENV || 'development'
+    isProduction: enhancedEnvironment === 'production',
+    nodeEnv: nodeEnv,
+    buildMode: process.env.BUILD_MODE || 'production',
+    ci: process.env.CI === 'true',
+    validationStatus: 'valid'
   };
+
+  // Validate all required fields are present
+  const requiredFields = ['version', 'environment', 'buildBranch', 'commitHash', 'buildTimestamp', 'deployUrl'];
+  const missingFields = requiredFields.filter(field => !versionEndpointData[field] || versionEndpointData[field] === 'unknown');
+  
+  if (missingFields.length > 0) {
+    console.warn(`⚠️  Warning: Version endpoint has missing fields: ${missingFields.join(', ')}`);
+    versionEndpointData.validationStatus = `missing_fields: ${missingFields.join(', ')}`;
+  }
 
   fs.writeFileSync('./dist/version.json', JSON.stringify(versionEndpointData, null, 2));
   
-  // Also create a simple version.txt for easy checking
-  const versionTextContent = `${appVersion}\n${environment}\n${commitShort}\n${buildTimestamp}\n${deployUrl}`;
+  // Create robust version.txt with validation
+  const versionTextContent = `${safeAppVersion}\n${enhancedEnvironment}\n${safeCommitShort}\n${safeBuildTimestamp}\n${safeDeployUrl}\n${nodeEnv}`;
   fs.writeFileSync('./dist/version.txt', versionTextContent);
   
   console.log(`🔗 Version endpoints generated:`);
