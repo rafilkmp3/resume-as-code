@@ -265,6 +265,9 @@ jobs:
           uploadArtifacts: true
         continue-on-error: true
         id: lighthouse-run
+        env:
+          # Enable LHCI debugging to capture report URLs
+          DEBUG: 'lhci:*'
 
       - name: Extract Lighthouse Report URLs and Results
         id: lighthouse-results
@@ -283,29 +286,70 @@ jobs:
           echo "links output: '${{ steps.lighthouse-run.outputs.links }}'"
           echo "assertionResults output: '${{ steps.lighthouse-run.outputs.assertionResults }}'"
           
-          # Try to extract public URLs from links output
+          # Initialize variables
+          PUBLIC_REPORT_URLS=""
+          HAS_PUBLIC_URLS="false"
+          
+          # Method 1: Extract from action outputs
           if [ -n "${{ steps.lighthouse-run.outputs.links }}" ] && [ "${{ steps.lighthouse-run.outputs.links }}" != "" ]; then
             echo "✅ Found links output from Lighthouse CI action"
-            echo "🔗 Public report links: ${{ steps.lighthouse-run.outputs.links }}"
-            echo "public_report_links=${{ steps.lighthouse-run.outputs.links }}" >> $GITHUB_OUTPUT
-            echo "has_public_urls=true" >> $GITHUB_OUTPUT
-          else
-            echo "⚠️ No public links found in Lighthouse CI action outputs"
-            # Check for links.json file that might contain public URLs
-            if [ -f "links.json" ]; then
-              echo "📄 Found links.json file"
-              echo "🔍 Contents of links.json:"
-              cat links.json || echo "Cannot read links.json"
-              LINKS_CONTENT=$(cat links.json 2>/dev/null || echo "{}")
-              echo "public_report_links=${LINKS_CONTENT}" >> $GITHUB_OUTPUT
-              echo "has_public_urls=true" >> $GITHUB_OUTPUT
-            else
-              echo "❌ No links.json file found"
-              # Search for any files containing "storage.googleapis.com" URLs
-              echo "🔍 Searching for Google Cloud Storage URLs in all files:"
-              grep -r "storage\.googleapis\.com" . 2>/dev/null | head -5 || echo "No Google Cloud Storage URLs found"
-              echo "has_public_urls=false" >> $GITHUB_OUTPUT
+            echo "🔗 Action output links: ${{ steps.lighthouse-run.outputs.links }}"
+            PUBLIC_REPORT_URLS="${{ steps.lighthouse-run.outputs.links }}"
+            HAS_PUBLIC_URLS="true"
+          fi
+          
+          # Method 2: Check for links.json file
+          if [ -f "links.json" ] && [ -s "links.json" ]; then
+            echo "📄 Found links.json file with content"
+            echo "🔍 Contents of links.json:"
+            cat links.json || echo "Cannot read links.json"
+            LINKS_CONTENT=$(cat links.json 2>/dev/null || echo "{}")
+            if [ -z "$PUBLIC_REPORT_URLS" ]; then
+              PUBLIC_REPORT_URLS="$LINKS_CONTENT"
+              HAS_PUBLIC_URLS="true"
             fi
+          fi
+          
+          # Method 3: Search LHCI directory for manifest.json (contains report URLs)
+          if [ -d ".lighthouseci" ]; then
+            echo "📁 Searching .lighthouseci directory for manifest with URLs..."
+            if [ -f ".lighthouseci/manifest.json" ]; then
+              echo "📄 Found manifest.json in .lighthouseci"
+              cat .lighthouseci/manifest.json 2>/dev/null || echo "Cannot read manifest"
+              # Extract URLs from manifest if they exist
+              MANIFEST_URLS=$(grep -o "https://storage\.googleapis\.com[^\"]*" .lighthouseci/manifest.json 2>/dev/null || echo "")
+              if [ -n "$MANIFEST_URLS" ]; then
+                echo "✅ Found public storage URLs in manifest:"
+                echo "$MANIFEST_URLS"
+                if [ -z "$PUBLIC_REPORT_URLS" ]; then
+                  PUBLIC_REPORT_URLS="$MANIFEST_URLS"
+                  HAS_PUBLIC_URLS="true"
+                fi
+              fi
+            fi
+          fi
+          
+          # Method 4: Search all files for Google Cloud Storage URLs (last resort)
+          if [ "$HAS_PUBLIC_URLS" = "false" ]; then
+            echo "🔍 Last resort: Searching all files for Google Cloud Storage URLs..."
+            FOUND_URLS=$(grep -r "https://storage\.googleapis\.com" . 2>/dev/null | grep -o "https://storage\.googleapis\.com[^\"'[:space:]]*" | head -3 || echo "")
+            if [ -n "$FOUND_URLS" ]; then
+              echo "✅ Found Google Cloud Storage URLs via global search:"
+              echo "$FOUND_URLS"
+              PUBLIC_REPORT_URLS="$FOUND_URLS"
+              HAS_PUBLIC_URLS="true"
+            fi
+          fi
+          
+          # Set final outputs
+          echo "public_report_links=$PUBLIC_REPORT_URLS" >> $GITHUB_OUTPUT
+          echo "has_public_urls=$HAS_PUBLIC_URLS" >> $GITHUB_OUTPUT
+          
+          if [ "$HAS_PUBLIC_URLS" = "true" ]; then
+            echo "✅ SUCCESSFULLY CAPTURED PUBLIC LIGHTHOUSE REPORTS:"
+            echo "$PUBLIC_REPORT_URLS"
+          else
+            echo "⚠️ No public Lighthouse report URLs found in any location"
           fi
           
           # Debug: Check what files the treosh/lighthouse-ci-action created
@@ -475,31 +519,44 @@ jobs:
                 commentBody += `| **Speed Index** | ${speedIndex} | ${speedIndex.includes('s') && parseFloat(speedIndex) <= 3.0 ? '✅ Good' : '⚠️ Needs Improvement'} |\n\n`;
                 
                 
-                commentBody += `### 🔗 Public Reports\n\n`;
+                commentBody += `### 🔗 Detailed Reports\n\n`;
                 
                 // Add temporaryPublicStorage URLs if available
                 const hasPublicUrls = "${{ steps.lighthouse-results.outputs.has_public_urls }}" === "true";
                 const publicReportLinks = "${{ steps.lighthouse-results.outputs.public_report_links }}";
                 
-                if (hasPublicUrls && publicReportLinks) {
+                if (hasPublicUrls && publicReportLinks && publicReportLinks.trim() !== "") {
+                  commentBody += `🌐 **Google Lighthouse Public Reports** (temporary-public-storage - 7 days):\n\n`;
+                  
                   try {
+                    // Try to parse as JSON first
                     const reportLinks = JSON.parse(publicReportLinks);
                     if (Array.isArray(reportLinks) && reportLinks.length > 0) {
-                      commentBody += `🌐 **Public Lighthouse Reports** (7-day storage):\n`;
                       reportLinks.forEach((link, index) => {
-                        commentBody += `${index + 1}. [Report ${index + 1}](${link})\n`;
+                        if (link.startsWith('http')) {
+                          commentBody += `${index + 1}. [📊 **Lighthouse Report ${index + 1}**](${link}) - Interactive Google Lighthouse analysis\n`;
+                        }
                       });
-                      commentBody += `\n`;
                     } else if (typeof reportLinks === 'string' && reportLinks.startsWith('http')) {
-                      commentBody += `🌐 **Public Lighthouse Report**: [View Report](${reportLinks}) (7-day storage)\n\n`;
+                      commentBody += `📊 [**Google Lighthouse Public Report**](${reportLinks}) - Full interactive analysis\n`;
                     }
                   } catch (e) {
-                    // If parsing fails, just show raw links
-                    commentBody += `🌐 **Public Lighthouse Report**: ${publicReportLinks}\n\n`;
+                    // Not JSON, handle as raw URLs
+                    const urls = publicReportLinks.split('\n').filter(line => line.trim().startsWith('http'));
+                    if (urls.length > 0) {
+                      urls.forEach((url, index) => {
+                        commentBody += `${index + 1}. [📊 **Lighthouse Report ${index + 1}**](${url.trim()}) - Interactive Google analysis\n`;
+                      });
+                    } else if (publicReportLinks.startsWith('http')) {
+                      commentBody += `📊 [**Google Lighthouse Public Report**](${publicReportLinks}) - Full interactive analysis\n`;
+                    } else {
+                      commentBody += `🔗 **Report Data**: ${publicReportLinks}\n`;
+                    }
                   }
+                  commentBody += `\n💡 **What you get**: Interactive drill-down, detailed recommendations, filmstrip view, and performance waterfall analysis.\n\n`;
                 } else {
-                  commentBody += `📋 **Lighthouse CI Report**: Stored in workflow artifacts\n`;
-                  commentBody += `🌐 **Public Storage**: temporaryPublicStorage enabled\n`;
+                  commentBody += `📋 **Lighthouse Reports**: Available in workflow artifacts (check Actions tab)\n`;
+                  commentBody += `🔍 **Note**: Public storage URLs not captured - check logs for temporaryPublicStorage details\n\n`;
                 }
                 
                 commentBody += `📊 **Compare with**: [PageSpeed Insights](https://pagespeed.web.dev/analysis/${encodeURIComponent(previewUrl)})\n\n`;

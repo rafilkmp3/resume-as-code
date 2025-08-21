@@ -1,0 +1,1 @@
+- all required path should exist locally and protecte with gitkeep to file scture always get  consistent and triger ci smart way possible
