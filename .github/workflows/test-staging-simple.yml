@@ -1,0 +1,13 @@
+---
+name: 🧪 Test Staging Simple
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-simple:
+    name: Simple Test Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test step
+        run: echo "Testing simple workflow"
