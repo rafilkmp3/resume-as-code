@@ -1,5 +1,54 @@
 # Changelog
 
+## [4.3.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.1...v4.3.0) (2025-08-21)
+
+
+### Features
+
+* add lighthouse report url display to workflow summary ([fe178d8](https://github.com/rafilkmp3/resume-as-code/commit/fe178d8cf890fcaa207a8743ff1074b91bcd64e5))
+* add staging deployment pipeline and test accessibility reporting ([08c0e21](https://github.com/rafilkmp3/resume-as-code/commit/08c0e219d1e0144b0e7a00664476879273843342))
+* comprehensive accessibility testing workflow with enhanced comment management ([b1127e9](https://github.com/rafilkmp3/resume-as-code/commit/b1127e9969982487813d58c727f4b3db37c6118b))
+* enhance staging workflow with comprehensive test results in summary ([c69aae5](https://github.com/rafilkmp3/resume-as-code/commit/c69aae5d953caad7586a9d2fc0b80a96aaa4ad96))
+* enterprise testing suite with comprehensive multi-tool validation ([93e7d34](https://github.com/rafilkmp3/resume-as-code/commit/93e7d3492593fa52b4822d75a34e813160b51d9e))
+* implement temporary image hosting for visual test PR comments ([f251567](https://github.com/rafilkmp3/resume-as-code/commit/f251567e1ebc3928eaa3b732110cb4a3075d2e7a))
+* Phase 1 - Complete modular workflow architecture with 74% reduction ([1124199](https://github.com/rafilkmp3/resume-as-code/commit/11241994d9608e7ab72eb975bba829399a63b0bc))
+* promote Resume-as-Code Platform to primary key project with enhanced description ([4ee5672](https://github.com/rafilkmp3/resume-as-code/commit/4ee567211db5922cba7b587bacdef412d63f6bb0))
+
+
+### Bug Fixes
+
+* accessibility audit script path resolution for speedlight architecture ([c8c2a28](https://github.com/rafilkmp3/resume-as-code/commit/c8c2a280f2388cace8465f7decdae9a092e1cb68))
+* comprehensive performance workflow fixes - lighthouse config, pa11y flags, playwright timeout ([c54ab64](https://github.com/rafilkmp3/resume-as-code/commit/c54ab64544835a3169760daee7b3137cdaf0b86f))
+* correct release-please manifest configuration to enable release detection ([88b13f0](https://github.com/rafilkmp3/resume-as-code/commit/88b13f04dbe6d631a92819f014dce53527eb722b))
+* correct staging deployment workflow syntax for reusable workflow ([104131b](https://github.com/rafilkmp3/resume-as-code/commit/104131b8a0e8d56e5d18b43ce7569d2e96010f2f))
+* correct timeout command syntax in performance monitoring workflow ([261e9f7](https://github.com/rafilkmp3/resume-as-code/commit/261e9f7ed672ae5e30a5aa03a7b6830c2cfffca7))
+* enhance chrome stability flags for lighthouse ci protocol error resolution ([f1844b7](https://github.com/rafilkmp3/resume-as-code/commit/f1844b70fefc02a362578fc474922c8ecb648edf))
+* implement manual lighthouse ci setup with context7 shared memory configuration ([520f1ba](https://github.com/rafilkmp3/resume-as-code/commit/520f1ba39faa1a51e57ba444750c105da28f9985))
+* improve release-please configuration for cleaner branches and messages ([0df7603](https://github.com/rafilkmp3/resume-as-code/commit/0df760306f7ce38a1e109d0191b251662764b53d))
+* lighthouse ci no_fcp error with context7-recommended chrome flags ([2302e8b](https://github.com/rafilkmp3/resume-as-code/commit/2302e8b9fb03ee0d784424f88d6132eb88ad9487))
+* lighthouse ci results extraction with google 3-run configuration ([5d7dac8](https://github.com/rafilkmp3/resume-as-code/commit/5d7dac86727a0b8667e958ff0a0fdaf2a015e0db))
+* lighthouse ci url-based testing configuration - context7 solution ([204ba83](https://github.com/rafilkmp3/resume-as-code/commit/204ba8383455c756f9dfe60751d1b77bd2bdcdfc))
+* remove continue-on-error from production workflow for proper health check reporting ([f3230f3](https://github.com/rafilkmp3/resume-as-code/commit/f3230f3639156ed15b9ab2e86f5bd3726c2c4e59))
+* remove continue-on-error from staging quality gates for proper failure reporting ([98587df](https://github.com/rafilkmp3/resume-as-code/commit/98587df01d07c77a8ab462a0181ee56618fd5b05))
+* remove continue-on-error from visual regression workflow for proper badge status ([afe76e7](https://github.com/rafilkmp3/resume-as-code/commit/afe76e7eda07edab0b65ad04e8faaa1bed964bc5))
+* remove continue-on-error to show proper red/green job badges ([e1ae6a6](https://github.com/rafilkmp3/resume-as-code/commit/e1ae6a6d6086ee7daa0f47346eed2cb582e46123))
+* resolve chrome sandbox and module issues in performance tests ([0065c8c](https://github.com/rafilkmp3/resume-as-code/commit/0065c8c2430b8ac6757147a252e1d3da3c12d7c6))
+* resolve Lighthouse CI Performance test failure with enhanced error handling ([5e71d38](https://github.com/rafilkmp3/resume-as-code/commit/5e71d38fc2786bb106c34d1c5ff353b1eb695e1d))
+* resolve NODE_OPTIONS GITHUB_ENV syntax error in staging workflow ([44f32c2](https://github.com/rafilkmp3/resume-as-code/commit/44f32c23afd4840b8baaf081a6a5409144430df3))
+* resolve NODE_OPTIONS GITHUB_ENV syntax error in workflows ([e592fb7](https://github.com/rafilkmp3/resume-as-code/commit/e592fb736001f7b1d0dfb5b0b44cd2af00ae1d31))
+* resolve performance monitoring workflow failures with comprehensive error handling ([da74ac0](https://github.com/rafilkmp3/resume-as-code/commit/da74ac09b2b87ec7cb9b73cc550388648948f398))
+* restore comprehensive WCAG tags while adding Chrome options ([f75a332](https://github.com/rafilkmp3/resume-as-code/commit/f75a33250d3ad43697b75d0ddc0d6c5dd2602b80))
+* simplify lighthouse ci with proven chrome setup ([19a2536](https://github.com/rafilkmp3/resume-as-code/commit/19a2536f4cd855dfe62a00d942672b3c31ccdd76))
+* simplify release-please branch naming by removing package-name component ([930e716](https://github.com/rafilkmp3/resume-as-code/commit/930e716865e414b099b0166dee604cf86a43d180))
+* staging deployment chrome compatibility - use amd64 runner instead of arm64 ([c59b684](https://github.com/rafilkmp3/resume-as-code/commit/c59b68436ec6f53bcec13771d60bc3c1455c07b2))
+* standardize axe-core Chrome options for accurate accessibility reporting ([52dd7ea](https://github.com/rafilkmp3/resume-as-code/commit/52dd7ea8d3cdaff2172ce3e13c0000e03f161f25))
+* version information accuracy - correct environment detection and commit counting ([fcb6456](https://github.com/rafilkmp3/resume-as-code/commit/fcb6456996d4d587cdc26921670502ea731faef5))
+
+
+### Code Refactoring
+
+* implement build-once test-many architecture for performance monitoring ([e1a482f](https://github.com/rafilkmp3/resume-as-code/commit/e1a482fdd65fae11043025a9f7dcd63a46af2db1))
+
 ## [4.2.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.2.0...v4.2.1) (2025-08-18)
 
 
