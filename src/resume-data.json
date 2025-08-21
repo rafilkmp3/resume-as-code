@@ -437,5 +437,7 @@
         "Remote"
       ]
     }
-  }
+  },
+  "e2eTestInfo": "E2E Pipeline Test - e2e-20250821-200711-17137790342",
+  "e2eTestTimestamp": "2025-08-21T20:07:19.730Z"
 }
