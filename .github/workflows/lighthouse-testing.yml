@@ -101,25 +101,74 @@ jobs:
           npm install -g @lhci/cli@0.15.x
           
           echo "📊 Running Lighthouse CI autorun for: ${{ inputs.target_url }}"
-          # Simple autorun approach from Context7 documentation
-          lhci autorun \
+          # Google-recommended 3 runs for accurate median results
+          set +e  # Don't exit on error, capture output
+          LHCI_OUTPUT=$(lhci autorun \
             --upload.target=temporary-public-storage \
             --collect.url="${{ inputs.target_url }}" \
             --collect.settings.chromeFlags="--no-sandbox --disable-setuid-sandbox --headless=new" \
-            --collect.numberOfRuns=1 || echo "⚠️ Lighthouse CI failed but continuing..."
+            --collect.numberOfRuns=3 \
+            --collect.median=true \
+            --collect.settings.output=json \
+            --collect.settings.outputPath=./lighthouse-reports 2>&1)
+          LHCI_EXIT_CODE=$?
+          set -e  # Re-enable exit on error
+          
+          echo "$LHCI_OUTPUT"
+          
+          # Extract the report URL from LHCI output
+          REPORT_URL=$(echo "$LHCI_OUTPUT" | grep -o 'https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/[^[:space:]]*' | head -1)
+          if [[ -n "$REPORT_URL" ]]; then
+            echo "🌐 Lighthouse Report URL: $REPORT_URL"
+            echo "lighthouse_report_url=$REPORT_URL" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ $LHCI_EXIT_CODE -ne 0 ]]; then
+            echo "⚠️ Lighthouse CI failed but continuing..."
+          fi
 
       - name: Extract Lighthouse Results
         id: lighthouse-results
         run: |
           echo "📊 Extracting Lighthouse performance metrics..."
           
-          # Find the latest lighthouse results file
-          RESULTS_FILE=$(find .lighthouseci -name "*.json" | head -1)
+          # Look for reports in multiple locations
+          RESULTS_FILE=""
           
-          if [[ -f "$RESULTS_FILE" ]]; then
+          # First, try the new outputPath location
+          if [[ -d "./lighthouse-reports" ]]; then
+            RESULTS_FILE=$(find ./lighthouse-reports -name "*.json" | head -1)
+          fi
+          
+          # Then try .lighthouseci directory for lhr-*.json files
+          if [[ ! -f "$RESULTS_FILE" ]]; then
+            RESULTS_FILE=$(find .lighthouseci -name "lhr-*.json" 2>/dev/null | head -1)
+          fi
+          
+          # Try other patterns in .lighthouseci
+          if [[ ! -f "$RESULTS_FILE" ]]; then
+            RESULTS_FILE=$(find .lighthouseci -name "*.report.json" 2>/dev/null | head -1)
+          fi
+          
+          # Find any JSON with categories data (excluding links.json)
+          if [[ ! -f "$RESULTS_FILE" ]]; then
+            for dir in ./lighthouse-reports .lighthouseci; do
+              if [[ -d "$dir" ]]; then
+                for file in $(find "$dir" -name "*.json" 2>/dev/null | grep -v links.json); do
+                  if jq -e '.categories' "$file" >/dev/null 2>&1; then
+                    RESULTS_FILE="$file"
+                    break
+                  fi
+                done
+                if [[ -f "$RESULTS_FILE" ]]; then break; fi
+              fi
+            done
+          fi
+          
+          if [[ -f "$RESULTS_FILE" ]] && jq -e '.categories' "$RESULTS_FILE" >/dev/null 2>&1; then
             echo "📄 Processing results from: $RESULTS_FILE"
             
-            # Extract scores (0-100)
+            # Extract scores (0-100) with better error handling
             PERFORMANCE=$(jq -r '.categories.performance.score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
             ACCESSIBILITY=$(jq -r '.categories.accessibility.score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
             BEST_PRACTICES=$(jq -r '.categories["best-practices"].score * 100 | floor' "$RESULTS_FILE" 2>/dev/null || echo "N/A")
@@ -151,7 +200,24 @@ jobs:
             echo "  CLS: $CLS"
             echo "  Speed Index: $SPEED_INDEX"
           else
-            echo "⚠️ No Lighthouse results file found"
+            echo "⚠️ No valid Lighthouse results file found with categories data"
+            echo "🔍 Debug: Files found in lighthouse directories:"
+            
+            for dir in ./lighthouse-reports .lighthouseci; do
+              if [[ -d "$dir" ]]; then
+                echo "📁 Directory: $dir"
+                find "$dir" -type f -name "*.json" 2>/dev/null | while read file; do
+                  echo "  - $file ($(wc -c < "$file" 2>/dev/null || echo "0") bytes)"
+                  if [[ "$file" != *"links.json" ]]; then
+                    echo "    Structure: $(jq -r 'keys[]?' "$file" 2>/dev/null | head -3 | tr '\n' ' ' || echo "Invalid JSON")"
+                  fi
+                done
+              else
+                echo "📁 Directory: $dir (not found)"
+              fi
+            done
+            
+            # Set N/A values
             echo "performance_score=N/A" >> $GITHUB_OUTPUT
             echo "accessibility_score=N/A" >> $GITHUB_OUTPUT
             echo "best_practices_score=N/A" >> $GITHUB_OUTPUT
@@ -168,6 +234,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** ${{ inputs.target_url }}" >> $GITHUB_STEP_SUMMARY
+          
+          # Add report URL if available
+          if [[ -n "${{ steps.lighthouse-ci.outputs.lighthouse_report_url }}" ]]; then
+            echo "**📊 Full Report:** [${{ steps.lighthouse-ci.outputs.lighthouse_report_url }}](${{ steps.lighthouse-ci.outputs.lighthouse_report_url }})" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "## 📊 Lighthouse Scores" >> $GITHUB_STEP_SUMMARY
@@ -195,4 +266,5 @@ jobs:
           path: |
             .lighthouseci/
             lhci_reports/
+            lighthouse-reports/
           retention-days: ${{ inputs.artifact_retention_days }}
