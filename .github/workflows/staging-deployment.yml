@@ -55,28 +55,90 @@ jobs:
             echo "should_deploy=true" >> $GITHUB_OUTPUT
           fi
 
-  deploy-staging:
-    name: 🚀 Deploy to Netlify Staging  
+  build-and-deploy-staging:
+    name: 🚀 Build & Deploy to Netlify Staging  
     needs: check-release-context
     if: needs.check-release-context.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_ENV: production
+      NETLIFY_ENV: staging
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
+
       - name: Install Dependencies
         run: npm ci
+
       - name: Build for Staging
+        env:
+          NETLIFY: 'true'
+          CONTEXT: 'deploy'
+          URL: 'https://resume-as-code.netlify.app'
+          DEPLOY_URL: 'https://resume-as-code.netlify.app'
         run: npm run build
+
       - name: Deploy to Netlify Staging
-        uses: ./.github/workflows/deployment-core.yml
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        uses: South-Paw/action-netlify-cli@v2
         with:
-          environment: staging
-          target_url: https://resume-as-code.netlify.app
-          deployment_context: 'Staging deployment from main branch'
-          build_directory: ./dist
-        secrets: inherit
+          args: deploy --json --dir=dist --prod
+
+      - name: Verify Staging Deployment
+        run: |
+          echo "🔍 Verifying staging deployment accessibility..."
+          STAGING_URL="https://resume-as-code.netlify.app"
+          
+          # Wait for deployment to be accessible
+          for i in {1..30}; do
+            echo "🌐 Attempt $i/30: Testing $STAGING_URL"
+            if curl -f -s -L "$STAGING_URL" > /dev/null; then
+              echo "✅ Staging deployment is accessible"
+              break
+            fi
+            
+            if [[ $i -eq 30 ]]; then
+              echo "❌ Staging deployment verification failed"
+              exit 1
+            fi
+            
+            echo "⏳ Waiting 10 seconds before retry..."
+            sleep 10
+          done
+
+      - name: Test Version Endpoints
+        run: |
+          echo "🧪 Testing version endpoints in staging..."
+          STAGING_URL="https://resume-as-code.netlify.app"
+          
+          # Test version.json endpoint
+          echo "📋 Testing /version.json..."
+          if curl -f -s "$STAGING_URL/version.json" | jq . > /dev/null; then
+            echo "✅ /version.json endpoint is accessible and valid JSON"
+            curl -s "$STAGING_URL/version.json" | jq .
+          else
+            echo "❌ /version.json endpoint failed"
+            exit 1
+          fi
+          
+          # Test version.txt endpoint  
+          echo "📋 Testing /version.txt..."
+          if curl -f -s "$STAGING_URL/version.txt" > /dev/null; then
+            echo "✅ /version.txt endpoint is accessible"
+            echo "Content:"
+            curl -s "$STAGING_URL/version.txt"
+          else
+            echo "❌ /version.txt endpoint failed"
+            exit 1
+          fi
