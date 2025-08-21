@@ -1,5 +1,44 @@
 # Changelog
 
+## [4.5.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.4.0...v4.5.0) (2025-08-21)
+
+
+### Features
+
+* add version endpoint testing highlight to trigger staging deployment validation ([3365834](https://github.com/rafilkmp3/resume-as-code/commit/3365834b85c89cee99d12b77257ef92d2eb76a47))
+* enhance e2e pipeline with comprehensive version validation ([1bd3cb0](https://github.com/rafilkmp3/resume-as-code/commit/1bd3cb06cb48e3d2454418981b5ed621ad4480c8))
+* implement /version endpoints for environment tracking ([87af686](https://github.com/rafilkmp3/resume-as-code/commit/87af686b15c35d8070aa5baf8120bd40636bb4db))
+* implement comprehensive e2e pipeline validation system ([0b860f0](https://github.com/rafilkmp3/resume-as-code/commit/0b860f03ace047d85ce614c8f0367bcfea0231fc))
+* implement real staging deployment with version endpoints testing ([90296df](https://github.com/rafilkmp3/resume-as-code/commit/90296df1bce2720a9137a101ff67855f2017ba28))
+* robust version endpoints with validation and environment detection ([2ea660e](https://github.com/rafilkmp3/resume-as-code/commit/2ea660eac7277ace6cde25cd26e7438b86e2b3cc))
+* self-documenting workflow steps with clear purpose names ([f6eebba](https://github.com/rafilkmp3/resume-as-code/commit/f6eebba01540e4020f5a39f49419cf99c2f49433))
+* test fixed staging deployment workflow validation ([8c48bb7](https://github.com/rafilkmp3/resume-as-code/commit/8c48bb785d56131fd92df00c26ef98f6c63a657f))
+
+
+### Bug Fixes
+
+* add missing yaml document marker to release-please workflow ([db953d0](https://github.com/rafilkmp3/resume-as-code/commit/db953d079ef2054fcd8ae26e6b17f7d13bff8dd4))
+* prevent duplicate deployments - staging skips release-please commits ([582ccce](https://github.com/rafilkmp3/resume-as-code/commit/582ccce0e5b69a73e3dae811a161acc6fccb472a))
+* remove invalid github actions expression operators and update resume date ([e8636b5](https://github.com/rafilkmp3/resume-as-code/commit/e8636b588486ed56109f56639d487c043036811a))
+* replace broken workflows with simplified working versions ([f060750](https://github.com/rafilkmp3/resume-as-code/commit/f0607507631b58d9a92915ff3f4046ad3675dae7))
+* replace staging deployment simulation with actual deployment-core.yml workflow ([bb76b57](https://github.com/rafilkmp3/resume-as-code/commit/bb76b57eebf099660e6db0dfb26d0cc8f04604a2))
+* resolve critical security issues in staging deployment workflow ([7840cad](https://github.com/rafilkmp3/resume-as-code/commit/7840cad25e1c5c74ec02b35f3590bbfe35ce46b0))
+* resolve e2e pipeline validation workflow issues ([79107b6](https://github.com/rafilkmp3/resume-as-code/commit/79107b69734f6a40240592a8d3b37438e240357e))
+* resolve job dependency mismatch in staging workflow ([5b1b721](https://github.com/rafilkmp3/resume-as-code/commit/5b1b721a10c7810d893780f1fc5e218ce5f755b8))
+* resolve staging deployment job output reference mismatch ([b48a3ea](https://github.com/rafilkmp3/resume-as-code/commit/b48a3ea578d9305a7ce06650426950fedf80e657))
+* resolve staging deployment runner acquisition failure ([95e67e1](https://github.com/rafilkmp3/resume-as-code/commit/95e67e17eac24d7749b888c665277df464b7ebb7))
+* resolve staging deployment runner acquisition failure ([eae1c41](https://github.com/rafilkmp3/resume-as-code/commit/eae1c41dbfaff051117081167cfd6ee3c96401fe))
+
+
+### Miscellaneous
+
+* remove temporary test workflow after successful debugging ([930830d](https://github.com/rafilkmp3/resume-as-code/commit/930830d084205975f1d48ab4800eb2b5c782574c))
+
+
+### Performance Improvements
+
+* upgrade staging deployment to arm64 runners for performance boost ([e736dda](https://github.com/rafilkmp3/resume-as-code/commit/e736ddab027056807eddf7e1521711e32f9e3d5e))
+
 ## [4.4.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.3.0...v4.4.0) (2025-08-21)
 
 
