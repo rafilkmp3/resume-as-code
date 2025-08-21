@@ -140,6 +140,90 @@ make test-local        # Test using act local environment (no Docker)
 - **Perfect Debugging**: Debug workflows locally with full access
 - **Cost Efficiency**: No CI minutes consumed during development
 
+### 🧪 E2E Pipeline Validation System
+
+**Comprehensive End-to-End Testing**: Automated validation of the complete workflow cycle: PR → preview → staging → production.
+
+#### E2E Testing Commands
+
+```bash
+# Full pipeline testing
+make e2e-test                    # Complete E2E test (PR → preview → staging → prod)
+npm run e2e:test                 # Same as above (direct npm command)
+
+# Scoped testing
+make e2e-test-pr                 # Test PR flow only (PR → preview)
+make e2e-test-staging            # Test staging deployment only
+make e2e-test-release            # Test release flow only (release → production)
+make e2e-test-dry                # Dry run validation (no real operations)
+
+# Endpoint monitoring
+make e2e-endpoints               # Monitor all deployment endpoints
+make e2e-endpoints-staging       # Monitor staging endpoints only
+make e2e-endpoints-prod          # Monitor production endpoints only
+make e2e-endpoints-brightdata    # Enhanced monitoring with BrightData
+```
+
+#### E2E Testing Features
+
+**Master Workflow Controller** (`.github/workflows/e2e-pipeline-validation.yml`):
+- **Automated PR Creation**: Creates test branches and PRs for validation
+- **Preview Deployment Testing**: Validates Netlify preview deployments
+- **Staging Environment Validation**: Tests staging deployment flow
+- **Version Endpoint Verification**: Validates `/version.json` endpoints
+- **Cleanup Management**: Automatic cleanup of test resources
+
+**Pipeline Orchestrator** (`scripts/e2e-testing/pipeline-orchestrator.js`):
+- **Environment Validation**: Pre-flight checks for GitHub CLI, workflows
+- **Workflow Triggering**: Automated GitHub Actions workflow execution
+- **Real-time Monitoring**: Live workflow progress tracking
+- **Results Analysis**: Comprehensive result parsing and reporting
+
+**Endpoint Monitor** (`scripts/e2e-testing/endpoint-monitor.js`):
+- **Multi-Environment Testing**: Production, staging, and preview endpoints
+- **BrightData Integration**: Enhanced reliability for web scraping
+- **Version Validation**: Comprehensive version endpoint testing
+- **Performance Metrics**: Response time and accessibility tracking
+
+#### E2E Test Scope Options
+
+| Scope | Description | What It Tests |
+|-------|-------------|---------------|
+| `full-cycle` | Complete pipeline | PR → preview → staging → production |
+| `pr-flow-only` | PR workflow | PR creation → preview deployment |
+| `staging-only` | Staging validation | Staging deployment and endpoints |
+| `release-flow-only` | Release workflow | Release-please → production |
+| `endpoints-only` | Endpoint monitoring | All endpoint accessibility and versions |
+
+#### Example Usage
+
+```bash
+# Test complete workflow cycle
+make e2e-test
+
+# Test just PR preview functionality
+npm run e2e:test:pr
+
+# Validate staging deployment after changes
+npm run e2e:test:staging -- --verbose
+
+# Monitor endpoints with enhanced reliability
+npm run e2e:endpoints:brightdata
+
+# Dry run validation (safe testing)
+npm run e2e:test:dry
+```
+
+#### E2E Testing Benefits
+
+- ✅ **Automated Validation**: Complete workflow testing without manual steps
+- ✅ **Multi-Environment Coverage**: Preview, staging, and production validation
+- ✅ **Real-time Monitoring**: Live feedback during workflow execution
+- ✅ **BrightData Integration**: Enhanced reliability for endpoint testing
+- ✅ **Cleanup Management**: Automatic test resource cleanup
+- ✅ **Flexible Scoping**: Test specific parts of the pipeline
+- ✅ **GitHub Integration**: Full GitHub CLI and Actions integration
+
 ### Docker Operations
 
 - `make docker-check` - Verify Docker is running (required for all operations)

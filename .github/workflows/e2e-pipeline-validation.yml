@@ -1,0 +1,523 @@
+name: 🧪 E2E Pipeline Validation (Master Controller)
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Test scope to execute'
+        required: true
+        type: choice
+        options:
+          - 'full-cycle'
+          - 'pr-flow-only'
+          - 'staging-only'
+          - 'release-flow-only'
+          - 'endpoints-only'
+        default: 'full-cycle'
+      skip_pr_creation:
+        description: 'Skip automated PR creation (use existing PR)'
+        required: false
+        type: boolean
+        default: false
+      pr_number:
+        description: 'Existing PR number (if skip_pr_creation is true)'
+        required: false
+        type: string
+        default: ''
+      dry_run:
+        description: 'Dry run mode (validate only, no real operations)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: e2e-pipeline-${{ github.ref }}-${{ inputs.test_scope }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  deployments: read
+
+env:
+  E2E_TEST_IDENTIFIER: "e2e-test-${{ github.run_id }}"
+  E2E_BRANCH_NAME: "e2e/pipeline-test-${{ github.run_id }}"
+
+jobs:
+  initialize-e2e-controller:
+    name: 🚀 Initialize E2E Pipeline Controller
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      test_branch: ${{ steps.setup.outputs.test_branch }}
+      test_pr_number: ${{ steps.setup.outputs.test_pr_number }}
+      validation_id: ${{ steps.setup.outputs.validation_id }}
+      endpoints_to_test: ${{ steps.setup.outputs.endpoints_to_test }}
+      should_run_pr_flow: ${{ steps.scope.outputs.should_run_pr_flow }}
+      should_run_staging: ${{ steps.scope.outputs.should_run_staging }}
+      should_run_release: ${{ steps.scope.outputs.should_run_release }}
+      should_run_endpoints: ${{ steps.scope.outputs.should_run_endpoints }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Determine Test Scope
+        id: scope
+        run: |
+          echo "🎯 Determining test scope: ${{ inputs.test_scope }}"
+          
+          case "${{ inputs.test_scope }}" in
+            "full-cycle")
+              echo "should_run_pr_flow=true" >> $GITHUB_OUTPUT
+              echo "should_run_staging=true" >> $GITHUB_OUTPUT
+              echo "should_run_release=true" >> $GITHUB_OUTPUT
+              echo "should_run_endpoints=true" >> $GITHUB_OUTPUT
+              echo "✅ Full cycle testing enabled"
+              ;;
+            "pr-flow-only")
+              echo "should_run_pr_flow=true" >> $GITHUB_OUTPUT
+              echo "should_run_staging=false" >> $GITHUB_OUTPUT
+              echo "should_run_release=false" >> $GITHUB_OUTPUT
+              echo "should_run_endpoints=true" >> $GITHUB_OUTPUT
+              echo "✅ PR flow testing only"
+              ;;
+            "staging-only")
+              echo "should_run_pr_flow=false" >> $GITHUB_OUTPUT
+              echo "should_run_staging=true" >> $GITHUB_OUTPUT
+              echo "should_run_release=false" >> $GITHUB_OUTPUT
+              echo "should_run_endpoints=true" >> $GITHUB_OUTPUT
+              echo "✅ Staging testing only"
+              ;;
+            "release-flow-only")
+              echo "should_run_pr_flow=false" >> $GITHUB_OUTPUT
+              echo "should_run_staging=false" >> $GITHUB_OUTPUT
+              echo "should_run_release=true" >> $GITHUB_OUTPUT
+              echo "should_run_endpoints=true" >> $GITHUB_OUTPUT
+              echo "✅ Release flow testing only"
+              ;;
+            "endpoints-only")
+              echo "should_run_pr_flow=false" >> $GITHUB_OUTPUT
+              echo "should_run_staging=false" >> $GITHUB_OUTPUT
+              echo "should_run_release=false" >> $GITHUB_OUTPUT
+              echo "should_run_endpoints=true" >> $GITHUB_OUTPUT
+              echo "✅ Endpoint monitoring only"
+              ;;
+          esac
+
+      - name: Setup E2E Test Environment
+        id: setup
+        run: |
+          echo "🔧 Setting up E2E test environment..."
+          
+          VALIDATION_ID="e2e-$(date +%Y%m%d-%H%M%S)-${{ github.run_id }}"
+          TEST_BRANCH="${{ env.E2E_BRANCH_NAME }}"
+          
+          echo "validation_id=$VALIDATION_ID" >> $GITHUB_OUTPUT
+          echo "test_branch=$TEST_BRANCH" >> $GITHUB_OUTPUT
+          
+          # Determine PR number
+          if [[ "${{ inputs.skip_pr_creation }}" == "true" && -n "${{ inputs.pr_number }}" ]]; then
+            echo "test_pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+            echo "📋 Using existing PR: #${{ inputs.pr_number }}"
+          else
+            echo "test_pr_number=" >> $GITHUB_OUTPUT
+            echo "📋 Will create new test PR"
+          fi
+          
+          # Setup endpoints to test based on scope
+          ENDPOINTS='["https://resume-as-code.netlify.app/version.json", "https://rafilkmp3.github.io/resume-as-code/version.json"]'
+          echo "endpoints_to_test=$ENDPOINTS" >> $GITHUB_OUTPUT
+          
+          echo "✅ E2E Controller initialized with ID: $VALIDATION_ID"
+
+      - name: Validate Current Environment State
+        run: |
+          echo "🔍 Validating current environment state..."
+          
+          # Check GitHub CLI authentication
+          if ! gh auth status > /dev/null 2>&1; then
+            echo "❌ GitHub CLI not authenticated"
+            exit 1
+          fi
+          
+          # Check repository permissions
+          if ! gh api repos/${{ github.repository }} --jq '.permissions' > /dev/null 2>&1; then
+            echo "❌ Insufficient repository permissions"
+            exit 1
+          fi
+          
+          # Validate workflow files exist
+          REQUIRED_WORKFLOWS=(
+            ".github/workflows/pr-preview.yml"
+            ".github/workflows/staging-deployment.yml"
+            ".github/workflows/release-please.yml"
+          )
+          
+          for workflow in "${REQUIRED_WORKFLOWS[@]}"; do
+            if [[ ! -f "$workflow" ]]; then
+              echo "❌ Required workflow missing: $workflow"
+              exit 1
+            fi
+          done
+          
+          echo "✅ Environment validation passed"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  pr-flow-validator:
+    name: 🔄 PR Flow Validator
+    needs: initialize-e2e-controller
+    if: needs.initialize-e2e-controller.outputs.should_run_pr_flow == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      pr_number: ${{ steps.pr-creation.outputs.pr_number }}
+      preview_url: ${{ steps.preview-validation.outputs.preview_url }}
+      pr_status: ${{ steps.pr-validation.outputs.status }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Create Test Branch and PR
+        id: pr-creation
+        if: needs.initialize-e2e-controller.outputs.test_pr_number == ''
+        run: |
+          echo "🌿 Creating test branch: ${{ needs.initialize-e2e-controller.outputs.test_branch }}"
+          
+          # Create test branch
+          git checkout -b "${{ needs.initialize-e2e-controller.outputs.test_branch }}"
+          
+          # Make test changes to trigger workflows
+          TEST_CONTENT="E2E Pipeline Test - ${{ needs.initialize-e2e-controller.outputs.validation_id }}"
+          echo "  \"e2eTestInfo\": \"$TEST_CONTENT\"," >> src/resume-data.json
+          
+          # Commit test changes
+          git config user.name "E2E Pipeline Bot"
+          git config user.email "e2e-pipeline@github.actions"
+          git add src/resume-data.json
+          git commit -m "test: e2e pipeline validation - ${{ needs.initialize-e2e-controller.outputs.validation_id }}"
+          
+          # Push test branch
+          git push origin "${{ needs.initialize-e2e-controller.outputs.test_branch }}"
+          
+          # Create PR
+          PR_BODY="## 🧪 E2E Pipeline Validation
+          
+          **Validation ID**: \`${{ needs.initialize-e2e-controller.outputs.validation_id }}\`
+          **Test Scope**: ${{ inputs.test_scope }}
+          **Dry Run**: ${{ inputs.dry_run }}
+          
+          This PR is created automatically by the E2E Pipeline Validation workflow to test:
+          - ✅ PR Preview deployment
+          - ✅ Staging deployment (after merge)
+          - ✅ Version endpoint generation
+          - ✅ Workflow orchestration
+          
+          **⚠️ Auto-generated PR - Safe to merge for testing**"
+          
+          PR_NUMBER=$(gh pr create \
+            --title "🧪 E2E Pipeline Test - ${{ needs.initialize-e2e-controller.outputs.validation_id }}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "${{ needs.initialize-e2e-controller.outputs.test_branch }}" \
+            --label "e2e-test" \
+            --label "automated" | grep -o '#[0-9]*' | tr -d '#')
+          
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "✅ Created test PR: #$PR_NUMBER"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Wait for PR Preview Deployment
+        id: preview-validation
+        run: |
+          PR_NUM="${{ steps.pr-creation.outputs.pr_number || needs.initialize-e2e-controller.outputs.test_pr_number }}"
+          echo "⏳ Waiting for PR #$PR_NUM preview deployment..."
+          
+          MAX_ATTEMPTS=20
+          ATTEMPT=1
+          PREVIEW_URL=""
+          
+          while [[ $ATTEMPT -le $MAX_ATTEMPTS ]]; do
+            echo "🔍 Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking PR preview status..."
+            
+            # Check PR status and deployments
+            PR_INFO=$(gh pr view "$PR_NUM" --json url,statusCheckRollup)
+            
+            # Look for Netlify preview deployment
+            if echo "$PR_INFO" | jq -e '.statusCheckRollup[] | select(.name | contains("netlify"))' > /dev/null; then
+              NETLIFY_STATUS=$(echo "$PR_INFO" | jq -r '.statusCheckRollup[] | select(.name | contains("netlify")) | .state')
+              if [[ "$NETLIFY_STATUS" == "SUCCESS" ]]; then
+                PREVIEW_URL="https://deploy-preview-${PR_NUM}--resume-as-code.netlify.app"
+                echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+                echo "✅ PR preview deployed: $PREVIEW_URL"
+                break
+              fi
+            fi
+            
+            if [[ $ATTEMPT -eq $MAX_ATTEMPTS ]]; then
+              echo "⚠️ Preview deployment not detected after $MAX_ATTEMPTS attempts"
+              echo "preview_url=" >> $GITHUB_OUTPUT
+            fi
+            
+            echo "⏳ Waiting 30 seconds before retry..."
+            sleep 30
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Validate PR Preview
+        id: pr-validation
+        run: |
+          PREVIEW_URL="${{ steps.preview-validation.outputs.preview_url }}"
+          
+          if [[ -n "$PREVIEW_URL" ]]; then
+            echo "🔍 Validating PR preview: $PREVIEW_URL"
+            
+            # Test preview accessibility
+            if curl -f -s -L "$PREVIEW_URL" > /dev/null; then
+              echo "✅ PR preview is accessible"
+              
+              # Test version endpoint
+              if curl -f -s "$PREVIEW_URL/version.json" | jq . > /dev/null; then
+                echo "✅ Preview version endpoint is functional"
+                echo "status=success" >> $GITHUB_OUTPUT
+              else
+                echo "⚠️ Preview version endpoint not accessible"
+                echo "status=partial" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "❌ PR preview is not accessible"
+              echo "status=failed" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ No preview URL available for validation"
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+
+  staging-environment-validator:
+    name: 🎯 Staging Environment Validator
+    needs: [initialize-e2e-controller, pr-flow-validator]
+    if: needs.initialize-e2e-controller.outputs.should_run_staging == 'true' && (success() || needs.initialize-e2e-controller.outputs.should_run_pr_flow == 'false')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      staging_deployment_status: ${{ steps.staging-validation.outputs.status }}
+      staging_version_check: ${{ steps.version-validation.outputs.status }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Merge Test PR (if created)
+        if: needs.pr-flow-validator.outputs.pr_number != '' && inputs.dry_run == false
+        run: |
+          PR_NUMBER="${{ needs.pr-flow-validator.outputs.pr_number }}"
+          echo "🔀 Merging test PR #$PR_NUMBER to trigger staging deployment..."
+          
+          # Wait for PR to be ready for merge
+          echo "⏳ Waiting for PR checks to complete..."
+          gh pr ready "$PR_NUMBER" --undo 2>/dev/null || true
+          
+          # Merge PR
+          gh pr merge "$PR_NUMBER" --merge --delete-branch
+          echo "✅ Test PR merged successfully"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Monitor Staging Deployment
+        id: staging-validation
+        run: |
+          echo "📊 Monitoring staging deployment workflow..."
+          
+          MAX_ATTEMPTS=15
+          ATTEMPT=1
+          DEPLOYMENT_FOUND=false
+          
+          while [[ $ATTEMPT -le $MAX_ATTEMPTS ]]; do
+            echo "🔍 Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking staging deployment..."
+            
+            # Get recent workflow runs for staging deployment
+            RECENT_RUNS=$(gh run list --workflow="staging-deployment.yml" --limit=3 --json status,conclusion,url)
+            
+            # Check if any recent run is in progress or completed
+            if echo "$RECENT_RUNS" | jq -e '.[] | select(.status == "in_progress" or .conclusion == "success")' > /dev/null; then
+              DEPLOYMENT_FOUND=true
+              echo "✅ Staging deployment detected"
+              break
+            fi
+            
+            if [[ $ATTEMPT -eq $MAX_ATTEMPTS ]]; then
+              echo "⚠️ No staging deployment detected after $MAX_ATTEMPTS attempts"
+            fi
+            
+            echo "⏳ Waiting 1 minute before retry..."
+            sleep 60
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          
+          if [[ "$DEPLOYMENT_FOUND" == "true" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Validate Staging Version Endpoints
+        id: version-validation
+        run: |
+          echo "🔍 Validating staging version endpoints..."
+          
+          STAGING_URL="https://resume-as-code.netlify.app"
+          
+          # Test staging version.json
+          echo "📋 Testing $STAGING_URL/version.json..."
+          if curl -f -s "$STAGING_URL/version.json" | jq . > /dev/null; then
+            VERSION_DATA=$(curl -s "$STAGING_URL/version.json")
+            echo "✅ Staging version.json is accessible"
+            echo "📄 Version data: $VERSION_DATA"
+            
+            # Validate required fields
+            ENVIRONMENT=$(echo "$VERSION_DATA" | jq -r '.environment // "unknown"')
+            VERSION=$(echo "$VERSION_DATA" | jq -r '.version // "unknown"')
+            
+            if [[ "$ENVIRONMENT" != "unknown" && "$VERSION" != "unknown" ]]; then
+              echo "✅ Version endpoint validation passed"
+              echo "status=success" >> $GITHUB_OUTPUT
+            else
+              echo "⚠️ Version endpoint missing required fields"
+              echo "status=partial" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ Staging version endpoint not accessible"
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+
+  endpoint-monitor:
+    name: 🌐 Endpoint Monitor
+    needs: initialize-e2e-controller
+    if: needs.initialize-e2e-controller.outputs.should_run_endpoints == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      monitoring_results: ${{ steps.endpoint-check.outputs.results }}
+    steps:
+      - name: Monitor All Endpoints
+        id: endpoint-check
+        run: |
+          echo "🌐 Monitoring all deployment endpoints..."
+          
+          ENDPOINTS='${{ needs.initialize-e2e-controller.outputs.endpoints_to_test }}'
+          RESULTS="[]"
+          
+          for endpoint in $(echo "$ENDPOINTS" | jq -r '.[]'); do
+            echo "🔍 Testing endpoint: $endpoint"
+            
+            if curl -f -s -L "$endpoint" > /dev/null; then
+              echo "✅ $endpoint is accessible"
+              RESULT="{\"url\": \"$endpoint\", \"status\": \"success\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+            else
+              echo "❌ $endpoint is not accessible"
+              RESULT="{\"url\": \"$endpoint\", \"status\": \"failed\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+            fi
+            
+            RESULTS=$(echo "$RESULTS" | jq ". + [$RESULT]")
+          done
+          
+          echo "results=$RESULTS" >> $GITHUB_OUTPUT
+          echo "📊 Endpoint monitoring completed"
+
+  e2e-summary-report:
+    name: 📊 E2E Pipeline Summary
+    needs: [initialize-e2e-controller, pr-flow-validator, staging-environment-validator, endpoint-monitor]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Generate E2E Pipeline Report
+        run: |
+          echo "📊 Generating E2E Pipeline Validation Report"
+          echo "============================================="
+          echo ""
+          echo "**Validation ID**: ${{ needs.initialize-e2e-controller.outputs.validation_id }}"
+          echo "**Test Scope**: ${{ inputs.test_scope }}"
+          echo "**Dry Run**: ${{ inputs.dry_run }}"
+          echo "**Execution Time**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          echo "## 🎯 Test Results Summary"
+          echo ""
+          
+          # PR Flow Results
+          if [[ "${{ needs.initialize-e2e-controller.outputs.should_run_pr_flow }}" == "true" ]]; then
+            echo "### 🔄 PR Flow Validation"
+            if [[ "${{ needs.pr-flow-validator.result }}" == "success" ]]; then
+              echo "- ✅ **Status**: PASSED"
+              echo "- 📋 **PR Number**: #${{ needs.pr-flow-validator.outputs.pr_number }}"
+              echo "- 🌐 **Preview URL**: ${{ needs.pr-flow-validator.outputs.preview_url }}"
+            else
+              echo "- ❌ **Status**: FAILED"
+            fi
+            echo ""
+          fi
+          
+          # Staging Results
+          if [[ "${{ needs.initialize-e2e-controller.outputs.should_run_staging }}" == "true" ]]; then
+            echo "### 🎯 Staging Environment Validation"
+            if [[ "${{ needs.staging-environment-validator.result }}" == "success" ]]; then
+              echo "- ✅ **Status**: PASSED"
+              echo "- 🚀 **Deployment**: ${{ needs.staging-environment-validator.outputs.staging_deployment_status }}"
+              echo "- 📄 **Version Check**: ${{ needs.staging-environment-validator.outputs.staging_version_check }}"
+            else
+              echo "- ❌ **Status**: FAILED"
+            fi
+            echo ""
+          fi
+          
+          # Endpoint Monitoring Results
+          if [[ "${{ needs.initialize-e2e-controller.outputs.should_run_endpoints }}" == "true" ]]; then
+            echo "### 🌐 Endpoint Monitoring"
+            if [[ "${{ needs.endpoint-monitor.result }}" == "success" ]]; then
+              echo "- ✅ **Status**: PASSED"
+              echo "- 📊 **Results**: Available in job logs"
+            else
+              echo "- ❌ **Status**: FAILED"
+            fi
+            echo ""
+          fi
+          
+          # Overall Status
+          echo "## 🏁 Overall E2E Pipeline Status"
+          OVERALL_STATUS="✅ PASSED"
+          
+          if [[ "${{ needs.pr-flow-validator.result }}" == "failure" ]] || \
+             [[ "${{ needs.staging-environment-validator.result }}" == "failure" ]] || \
+             [[ "${{ needs.endpoint-monitor.result }}" == "failure" ]]; then
+            OVERALL_STATUS="❌ FAILED"
+          fi
+          
+          echo "**$OVERALL_STATUS**"
+          echo ""
+          echo "---"
+          echo "*Generated by E2E Pipeline Validation Controller*"
+
+      - name: Cleanup Test Resources
+        if: always() && inputs.dry_run == false
+        run: |
+          echo "🧹 Cleaning up test resources..."
+          
+          # Clean up test branch if created
+          TEST_BRANCH="${{ needs.initialize-e2e-controller.outputs.test_branch }}"
+          if git ls-remote --heads origin "$TEST_BRANCH" | grep -q "$TEST_BRANCH"; then
+            echo "🗑️ Deleting test branch: $TEST_BRANCH"
+            git push origin --delete "$TEST_BRANCH" 2>/dev/null || echo "⚠️ Test branch may have been already deleted"
+          fi
+          
+          echo "✅ Cleanup completed"
+        env:
+          GH_TOKEN: ${{ github.token }}

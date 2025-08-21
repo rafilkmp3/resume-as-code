@@ -1,4 +1,4 @@
-.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal monitor act-check act-list act-production act-staging act-release act-lighthouse act-security act-visual act-pr-preview act-test-all act-setup act-workflow act-dry-run
+.PHONY: help install build build-internal dev serve test test-unit test-e2e test-visual test-accessibility test-performance test-fast clean status docker-check test-internal test-unit-internal test-e2e-internal test-visual-internal test-accessibility-internal test-performance-internal test-fast-internal monitor act-check act-list act-production act-staging act-release act-lighthouse act-security act-visual act-pr-preview act-test-all act-setup act-workflow act-dry-run e2e-test e2e-test-pr e2e-test-staging e2e-test-release e2e-test-dry e2e-endpoints e2e-endpoints-staging e2e-endpoints-prod e2e-endpoints-brightdata
 
 # Colors for output
 RED=\033[0;31m
@@ -92,6 +92,17 @@ help:
 	@echo "  $(CYAN)npm run perf:history$(NC)- Show performance history"
 	@echo "  $(CYAN)npm run perf:build$(NC)  - Measure build time only"
 	@echo "  $(CYAN)npm run perf:test$(NC)   - Measure test time only"
+	@echo ""
+	@echo "$(GREEN)🧪 E2E Pipeline Validation:$(NC)"
+	@echo "  $(PURPLE)make e2e-test$(NC)        - Full E2E pipeline test (PR → preview → staging → prod)"
+	@echo "  $(PURPLE)make e2e-test-pr$(NC)     - Test PR flow only (PR → preview)"
+	@echo "  $(PURPLE)make e2e-test-staging$(NC)- Test staging deployment only"
+	@echo "  $(PURPLE)make e2e-test-release$(NC)- Test release flow only (release → production)"
+	@echo "  $(PURPLE)make e2e-test-dry$(NC)    - Dry run validation (no real operations)"
+	@echo "  $(CYAN)make e2e-endpoints$(NC)    - Monitor all deployment endpoints"
+	@echo "  $(CYAN)make e2e-endpoints-staging$(NC) - Monitor staging endpoints only"
+	@echo "  $(CYAN)make e2e-endpoints-prod$(NC)    - Monitor production endpoints only"
+	@echo "  $(CYAN)make e2e-endpoints-brightdata$(NC) - Use BrightData for enhanced monitoring"
 	@echo "  $(CYAN)npm run ux:analyze$(NC) - User experience analysis"
 	@echo "  $(CYAN)npm run accessibility:audit$(NC) - Accessibility compliance check"
 	@echo ""
@@ -751,3 +762,40 @@ speedlight-benchmark:
 	@echo "$(GREEN)🚀 Expected Performance Gain: 2-4x faster (50-75% reduction)$(NC)"
 	@echo "$(GREEN)💰 Cost Savings: ~60-80% reduction in CI minutes$(NC)"
 	@echo "$(GREEN)🌱 Energy Savings: ARM64 + shorter runs = 40-60% less power$(NC)"
+
+# 🧪 E2E Pipeline Validation - Complete workflow testing
+e2e-test:
+	@echo "$(PURPLE)🧪 Full E2E Pipeline Test (PR → preview → staging → production)$(NC)"
+	@npm run e2e:test
+
+e2e-test-pr:
+	@echo "$(PURPLE)🔄 E2E PR Flow Test (PR → preview)$(NC)"
+	@npm run e2e:test:pr
+
+e2e-test-staging:
+	@echo "$(PURPLE)🎯 E2E Staging Test (staging deployment validation)$(NC)"
+	@npm run e2e:test:staging
+
+e2e-test-release:
+	@echo "$(PURPLE)🚀 E2E Release Flow Test (release → production)$(NC)"
+	@npm run e2e:test:release
+
+e2e-test-dry:
+	@echo "$(PURPLE)🧪 E2E Dry Run Test (validation only, no real operations)$(NC)"
+	@npm run e2e:test:dry
+
+e2e-endpoints:
+	@echo "$(CYAN)🌐 Monitor All Deployment Endpoints$(NC)"
+	@npm run e2e:endpoints
+
+e2e-endpoints-staging:
+	@echo "$(CYAN)🎯 Monitor Staging Endpoints$(NC)"
+	@npm run e2e:endpoints:staging
+
+e2e-endpoints-prod:
+	@echo "$(CYAN)🚀 Monitor Production Endpoints$(NC)"
+	@npm run e2e:endpoints:prod
+
+e2e-endpoints-brightdata:
+	@echo "$(CYAN)🌐 Enhanced Endpoint Monitoring with BrightData$(NC)"
+	@npm run e2e:endpoints:brightdata
