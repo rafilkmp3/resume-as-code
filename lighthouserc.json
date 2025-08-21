@@ -2,6 +2,7 @@
   "ci": {
     "collect": {
       "numberOfRuns": 1,
+      "method": "node",
       "settings": {
         "preset": "desktop",
         "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
