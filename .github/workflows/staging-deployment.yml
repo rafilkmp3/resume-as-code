@@ -42,10 +42,49 @@ env:
   GITHUB_PAGES: false
 
 jobs:
+  # Check if this is a release-please commit to avoid duplicate deployments
+  check-release-context:
+    name: Check Release Context
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy_staging: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - name: Check if this is a release-please commit
+        id: check
+        run: |
+          echo "🔍 Analyzing commit context to prevent duplicate deployments..."
+          
+          # Get commit message and author
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
+          
+          echo "📝 Commit message: $COMMIT_MSG"
+          echo "👤 Commit author: $COMMIT_AUTHOR"
+          
+          # Check if this is a release-please commit or release-related
+          if echo "$COMMIT_MSG" | grep -q "chore(release):" || \
+             echo "$COMMIT_MSG" | grep -q "chore: release" || \
+             echo "$COMMIT_AUTHOR" | grep -q "release-please"; then
+            echo "🚫 SKIPPING: This is a release-please commit - production deployment will handle this"
+            echo "📋 Release-please workflow will create the proper production deployment"
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "::notice::Staging deployment skipped - release-please detected"
+          else
+            echo "✅ PROCEEDING: Regular commit - staging deployment appropriate"
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          fi
+
   deploy-staging:
     name: Deploy to Netlify Staging
     runs-on: ubuntu-latest  # AMD64 runner for Chrome compatibility
     timeout-minutes: 15
+    needs: check-release-context
+    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
     environment:
       name: netlify-staging
       url: https://resume-as-code.netlify.app
@@ -285,8 +324,8 @@ jobs:
   call-comprehensive-tests:
     name: Comprehensive Staging Tests
     uses: ./.github/workflows/shared-comprehensive-testing.yml
-    needs: deploy-staging
-    if: success()
+    needs: [check-release-context, deploy-staging]
+    if: needs.check-release-context.outputs.should_deploy_staging == 'true' && success()
     with:
       target_url: 'https://resume-as-code.netlify.app'
       environment_name: 'staging'
@@ -300,8 +339,8 @@ jobs:
   staging-summary:
     name: Staging Test Summary
     runs-on: ubuntu-latest
-    needs: [deploy-staging, call-comprehensive-tests]
-    if: always()
+    needs: [check-release-context, deploy-staging, call-comprehensive-tests]
+    if: always() && needs.check-release-context.outputs.should_deploy_staging == 'true'
     steps:
       - name: Create Comprehensive Staging Summary
         run: |
