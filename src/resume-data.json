@@ -195,7 +195,7 @@
       ]
     },
     {
-      "name": "Self-Service Terraform Platform with Atlantis Integration", 
+      "name": "Self-Service Terraform Platform with Atlantis Integration",
       "url": "https://www.runatlantis.io/",
       "description": "Enterprise-grade GitOps platform enabling teams to self-apply Terraform through GitHub PR interface using Atlantis",
       "highlights": [
@@ -232,7 +232,7 @@
       "keywords": [
         "AWS Route53",
         "Multi-Cloud",
-        "Hybrid Network", 
+        "Hybrid Network",
         "DNS",
         "VPC",
         "Transit Gateway",
