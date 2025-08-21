@@ -56,13 +56,13 @@ jobs:
       
       - name: 🔍 Analyze Commit Message & Author (Detect Release-Please)
         id: check
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_AUTHOR: ${{ github.event.head_commit.author.name }}
         run: |
           echo "🔍 Analyzing commit context to prevent duplicate deployments..."
           
-          # Get commit message and author
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
-          
+          # Get commit message and author from environment variables (security best practice)
           echo "📝 Commit message: $COMMIT_MSG"
           echo "👤 Commit author: $COMMIT_AUTHOR"
           
@@ -352,10 +352,10 @@ jobs:
           
           # Lighthouse Performance Results
           echo "## 🚀 Lighthouse Performance" >> $GITHUB_STEP_SUMMARY
-          PERF_SCORE="${{ needs.call-comprehensive-tests.outputs.performance_score }}"
-          ACCESS_SCORE="${{ needs.call-comprehensive-tests.outputs.accessibility_score }}"
-          BEST_PRACTICES_SCORE="${{ needs.call-comprehensive-tests.outputs.best_practices_score }}"
-          SEO_SCORE="${{ needs.call-comprehensive-tests.outputs.seo_score }}"
+          PERF_SCORE="${{ needs.call-comprehensive-tests.outputs.performance_score || 'N/A' }}"
+          ACCESS_SCORE="${{ needs.call-comprehensive-tests.outputs.accessibility_score || 'N/A' }}"
+          BEST_PRACTICES_SCORE="${{ needs.call-comprehensive-tests.outputs.best_practices_score || 'N/A' }}"
+          SEO_SCORE="${{ needs.call-comprehensive-tests.outputs.seo_score || 'N/A' }}"
           
           if [ -n "$PERF_SCORE" ] && [ "$PERF_SCORE" != "N/A" ]; then
             echo "- **Performance:** $PERF_SCORE/100" >> $GITHUB_STEP_SUMMARY
