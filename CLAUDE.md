@@ -779,6 +779,53 @@ All GitHub Actions workflows implement comprehensive resilience patterns:
 **Verification**: `node scripts/verify-resilience.js` validates all patterns
 **Documentation**: See `WORKFLOW-RESILIENCE.md` for complete implementation details
 
+### 🚨 CRITICAL: Deployment Flow Anti-Regression Documentation
+
+**NEVER ALLOW DUPLICATE DEPLOYMENTS**. This section documents critical deployment flow logic to prevent regression.
+
+#### 🔄 Proper Release-Please Flow (DO NOT BREAK)
+
+**✅ CORRECT FLOW:**
+```
+Regular PR Merge → staging-deployment.yml → Deploy to Netlify Staging
+Release-Please Merge → release-please.yml → Deploy to GitHub Pages Production
+```
+
+**❌ BROKEN FLOW (FIXED in Aug 2025):**
+```
+Release-Please Merge → BOTH staging-deployment.yml AND release-please.yml trigger simultaneously
+```
+
+#### 🛡️ Release-Please Detection Logic (staging-deployment.yml:57-80)
+
+**Critical Implementation:**
+- `check-release-context` job MUST analyze commit messages and authors
+- **Patterns to detect**: `chore(release):`, `chore: release`, author: `release-please`
+- **Action**: Skip entire staging workflow when release-please detected
+- **Reason**: Prevents duplicate staging + production deployments
+
+#### 🚨 Anti-Regression Rules
+
+1. **NEVER remove `check-release-context` job** from staging-deployment.yml
+2. **NEVER allow staging deployment** on release-please commits
+3. **ALWAYS test deployment flow** after workflow changes
+4. **User reported issue**: "staging and prod deploy at same time" - this is the fix
+5. **Staging = Development**, **Production = Releases only**
+
+#### ✅ Validation Commands
+
+```bash
+# Test deployment flow after changes
+git log --oneline -5  # Check recent commits
+gh run list --limit 5  # Verify no duplicate deployments
+```
+
+**Date Fixed**: August 21, 2025  
+**Root Cause**: Both workflows triggered on main branch push  
+**Fix**: Release-please detection with smart workflow skipping
+
+---
+
 ### 🚀 Optimized Three-Tier CI/CD Architecture
 
 #### Production Pipeline (`ci-prod.yml`) - **ROCK SOLID**

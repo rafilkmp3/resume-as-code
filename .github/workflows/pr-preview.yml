@@ -1,5 +1,5 @@
 ---
-name: PR Preview
+name: 🔍 PR Preview Deploy & Testing
 
 on:
   pull_request:

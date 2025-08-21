@@ -1,5 +1,5 @@
 ---
-name: Conventional Commits Check
+name: ✅ Quality Gates (Conventional Commits)
 
 on:
   pull_request:
