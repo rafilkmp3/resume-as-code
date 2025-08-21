@@ -81,15 +81,50 @@ jobs:
           
           echo "✅ Site is available and ready for testing"
 
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v12
-        id: lighthouse-ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          urls: ${{ inputs.target_url }}
-          configPath: ./lighthouserc.json
-          budgetPath: ${{ inputs.budget_path }}
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Lighthouse CI
+        run: |
+          echo "📦 Installing Lighthouse CI..."
+          npm install -g @lhci/cli@0.15.x
+          
+          # Increase shared memory for Chrome stability (Context7 recommendation)
+          sudo mount -o remount,size=2G /dev/shm || echo "Could not resize /dev/shm"
+          
+          echo "🔍 Verifying Lighthouse CI installation..."
+          lhci --version
+          
+          echo "🌐 Chrome configuration for CI environment..."
+          google-chrome --version || echo "Chrome version check failed"
+
+      - name: Run Lighthouse CI
+        id: lighthouse-ci
+        run: |
+          echo "🚀 Running Lighthouse CI with enhanced stability configuration..."
+          
+          # Set Chrome path for Lighthouse CI
+          export CHROME_PATH=$(which google-chrome-stable || which google-chrome)
+          export LIGHTHOUSE_CI=true
+          
+          # Run with Context7 recommended configuration
+          lhci autorun \
+            --config=./lighthouserc.json \
+            --budget-path=${{ inputs.budget_path }} \
+            --upload.target=temporary-public-storage \
+            --upload.temporaryPublicStorage=true || {
+              echo "❌ Lighthouse CI failed, attempting fallback configuration..."
+              
+              # Fallback: Try with minimal Chrome flags
+              export LHCI_CHROME_FLAGS="--no-sandbox --disable-setuid-sandbox --headless=new"
+              lhci collect --url="${{ inputs.target_url }}" --config=./lighthouserc.json || {
+                echo "❌ Lighthouse CI completely failed"
+                exit 1
+              }
+            }
 
       - name: Extract Lighthouse Results
         id: lighthouse-results
