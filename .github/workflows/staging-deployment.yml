@@ -58,7 +58,7 @@ jobs:
   build-and-deploy-staging:
     name: 🚀 Build & Deploy to Netlify Staging  
     needs: check-release-context
-    if: needs.check-release-context.outputs.should_deploy == 'true'
+    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
