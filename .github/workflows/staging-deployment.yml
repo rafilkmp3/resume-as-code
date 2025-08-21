@@ -44,7 +44,7 @@ env:
 jobs:
   deploy-staging:
     name: Deploy to Netlify Staging
-    runs-on: ubuntu-24.04-arm  # Free ARM64 runner (40% performance boost + 37% cost savings)
+    runs-on: ubuntu-latest  # AMD64 runner for Chrome compatibility
     timeout-minutes: 15
     environment:
       name: netlify-staging
@@ -98,7 +98,7 @@ jobs:
           echo "🏷️ Staging version: ${STAGING_VERSION}"
           echo "🌐 Staging URL: https://resume-as-code.netlify.app/"
 
-      - name: Setup Node.js (ARM64 optimized)
+      - name: Setup Node.js (Speedlight)
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -126,12 +126,12 @@ jobs:
             node_modules/.cache
             dist/assets/images
             dist/assets/optimized
-          key: ${{ runner.os }}-arm64-speedlight-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          key: ${{ runner.os }}-speedlight-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
           restore-keys: |
-            ${{ runner.os }}-arm64-speedlight-
-            ${{ runner.os }}-arm64-
+            ${{ runner.os }}-speedlight-
+            ${{ runner.os }}-
 
-      - name: 📦 Fast Dependency Installation (ARM64)
+      - name: 📦 Fast Dependency Installation (Speedlight)
         run: |
           echo "🚀 SPEEDLIGHT BUILD: Leveraging aggressive caching for ultra-fast builds"
           echo "💡 Docker-free advantage: Can cache everything without container limitations"
@@ -155,7 +155,7 @@ jobs:
       #     task: start-measurement
       #     label: speedlight-build
 
-      - name: 🚀 Speedlight Build with Intelligent Caching (ARM64)
+      - name: 🚀 Speedlight Build with Intelligent Caching
         env:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
@@ -168,13 +168,13 @@ jobs:
           DEPLOY_URL: https://resume-as-code.netlify.app/
           URL: https://resume-as-code.netlify.app/
         run: |
-          echo "🚀 SPEEDLIGHT BUILD: ARM64 Docker-Free with Aggressive Caching"
+          echo "🚀 SPEEDLIGHT BUILD: Docker-Free with Aggressive Caching"
           echo "🌐 Target: Netlify Staging (resume-as-code.netlify.app)"
-          echo "⚡ Using ARM64 native Node.js build (40% performance boost + 37% cost savings)"
-          echo "🌱 Energy-efficient ARM64 architecture (30-40% less power consumption)"
+          echo "⚡ Using native Node.js build with professional browser actions"
+          echo "🌱 Energy-efficient speedlight architecture"
           
-          # Display ARM64 system info
-          echo "📊 ARM64 System Information:"
+          # Display system info
+          echo "📊 System Information:"
           echo "  - Architecture: $(uname -m)"
           echo "  - CPU Cores: $(nproc)"
           echo "  - Node.js Arch: $(node -p 'process.arch')"
@@ -205,16 +205,16 @@ jobs:
             echo "📦 Verifying cached artifacts..."
             ls -la dist/ | head -10
           else
-            echo "🏗️ Executing full ARM64 native build..."
+            echo "🏗️ Executing full speedlight native build..."
             time npm run build
           fi
           
-          echo "✅ ARM64 Speedlight build completed successfully!"
+          echo "✅ Speedlight build completed successfully!"
           
           # Cache performance metrics
           echo "📊 Build Performance Summary:"
           echo "  - Cache Strategy: Aggressive multi-layer caching"
-          echo "  - Architecture: Native ARM64 (no emulation)"
+          echo "  - Architecture: Native $(uname -m) (no emulation)"
           echo "  - Dependencies: $([ -d 'node_modules' ] && echo 'Cached' || echo 'Fresh')"
           echo "  - Build Artifacts: $([ '$BUILD_CACHE_VALID' = 'true' ] && echo 'Cache Hit' || echo 'Cache Miss')"
 
@@ -233,7 +233,7 @@ jobs:
             node_modules/.cache
             ~/.npm
             ~/.cache
-          key: ${{ runner.os }}-arm64-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          key: ${{ runner.os }}-speedlight-build-artifacts-${{ github.sha }}-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
 
       - name: Verify staging artifacts
         run: |
