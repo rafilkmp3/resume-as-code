@@ -58,7 +58,7 @@ jobs:
   deploy-staging:
     name: 🚀 Deploy to Netlify Staging  
     needs: check-release-context
-    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
+    if: needs.check-release-context.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest-arm64
     steps:
       - name: Checkout
