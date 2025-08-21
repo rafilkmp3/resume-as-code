@@ -194,7 +194,15 @@ jobs:
           
           # Make test changes to trigger workflows
           TEST_CONTENT="E2E Pipeline Test - ${{ needs.initialize-e2e-controller.outputs.validation_id }}"
-          echo "  \"e2eTestInfo\": \"$TEST_CONTENT\"," >> src/resume-data.json
+          
+          # Create a valid JSON modification - add test info to resume data
+          node -e "
+          const fs = require('fs');
+          const resumeData = JSON.parse(fs.readFileSync('src/resume-data.json', 'utf8'));
+          resumeData.e2eTestInfo = '$TEST_CONTENT';
+          resumeData.e2eTestTimestamp = new Date().toISOString();
+          fs.writeFileSync('src/resume-data.json', JSON.stringify(resumeData, null, 2));
+          "
           
           # Commit test changes
           git config user.name "E2E Pipeline Bot"
@@ -421,16 +429,24 @@ jobs:
             
             if curl -f -s -L "$endpoint" > /dev/null; then
               echo "✅ $endpoint is accessible"
-              RESULT="{\"url\": \"$endpoint\", \"status\": \"success\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+              STATUS="success"
             else
               echo "❌ $endpoint is not accessible"
-              RESULT="{\"url\": \"$endpoint\", \"status\": \"failed\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+              STATUS="failed"
             fi
+            
+            # Build JSON properly using jq
+            RESULT=$(jq -n \
+              --arg url "$endpoint" \
+              --arg status "$STATUS" \
+              --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              '{url: $url, status: $status, timestamp: $timestamp}')
             
             RESULTS=$(echo "$RESULTS" | jq ". + [$RESULT]")
           done
           
-          echo "results=$RESULTS" >> $GITHUB_OUTPUT
+          # Use printf to avoid newline issues with GitHub Actions output
+          printf "results=%s\n" "$RESULTS" >> $GITHUB_OUTPUT
           echo "📊 Endpoint monitoring completed"
 
   e2e-summary-report:
