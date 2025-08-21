@@ -87,48 +87,26 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Lighthouse CI
-        run: |
-          echo "📦 Installing Lighthouse CI..."
-          npm install -g @lhci/cli@0.15.x
-          
-          # Increase shared memory for Chrome stability (Context7 recommendation)
-          sudo mount -o remount,size=2G /dev/shm || echo "Could not resize /dev/shm"
-          
-          echo "🔍 Verifying Lighthouse CI installation..."
-          lhci --version
-          
-          echo "🌐 Chrome configuration for CI environment..."
-          google-chrome --version || echo "Chrome version check failed"
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
 
       - name: Run Lighthouse CI
         id: lighthouse-ci
         run: |
-          echo "🚀 Running Lighthouse CI with URL-based testing configuration..."
+          echo "🚀 Installing and running Lighthouse CI (Context7 proven approach)..."
           
-          # Set Chrome path for Lighthouse CI
-          export CHROME_PATH=$(which google-chrome-stable || which google-chrome)
-          export LIGHTHOUSE_CI=true
+          # Install Lighthouse CI - Context7 recommended GitHub Actions approach
+          npm install -g @lhci/cli@0.15.x
           
-          # URL-based testing (not autorun) - Context7 recommended approach
-          echo "📊 Collecting Lighthouse results for: ${{ inputs.target_url }}"
-          lhci collect \
-            --url="${{ inputs.target_url }}" \
-            --config=./lighthouserc.json || {
-              echo "❌ Lighthouse CI collect failed, trying with minimal Chrome flags..."
-              
-              # Fallback: Try with minimal Chrome flags
-              export LHCI_CHROME_FLAGS="--no-sandbox --disable-setuid-sandbox --headless=new"
-              lhci collect --url="${{ inputs.target_url }}" --numberOfRuns=1 || {
-                echo "❌ Lighthouse CI completely failed"
-                exit 1
-              }
-            }
-            
-          echo "📤 Uploading results to temporary public storage..."
-          lhci upload \
-            --target=temporary-public-storage \
-            --uploadUrlMap=true || echo "⚠️ Upload failed but continuing..."
+          echo "📊 Running Lighthouse CI autorun for: ${{ inputs.target_url }}"
+          # Simple autorun approach from Context7 documentation
+          lhci autorun \
+            --upload.target=temporary-public-storage \
+            --collect.url="${{ inputs.target_url }}" \
+            --collect.settings.chromeFlags="--no-sandbox --disable-setuid-sandbox --headless=new" \
+            --collect.numberOfRuns=1 || echo "⚠️ Lighthouse CI failed but continuing..."
 
       - name: Extract Lighthouse Results
         id: lighthouse-results

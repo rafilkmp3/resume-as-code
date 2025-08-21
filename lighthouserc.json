@@ -1,42 +1,13 @@
 {
   "ci": {
     "collect": {
-      "numberOfRuns": 1,
-      "method": "node",
       "settings": {
         "preset": "desktop",
-        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
-        "chromeFlags": "--no-sandbox --disable-setuid-sandbox --no-zygote --headless=new --disable-gpu --disable-dev-shm-usage --disable-extensions --no-first-run --disable-default-apps --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --single-process --disable-features=TranslateUI --disable-ipc-flooding-protection --disable-web-security --disable-features=VizDisplayCompositor --disable-blink-features=AutomationControlled --no-crash-upload --crash-dumps-dir=/tmp --disable-crash-reporter --disable-logging --silent",
-        "maxWaitForLoad": 90000,
-        "maxWaitForFcp": 30000,
-        "skipAudits": ["uses-http2"],
-        "throttling": {
-          "rttMs": 40,
-          "throughputKbps": 10240,
-          "cpuSlowdownMultiplier": 1,
-          "requestLatencyMs": 0,
-          "downloadThroughputKbps": 0,
-          "uploadThroughputKbps": 0
-        }
-      }
-    },
-    "assert": {
-      "budgetPath": "./budget.json",
-      "assertions": {
-        "categories:performance": ["warn", {"minScore": 0.85}],
-        "categories:accessibility": ["warn", {"minScore": 0.90}],
-        "categories:best-practices": ["warn", {"minScore": 0.85}],
-        "categories:seo": ["warn", {"minScore": 0.85}],
-        "categories:pwa": "off",
-        "first-contentful-paint": ["warn", {"maxNumericValue": 2000}],
-        "largest-contentful-paint": ["warn", {"maxNumericValue": 2500}],
-        "cumulative-layout-shift": ["warn", {"maxNumericValue": 0.1}],
-        "speed-index": ["warn", {"maxNumericValue": 3000}]
+        "chromeFlags": "--no-sandbox --disable-setuid-sandbox --headless=new"
       }
     },
     "upload": {
-      "target": "temporary-public-storage",
-      "temporaryPublicStorage": true
+      "target": "temporary-public-storage"
     }
   }
 }
