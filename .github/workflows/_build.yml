@@ -93,6 +93,12 @@ jobs:
           runner_type: ${{ inputs.runner_type }}
           cache_key_suffix: ${{ inputs.cache_key_suffix }}
 
+      - name: 🌐 Setup Chrome (ARM64 Compatible)
+        if: contains(inputs.runner_type, 'arm') 
+        uses: ./.github/actions/setup-chrome-arm64
+        with:
+          chrome-version: 'stable'
+
       - name: 🏗️ Build Resume Site
         env:
           NETLIFY: ${{ inputs.environment_name != 'production' && 'true' || 'false' }}

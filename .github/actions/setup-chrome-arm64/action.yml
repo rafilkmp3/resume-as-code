@@ -161,19 +161,29 @@ runs:
         
         echo "📥 Downloading ChromeDriver $CHROMEDRIVER_VERSION for ARM64..."
         
-        # Download ChromeDriver for ARM64
-        CHROMEDRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+        # Check if ARM64 ChromeDriver is available, fallback to x64 with emulation
+        CHROMEDRIVER_URL_ARM64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux-arm64/chromedriver-linux-arm64.zip"
+        CHROMEDRIVER_URL_X64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
         
-        # Note: ChromeDriver ARM64 binaries may not be available, fallback to x64 with emulation
-        wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL" || {
+        echo "🔍 Checking for ARM64 ChromeDriver availability..."
+        if curl --head --silent --fail "$CHROMEDRIVER_URL_ARM64" >/dev/null 2>&1; then
+          echo "✅ ARM64 ChromeDriver available, downloading native binary..."
+          wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_ARM64"
+          CHROMEDRIVER_ARCH="linux-arm64"
+        else
           echo "⚠️ ARM64 ChromeDriver not available, using x64 version with emulation"
-          # Install qemu for x64 emulation if needed
+          echo "📥 Installing QEMU for x86_64 emulation..."
+          sudo apt-get update -q
           sudo apt-get install -y qemu-user-static binfmt-support
-        }
+          
+          # Download x64 version
+          wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_X64"
+          CHROMEDRIVER_ARCH="linux64"
+        fi
         
         unzip /tmp/chromedriver.zip -d /tmp/
-        chmod +x /tmp/chromedriver-linux64/chromedriver
-        sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        chmod +x /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver
+        sudo mv /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver /usr/local/bin/chromedriver
         
         # Verify ChromeDriver
         CHROMEDRIVER_VERSION_ACTUAL=$(/usr/local/bin/chromedriver --version | cut -d ' ' -f2)
@@ -186,7 +196,7 @@ runs:
         echo "📁 ChromeDriver path: /usr/local/bin/chromedriver"
         
         # Cleanup
-        rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64/
+        rm -rf /tmp/chromedriver.zip /tmp/chromedriver-$CHROMEDRIVER_ARCH/
     
     - name: Verify Setup and Display Summary
       shell: bash
