@@ -35,68 +35,61 @@ permissions:
   contents: read
 
 jobs:
-  matrix-build:
-    name: 🏗️ Build Test (${{ matrix.environment }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Preview: ARM64 for native Chrome + PDF generation
-          - environment: preview
-            build_mode: draft
-            context: preview
-            runner_type: ubuntu-24.04-arm
-            node_version: '22'
-            
-          # Staging: ARM64 for native Chrome + full build
-          - environment: staging  
-            build_mode: production
-            context: staging
-            runner_type: ubuntu-24.04-arm
-            node_version: '22'
-            
-          # Production: x64 for GitHub Pages compatibility
-          - environment: production
-            build_mode: production
-            context: deploy
-            runner_type: ubuntu-latest
-            node_version: '22'
-    
-    # Environment filter logic
+  preview-build:
+    name: 🏗️ Preview Build Test
     if: |
       github.event_name != 'workflow_dispatch' || 
       inputs.environment_filter == 'all' || 
-      inputs.environment_filter == matrix.environment
-    
-    steps:
-      - name: 🏷️ Environment Info
-        run: |
-          echo "## 🧪 Testing Environment: ${{ matrix.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**🖥️ Runner**: ${{ matrix.runner_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "**⚙️ Build Mode**: ${{ matrix.build_mode }}" >> $GITHUB_STEP_SUMMARY  
-          echo "**📦 Context**: ${{ matrix.context }}" >> $GITHUB_STEP_SUMMARY
-          echo "**🟢 Node.js**: ${{ matrix.node_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**🌐 Chrome Setup**: ${{ contains(matrix.runner_type, 'arm') && 'ARM64 Native' || 'System Default' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-      
-      - name: 🏗️ Run Build Workflow
-        uses: ./.github/workflows/_build.yml
-        with:
-          runner_type: ${{ matrix.runner_type }}
-          node_version: ${{ matrix.node_version }}
-          build_mode: ${{ matrix.build_mode }}
-          environment_name: ${{ matrix.environment }}
-          context: ${{ matrix.context }}
-          upload_artifacts: true
-          artifact_name: build-test-${{ matrix.environment }}
-          timeout_minutes: 12
+      inputs.environment_filter == 'preview'
+    uses: ./.github/workflows/_build.yml
+    with:
+      runner_type: ubuntu-24.04-arm
+      node_version: '22'
+      build_mode: draft
+      environment_name: preview
+      context: preview
+      upload_artifacts: true
+      artifact_name: build-test-preview
+      timeout_minutes: 12
+
+  staging-build:
+    name: 🏗️ Staging Build Test  
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      inputs.environment_filter == 'all' || 
+      inputs.environment_filter == 'staging'
+    uses: ./.github/workflows/_build.yml
+    with:
+      runner_type: ubuntu-24.04-arm
+      node_version: '22'
+      build_mode: production
+      environment_name: staging
+      context: staging
+      upload_artifacts: true
+      artifact_name: build-test-staging
+      timeout_minutes: 12
+
+  production-build:
+    name: 🏗️ Production Build Test
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      inputs.environment_filter == 'all' || 
+      inputs.environment_filter == 'production'
+    uses: ./.github/workflows/_build.yml
+    with:
+      runner_type: ubuntu-latest
+      node_version: '22'
+      build_mode: production
+      environment_name: production
+      context: deploy
+      upload_artifacts: true
+      artifact_name: build-test-production
+      timeout_minutes: 12
 
   production-guard:
     name: 🛡️ Production Deployment Guard
     runs-on: ubuntu-latest
-    needs: [matrix-build]
+    needs: [preview-build, staging-build, production-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 5
     
@@ -116,7 +109,7 @@ jobs:
 
   test-summary:
     name: 📋 Environment Test Summary  
-    needs: [matrix-build]
+    needs: [preview-build, staging-build, production-build]
     runs-on: ubuntu-latest
     if: always()
     timeout-minutes: 5
@@ -126,18 +119,18 @@ jobs:
         run: |
           echo "# 🧪 Environment Build Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📋 Test Matrix Status" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Test Results Status" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | Status | Runner | Chrome | Build Mode |" >> $GITHUB_STEP_SUMMARY
           echo "|-------------|---------|---------|---------|------------|" >> $GITHUB_STEP_SUMMARY
           
-          # Preview status
-          if [ "${{ needs.matrix-build.result }}" = "success" ]; then
-            echo "| 📱 Preview | ✅ Pass | ubuntu-24.04-arm | ARM64 Native | draft |" >> $GITHUB_STEP_SUMMARY
-            echo "| 🔄 Staging | ✅ Pass | ubuntu-24.04-arm | ARM64 Native | production |" >> $GITHUB_STEP_SUMMARY
-            echo "| 🚀 Production | ✅ Pass | ubuntu-latest | System Default | production |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| ❌ Some Tests | ❌ Failed | Mixed | Mixed | Mixed |" >> $GITHUB_STEP_SUMMARY
-          fi
+          # Individual job status
+          PREVIEW_STATUS="${{ needs.preview-build.result == 'success' && '✅ Pass' || '❌ Fail' }}"
+          STAGING_STATUS="${{ needs.staging-build.result == 'success' && '✅ Pass' || '❌ Fail' }}"
+          PRODUCTION_STATUS="${{ needs.production-build.result == 'success' && '✅ Pass' || '❌ Fail' }}"
+          
+          echo "| 📱 Preview | $PREVIEW_STATUS | ubuntu-24.04-arm | ARM64 Native | draft |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔄 Staging | $STAGING_STATUS | ubuntu-24.04-arm | ARM64 Native | production |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 Production | $PRODUCTION_STATUS | ubuntu-latest | Google Chrome | production |" >> $GITHUB_STEP_SUMMARY
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🎯 Key Validations" >> $GITHUB_STEP_SUMMARY
@@ -154,13 +147,19 @@ jobs:
           echo "- **build-test-staging**: Full production build for pre-deploy testing" >> $GITHUB_STEP_SUMMARY
           echo "- **build-test-production**: Production-ready build for GitHub Pages" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ needs.matrix-build.result }}" != "success" ]; then
+          # Check if any builds failed
+          if [ "${{ needs.preview-build.result }}" != "success" ] || [ "${{ needs.staging-build.result }}" != "success" ] || [ "${{ needs.production-build.result }}" != "success" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "## ❌ Failure Analysis" >> $GITHUB_STEP_SUMMARY
             echo "Some environment builds failed. Check individual job logs for details." >> $GITHUB_STEP_SUMMARY
             echo "Common issues:" >> $GITHUB_STEP_SUMMARY
-            echo "- Chrome/Puppeteer setup problems on non-ARM runners" >> $GITHUB_STEP_SUMMARY
+            echo "- Chrome/Puppeteer setup problems on runners" >> $GITHUB_STEP_SUMMARY
             echo "- Missing dependencies or build script failures" >> $GITHUB_STEP_SUMMARY
             echo "- Node.js version compatibility issues" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Failed Jobs:**" >> $GITHUB_STEP_SUMMARY
+            [ "${{ needs.preview-build.result }}" != "success" ] && echo "- Preview Build: ${{ needs.preview-build.result }}" >> $GITHUB_STEP_SUMMARY
+            [ "${{ needs.staging-build.result }}" != "success" ] && echo "- Staging Build: ${{ needs.staging-build.result }}" >> $GITHUB_STEP_SUMMARY
+            [ "${{ needs.production-build.result }}" != "success" ] && echo "- Production Build: ${{ needs.production-build.result }}" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
