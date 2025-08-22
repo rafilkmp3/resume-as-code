@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.8.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.7.0...v4.8.0) (2025-08-22)
+
+
+### Features
+
+* add comprehensive environment testing workflow with cross-platform chrome support ([929e6fc](https://github.com/rafilkmp3/resume-as-code/commit/929e6fc0f2850a011d00aa1c62f006e40672edf4))
+* enhance chrome arm64 action with intelligent chromedriver detection and build integration ([ab870b1](https://github.com/rafilkmp3/resume-as-code/commit/ab870b1b5f4d69e395e07471bf38ace702a74f68))
+* implement comprehensive chrome arm64 setup action with testing ([d5c55f8](https://github.com/rafilkmp3/resume-as-code/commit/d5c55f8bd322115cd5a975f0306e2f17fd6b84ba))
+* refactor production deployment to use reusable build workflow and trigger on releases only ([047bc59](https://github.com/rafilkmp3/resume-as-code/commit/047bc590df0b59759270c587d14476c7bd0fec2a))
+* separate release management from production deployment for clarity ([a391993](https://github.com/rafilkmp3/resume-as-code/commit/a391993b14ef66f80c9c3326b7ff050243a4f6aa))
+
+
+### Bug Fixes
+
+* add workflow_dispatch trigger to conventional commits validation for release-please pr testing ([90a4668](https://github.com/rafilkmp3/resume-as-code/commit/90a466880f5b31e96d11275923b62046d057aa87))
+* correct environment testing workflow syntax for reusable workflow calls ([5cdb58e](https://github.com/rafilkmp3/resume-as-code/commit/5cdb58ea0f2a36384689ff6c0b87e66b0f007c88))
+* lighthouse ci test output path detection for chrome arm64 action ([1a0939a](https://github.com/rafilkmp3/resume-as-code/commit/1a0939ae2251a16dc1543875db0bdc252eb9e012))
+* update chrome arm64 action dependencies for ubuntu 24.04 compatibility ([d3b6418](https://github.com/rafilkmp3/resume-as-code/commit/d3b641862fcd8b07b756dff7bbdc85a16ecab709))
+* update chrome arm64 action to use chromium browser instead of chrome ([fc58759](https://github.com/rafilkmp3/resume-as-code/commit/fc5875966a4f86d780877c7c1a2ec8c4815be63f))
+
 ## [4.7.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.6.0...v4.7.0) (2025-08-22)
 
 
