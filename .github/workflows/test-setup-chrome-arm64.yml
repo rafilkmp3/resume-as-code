@@ -195,10 +195,7 @@ jobs:
           echo "🌐 Using Chrome path: $LHCI_CHROME_PATH"
           echo "🧪 Running Lighthouse CI on test URL..."
           
-          # Create output directory explicitly
-          mkdir -p ./lighthouse-test-reports
-          
-          # Run Lighthouse CI with our Chrome
+          # Run Lighthouse CI with our Chrome (use default .lighthouseci directory)
           # Using Context7 best practices for Chrome flags
           echo "🚀 Running LHCI collect..."
           lhci collect \
@@ -207,7 +204,6 @@ jobs:
             --settings.chromeFlags="--no-sandbox --disable-setuid-sandbox --headless=new --disable-gpu --disable-dev-shm-usage --disable-extensions --disable-web-security" \
             --numberOfRuns=1 \
             --settings.output=json \
-            --settings.outputPath=./lighthouse-test-reports \
             --settings.onlyCategories=performance,accessibility
           
           echo "📋 Lighthouse CI completed, checking results..."
@@ -216,16 +212,15 @@ jobs:
           echo "🔍 Available directories and files:"
           find . -name "*.json" -o -name "*lighthouse*" -type d | head -10
           
-          # Look for reports in multiple possible locations
+          # Look for reports in Lighthouse CI default directory
           REPORT_FILE=""
           
-          # First check the specified output path
-          if [ -d "./lighthouse-test-reports" ] && [ -n "$(ls -A ./lighthouse-test-reports/*.json 2>/dev/null)" ]; then
-            REPORT_FILE=$(ls ./lighthouse-test-reports/*.json | head -1)
-          # Then check LHCI default directory
-          elif [ -d "./.lighthouseci" ] && [ -n "$(ls -A ./.lighthouseci/*.json 2>/dev/null)" ]; then
+          # Check LHCI default directory first
+          if [ -d "./.lighthouseci" ] && [ -n "$(ls -A ./.lighthouseci/*.json 2>/dev/null)" ]; then
             REPORT_FILE=$(ls ./.lighthouseci/*.json | head -1)
-          # Check for lhci reports directory
+          # Fallback to other possible locations
+          elif [ -d "./lighthouse-test-reports" ] && [ -n "$(ls -A ./lighthouse-test-reports/*.json 2>/dev/null)" ]; then
+            REPORT_FILE=$(ls ./lighthouse-test-reports/*.json | head -1)
           elif [ -d "./lhci_reports" ] && [ -n "$(ls -A ./lhci_reports/*.json 2>/dev/null)" ]; then
             REPORT_FILE=$(ls ./lhci_reports/*.json | head -1)
           fi
@@ -252,12 +247,14 @@ jobs:
           else
             echo "❌ No Lighthouse report found in any expected location"
             echo "🔍 Debug information:"
-            echo "📁 lighthouse-test-reports contents:"
-            ls -la ./lighthouse-test-reports/ 2>/dev/null || echo "Directory not found"
             echo "📁 .lighthouseci contents:"
             ls -la ./.lighthouseci/ 2>/dev/null || echo "Directory not found"
-            echo "📁 Current directory JSON files:"
-            find . -name "*.json" -type f | head -5
+            echo "📁 lighthouse-test-reports contents:"
+            ls -la ./lighthouse-test-reports/ 2>/dev/null || echo "Directory not found"
+            echo "📁 Current directory structure:"
+            find . -maxdepth 2 -type d -name "*lighthouse*" 2>/dev/null || echo "No lighthouse directories found"
+            echo "📁 All JSON files in current directory:"
+            find . -maxdepth 2 -name "*.json" -type f 2>/dev/null | head -10 || echo "No JSON files found"
             exit 1
           fi
 
@@ -342,6 +339,7 @@ jobs:
         with:
           name: chrome-arm64-test-${{ matrix.mode }}-${{ github.run_id }}
           path: |
+            .lighthouseci/
             lighthouse-test-reports/
             /tmp/chromedriver.log
           retention-days: 3
