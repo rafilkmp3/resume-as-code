@@ -1,12 +1,12 @@
 {
   "basics": {
     "name": "Rafael Bernardo Sathler",
-    "label": "DevOps Engineer • Infrastructure Engineer • Platform Engineer • AWS/GCP Cloud Architect",
+    "label": "DevOps Engineer • AWS Cloud Infrastructure • Linux/Unix System Administration",
     "image": "assets/images/profile-optimized.jpg",
     "email": "rafaelbsathler@gmail.com",
     "phone": "+55 21 997988682",
     "url": "https://rafilkmp3.github.io/resume-as-code/",
-    "summary": "Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence. Currently implementing ARM64-optimized GitHub Actions workflows with 70-85% performance improvements and enhanced Context7-powered documentation systems.",
+    "summary": "Senior DevOps Engineer with 8+ years of hands-on experience in AWS cloud infrastructure, Linux/Unix system administration, and container orchestration. Proven track record in financial services environments, delivering significant cost savings ($65K+) through automation and optimization. Expert in Configuration Management (Puppet/Chef), System Monitoring, Docker/Kubernetes, and CI/CD pipelines. Strong background in Java environments, Python scripting, and building resilient infrastructure for high-traffic financial systems.",
     "location": {
       "city": "Rio de Janeiro",
       "countryCode": "BR",
@@ -61,14 +61,14 @@
       "url": "https://uber.com",
       "startDate": "2023-08",
       "endDate": "2024-08",
-      "summary": "Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.",
+      "summary": "Led enterprise-scale DevOps transformation and infrastructure automation serving 5,000 engineers, with strong focus on system monitoring and configuration management.",
       "highlights": [
-        "Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO",
-        "Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers",
-        "Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%",
-        "Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings",
-        "Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration",
-        "Technical documentation: Authored comprehensive 'CI/CD Playbook' and Bazel optimization guides, becoming the go-to technical resource for platform teams"
+        "DevOps Platform Engineering: Built and maintained 1,000-node Kubernetes (GKE) infrastructure with 99%+ uptime, managing CI/CD for 8,000 repositories using configuration-as-code principles",
+        "Linux/Unix System Administration: Managed large-scale Linux environments with automated configuration management using Terraform and custom automation tools across multiple data centers",
+        "System Monitoring Excellence: Implemented comprehensive monitoring stack (Prometheus, Grafana, custom alerting) providing real-time visibility into infrastructure health and performance metrics",
+        "AWS/Cloud Cost Optimization: Achieved $65K annual savings through intelligent resource management, spot-instance strategies, and infrastructure right-sizing using Python automation scripts",
+        "Configuration Management at Scale: Automated deployment pipelines reducing deployment time from 24+ hours to <4 hours through Infrastructure-as-Code and systematic configuration management",
+        "DevOps Toolchain Integration: Built self-service platform integrating Java-based applications with Ruby monitoring tools, Python automation scripts, and Perl legacy system interfaces"
       ]
     },
     {
@@ -119,12 +119,13 @@
       "url": "",
       "startDate": "2016-12",
       "endDate": "2018-08",
-      "summary": "Led infrastructure automation and security initiatives for Brazilian fintech platform.",
+      "summary": "Led DevOps and infrastructure automation initiatives for Brazilian fintech platform, implementing financial services compliance and security measures.",
       "highlights": [
-        "Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings",
-        "CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%",
-        "Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance",
-        "Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments"
+        "Financial Services DevOps: Built secure, compliant infrastructure for financial transactions processing, ensuring data privacy and regulatory compliance in fintech environment",
+        "Configuration Management: Automated server provisioning using Puppet and Chef, enabling rapid scaling and consistent deployments across Linux/Unix environments",
+        "System Monitoring: Implemented comprehensive monitoring solutions with 24/7 alerting, achieving 99.9% uptime for critical financial systems",
+        "AWS Infrastructure: Designed and managed AWS EC2 and ECS infrastructure for high-volume financial transactions with multi-layered security measures",
+        "Infrastructure Automation: Developed Python and Bash scripts improving system efficiency by 50%, reducing deployment time by 70% through CI/CD pipelines"
       ]
     },
     {
@@ -264,21 +265,43 @@
   ],
   "skills": [
     {
-      "name": "☁️ Cloud Platforms & IaC",
+      "name": "🔧 DevOps Core Technologies", 
       "level": "Expert",
       "keywords": [
-        "AWS",
-        "GCP",
-        "Terraform",
-        "Ansible",
-        "Helm"
+        "Linux/Unix System Administration",
+        "AWS EC2",
+        "AWS ECS", 
+        "Docker",
+        "Kubernetes",
+        "Configuration Management",
+        "System Monitoring"
       ],
       "links": {
-        "AWS": "https://aws.amazon.com/",
-        "GCP": "https://cloud.google.com/",
+        "Linux/Unix System Administration": "https://www.kernel.org/",
+        "AWS EC2": "https://aws.amazon.com/ec2/",
+        "AWS ECS": "https://aws.amazon.com/ecs/",
+        "Docker": "https://www.docker.com/",
+        "Kubernetes": "https://kubernetes.io/",
+        "Configuration Management": "https://puppet.com/",
+        "System Monitoring": "https://prometheus.io/"
+      }
+    },
+    {
+      "name": "⚙️ Configuration Management & Automation",
+      "level": "Expert", 
+      "keywords": [
+        "Chef",
+        "Puppet",
+        "Terraform",
+        "Ansible",
+        "Infrastructure as Code"
+      ],
+      "links": {
+        "Chef": "https://www.chef.io/",
+        "Puppet": "https://puppet.com/",
         "Terraform": "https://www.terraform.io/",
         "Ansible": "https://www.ansible.com/",
-        "Helm": "https://helm.sh/"
+        "Infrastructure as Code": "https://www.terraform.io/"
       }
     },
     {
@@ -350,25 +373,25 @@
       }
     },
     {
-      "name": "💻 Programming & Scripting",
-      "level": "Advanced",
+      "name": "💻 Programming & Scripting (DevOps Focus)",
+      "level": "Expert", 
       "keywords": [
-        "Python",
+        "Java",
+        "Python", 
+        "Ruby",
+        "Perl",
         "Bash",
-        "Go",
-        "JavaScript",
-        "YAML",
-        "HCL",
-        "SQL"
+        "Linux Shell Scripting",
+        "*NIX System Programming"
       ],
       "links": {
+        "Java": "https://www.oracle.com/java/",
         "Python": "https://www.python.org/",
+        "Ruby": "https://www.ruby-lang.org/",
+        "Perl": "https://www.perl.org/",
         "Bash": "https://www.gnu.org/software/bash/",
-        "Go": "https://golang.org/",
-        "JavaScript": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
-        "YAML": "https://yaml.org/",
-        "HCL": "https://github.com/hashicorp/hcl",
-        "SQL": "https://www.iso.org/standard/63555.html"
+        "Linux Shell Scripting": "https://www.gnu.org/software/bash/",
+        "*NIX System Programming": "https://www.kernel.org/"
       }
     },
     {
@@ -439,12 +462,14 @@
     }
   },
   "targetPosition": {
-    "title": "DevOps",
+    "title": "DevOps Engineer",
+    "company": "Sonata",
+    "location": "Remote",
     "requiredSkills": [
       "Bachelor's degree or equivalent work experience",
       "8+ years of relevant work experience",
       "Experience with *NIX system administration, Java, Linux/Unix, Ruby, Perl and Python",
-      "Experience with Configuration Management such as Chef or Puppet",
+      "Experience with Configuration Management such as Chef or Puppet", 
       "Experience with System Monitoring and Logging Solutions",
       "Experience with AWS cloud and his services EC2 and ECS",
       "Experience with Docker and Kubernetes",

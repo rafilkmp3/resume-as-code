@@ -380,6 +380,14 @@
           "minLength": 1,
           "description": "Target position title"
         },
+        "company": {
+          "type": "string",
+          "description": "Target company name"
+        },
+        "location": {
+          "type": "string", 
+          "description": "Target position location"
+        },
         "requiredSkills": {
           "type": "array",
           "items": {
