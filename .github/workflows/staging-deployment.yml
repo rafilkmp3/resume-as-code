@@ -57,10 +57,26 @@ jobs:
             echo "should_deploy=true" >> $GITHUB_OUTPUT
           fi
 
-  build-and-deploy-staging:
-    name: 🚀 Build & Deploy to Netlify Staging  
+  build-staging:
+    name: 🏗️ Build for Staging (ARM64 Reusable)
     needs: check-release-context
     if: needs.check-release-context.outputs.should_deploy_staging == 'true'
+    uses: ./.github/workflows/_build.yml
+    with:
+      runner_type: 'ubuntu-24.04-arm'
+      node_version: '22'
+      build_mode: 'production'
+      environment_name: 'staging'
+      context: 'deploy'
+      cache_key_suffix: '-staging'
+      upload_artifacts: true
+      artifact_name: 'staging-build'
+      timeout_minutes: 10
+
+  deploy-staging:
+    name: 🚀 Deploy to Netlify Staging  
+    needs: [check-release-context, build-staging]
+    if: needs.check-release-context.outputs.should_deploy_staging == 'true' && needs.build-staging.outputs.build_success == 'true'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     env:
@@ -72,22 +88,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build for Staging
-        env:
-          NETLIFY: 'true'
-          CONTEXT: 'deploy'
-          URL: 'https://resume-as-code.netlify.app'
-          DEPLOY_URL: 'https://resume-as-code.netlify.app'
-        run: npm run build
+          name: staging-build
+          path: dist/
 
       - name: Deploy to Netlify Staging
         env:
@@ -118,6 +123,9 @@ jobs:
             echo "⏳ Waiting 10 seconds before retry..."
             sleep 10
           done
+
+      - name: Ensure jq is installed
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Test Version Endpoints
         run: |
@@ -153,7 +161,9 @@ jobs:
           echo "**Status**: ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY  
           echo "**Environment**: Netlify Staging" >> $GITHUB_STEP_SUMMARY
           echo "**URL**: https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Size**: ${{ needs.build-staging.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PDFs Generated**: ${{ needs.build-staging.outputs.pdf_count }}/3" >> $GITHUB_STEP_SUMMARY
+          echo "**Runner**: ARM64 (reusable workflow)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Endpoints Validated" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Main site accessible" >> $GITHUB_STEP_SUMMARY
@@ -170,19 +180,20 @@ jobs:
   # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
   post-to-release-please:
     name: 📋 Post Staging Results to Release-Please PR
-    needs: build-and-deploy-staging
+    needs: [check-release-context, build-staging, deploy-staging]
     if: always() && needs.check-release-context.outputs.should_deploy_staging == 'true'
     uses: ./.github/workflows/shared-deployment-status.yml
     with:
-      deployment_status: ${{ needs.build-and-deploy-staging.result == 'success' && 'ready' || 'failure' }}
+      deployment_status: ${{ needs.deploy-staging.result == 'success' && 'ready' || 'failure' }}
       deployment_url: 'https://resume-as-code.netlify.app'
       deployment_environment: 'staging'
       additional_info: |
         ### 🧪 Staging Test Results
-        - ✅ **Build**: ARM64 native compilation successful
+        - ✅ **Build**: ARM64 reusable workflow successful
         - ✅ **Deploy**: Netlify staging deployment complete  
         - ✅ **Version Endpoint**: /version.json accessible and valid
-        - ✅ **PDF Generation**: All 3 PDFs generated successfully
+        - ✅ **PDF Generation**: ${{ needs.build-staging.outputs.pdf_count }}/3 PDFs generated
+        - ✅ **Build Size**: ${{ needs.build-staging.outputs.build_size }}
         - 🏃‍♂️ **Runner**: ARM64 architecture for 40% performance boost
         
         ### 📊 Environment Info
