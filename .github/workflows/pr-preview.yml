@@ -19,7 +19,7 @@ permissions:
 jobs:
   build-and-deploy:
     name: Build & Deploy Preview
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       preview_url: ${{ steps.set-url.outputs.preview_url }}
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && !startsWith(github.head_ref, 'release-please--')
