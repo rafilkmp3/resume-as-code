@@ -5,9 +5,15 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to validate (leave empty to validate current branch)'
+        required: false
+        type: number
 
 concurrency:
-  group: conventional-commits-${{ github.event.pull_request.number }}
+  group: conventional-commits-${{ github.event.pull_request.number || inputs.pr_number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -68,9 +74,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get all commit messages in this PR
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          # Handle both pull_request and workflow_dispatch triggers
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ inputs.pr_number }}" ]; then
+              echo "🔍 Manual validation for PR #${{ inputs.pr_number }}"
+              PR_INFO=$(gh pr view ${{ inputs.pr_number }} --json baseRefOid,headRefOid)
+              BASE_SHA=$(echo "$PR_INFO" | jq -r '.baseRefOid')
+              HEAD_SHA=$(echo "$PR_INFO" | jq -r '.headRefOid')
+            else
+              echo "🔍 Manual validation for current branch"
+              BASE_SHA="origin/main"
+              HEAD_SHA="HEAD"
+            fi
+          else
+            # Regular PR trigger
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          fi
 
           echo "🔍 Checking commits from $BASE_SHA to $HEAD_SHA"
 
@@ -194,7 +214,17 @@ jobs:
           COMMIT_COUNT: ${{ steps.commits.outputs.commit_count }}
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
+            // Handle both pull_request and workflow_dispatch events
+            let prNumber;
+            if (context.eventName === 'workflow_dispatch') {
+              prNumber = ${{ inputs.pr_number || 'null' }};
+              if (!prNumber) {
+                console.log('⚠️ No PR number specified for workflow_dispatch, skipping PR comment');
+                return;
+              }
+            } else {
+              prNumber = context.payload.pull_request.number;
+            }
             const validationFailed = process.env.VALIDATION_FAILED === 'true';
             const validCommits = process.env.VALID_COMMITS || '';
             const invalidCommits = process.env.INVALID_COMMITS || '';
