@@ -22,7 +22,7 @@ on:
       deployment_environment:
         required: true
         type: string
-        description: 'Deployment environment (production, preview)'
+        description: 'Deployment environment (production, preview, staging)'
       commit_sha:
         required: false
         type: string
@@ -78,6 +78,16 @@ jobs:
             if [ -n "$PR_SEARCH" ]; then
               PR_NUMBER="$PR_SEARCH"
               echo "✅ Found PR #$PR_NUMBER for commit $COMMIT_SHA"
+            fi
+          fi
+
+          # 🎯 SPECIAL CASE: For staging environment, also try to find release-please PR
+          if [ -z "$PR_NUMBER" ] && [ "$INPUT_DEPLOYMENT_ENV" = "staging" ]; then
+            echo "🔍 Staging deployment: Searching for open release-please PR..."
+            RELEASE_PR=$(gh pr list --search "chore(release)" --state open --json number --jq '.[0].number // empty' || echo "")
+            if [ -n "$RELEASE_PR" ]; then
+              PR_NUMBER="$RELEASE_PR"
+              echo "🎯 Found release-please PR #$PR_NUMBER for staging results posting"
             fi
           fi
 
@@ -177,7 +187,8 @@ jobs:
             };
 
             const emoji = statusEmoji[status] || '📊';
-            const envName = environment === 'production' ? 'Production' : 'Preview';
+            const envName = environment === 'production' ? 'Production' : 
+                          environment === 'staging' ? 'Staging' : 'Preview';
 
             // Build status line
             let statusLine = `**Status**: ${emoji} **${status.toUpperCase()}**`;
@@ -205,6 +216,14 @@ jobs:
                 deploymentInfo += `| Preview | URL |\n`;
                 deploymentInfo += `|---------|-----|\n`;
                 deploymentInfo += `| 🌐 **Live Preview** | [${deployUrl}](${deployUrl}) |\n`;
+                deploymentInfo += `| 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume.pdf) |\n`;
+                deploymentInfo += `| 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-print.pdf) |\n`;
+                deploymentInfo += `| 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-ats.pdf) |\n`;
+              } else if (environment === 'staging') {
+                deploymentInfo += `| Staging | URL |\n`;
+                deploymentInfo += `|---------|-----|\n`;
+                deploymentInfo += `| 🌐 **Live Staging** | [${deployUrl}](${deployUrl}) |\n`;
+                deploymentInfo += `| 📊 **Version Info** | [/version.json](${deployUrl}/version.json) |\n`;
                 deploymentInfo += `| 📄 **Screen PDF** | [Screen PDF](${deployUrl}/resume.pdf) |\n`;
                 deploymentInfo += `| 🖨️ **Print PDF** | [Print PDF](${deployUrl}/resume-print.pdf) |\n`;
                 deploymentInfo += `| 🤖 **ATS PDF** | [ATS PDF](${deployUrl}/resume-ats.pdf) |\n`;

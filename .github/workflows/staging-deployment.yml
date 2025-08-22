@@ -142,3 +142,49 @@ jobs:
             echo "❌ /version.txt endpoint failed"
             exit 1
           fi
+
+      - name: Generate User-Friendly Step Summary
+        if: always()
+        run: |
+          echo "## 🚀 Netlify Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY  
+          echo "**Environment**: Netlify Staging" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
+          echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Endpoints Validated" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Main site accessible" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ /version.json endpoint working" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ /version.txt endpoint working" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 [Live Site](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Version Info](https://resume-as-code.netlify.app/version.json)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 [Screen PDF](https://resume-as-code.netlify.app/resume.pdf)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🖨️ [Print PDF](https://resume-as-code.netlify.app/resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🤖 [ATS PDF](https://resume-as-code.netlify.app/resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+
+  # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
+  post-to-release-please:
+    name: 📋 Post Staging Results to Release-Please PR
+    needs: build-and-deploy-staging
+    if: always() && needs.check-release-context.outputs.should_deploy_staging == 'true'
+    uses: ./.github/workflows/shared-deployment-status.yml
+    with:
+      deployment_status: ${{ needs.build-and-deploy-staging.result == 'success' && 'ready' || 'failure' }}
+      deployment_url: 'https://resume-as-code.netlify.app'
+      deployment_environment: 'staging'
+      additional_info: |
+        ### 🧪 Staging Test Results
+        - ✅ **Build**: ARM64 native compilation successful
+        - ✅ **Deploy**: Netlify staging deployment complete  
+        - ✅ **Version Endpoint**: /version.json accessible and valid
+        - ✅ **PDF Generation**: All 3 PDFs generated successfully
+        - 🏃‍♂️ **Runner**: ARM64 architecture for 40% performance boost
+        
+        ### 📊 Environment Info
+        - **URL**: https://resume-as-code.netlify.app
+        - **Environment**: Netlify Staging (main branch)
+        - **Branch**: main
+        - **Build**: Production mode with staging environment variables

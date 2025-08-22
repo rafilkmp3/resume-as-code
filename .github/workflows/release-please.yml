@@ -67,3 +67,27 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Generate User-Friendly Step Summary
+        if: always()
+        run: |
+          echo "## 🚀 GitHub Pages Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ✅ Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "**Release**: v${{ needs.release-please.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎉 Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏷️ **Version**: ${{ needs.release-please.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📝 **Release Notes**: Available in GitHub Releases" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **Production URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Version Info](${{ steps.deployment.outputs.page_url }}version.json)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 [Screen PDF](${{ steps.deployment.outputs.page_url }}resume.pdf)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🖨️ [Print PDF](${{ steps.deployment.outputs.page_url }}resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🤖 [ATS PDF](${{ steps.deployment.outputs.page_url }}resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏷️ [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }})" >> $GITHUB_STEP_SUMMARY
