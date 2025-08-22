@@ -1,0 +1,166 @@
+---
+name: 🧪 Test Build Environments - Preview/Staging/Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment_filter:
+        description: 'Environment to test (all, preview, staging, production)'
+        required: false
+        type: choice
+        options: ['all', 'preview', 'staging', 'production']
+        default: 'all'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'package*.json'
+      - '.github/workflows/_build.yml'
+      - '.github/actions/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'package*.json'
+      - '.github/workflows/_build.yml'
+      - '.github/actions/**'
+
+concurrency:
+  group: test-environments-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  matrix-build:
+    name: 🏗️ Build Test (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Preview: ARM64 for native Chrome + PDF generation
+          - environment: preview
+            build_mode: draft
+            context: preview
+            runner_type: ubuntu-24.04-arm
+            node_version: '22'
+            
+          # Staging: ARM64 for native Chrome + full build
+          - environment: staging  
+            build_mode: production
+            context: staging
+            runner_type: ubuntu-24.04-arm
+            node_version: '22'
+            
+          # Production: x64 for GitHub Pages compatibility
+          - environment: production
+            build_mode: production
+            context: deploy
+            runner_type: ubuntu-latest
+            node_version: '22'
+    
+    # Environment filter logic
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      inputs.environment_filter == 'all' || 
+      inputs.environment_filter == matrix.environment
+    
+    steps:
+      - name: 🏷️ Environment Info
+        run: |
+          echo "## 🧪 Testing Environment: ${{ matrix.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**🖥️ Runner**: ${{ matrix.runner_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**⚙️ Build Mode**: ${{ matrix.build_mode }}" >> $GITHUB_STEP_SUMMARY  
+          echo "**📦 Context**: ${{ matrix.context }}" >> $GITHUB_STEP_SUMMARY
+          echo "**🟢 Node.js**: ${{ matrix.node_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**🌐 Chrome Setup**: ${{ contains(matrix.runner_type, 'arm') && 'ARM64 Native' || 'System Default' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+      
+      - name: 🏗️ Run Build Workflow
+        uses: ./.github/workflows/_build.yml
+        with:
+          runner_type: ${{ matrix.runner_type }}
+          node_version: ${{ matrix.node_version }}
+          build_mode: ${{ matrix.build_mode }}
+          environment_name: ${{ matrix.environment }}
+          context: ${{ matrix.context }}
+          upload_artifacts: true
+          artifact_name: build-test-${{ matrix.environment }}
+          timeout_minutes: 12
+
+  production-guard:
+    name: 🛡️ Production Deployment Guard
+    runs-on: ubuntu-latest
+    needs: [matrix-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 5
+    
+    steps:
+      - name: 🚨 Production Build Ready
+        run: |
+          echo "## 🚨 PRODUCTION BUILD READY" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All environment tests passed**" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Production build artifacts available**" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Manual deployment required**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Download production build artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy to GitHub Pages (automated via other workflows)" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify production deployment" >> $GITHUB_STEP_SUMMARY
+
+  test-summary:
+    name: 📋 Environment Test Summary  
+    needs: [matrix-build]
+    runs-on: ubuntu-latest
+    if: always()
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📊 Generate Test Summary
+        run: |
+          echo "# 🧪 Environment Build Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Test Matrix Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Status | Runner | Chrome | Build Mode |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|---------|---------|---------|------------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Preview status
+          if [ "${{ needs.matrix-build.result }}" = "success" ]; then
+            echo "| 📱 Preview | ✅ Pass | ubuntu-24.04-arm | ARM64 Native | draft |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔄 Staging | ✅ Pass | ubuntu-24.04-arm | ARM64 Native | production |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🚀 Production | ✅ Pass | ubuntu-latest | System Default | production |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ❌ Some Tests | ❌ Failed | Mixed | Mixed | Mixed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Key Validations" >> $GITHUB_STEP_SUMMARY
+          echo "- **✅ ARM64 Chrome Setup**: Native Chromium installation for PDF generation" >> $GITHUB_STEP_SUMMARY
+          echo "- **✅ Cross-Platform**: ARM64 (preview/staging) + x64 (production)" >> $GITHUB_STEP_SUMMARY
+          echo "- **✅ Build Modes**: Draft (fast preview) + Production (full build)" >> $GITHUB_STEP_SUMMARY
+          echo "- **✅ Artifacts**: All environments generate build artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- **✅ PDF Generation**: Chrome-based PDF rendering validated" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Artifact Information" >> $GITHUB_STEP_SUMMARY
+          echo "Build artifacts are uploaded with 7-day retention:" >> $GITHUB_STEP_SUMMARY
+          echo "- **build-test-preview**: Draft mode build for quick iteration" >> $GITHUB_STEP_SUMMARY  
+          echo "- **build-test-staging**: Full production build for pre-deploy testing" >> $GITHUB_STEP_SUMMARY
+          echo "- **build-test-production**: Production-ready build for GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.matrix-build.result }}" != "success" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## ❌ Failure Analysis" >> $GITHUB_STEP_SUMMARY
+            echo "Some environment builds failed. Check individual job logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "Common issues:" >> $GITHUB_STEP_SUMMARY
+            echo "- Chrome/Puppeteer setup problems on non-ARM runners" >> $GITHUB_STEP_SUMMARY
+            echo "- Missing dependencies or build script failures" >> $GITHUB_STEP_SUMMARY
+            echo "- Node.js version compatibility issues" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

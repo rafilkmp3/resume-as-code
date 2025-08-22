@@ -99,6 +99,28 @@ jobs:
         with:
           chrome-version: 'stable'
 
+      - name: 🌐 Setup Chrome (x64 Compatible)
+        if: "!contains(inputs.runner_type, 'arm')"
+        run: |
+          echo "🔧 Setting up Chrome for x64 architecture..."
+          
+          # Install Google Chrome for x64
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+          # Set environment variables for various tools
+          CHROME_BIN="/usr/bin/google-chrome"
+          echo "CHROME_BIN=$CHROME_BIN" >> $GITHUB_ENV
+          echo "PUPPETEER_EXECUTABLE_PATH=$CHROME_BIN" >> $GITHUB_ENV
+          echo "CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+          echo "CHROMIUM_PATH=$CHROME_BIN" >> $GITHUB_ENV
+          echo "LHCI_CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+          
+          echo "✅ Google Chrome installed for x64 architecture"
+          echo "📁 Chrome executable: $CHROME_BIN"
+
       - name: 🏗️ Build Resume Site
         env:
           NETLIFY: ${{ inputs.environment_name != 'production' && 'true' || 'false' }}
