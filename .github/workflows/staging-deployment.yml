@@ -18,6 +18,8 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 env:
   NODE_ENV: production
