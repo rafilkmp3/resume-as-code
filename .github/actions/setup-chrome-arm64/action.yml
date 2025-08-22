@@ -1,10 +1,10 @@
 name: 'Setup Chrome for ARM64'
-description: 'Install and configure Google Chrome for ARM64 architecture with CI/CD optimizations'
+description: 'Install and configure Chromium Browser for ARM64 architecture with CI/CD optimizations (Chrome not available for ARM64)'
 author: 'Resume-as-Code'
 
 inputs:
   chrome-version:
-    description: 'Chrome version to install (stable, beta, dev)'
+    description: 'Chromium version to install (stable, beta, dev) - Note: only stable available on ARM64'
     required: false
     default: 'stable'
   install-chromedriver:
@@ -57,25 +57,22 @@ runs:
           libglib2.0-0 \
           libxcb1
         
-        # Add Google's official GPG key and repository
-        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-        echo "deb [arch=arm64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-        
-        # Update package list and install Chrome
-        sudo apt-get update
+        # Install Chromium Browser (ARM64 Compatible)
+        # Note: Google Chrome is not available for ARM64 Linux
+        # Using Chromium which is the open-source base of Chrome
+        echo "📝 Note: Google Chrome is not available for ARM64 Linux"
+        echo "🔄 Installing Chromium Browser (open-source Chrome base) instead"
         
         case "${{ inputs.chrome-version }}" in
           "stable")
-            sudo apt-get install -y google-chrome-stable
-            CHROME_BIN="/usr/bin/google-chrome"
+            sudo apt-get install -y chromium-browser
+            CHROME_BIN="/usr/bin/chromium-browser"
             ;;
-          "beta")
-            sudo apt-get install -y google-chrome-beta
-            CHROME_BIN="/usr/bin/google-chrome-beta"
-            ;;
-          "dev")
-            sudo apt-get install -y google-chrome-unstable
-            CHROME_BIN="/usr/bin/google-chrome-unstable"
+          "beta"|"dev")
+            echo "⚠️ Beta/Dev versions not available for Chromium on Ubuntu"
+            echo "🔄 Installing stable Chromium instead"
+            sudo apt-get install -y chromium-browser
+            CHROME_BIN="/usr/bin/chromium-browser"
             ;;
           *)
             echo "❌ Invalid Chrome version: ${{ inputs.chrome-version }}"
@@ -83,14 +80,14 @@ runs:
             ;;
         esac
         
-        # Verify Chrome installation
+        # Verify Chromium installation
         if [[ ! -f "$CHROME_BIN" ]]; then
-          echo "❌ Chrome installation failed - executable not found: $CHROME_BIN"
+          echo "❌ Chromium installation failed - executable not found: $CHROME_BIN"
           exit 1
         fi
         
-        # Get Chrome version
-        CHROME_VERSION=$($CHROME_BIN --version | cut -d ' ' -f3)
+        # Get Chromium version
+        CHROME_VERSION=$($CHROME_BIN --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
         
         # Create Chrome wrapper script with CI/CD optimized flags
         cat > /tmp/chrome-wrapper << 'EOF'
@@ -138,8 +135,8 @@ runs:
         echo "chrome-path=$CHROME_BIN" >> $GITHUB_OUTPUT
         echo "chrome-version=$CHROME_VERSION" >> $GITHUB_OUTPUT
         
-        echo "✅ Chrome $CHROME_VERSION installed and configured for CI/CD"
-        echo "📁 Chrome executable: $CHROME_BIN"
+        echo "✅ Chromium $CHROME_VERSION installed and configured for CI/CD"
+        echo "📁 Chromium executable: $CHROME_BIN"
         echo "🔧 CI wrapper available at: /usr/local/bin/chrome-ci"
     
     - name: Install ChromeDriver (Optional)
@@ -216,7 +213,7 @@ runs:
         fi
         
         echo ""
-        echo "📋 Chrome Setup Summary:"
+        echo "📋 Chromium Setup Summary:"
         echo "  Version: $CHROME_VERSION"
         echo "  Executable: $CHROME_PATH"
         echo "  CI Wrapper: /usr/local/bin/chrome-ci"
