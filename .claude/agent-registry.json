@@ -1,0 +1,419 @@
+{
+  "version": "1.0",
+  "description": "Claude Code Agent Registry for Resume-as-Code Project",
+  "last_updated": "2025-08-22T00:00:00Z",
+  "orchestrator": "workflow-orchestrator",
+  "agents": {
+    "workflow-orchestrator": {
+      "name": "Workflow Orchestrator",
+      "type": "orchestrator",
+      "file": ".claude/workflow-orchestrator.js",
+      "status": "implemented",
+      "purpose": "Master orchestrator for coordinating complex multi-agent workflows",
+      "capabilities": [
+        "task analysis",
+        "workflow planning",
+        "agent coordination",
+        "execution monitoring"
+      ],
+      "sub_agents": [
+        "conventional-committer",
+        "deployment-monitor",
+        "test-strategist",
+        "performance-analyzer",
+        "security-guardian",
+        "context7-researcher"
+      ],
+      "invocation": "@workflow-orchestrator <task-description>",
+      "examples": [
+        "@workflow-orchestrator implement new PDF optimization feature",
+        "@workflow-orchestrator prepare for release",
+        "@workflow-orchestrator debug deployment issues"
+      ],
+      "workflows": {
+        "full-feature-development": {
+          "sequence": ["test-strategist", "conventional-committer", "deployment-monitor", "performance-analyzer"],
+          "conditions": ["has-code-changes", "is-feature"]
+        },
+        "hotfix-deployment": {
+          "sequence": ["conventional-committer", "deployment-monitor", "security-guardian"],
+          "conditions": ["is-urgent", "has-code-changes"]
+        },
+        "release-preparation": {
+          "sequence": ["test-strategist", "performance-analyzer", "security-guardian", "deployment-monitor"],
+          "conditions": ["is-release", "has-major-changes"]
+        }
+      }
+    },
+    "conventional-committer": {
+      "name": "Conventional Committer",
+      "type": "automation",
+      "file": ".claude/conventional-committer.js",
+      "status": "implemented",
+      "purpose": "Smart conventional commit message generation",
+      "capabilities": [
+        "git diff analysis",
+        "conventional commit generation",
+        "project pattern recognition",
+        "scope detection"
+      ],
+      "dependencies": ["git", "node"],
+      "invocation": "@conventional-committer [--dry-run] [--scope=<scope>]",
+      "examples": [
+        "@conventional-committer",
+        "@conventional-committer --dry-run",
+        "@conventional-committer --scope=ci"
+      ],
+      "file_patterns": {
+        "workflows": { "pattern": "\\.github/workflows/.*\\.yml$", "type": "ci", "scope": null },
+        "resumeData": { "pattern": "src/resume-data\\.json$", "type": "feat", "scope": "resume" },
+        "templates": { "pattern": "src/templates/.*\\.html$", "type": "feat", "scope": "ui" },
+        "scripts": { "pattern": "scripts/.*\\.js$", "type": "feat", "scope": "build" },
+        "tests": { "pattern": "tests/.*\\.(js|spec\\.js)$", "type": "test", "scope": null }
+      }
+    },
+    "deployment-monitor": {
+      "name": "Deployment Monitor",
+      "type": "monitoring",
+      "file": ".claude/deployment-monitor.js",
+      "status": "implemented",
+      "purpose": "Comprehensive deployment monitoring across all environments",
+      "capabilities": [
+        "environment health checking",
+        "endpoint monitoring",
+        "workflow status tracking",
+        "real-time monitoring"
+      ],
+      "environments": {
+        "production": {
+          "name": "GitHub Pages Production",
+          "url": "https://rafilkmp3.github.io/resume-as-code/"
+        },
+        "staging": {
+          "name": "Netlify Staging",
+          "url": "https://resume-as-code.netlify.app"
+        },
+        "preview": {
+          "name": "Netlify Preview",
+          "url": null
+        }
+      },
+      "invocation": "@deployment-monitor [--environment=<env>] [--watch]",
+      "examples": [
+        "@deployment-monitor",
+        "@deployment-monitor --environment=staging",
+        "@deployment-monitor --check-all",
+        "@deployment-monitor --watch"
+      ]
+    },
+    "test-strategist": {
+      "name": "Test Strategist",
+      "type": "analysis",
+      "file": ".claude/test-strategist.js",
+      "status": "implemented",
+      "purpose": "Smart testing strategy recommendations based on change analysis",
+      "capabilities": [
+        "change impact analysis",
+        "testing strategy recommendation",
+        "test execution coordination",
+        "risk assessment"
+      ],
+      "test_types": {
+        "unit": { "command": "npm run test:unit", "time": "30-60s" },
+        "integration": { "command": "make test-fast", "time": "60-120s" },
+        "e2e": { "command": "make test-e2e", "time": "2-5 minutes" },
+        "visual": { "command": "make test-visual-matrix", "time": "3-8 minutes" },
+        "performance": { "command": "make test-performance", "time": "2-4 minutes" },
+        "accessibility": { "command": "make test-accessibility", "time": "1-3 minutes" },
+        "pdf": { "command": "make test-pdf", "time": "1-2 minutes" }
+      },
+      "strategies": {
+        "minimal": { "tests": ["unit", "integration"], "confidence": "medium" },
+        "standard": { "tests": ["unit", "integration", "pdf"], "confidence": "high" },
+        "comprehensive": { "tests": ["unit", "integration", "e2e", "visual", "pdf"], "confidence": "very high" },
+        "visual_focused": { "tests": ["unit", "visual", "accessibility", "pdf"], "confidence": "high" },
+        "release_ready": { "tests": ["unit", "integration", "e2e", "visual", "performance", "accessibility", "pdf"], "confidence": "maximum" }
+      },
+      "invocation": "@test-strategist [--execute-recommended]",
+      "examples": [
+        "@test-strategist",
+        "@test-strategist --execute-recommended",
+        "@test-strategist --analyze-changes"
+      ]
+    },
+    "context7-researcher": {
+      "name": "Context7 Researcher",
+      "type": "research",
+      "file": ".claude/context7-researcher.js",
+      "status": "implemented",
+      "purpose": "Context7-powered documentation and best practices research",
+      "capabilities": [
+        "library documentation research",
+        "best practices analysis",
+        "dependency analysis",
+        "project recommendations"
+      ],
+      "project_dependencies": {
+        "handlebars": {
+          "usage": "Template engine for HTML generation",
+          "topics": ["template helpers", "custom helpers", "partials", "performance optimization"],
+          "priority": "high"
+        },
+        "puppeteer": {
+          "usage": "PDF generation and browser automation",
+          "topics": ["pdf generation", "performance optimization", "memory management", "arm64 compatibility"],
+          "priority": "high"
+        },
+        "sharp": {
+          "usage": "Image optimization and processing",
+          "topics": ["image optimization", "performance", "arm64 optimization", "memory management"],
+          "priority": "high"
+        },
+        "playwright": {
+          "usage": "End-to-end testing and browser automation",
+          "topics": ["e2e testing", "visual regression", "accessibility testing", "performance testing"],
+          "priority": "medium"
+        }
+      },
+      "invocation": "@context7-researcher <library-name> [--topic=<topic>]",
+      "examples": [
+        "@context7-researcher handlebars --topic=\"template helpers\"",
+        "@context7-researcher puppeteer --topic=\"arm64 optimization\"",
+        "@context7-researcher --analyze-dependencies",
+        "@context7-researcher --project-recommendations"
+      ]
+    },
+    "performance-analyzer": {
+      "name": "Performance Analyzer",
+      "type": "analysis",
+      "file": null,
+      "status": "documented",
+      "purpose": "Performance monitoring and optimization analysis",
+      "capabilities": [
+        "build performance analysis",
+        "deployment time monitoring",
+        "ARM64 performance benchmarking",
+        "optimization recommendations"
+      ],
+      "invocation": "@performance-analyzer [--benchmark] [--arm64]",
+      "examples": [
+        "@performance-analyzer",
+        "@performance-analyzer --benchmark",
+        "@performance-analyzer --arm64"
+      ]
+    },
+    "security-guardian": {
+      "name": "Security Guardian",
+      "type": "security",
+      "file": null,
+      "status": "documented",
+      "purpose": "Security scanning and compliance validation",
+      "capabilities": [
+        "vulnerability scanning",
+        "secret detection",
+        "compliance checking",
+        "security recommendations"
+      ],
+      "invocation": "@security-guardian [--scan-type=<type>]",
+      "examples": [
+        "@security-guardian",
+        "@security-guardian --scan-type=secrets",
+        "@security-guardian --scan-type=dependencies"
+      ]
+    },
+    "environment-validator": {
+      "name": "Environment Validator",
+      "type": "validation",
+      "file": null,
+      "status": "documented",
+      "purpose": "Multi-environment validation specialist",
+      "capabilities": [
+        "cross-environment validation",
+        "configuration verification",
+        "endpoint accessibility",
+        "environment parity checking"
+      ],
+      "invocation": "@environment-validator [--environment=<env>]",
+      "examples": [
+        "@environment-validator",
+        "@environment-validator --environment=all",
+        "@environment-validator --check-parity"
+      ]
+    },
+    "dependency-curator": {
+      "name": "Dependency Curator",
+      "type": "maintenance",
+      "file": null,
+      "status": "documented",
+      "purpose": "Dependency management and optimization",
+      "capabilities": [
+        "dependency health analysis",
+        "update recommendations",
+        "conflict resolution",
+        "security monitoring"
+      ],
+      "invocation": "@dependency-curator [--action=<action>]",
+      "examples": [
+        "@dependency-curator",
+        "@dependency-curator --action=analyze",
+        "@dependency-curator --action=update-safe"
+      ]
+    },
+    "resume-optimizer": {
+      "name": "Resume Optimizer",
+      "type": "domain-specific",
+      "file": ".claude/resume-optimizer.js",
+      "status": "implemented",
+      "purpose": "Comprehensive resume optimization based on JSON Resume ecosystem analysis",
+      "capabilities": [
+        "JSON Resume schema compliance validation",
+        "content quality analysis with industry benchmarks",
+        "SEO optimization for discoverability",
+        "performance analysis and recommendations",
+        "accessibility validation (WCAG 2.1 AA)",
+        "industry-specific keyword recommendations",
+        "comprehensive scoring and grading system"
+      ],
+      "dependencies": ["resume-data.json", "config/resume-schema.json"],
+      "invocation": "@resume-optimizer [--aspect=<aspect>] [--validate]",
+      "examples": [
+        "@resume-optimizer",
+        "@resume-optimizer --aspect=schema",
+        "@resume-optimizer --aspect=content",
+        "@resume-optimizer --aspect=seo",
+        "@resume-optimizer --validate"
+      ],
+      "integration": {
+        "jsonResume": {
+          "schema": "Based on jsonresume/resume-schema analysis",
+          "standards": "Validates against JSON Resume standard fields",
+          "keywords": "Industry-specific keyword database from GitHub ecosystem"
+        },
+        "projectMemory": "Uses project memory for context-aware recommendations"
+      }
+    },
+    "project-memory": {
+      "name": "Project Memory System",
+      "type": "infrastructure",
+      "file": ".claude/project-memory.js",
+      "status": "implemented",
+      "purpose": "Centralized memory and context management for all agents",
+      "capabilities": [
+        "project state tracking and persistence",
+        "agent interaction history and preferences",
+        "development pattern analysis and learning",
+        "performance metrics collection and analysis",
+        "context-aware recommendations for agents",
+        "git history and change pattern analysis",
+        "dependency tracking and vulnerability monitoring",
+        "build metrics and deployment history"
+      ],
+      "dependencies": ["git", "package.json", "project files"],
+      "invocation": "@project-memory [--update] [--context=<agent>] [--summary]",
+      "examples": [
+        "@project-memory",
+        "@project-memory --update",
+        "@project-memory --context=conventional-committer",
+        "@project-memory --summary"
+      ],
+      "memory_structure": {
+        "project": "Basic project information and versioning",
+        "agents": "Agent interactions, preferences, and performance",
+        "development": "Recent changes, build metrics, test results",
+        "patterns": "Successful workflows, common issues, optimizations",
+        "context": "Current sprint, active features, technical debt",
+        "ecosystem": "Dependencies, vulnerabilities, benchmarks"
+      },
+      "integration": {
+        "allAgents": "Provides context and memory to all other agents",
+        "git": "Analyzes commit history and change patterns",
+        "ci": "Tracks build and deployment metrics",
+        "ecosystem": "Monitors dependencies and ecosystem changes"
+      }
+    }
+  },
+  "usage_patterns": {
+    "proactive_agents": [
+      {
+        "agent": "conventional-committer",
+        "trigger": "user says 'commit' without message"
+      },
+      {
+        "agent": "deployment-monitor",
+        "trigger": "after any push to main"
+      },
+      {
+        "agent": "test-strategist",
+        "trigger": "when user asks 'what tests should I run?'"
+      }
+    ],
+    "on_demand_agents": [
+      {
+        "agent": "context7-researcher",
+        "use_case": "research and documentation tasks"
+      },
+      {
+        "agent": "performance-analyzer",
+        "use_case": "performance optimization tasks"
+      },
+      {
+        "agent": "security-guardian",
+        "use_case": "security validation"
+      }
+    ],
+    "emergency_agents": [
+      {
+        "agent": "workflow-orchestrator",
+        "use_case": "complex multi-step emergency responses"
+      },
+      {
+        "agent": "deployment-monitor",
+        "use_case": "deployment failures and environment issues"
+      },
+      {
+        "agent": "environment-validator",
+        "use_case": "cross-environment deployment issues"
+      }
+    ]
+  },
+  "integration_examples": {
+    "conventional_commit_workflow": {
+      "user_input": "commit my staging changes",
+      "sequence": [
+        "conventional-committer analyzes diff",
+        "generates: 'feat: add staging results posting to release-please prs'"
+      ]
+    },
+    "deployment_workflow": {
+      "user_input": "deploy to staging",
+      "sequence": [
+        "deployment-monitor triggered",
+        "monitors deployment",
+        "posts results to PR",
+        "validates endpoints"
+      ]
+    },
+    "performance_optimization": {
+      "user_input": "my build is slow",
+      "sequence": [
+        "performance-analyzer examines build logs",
+        "suggests: 'Enable ARM64 runners for 40% performance boost'"
+      ]
+    },
+    "research_workflow": {
+      "user_input": "optimize handlebars performance",
+      "sequence": [
+        "context7-researcher analyzes handlebars usage",
+        "provides up-to-date best practices",
+        "suggests specific optimizations"
+      ]
+    }
+  },
+  "development_notes": {
+    "architecture": "Agent-based system with orchestrator pattern",
+    "context7_integration": "Real-time documentation and best practices",
+    "atlantis_style": "Clean PR comment management",
+    "arm64_optimization": "Native ARM64 performance focus",
+    "conventional_commits": "100% enforcement with AI-friendly validation"
+  }
+}
