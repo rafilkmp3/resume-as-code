@@ -1,7 +1,7 @@
 {
   "basics": {
     "name": "Rafael Bernardo Sathler",
-    "label": "Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect",
+    "label": "DevOps Engineer • Infrastructure Engineer • Platform Engineer • AWS/GCP Cloud Architect",
     "image": "assets/images/profile-optimized.jpg",
     "email": "rafaelbsathler@gmail.com",
     "phone": "+55 21 997988682",
@@ -437,5 +437,18 @@
         "Remote"
       ]
     }
+  },
+  "targetPosition": {
+    "title": "DevOps",
+    "requiredSkills": [
+      "Bachelor's degree or equivalent work experience",
+      "8+ years of relevant work experience",
+      "Experience with *NIX system administration, Java, Linux/Unix, Ruby, Perl and Python",
+      "Experience with Configuration Management such as Chef or Puppet",
+      "Experience with System Monitoring and Logging Solutions",
+      "Experience with AWS cloud and his services EC2 and ECS",
+      "Experience with Docker and Kubernetes",
+      "Financial Services and, if possible, mortgage industry experience preferred"
+    ]
   }
 }

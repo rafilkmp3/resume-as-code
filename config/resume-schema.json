@@ -369,6 +369,26 @@
           }
         }
       }
+    },
+    "targetPosition": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Target position information for job applications",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target position title"
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "List of required skills and qualifications for the position"
+        }
+      }
     }
   }
 }
