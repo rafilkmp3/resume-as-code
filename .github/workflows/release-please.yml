@@ -1,5 +1,5 @@
 ---
-name: 🚀 Production Deploy (GitHub Pages)
+name: 📋 Release Management
 
 on:
   push:
@@ -17,13 +17,13 @@ permissions:
 
 jobs:
   release-please:
-    name: 🚀 Generate Release (Changelog + GitHub Release)
+    name: 📋 Update Release PR (Changelog + Version)
     runs-on: ubuntu-24.04-arm
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - name: 🚀 Create Release + Changelog (Release-Please)
+      - name: 📝 Update Release PR (Release-Please)
         uses: googleapis/release-please-action@v4
         id: release
         with:
@@ -31,63 +31,22 @@ jobs:
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  deploy:
-    name: 🚀 Deploy to Production (GitHub Pages)
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    runs-on: ubuntu-24.04-arm
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v5
-      - name: 🟢 Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-      - name: 📦 Install Dependencies
-        run: npm ci
-      - name: 🏗️ Build Production Resume
-        env:
-          GITHUB_PAGES: 'true'
-          NODE_ENV: 'production'
-        run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Generate User-Friendly Step Summary
-        if: always()
+      - name: 📋 Release Process Status Summary
         run: |
-          echo "## 🚀 GitHub Pages Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Release Process Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status**: ✅ Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment**: GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
-          echo "**Release**: v${{ needs.release-please.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🎉 Release Information" >> $GITHUB_STEP_SUMMARY
-          echo "- 🏷️ **Version**: ${{ needs.release-please.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 📝 **Release Notes**: Available in GitHub Releases" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 **Production URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Version Info](${{ steps.deployment.outputs.page_url }}version.json)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📄 [Screen PDF](${{ steps.deployment.outputs.page_url }}resume.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🖨️ [Print PDF](${{ steps.deployment.outputs.page_url }}resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🤖 [ATS PDF](${{ steps.deployment.outputs.page_url }}resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🏷️ [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }})" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.release.outputs.release_created }}" = "true" ]; then
+            echo "✅ **RELEASE CREATED** - Production deployment triggered" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created and deployment starting" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "📝 **RELEASE PR UPDATED** - No deployment yet" >> $GITHUB_STEP_SUMMARY
+            echo "⏳ **Status**: Updated release-please PR with new commits" >> $GITHUB_STEP_SUMMARY
+            echo "💡 **Next Step**: Merge the release-please PR to trigger production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📋 Current Action" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Updated release-please PR with latest commits" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Generated/updated CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Bumped version number in package.json" >> $GITHUB_STEP_SUMMARY
+            echo "- ⏳ **Waiting for PR merge to deploy to production**" >> $GITHUB_STEP_SUMMARY
+          fi
+
