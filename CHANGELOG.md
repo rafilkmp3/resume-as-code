@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.7.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.6.0...v4.7.0) (2025-08-22)
+
+
+### Features
+
+* **ci:** enforce arm64 consistency for core build workflows ([5247057](https://github.com/rafilkmp3/resume-as-code/commit/52470577e8cb318508e6cfa85ecadacc3052c05b))
+* **dx:** add arm64 optimization support ([e5f7745](https://github.com/rafilkmp3/resume-as-code/commit/e5f77458c0daede8e3b8009f20546cde62be6ae5))
+
+
+### Bug Fixes
+
+* add missing permissions for staging workflow to call shared deployment status ([b2a65fa](https://github.com/rafilkmp3/resume-as-code/commit/b2a65fa5c23bdb8051217cb662eeecf67968a229))
+* correct artifact name in staging deployment workflow ([929987c](https://github.com/rafilkmp3/resume-as-code/commit/929987c58e291e8d7d06e016af4e6c901507dd4e))
+* resolve staging deployment startup failures by switching to ubuntu-latest runner ([0cceaf2](https://github.com/rafilkmp3/resume-as-code/commit/0cceaf2235ec294dafaf1d2325a5f3d907735d5f))
+
+
+### Code Refactoring
+
+* modular documentation and critical workflow fixes ([2f2d7c0](https://github.com/rafilkmp3/resume-as-code/commit/2f2d7c004e1993848aff10b9060f8f2bdf650cd4))
+
 ## [4.6.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.5.0...v4.6.0) (2025-08-22)
 
 
