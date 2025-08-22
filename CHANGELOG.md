@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.6.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.5.0...v4.6.0) (2025-08-22)
+
+
+### Features
+
+* add staging results posting to release-please prs with user-friendly summaries ([3965289](https://github.com/rafilkmp3/resume-as-code/commit/39652892ef3b2a6bc45e23bf8bd712eb3a993a79))
+* apply arm64 runners migration for optimal performance testing ([3feea60](https://github.com/rafilkmp3/resume-as-code/commit/3feea6090582070a840d9b44c747a6f8a437a9f2))
+* update resume summary to reflect arm64 optimization and context7 integration ([fb1bb63](https://github.com/rafilkmp3/resume-as-code/commit/fb1bb631de32cfa1780c4c3ea36a2e59065bae01))
+* update resume to reflect advanced staging automation with release-please integration ([6476f5c](https://github.com/rafilkmp3/resume-as-code/commit/6476f5ce548124970815952a0ecb105f80496ecc))
+
+
+### Bug Fixes
+
+* add missing newlines at end of workflow files to resolve yaml syntax errors ([b41182a](https://github.com/rafilkmp3/resume-as-code/commit/b41182a669d8592d04396768bba41c597c826c8d))
+
 ## [4.5.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.4.0...v4.5.0) (2025-08-21)
 
 
