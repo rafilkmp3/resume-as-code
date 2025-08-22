@@ -32,7 +32,7 @@ runs:
       run: |
         echo "🔧 Setting up Chrome ${{ inputs.chrome-version }} for ARM64..."
         
-        # Install required dependencies for Chrome
+        # Install required dependencies for Chrome (Ubuntu 24.04 ARM64 compatible)
         sudo apt-get update
         sudo apt-get install -y \
           wget \
@@ -42,7 +42,7 @@ runs:
           ca-certificates \
           fonts-liberation \
           libappindicator3-1 \
-          libasound2 \
+          libasound2t64 \
           libatk-bridge2.0-0 \
           libdrm2 \
           libgtk-3-0 \
@@ -54,7 +54,8 @@ runs:
           libxrandr2 \
           xdg-utils \
           libxss1 \
-          libgconf-2-4
+          libglib2.0-0 \
+          libxcb1
         
         # Add Google's official GPG key and repository
         wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
