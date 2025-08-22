@@ -53,7 +53,7 @@ permissions:
 jobs:
   lighthouse-test:
     name: 🚀 Lighthouse Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm  # ARM64 compatible
     timeout-minutes: 10
     outputs:
       performance_score: ${{ steps.lighthouse-results.outputs.performance_score }}
@@ -87,10 +87,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
+      - name: 🌐 Setup Chrome (ARM64 Compatible)
+        uses: ./.github/actions/setup-chrome-arm64
 
       - name: Run Lighthouse CI
         id: lighthouse-ci

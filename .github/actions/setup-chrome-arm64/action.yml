@@ -1,0 +1,233 @@
+name: 'Setup Chrome for ARM64'
+description: 'Install and configure Google Chrome for ARM64 architecture with CI/CD optimizations'
+author: 'Resume-as-Code'
+
+inputs:
+  chrome-version:
+    description: 'Chrome version to install (stable, beta, dev)'
+    required: false
+    default: 'stable'
+  install-chromedriver:
+    description: 'Whether to install ChromeDriver'
+    required: false
+    default: 'false'
+
+outputs:
+  chrome-path:
+    description: 'Path to Chrome executable'
+    value: ${{ steps.setup.outputs.chrome-path }}
+  chrome-version:
+    description: 'Installed Chrome version'
+    value: ${{ steps.setup.outputs.chrome-version }}
+  chromedriver-path:
+    description: 'Path to ChromeDriver executable (if installed)'
+    value: ${{ steps.setup.outputs.chromedriver-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Chrome and Configure for CI/CD
+      id: setup
+      shell: bash
+      run: |
+        echo "🔧 Setting up Chrome ${{ inputs.chrome-version }} for ARM64..."
+        
+        # Install required dependencies for Chrome
+        sudo apt-get update
+        sudo apt-get install -y \
+          wget \
+          gnupg \
+          software-properties-common \
+          apt-transport-https \
+          ca-certificates \
+          fonts-liberation \
+          libappindicator3-1 \
+          libasound2 \
+          libatk-bridge2.0-0 \
+          libdrm2 \
+          libgtk-3-0 \
+          libnspr4 \
+          libnss3 \
+          libx11-xcb1 \
+          libxcomposite1 \
+          libxdamage1 \
+          libxrandr2 \
+          xdg-utils \
+          libxss1 \
+          libgconf-2-4
+        
+        # Add Google's official GPG key and repository
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+        echo "deb [arch=arm64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        
+        # Update package list and install Chrome
+        sudo apt-get update
+        
+        case "${{ inputs.chrome-version }}" in
+          "stable")
+            sudo apt-get install -y google-chrome-stable
+            CHROME_BIN="/usr/bin/google-chrome"
+            ;;
+          "beta")
+            sudo apt-get install -y google-chrome-beta
+            CHROME_BIN="/usr/bin/google-chrome-beta"
+            ;;
+          "dev")
+            sudo apt-get install -y google-chrome-unstable
+            CHROME_BIN="/usr/bin/google-chrome-unstable"
+            ;;
+          *)
+            echo "❌ Invalid Chrome version: ${{ inputs.chrome-version }}"
+            exit 1
+            ;;
+        esac
+        
+        # Verify Chrome installation
+        if [[ ! -f "$CHROME_BIN" ]]; then
+          echo "❌ Chrome installation failed - executable not found: $CHROME_BIN"
+          exit 1
+        fi
+        
+        # Get Chrome version
+        CHROME_VERSION=$($CHROME_BIN --version | cut -d ' ' -f3)
+        
+        # Create Chrome wrapper script with CI/CD optimized flags
+        cat > /tmp/chrome-wrapper << 'EOF'
+        #!/bin/bash
+        exec CHROME_BIN_PLACEHOLDER "$@" \
+          --no-sandbox \
+          --disable-setuid-sandbox \
+          --disable-dev-shm-usage \
+          --disable-extensions \
+          --disable-plugins \
+          --disable-gpu \
+          --headless=new \
+          --disable-background-timer-throttling \
+          --disable-backgrounding-occluded-windows \
+          --disable-features=TranslateUI \
+          --disable-component-extensions-with-background-pages \
+          --no-first-run \
+          --no-default-browser-check \
+          --disable-default-apps \
+          --disable-popup-blocking \
+          --disable-translate \
+          --disable-background-networking \
+          --disable-sync \
+          --metrics-recording-only \
+          --no-pings \
+          --mute-audio \
+          --disable-ipc-flooding-protection
+        EOF
+        
+        # Replace placeholder with actual Chrome binary path
+        sed "s|CHROME_BIN_PLACEHOLDER|$CHROME_BIN|g" /tmp/chrome-wrapper > /tmp/chrome-ci
+        chmod +x /tmp/chrome-ci
+        sudo mv /tmp/chrome-ci /usr/local/bin/chrome-ci
+        
+        # Set environment variables for various tools
+        echo "CHROME_BIN=$CHROME_BIN" >> $GITHUB_ENV
+        echo "PUPPETEER_EXECUTABLE_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        echo "CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        echo "CHROMIUM_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        
+        # Lighthouse CI configuration
+        echo "LHCI_CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        
+        # Output values
+        echo "chrome-path=$CHROME_BIN" >> $GITHUB_OUTPUT
+        echo "chrome-version=$CHROME_VERSION" >> $GITHUB_OUTPUT
+        
+        echo "✅ Chrome $CHROME_VERSION installed and configured for CI/CD"
+        echo "📁 Chrome executable: $CHROME_BIN"
+        echo "🔧 CI wrapper available at: /usr/local/bin/chrome-ci"
+    
+    - name: Install ChromeDriver (Optional)
+      if: inputs.install-chromedriver == 'true'
+      shell: bash
+      run: |
+        echo "🚗 Installing ChromeDriver for ARM64..."
+        
+        # Get Chrome version for ChromeDriver compatibility
+        CHROME_VERSION=${{ steps.setup.outputs.chrome-version }}
+        CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
+        
+        echo "🔍 Finding compatible ChromeDriver for Chrome $CHROME_MAJOR_VERSION..."
+        
+        # Use ChromeDriver's latest release API to get compatible version
+        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_MAJOR_VERSION")
+        
+        if [[ -z "$CHROMEDRIVER_VERSION" ]]; then
+          echo "⚠️ Could not determine ChromeDriver version for Chrome $CHROME_MAJOR_VERSION, using latest"
+          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE")
+        fi
+        
+        echo "📥 Downloading ChromeDriver $CHROMEDRIVER_VERSION for ARM64..."
+        
+        # Download ChromeDriver for ARM64
+        CHROMEDRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+        
+        # Note: ChromeDriver ARM64 binaries may not be available, fallback to x64 with emulation
+        wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL" || {
+          echo "⚠️ ARM64 ChromeDriver not available, using x64 version with emulation"
+          # Install qemu for x64 emulation if needed
+          sudo apt-get install -y qemu-user-static binfmt-support
+        }
+        
+        unzip /tmp/chromedriver.zip -d /tmp/
+        chmod +x /tmp/chromedriver-linux64/chromedriver
+        sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        
+        # Verify ChromeDriver
+        CHROMEDRIVER_VERSION_ACTUAL=$(/usr/local/bin/chromedriver --version | cut -d ' ' -f2)
+        
+        # Set environment variables
+        echo "CHROMEDRIVER_PATH=/usr/local/bin/chromedriver" >> $GITHUB_ENV
+        echo "chromedriver-path=/usr/local/bin/chromedriver" >> $GITHUB_OUTPUT
+        
+        echo "✅ ChromeDriver $CHROMEDRIVER_VERSION_ACTUAL installed"
+        echo "📁 ChromeDriver path: /usr/local/bin/chromedriver"
+        
+        # Cleanup
+        rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64/
+    
+    - name: Verify Setup and Display Summary
+      shell: bash
+      run: |
+        echo "🔍 Verifying Chrome installation and configuration..."
+        
+        CHROME_PATH="${{ steps.setup.outputs.chrome-path }}"
+        CHROME_VERSION="${{ steps.setup.outputs.chrome-version }}"
+        
+        # Test Chrome execution
+        if $CHROME_PATH --version > /dev/null 2>&1; then
+          echo "✅ Chrome executable working correctly"
+        else
+          echo "❌ Chrome executable test failed"
+          exit 1
+        fi
+        
+        # Test CI wrapper
+        if /usr/local/bin/chrome-ci --version > /dev/null 2>&1; then
+          echo "✅ Chrome CI wrapper working correctly"
+        else
+          echo "❌ Chrome CI wrapper test failed"
+          exit 1
+        fi
+        
+        echo ""
+        echo "📋 Chrome Setup Summary:"
+        echo "  Version: $CHROME_VERSION"
+        echo "  Executable: $CHROME_PATH"
+        echo "  CI Wrapper: /usr/local/bin/chrome-ci"
+        echo "  Architecture: $(uname -m)"
+        echo ""
+        echo "🔧 Environment Variables Set:"
+        echo "  CHROME_BIN=$CHROME_PATH"
+        echo "  PUPPETEER_EXECUTABLE_PATH=$CHROME_PATH"
+        echo "  CHROME_PATH=$CHROME_PATH"
+        echo "  LHCI_CHROME_PATH=$CHROME_PATH"
+        
+        if [[ "${{ inputs.install-chromedriver }}" == "true" ]]; then
+          CHROMEDRIVER_PATH="${{ steps.chromedriver.outputs.chromedriver-path }}"
+          echo "  CHROMEDRIVER_PATH=$CHROMEDRIVER_PATH"
+        fi

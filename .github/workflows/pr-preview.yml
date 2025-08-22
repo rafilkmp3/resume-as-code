@@ -19,7 +19,7 @@ permissions:
 jobs:
   build-and-deploy:
     name: Build & Deploy Preview
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-24.04-arm
     outputs:
       preview_url: ${{ steps.set-url.outputs.preview_url }}
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
@@ -91,17 +91,20 @@ jobs:
         with:
           args: status --json
 
-      - name: 🌐 Setup Chrome (Professional Action)
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
-          install-dependencies: true
+      - name: 🌐 Setup Chrome (ARM64 Compatible)
         id: setup-chrome
+        uses: ./.github/actions/setup-chrome-arm64
 
-      - name: Configure Puppeteer Chrome Path
+      - name: Verify Chrome Installation
         run: |
-          echo "PUPPETEER_EXECUTABLE_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-          echo "✅ Chrome ready for PDF generation: ${{ steps.setup-chrome.outputs.chrome-version }}"
+          echo "🧪 Testing Chrome installation..."
+          echo "Chrome Version: ${{ steps.setup-chrome.outputs.chrome-version }}"
+          echo "Chrome Path: ${{ steps.setup-chrome.outputs.chrome-path }}"
+          
+          # Test Chrome functionality
+          ${{ steps.setup-chrome.outputs.chrome-path }} --version
+          ${{ steps.setup-chrome.outputs.chrome-path }} --headless --disable-gpu --no-sandbox --dump-dom --virtual-time-budget=1000 https://www.google.com | head -10
+          echo "✅ Chrome ${{ steps.setup-chrome.outputs.chrome-version }} is working on ARM64!"
 
       - name: ⚡ Install Dependencies (with speedlight cache)
         run: |
@@ -189,7 +192,7 @@ jobs:
   # Smart URL-Based Testing - Tests real deployed URL
   smart-lighthouse-testing:
     name: 🚀 Lighthouse Performance (Real URL)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm  # Now compatible with ARM64
     needs: build-and-deploy
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
@@ -199,6 +202,9 @@ jobs:
         with:
           sparse-checkout: |
             budget.json
+
+      - name: 🌐 Setup Chrome (ARM64 Compatible)
+        uses: ./.github/actions/setup-chrome-arm64
             
       - name: Smart Lighthouse Performance Testing
         run: |
@@ -627,11 +633,14 @@ jobs:
   # Smart Accessibility Testing - Tests real deployed URL
   smart-accessibility-testing:
     name: ♿ Accessibility (Real URL)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm  # Now compatible with ARM64
     needs: build-and-deploy
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 5
     steps:
+      - name: 🌐 Setup Chrome (ARM64 Compatible)
+        uses: ./.github/actions/setup-chrome-arm64
+
       - name: Smart Accessibility Testing
         run: |
           echo "♿ ACCESSIBILITY TESTING - REAL DEPLOYMENT"
