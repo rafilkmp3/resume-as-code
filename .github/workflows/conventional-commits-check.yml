@@ -207,6 +207,7 @@ jobs:
       - name: Add PR comment with validation results
         if: always() && steps.commits.outputs.has_commits == 'true'
         uses: actions/github-script@v7
+        continue-on-error: true
         env:
           VALIDATION_FAILED: ${{ env.validation_failed }}
           VALID_COMMITS: ${{ env.VALID_COMMITS }}
@@ -365,15 +366,31 @@ jobs:
             commentBody += `\n<!-- conventional-commits-validation-${Date.now()} -->`;
 
             // Always create fresh comment (never update existing)
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: commentBody,
-            });
-            
-            console.log(`✅ Posted fresh conventional commits validation to PR #${prNumber} (${hiddenCount} old comments minimized)`);
-            console.log(`🎯 Atlantis-style management: Only latest validation visible, previous comments collapsed`);
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody,
+              });
+              
+              console.log(`✅ Posted fresh conventional commits validation to PR #${prNumber} (${hiddenCount} old comments minimized)`);
+              console.log(`🎯 Atlantis-style management: Only latest validation visible, previous comments collapsed`);
+            } catch (error) {
+              if (error.message.includes('Resource not accessible by integration')) {
+                console.log(`⚠️ Cannot comment on Dependabot PR #${prNumber}: GitHub Actions bot lacks permissions`);
+                console.log(`✅ Validation completed successfully - commits are ${validationFailed ? 'INVALID' : 'VALID'}`);
+                console.log(`🤖 Dependabot PRs have restricted comment permissions for security`);
+                
+                // Don't fail the workflow for Dependabot permission issues
+                if (!validationFailed) {
+                  console.log(`🎉 Dependabot PR #${prNumber} has valid conventional commits - workflow passes despite comment restriction`);
+                }
+              } else {
+                console.error(`❌ Failed to post comment: ${error.message}`);
+                throw error; // Re-throw non-permission errors
+              }
+            }
 
       - name: Generate step summary
         if: always()
@@ -413,4 +430,20 @@ jobs:
             echo "- ✅ Automated version bumping" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ Generated changelogs" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ Organized GitHub releases" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Final validation status
+        if: always() && steps.commits.outputs.has_commits == 'true'
+        run: |
+          if [ "${{ env.validation_failed }}" = "true" ]; then
+            echo "❌ Conventional commits validation failed - workflow will exit with error"
+            exit 1
+          else
+            echo "✅ All conventional commits validation passed successfully"
+            # Check if this is a Dependabot PR by looking at the actor
+            if [[ "${{ github.actor }}" == "dependabot[bot]" ]]; then
+              echo "🤖 Dependabot PR detected - comment posting may be restricted but validation succeeded"
+              echo "🎉 Dependabot commits follow conventional format correctly"
+            fi
+            exit 0
           fi
