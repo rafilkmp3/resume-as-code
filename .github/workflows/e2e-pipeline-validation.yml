@@ -47,7 +47,7 @@ env:
 jobs:
   initialize-e2e-controller:
     name: 🚀 Initialize E2E Pipeline Controller
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     outputs:
       test_branch: ${{ steps.setup.outputs.test_branch }}
@@ -504,7 +504,7 @@ jobs:
     name: 📊 E2E Pipeline Summary
     needs: [initialize-e2e-controller, pr-flow-validator, staging-environment-validator, endpoint-monitor]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
       - name: Generate E2E Pipeline Report
