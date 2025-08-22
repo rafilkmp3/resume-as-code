@@ -36,17 +36,19 @@ jobs:
           echo "## 📋 Release Process Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.release.outputs.release_created }}" = "true" ]; then
-            echo "✅ **RELEASE CREATED** - Production deployment triggered" >> $GITHUB_STEP_SUMMARY
-            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created and deployment starting" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **RELEASE CREATED** - Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created" >> $GITHUB_STEP_SUMMARY
+            echo "📋 **Next**: Production deployment workflow will automatically start" >> $GITHUB_STEP_SUMMARY
           else
             echo "📝 **RELEASE PR UPDATED** - No deployment yet" >> $GITHUB_STEP_SUMMARY
             echo "⏳ **Status**: Updated release-please PR with new commits" >> $GITHUB_STEP_SUMMARY
-            echo "💡 **Next Step**: Merge the release-please PR to trigger production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "💡 **Next Step**: Merge the release-please PR to create a GitHub Release" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### 📋 Current Action" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ Updated release-please PR with latest commits" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ Generated/updated CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ Bumped version number in package.json" >> $GITHUB_STEP_SUMMARY
-            echo "- ⏳ **Waiting for PR merge to deploy to production**" >> $GITHUB_STEP_SUMMARY
+            echo "- ⏳ **Waiting for PR merge to create GitHub Release**" >> $GITHUB_STEP_SUMMARY
+            echo "- 📝 **Note**: Production deployment happens automatically when release is published" >> $GITHUB_STEP_SUMMARY
           fi
 

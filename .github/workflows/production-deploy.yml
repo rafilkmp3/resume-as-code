@@ -2,8 +2,8 @@
 name: 🚀 Production Deployment
 
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
 
 concurrency:
   group: production-deploy-${{ github.ref }}
@@ -15,75 +15,36 @@ permissions:
   id-token: write
 
 jobs:
+  build:
+    name: 🏗️ Build Production Resume
+    uses: ./.github/workflows/_build.yml
+    with:
+      runner_type: 'ubuntu-24.04-arm'
+      node_version: '22'
+      build_mode: 'production'
+      environment_name: 'production'
+      context: 'deploy'
+      upload_artifacts: true
+      artifact_name: 'production-build'
+      timeout_minutes: 15
+
   deploy:
     name: 🚀 Deploy to GitHub Pages
+    needs: build
     runs-on: ubuntu-24.04-arm
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v5
-        
-      - name: 🚀 ARM64 Node.js Build Setup
-        uses: ./.github/actions/node-build
+      - name: 📥 Download Build Artifacts
+        uses: actions/download-artifact@v4
         with:
-          node_version: '22'
-          runner_type: 'ubuntu-24.04-arm'
-          
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
-        with:
-          chrome-version: 'stable'
-          
-      - name: 🏗️ Build Production Resume
-        env:
-          GITHUB_PAGES: 'true'
-          NODE_ENV: 'production'
-          URL: 'https://rafilkmp3.github.io/resume-as-code'
-          DEPLOY_URL: 'https://rafilkmp3.github.io/resume-as-code'
-          CONTEXT: 'deploy'
-        run: |
-          echo "🏗️ Building production resume for GitHub Pages"
-          echo "📊 Build Configuration:"
-          echo "  - Runner: ubuntu-24.04-arm"
-          echo "  - Node.js: 22"
-          echo "  - Mode: production"
-          echo "  - URL: ${URL}"
-          
-          # Build with timing
-          START_TIME=$(date +%s)
-          npm run build
-          END_TIME=$(date +%s)
-          BUILD_DURATION=$((END_TIME - START_TIME))
-          
-          echo "✅ Build completed in ${BUILD_DURATION}s"
-          echo "BUILD_DURATION=${BUILD_DURATION}" >> $GITHUB_ENV
-          
-      - name: 📋 Verify Build Output
-        run: |
-          echo "📋 Build verification:"
-          if [ -f "dist/index.html" ]; then
-            echo "  ✅ HTML: $(ls -lh dist/index.html | awk '{print $5}')"
-          else
-            echo "  ❌ HTML: Missing"
-            exit 1
-          fi
-          
-          # Count generated PDFs
-          PDF_COUNT=0
-          for pdf in dist/resume.pdf dist/resume-print.pdf dist/resume-ats.pdf; do
-            if [ -f "$pdf" ]; then
-              PDF_COUNT=$((PDF_COUNT + 1))
-              echo "  ✅ PDF: $(basename $pdf) - $(ls -lh $pdf | awk '{print $5}')"
-            fi
-          done
-          
-          echo "📊 Build Summary:"
-          echo "  - PDFs Generated: $PDF_COUNT/3"
-          echo "  - Build Duration: ${BUILD_DURATION}s"
-          echo "  - Total Assets: $(find dist -type f | wc -l)"
+          name: production-build-production
+          path: ./dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -103,10 +64,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: ✅ Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "**Environment**: GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "**Release**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Duration**: ${BUILD_DURATION}s" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Size**: ${{ needs.build.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PDFs Generated**: ${{ needs.build.outputs.pdf_count }}/3" >> $GITHUB_STEP_SUMMARY
           echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎉 Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏷️ **Version**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📝 **Release Notes**: [GitHub Release](${{ github.event.release.html_url }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
