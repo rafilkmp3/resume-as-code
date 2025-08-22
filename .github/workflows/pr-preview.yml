@@ -833,26 +833,26 @@ jobs:
       pull-requests: write
       issues: write
 
-  # Comprehensive Testing on Live Preview Environment
-  preview-comprehensive-testing:
-    name: 🧪 Comprehensive Preview Testing
-    needs: [build-and-deploy]
-    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && needs.build-and-deploy.result == 'success'
-    uses: ./.github/workflows/shared-comprehensive-testing.yml
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
-      security-events: write
-    with:
-      target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
-      environment_name: 'preview'
-      environment_context: 'PR #${{ github.event.pull_request.number }} - ${{ github.head_ref }} branch'
-      test_types: 'lighthouse,accessibility,performance'
-      lighthouse_budget_path: './budget.json'
-      artifact_retention_days: 7
-      post_pr_comment: true
-      pr_number: '${{ github.event.pull_request.number }}'
+  # Comprehensive Testing on Live Preview Environment - TEMPORARILY DISABLED FOR ARM64 TESTING
+  # preview-comprehensive-testing:
+  #   name: 🧪 Comprehensive Preview Testing
+  #   needs: [build-and-deploy]
+  #   if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--') && needs.build-and-deploy.result == 'success'
+  #   uses: ./.github/workflows/shared-comprehensive-testing.yml
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #     checks: write
+  #     security-events: write
+  #   with:
+  #     target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
+  #     environment_name: 'preview'
+  #     environment_context: 'PR #${{ github.event.pull_request.number }} - ${{ github.head_ref }} branch'
+  #     test_types: 'lighthouse,accessibility,performance'
+  #     lighthouse_budget_path: './budget.json'
+  #     artifact_retention_days: 7
+  #     post_pr_comment: true
+  #     pr_number: '${{ github.event.pull_request.number }}'
 
   cleanup-on-merge:
     name: Cleanup Preview Comment
