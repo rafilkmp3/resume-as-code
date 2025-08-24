@@ -89,7 +89,7 @@ runs:
         # Get Chromium version
         CHROME_VERSION=$($CHROME_BIN --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
         
-        # Create Chrome wrapper script with CI/CD optimized flags
+        # Create Chrome wrapper script with CI/CD optimized flags for ARM64 stability
         cat > /tmp/chrome-wrapper << 'EOF'
         #!/bin/bash
         exec CHROME_BIN_PLACEHOLDER "$@" \
@@ -102,7 +102,7 @@ runs:
           --headless=new \
           --disable-background-timer-throttling \
           --disable-backgrounding-occluded-windows \
-          --disable-features=TranslateUI \
+          --disable-features=TranslateUI,VizDisplayCompositor \
           --disable-component-extensions-with-background-pages \
           --no-first-run \
           --no-default-browser-check \
@@ -114,7 +114,27 @@ runs:
           --metrics-recording-only \
           --no-pings \
           --mute-audio \
-          --disable-ipc-flooding-protection
+          --disable-ipc-flooding-protection \
+          --memory-pressure-off \
+          --disable-software-rasterizer \
+          --disable-background-media-suspend \
+          --disable-renderer-backgrounding \
+          --disable-field-trial-config \
+          --disable-back-forward-cache \
+          --disable-hang-monitor \
+          --disable-prompt-on-repost \
+          --disable-client-side-phishing-detection \
+          --disable-component-update \
+          --disable-domain-reliability \
+          --disable-features=AudioServiceOutOfProcess,VizDisplayCompositor \
+          --aggressive-cache-discard \
+          --force-color-profile=srgb \
+          --disable-threaded-animation \
+          --disable-threaded-scrolling \
+          --disable-checker-imaging \
+          --disable-new-content-rendering-timeout \
+          --disable-partial-raster \
+          --disable-image-animation-resync
         EOF
         
         # Replace placeholder with actual Chrome binary path
