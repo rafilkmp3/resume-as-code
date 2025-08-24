@@ -39,7 +39,7 @@ const IMAGE_CONFIGS = {
       { width: 120, height: 120, suffix: 'base', quality: 80 },   // Common display size (PageSpeed optimization)
       { width: 128, height: 128, suffix: 'md', quality: 85 },     // Tablet (768px)
       { width: 160, height: 160, suffix: 'lg', quality: 90 },     // Desktop (1024px)
-      { width: 200, height: 200, suffix: 'xl', quality: 85 },     // Large desktop (lower quality for compression)
+      { width: 200, height: 200, suffix: 'xl', quality: 75 },     // Large desktop (optimized compression per PageSpeed)
       { width: 48, height: 48, suffix: 'thumbnail', quality: 75 }, // PDF/thumbnails
     ],
     formats: ['avif', 'webp', 'jpeg'], // Modern formats first for best compression
