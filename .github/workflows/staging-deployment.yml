@@ -138,30 +138,44 @@ jobs:
       - name: Ensure jq is installed
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Test Version Endpoints
+      - name: Test Version API Endpoint
         run: |
-          echo "🧪 Testing version endpoints in staging..."
+          echo "🧪 Testing version API endpoint in staging..."
           STAGING_URL="https://resume-as-code.netlify.app"
           
-          # Test version.json endpoint
-          echo "📋 Testing /version.json..."
-          if curl -f -s "$STAGING_URL/version.json" | jq . > /dev/null; then
-            echo "✅ /version.json endpoint is accessible and valid JSON"
-            curl -s "$STAGING_URL/version.json" | jq .
+          # Test dynamic API version endpoint
+          echo "📋 Testing /api/version (Astro API route)..."
+          if curl -f -s "$STAGING_URL/api/version" | jq . > /dev/null; then
+            echo "✅ /api/version endpoint is accessible and returns valid JSON"
+            echo "📊 Version Information:"
+            API_RESPONSE=$(curl -s "$STAGING_URL/api/version")
+            echo "$API_RESPONSE" | jq .
+            
+            # Extract key information for validation
+            GIT_HASH=$(echo "$API_RESPONSE" | jq -r '.git.shortHash // "unknown"')
+            BRANCH=$(echo "$API_RESPONSE" | jq -r '.git.branch // "unknown"')
+            SITE_URL=$(echo "$API_RESPONSE" | jq -r '.siteUrl // "unknown"')
+            
+            echo ""
+            echo "🔍 Validation Summary:"
+            echo "  - Git Hash: $GIT_HASH"
+            echo "  - Branch: $BRANCH"
+            echo "  - Site URL: $SITE_URL"
+            echo "  - Environment: $(echo "$API_RESPONSE" | jq -r '.environment.context // "unknown"')"
+            echo "  - Node Version: $(echo "$API_RESPONSE" | jq -r '.environment.nodeVersion // "unknown"')"
+            echo "  - Architecture: $(echo "$API_RESPONSE" | jq -r '.environment.arch // "unknown"')"
+            
           else
-            echo "❌ /version.json endpoint failed"
+            echo "❌ /api/version endpoint failed"
             exit 1
           fi
           
-          # Test version.txt endpoint  
-          echo "📋 Testing /version.txt..."
-          if curl -f -s "$STAGING_URL/version.txt" > /dev/null; then
-            echo "✅ /version.txt endpoint is accessible"
-            echo "Content:"
-            curl -s "$STAGING_URL/version.txt"
+          # Test legacy endpoints for backward compatibility (optional)
+          echo "📋 Testing legacy endpoints..."
+          if curl -f -s "$STAGING_URL/version.json" > /dev/null 2>&1; then
+            echo "✅ Legacy /version.json still accessible"
           else
-            echo "❌ /version.txt endpoint failed"
-            exit 1
+            echo "ℹ️ Legacy /version.json not found (expected with new API)"
           fi
 
       - name: Generate User-Friendly Step Summary
@@ -176,14 +190,14 @@ jobs:
           echo "**PDFs Generated**: ${{ needs.build-staging.outputs.pdf_count }}/3" >> $GITHUB_STEP_SUMMARY
           echo "**Runner**: ARM64 (reusable workflow)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Endpoints Validated" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 API Endpoints Validated" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Main site accessible" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ /version.json endpoint working" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ /version.txt endpoint working" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ /api/version (Astro API route) working" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Dynamic version information with git metadata" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 [Live Site](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Version Info](https://resume-as-code.netlify.app/version.json)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Version API](https://resume-as-code.netlify.app/api/version)" >> $GITHUB_STEP_SUMMARY
           echo "- 📄 [Screen PDF](https://resume-as-code.netlify.app/resume.pdf)" >> $GITHUB_STEP_SUMMARY
           echo "- 🖨️ [Print PDF](https://resume-as-code.netlify.app/resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
           echo "- 🤖 [ATS PDF](https://resume-as-code.netlify.app/resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY

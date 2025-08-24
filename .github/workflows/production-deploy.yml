@@ -85,7 +85,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Version Info](${{ steps.deployment.outputs.page_url }}version.json)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Version API](${{ steps.deployment.outputs.page_url }}api/version)" >> $GITHUB_STEP_SUMMARY
           echo "- 📄 [Screen PDF](${{ steps.deployment.outputs.page_url }}resume.pdf)" >> $GITHUB_STEP_SUMMARY
           echo "- 🖨️ [Print PDF](${{ steps.deployment.outputs.page_url }}resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
           echo "- 🤖 [ATS PDF](${{ steps.deployment.outputs.page_url }}resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
