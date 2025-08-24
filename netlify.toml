@@ -1,0 +1,53 @@
+# Netlify configuration for resume-as-code staging deployment
+# All builds are done in GitHub Actions - Netlify should only serve static files
+
+[build]
+  # Skip all build commands - files are pre-built by GitHub Actions
+  command = "echo 'Build completed in GitHub Actions - serving pre-built files'"
+  publish = "dist"
+  ignore = "exit 0"  # Always skip builds
+
+[build.environment]
+  # No build environment needed - files are pre-built
+  NODE_VERSION = "22"
+
+# Force skip builds for all contexts
+[context.production]
+  command = "echo 'Production build completed in GitHub Actions - serving pre-built files'"
+  publish = "dist"
+
+[context.deploy-preview]
+  command = "echo 'Deploy preview build completed in GitHub Actions - serving pre-built files'"
+  publish = "dist"
+
+[context.branch-deploy]
+  command = "echo 'Branch deploy build completed in GitHub Actions - serving pre-built files'"
+  publish = "dist"
+
+# Headers for optimal performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# API routes (Astro endpoints)
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# PDF files
+[[headers]]
+  for = "/*.pdf"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+    Content-Type = "application/pdf"
