@@ -24,7 +24,6 @@
         },
         "email": {
           "type": "string",
-          "format": "email",
           "description": "Email address"
         },
         "phone": {
@@ -33,7 +32,6 @@
         },
         "url": {
           "type": "string",
-          "format": "uri",
           "description": "Personal website URL"
         },
         "summary": {
@@ -65,7 +63,7 @@
             "properties": {
               "network": { "type": "string" },
               "username": { "type": "string" },
-              "url": { "type": "string", "format": "uri" }
+              "url": { "type": "string" }
             }
           },
           "description": "Social media profiles"
@@ -80,7 +78,7 @@
         "properties": {
           "name": { "type": "string" },
           "position": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
+          "url": { "type": "string" },
           "startDate": { "type": "string" },
           "endDate": { "type": "string" },
           "summary": { "type": "string" },
@@ -119,8 +117,7 @@
           "links": {
             "type": "object",
             "additionalProperties": { 
-              "type": "string", 
-              "format": "uri" 
+              "type": "string" 
             }
           }
         }
@@ -133,7 +130,7 @@
         "properties": {
           "name": { "type": "string" },
           "description": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
+          "url": { "type": "string" },
           "highlights": {
             "type": "array",
             "items": { "type": "string" }
@@ -149,7 +146,7 @@
           "name": { "type": "string" },
           "issuer": { "type": "string" },
           "date": { "type": "string" },
-          "url": { "type": "string", "format": "uri" }
+          "url": { "type": "string" }
         }
       }
     }
