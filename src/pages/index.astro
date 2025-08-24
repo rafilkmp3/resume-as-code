@@ -173,7 +173,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Experience Section -->
       <LiquidGlassCard class="p-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Professional Experience</h2>
-        <div class="space-y-8 2xl:columns-2 2xl:gap-8 2xl:space-y-0" id="experience-container">
+        <div class="space-y-8" id="experience-container">
           {work.map((job, index) => (
             <div class={`experience-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
               <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
@@ -448,25 +448,30 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
   /* Wide Screen Layout Optimizations */
   @media (min-width: 1536px) {
-    .experience-item, .project-item {
+    /* Projects can use columns since chronological order doesn't matter */
+    .project-item {
       break-inside: avoid;
       page-break-inside: avoid;
       margin-bottom: 2rem;
       display: block;
     }
     
-    /* Ensure proper spacing in column layout */
-    #experience-container .experience-item:not(:last-child),
+    /* Ensure proper spacing in column layout for projects */
     #projects-container .project-item:not(:last-child) {
       margin-bottom: 2rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 2rem;
     }
+    
+    /* Experience maintains single column for chronological timeline */
+    .experience-item {
+      margin-bottom: 2rem;
+    }
   }
 
   /* Responsive readability optimization */
   @media (min-width: 1280px) and (max-width: 1535px) {
-    /* xl screens: optimize without columns for better readability */
+    /* xl screens: optimize spacing for better readability */
     .experience-item, .project-item {
       margin-bottom: 1.5rem;
     }
