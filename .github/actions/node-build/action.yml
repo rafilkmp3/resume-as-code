@@ -1,6 +1,6 @@
 ---
 name: '🚀 ARM64 Node.js Build Setup'
-description: 'Optimized Node.js setup with ARM64 performance and intelligent caching'
+description: 'Optimized Node.js setup with ARM64 performance and source-code-aware intelligent caching'
 author: 'Resume-as-Code Project'
 
 inputs:
@@ -89,19 +89,24 @@ runs:
           ~/.cache
           node_modules
           node_modules/.cache
-        key: ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-node${{ inputs.node_version }}-${{ hashFiles('package-lock.json') }}${{ inputs.cache_key_suffix }}
+        key: ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-node${{ inputs.node_version }}-deps-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('src/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'scripts/**') }}${{ inputs.cache_key_suffix }}
         restore-keys: |
+          ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-node${{ inputs.node_version }}-deps-${{ hashFiles('package-lock.json') }}-src-
+          ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-node${{ inputs.node_version }}-deps-${{ hashFiles('package-lock.json') }}-
           ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-node${{ inputs.node_version }}-
           ${{ runner.os }}-${{ steps.analysis.outputs.cache_architecture }}-
-          ${{ runner.os }}-
 
     - name: 📦 Smart Dependency Installation
       shell: bash
       run: |
-        echo "📦 Installing dependencies with architecture optimization..."
+        echo "📦 Installing dependencies with architecture and source code optimization..."
         
         # Check if we hit cache
         CACHE_HIT="${{ steps.cache.outputs.cache-hit }}"
+        
+        echo "🔍 Cache Key Analysis:"
+        echo "  - Dependencies Hash: ${{ hashFiles('package-lock.json') }}"
+        echo "  - Source Code Hash: ${{ hashFiles('src/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'scripts/**') }}"
         
         if [[ "$CACHE_HIT" == "true" ]]; then
           echo "⚡ CACHE HIT: Verifying dependencies..."

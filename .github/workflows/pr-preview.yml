@@ -57,7 +57,7 @@ jobs:
           echo "✅ NETLIFY_SITE_ID secret configured"
           echo "🎉 Netlify deployment ready"
 
-      - name: 🚀 Speedlight Caching (Dependencies + Build Artifacts)
+      - name: 🚀 Source-Code-Aware Speedlight Caching (Dependencies + Build Artifacts)
         uses: actions/cache@v4
         with:
           path: |
@@ -67,8 +67,10 @@ jobs:
             node_modules/.cache
             dist/assets/images
             dist/assets/optimized
-          key: ${{ runner.os }}-speedlight-preview-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+          key: ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('src/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'scripts/**') }}
           restore-keys: |
+            ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-src-
+            ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-speedlight-preview-
             ${{ runner.os }}-speedlight-
 

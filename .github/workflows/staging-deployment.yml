@@ -5,14 +5,22 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/**'
-      - 'assets/**' 
-      - 'scripts/**'
-      - 'package.json'
-      - 'package-lock.json'
-      # Self-trigger: validate workflow changes by running them
+      # 🎯 Source Code (All site content and logic)
+      - 'src/**'              # Astro components, pages, layouts, data
+      - 'public/**'           # Static assets, images, favicon
+      - 'scripts/**'          # Build and utility scripts
+      
+      # ⚙️ Configuration Files (Build behavior changes)
+      - 'package.json'        # Dependencies and build scripts
+      - 'package-lock.json'   # Exact dependency versions
+      - 'astro.config.mjs'    # Astro framework configuration
+      - 'tailwind.config.mjs' # Styling configuration
+      - 'tsconfig.json'       # TypeScript configuration
+      
+      # 🔧 Workflow Self-Triggering (Infrastructure changes)
       - '.github/workflows/staging-deployment.yml'
       - '.github/workflows/_build.yml'
+      - '.github/actions/**'  # Reusable action changes
   workflow_dispatch:
 
 concurrency:

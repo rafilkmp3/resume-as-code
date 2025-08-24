@@ -8,8 +8,10 @@ on:
   push:
     branches: [main]
     paths:
+      # 🔧 Workflow Self-Triggering (Infrastructure changes)
       - '.github/workflows/production-deploy.yml'
       - '.github/workflows/_build.yml'
+      - '.github/actions/**'  # Reusable action changes
 
 concurrency:
   group: production-deploy-${{ github.ref }}
