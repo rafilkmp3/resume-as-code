@@ -10,6 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'",
+    "test:pdf": "playwright test src/test/pdf-routes.test.js",
+    "test:pdf-headed": "playwright test src/test/pdf-routes.test.js --headed",
     "prepare": "husky || true"
   },
   "dependencies": {
@@ -22,13 +24,13 @@
     "astro": "^5.13.3",
     "astro-icon": "^1.1.5",
     "daisyui": "^5.0.50",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
     "@axe-core/cli": "^4.10.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "ajv-cli": "^5.0.0",
     "axe-core": "^4.10.3",
     "husky": "^9.1.7",
     "lighthouse": "^12.8.1"

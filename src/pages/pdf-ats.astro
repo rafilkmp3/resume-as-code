@@ -1,12 +1,16 @@
 ---
 import resumeData from '../data/resume.json';
 import { getRuntimeSiteUrl } from '../utils/site-url.ts';
+import { QRCodePresets } from '../utils/qr-code.ts';
 
 const { basics, work, skills, education, projects } = resumeData;
 
 // Use runtime URL detection for reliable preview environment URLs
 // This ensures QR codes and links work correctly in all environments
 const siteUrl = getRuntimeSiteUrl();
+
+// Generate secure, self-hosted QR code data URL for ATS
+const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
 ---
 
 <!DOCTYPE html>
@@ -345,7 +349,7 @@ const siteUrl = getRuntimeSiteUrl();
         </div>
         <div class="footer-qr">
           <img 
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(siteUrl)}`}
+            src={qrCodeDataURL}
             alt="QR Code for resume website"
             class="qr-code"
           />
