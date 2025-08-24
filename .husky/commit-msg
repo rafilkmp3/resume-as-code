@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Husky commit-msg hook with AI-friendly error messages
+# Uses our custom AI-friendly commitlint wrapper for detailed feedback
+
+node scripts/ai-friendly-commitlint.cjs "$1"

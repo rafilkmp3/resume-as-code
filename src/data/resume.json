@@ -1,0 +1,448 @@
+{
+  "basics": {
+    "name": "Rafael Bernardo Sathler",
+    "label": "Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect",
+    "image": "assets/images/profile-optimized.jpg",
+    "email": "rafaelbsathler@gmail.com",
+    "phone": "+55 21 997988682",
+    "url": "https://rafilkmp3.github.io/resume-as-code/",
+    "summary": "Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence. Currently implementing ARM64-optimized GitHub Actions workflows with 70-85% performance improvements and enhanced Context7-powered documentation systems.",
+    "location": {
+      "city": "Rio de Janeiro",
+      "countryCode": "BR",
+      "region": "Brazil"
+    },
+    "nationality": "Brazilian",
+    "languages": [
+      "Portuguese",
+      "English"
+    ],
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "rafaelbsathler",
+        "url": "https://www.linkedin.com/in/rafaelbsathler/"
+      },
+      {
+        "network": "GitHub",
+        "username": "rafaelbsathler",
+        "url": "https://github.com/rafaelbsathler"
+      },
+      {
+        "network": "cal.com",
+        "username": "rafaelbsathler",
+        "url": "https://cal.com/rafaelbsathler"
+      },
+      {
+        "network": "WhatsApp",
+        "username": "+5521997988682",
+        "url": "https://wa.me/5521997988682"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Bluecore",
+      "position": "Platform Engineer",
+      "url": "https://bluecore.com",
+      "startDate": "2024-08",
+      "endDate": "2025-06",
+      "summary": "Re-platformed observability and future-proofed infrastructure for a high-traffic e-commerce platform.",
+      "highlights": [
+        "Re-platformed observability infrastructure: Migrated 300+ Datadog monitors and 150+ dashboards to Chronosphere, reducing monitoring costs by 40% (~$200K annually)",
+        "Zero-downtime Kubernetes upgrades: Orchestrated GKE fleet upgrades to v1.32 across multi-region clusters, protecting Black Friday/Cyber Monday revenue",
+        "Process optimization: Authored 20+ runbooks and implemented GitOps workflows, reducing patch lead-time by 50% and infrastructure tickets by 30%",
+        "Technical mentorship: Provided deep technical guidance to 10+ engineering teams, solving complex infrastructure challenges and driving adoption of best practices"
+      ]
+    },
+    {
+      "name": "Uber",
+      "position": "Senior Software Engineer",
+      "url": "https://uber.com",
+      "startDate": "2023-08",
+      "endDate": "2024-08",
+      "summary": "Drove company-wide migration from Atlassian Bamboo to GitHub Actions, scaling infrastructure to serve 5,000 engineers and 8,000 repos.",
+      "highlights": [
+        "Enterprise CI/CD transformation: Led migration of 8,000 repositories from Bamboo to GitHub Actions, scaling 1,000-node GKE runner fleet with 99%+ uptime and <5min job startup SLO",
+        "Monorepo at scale: Supported Bazel across the organization, enabling teams to leverage developing toolchains and CI/CD pipelines with GitHub Actions, reducing build times by 60% for 5,000+ engineers",
+        "Cost optimization at scale: Implemented Terraform automation and spot-instance strategy, achieving $65K annual savings while reducing median build latency by 40%",
+        "Security & compliance: Established audit-grade compliance with automated logging, secret scanning, and SAML enforcement, closing critical audit findings",
+        "Platform architecture: Designed and implemented self-service infrastructure platform reducing deployment time from 24+ hours to <4 hours through advanced automation and orchestration",
+        "Technical documentation: Authored comprehensive 'CI/CD Playbook' and Bazel optimization guides, becoming the go-to technical resource for platform teams"
+      ]
+    },
+    {
+      "name": "Triumph Technology Solutions LLC",
+      "position": "Solutions Architect",
+      "url": "https://www.linkedin.com/company/triumph-technology-solutions-llc/",
+      "startDate": "2023-04",
+      "endDate": "2023-07",
+      "summary": "Led enterprise AWS cloud transformation and migration projects for Fortune 500 clients.",
+      "highlights": [
+        "AWS MAP assessments: Executed comprehensive enterprise cloud migration assessments covering infrastructure analysis, cost optimization, and technical framework design",
+        "Microservices architecture: Designed and implemented scalable microservices that reduced component dependencies and improved system scalability by 300%",
+        "Hybrid cloud solutions: Developed secure hybrid cloud infrastructure enabling seamless data transfer between on-premise and cloud environments",
+        "DevOps strategy: Implemented enterprise DevOps practices that improved system reliability and enabled continuous delivery workflows"
+      ]
+    },
+    {
+      "name": "Toptal",
+      "position": "Infrastructure Engineer",
+      "url": "https://toptal.com",
+      "startDate": "2022-03",
+      "endDate": "2023-02",
+      "summary": "Built and maintained cloud-native infrastructure for global talent marketplace serving top-tier clients.",
+      "highlights": [
+        "Cloud-native solutions: Designed and implemented scalable infrastructure solutions using Kubernetes, Terraform, and ArgoCD on Google Cloud",
+        "Solution architecture: Designed complex technical architectures translating business requirements into scalable, resilient infrastructure solutions",
+        "Automation excellence: Developed CI/CD pipelines and infrastructure-as-code solutions that reduced deployment time by 60%",
+        "Performance optimization: Monitored and optimized cloud infrastructure performance, achieving 99.9% uptime SLA"
+      ]
+    },
+    {
+      "name": "Globo.com",
+      "position": "Senior DevOps Engineer",
+      "url": "https://globo.com",
+      "startDate": "2018-08",
+      "endDate": "2022-06",
+      "summary": "Achieved Guinness World Record supporting Big Data infrastructure for Brazil's largest media company.",
+      "highlights": [
+        "🏆 Guinness World Record: Ensured zero-downtime operation of voting infrastructure for 'Big Brother Brasil', handling record-breaking public votes that surpassed 'American Idol'",
+        "Big Data at scale: Architected and maintained Hadoop/Kafka clusters processing millions of requests per second with 99.99% availability",
+        "Production systems: Designed, deployed, and maintained highly available systems supporting Brazil's top media properties with shared ownership model",
+        "Advanced data engineering: Architected innovative solutions using Spark/Hadoop ecosystem for real-time analytics, processing millions of events with sub-second latency"
+      ]
+    },
+    {
+      "name": "MeuPatrocínio",
+      "position": "Senior DevOps Engineer",
+      "url": "https://www.meupatrocinio.com/",
+      "startDate": "2016-12",
+      "endDate": "2018-08",
+      "summary": "Led infrastructure automation and security initiatives for Brazilian fintech platform.",
+      "highlights": [
+        "Infrastructure automation: Developed scripts and tools that improved system efficiency by 50% and generated significant cost savings",
+        "CI/CD implementation: Built comprehensive deployment pipeline that improved system reliability, reduced deployment time by 70%, and increased uptime to 99.9%",
+        "Security hardening: Implemented multi-layered security measures protecting against attacks and ensuring data privacy compliance",
+        "Configuration management: Automated server provisioning and configuration management, enabling rapid scaling and consistent deployments"
+      ]
+    },
+    {
+      "name": "Funcional Health Tech | Fidelize",
+      "position": "Infrastructure Engineer",
+      "url": "https://www.funcionalcorp.com.br/",
+      "startDate": "2015-04",
+      "endDate": "2016-03",
+      "summary": "Managed pharmaceutical industry infrastructure with focus on compliance and reliability.",
+      "highlights": [
+        "Healthcare compliance: Managed CentOS-based infrastructure using Linux, Puppet, PostgreSQL, Redis, and VMware in regulated pharmaceutical environment",
+        "Multi-platform support: Ensured reliable operation of diverse web applications across multiple programming languages and database technologies",
+        "Proactive monitoring: Implemented Nagios monitoring solutions with 24/7 alerting, achieving 99.8% uptime and rapid issue resolution",
+        "System optimization: Applied deep infrastructure expertise to eliminate performance bottlenecks, achieving 60% reduction in server-related incidents through proactive monitoring and tuning",
+        "Advanced staging automation: Implemented staging results posting to release-please PRs with ARM64 performance metrics and user-friendly summaries"
+      ]
+    },
+    {
+      "name": "Acol Consultoria & Sistemas",
+      "position": "Support Specialist",
+      "url": "https://www.linkedin.com/company/acol-consultoria-e-sistemas/",
+      "startDate": "2014-08",
+      "endDate": "2015-04",
+      "summary": "Advanced from intern to specialist role, managing enterprise IT infrastructure and client support.",
+      "highlights": [
+        "Career progression: Promoted from intern to Support Specialist within 8 months, demonstrating rapid skill development and value delivery",
+        "Enterprise support: Provided technical support for enterprise clients, maintaining 95%+ customer satisfaction ratings",
+        "Infrastructure management: Managed servers, databases, and applications using Linux, VMware, and PostgreSQL technologies",
+        "System stability: Utilized monitoring tools and proactive maintenance to ensure reliable operation of critical business applications"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Universidade do Estado do Rio de Janeiro (UERJ)",
+      "area": "Computer Science",
+      "studyType": "Bachelor",
+      "startDate": "2011-06",
+      "endDate": "2016-06"
+    }
+  ],
+  "certificates": [],
+  "projects": [
+    {
+      "name": "Resume-as-Code Platform",
+      "url": "https://github.com/rafilkmp3/resume-as-code",
+      "description": "World-class resume generation system showcasing enterprise-grade platform engineering and DevOps excellence",
+      "highlights": [
+        "Architected comprehensive three-tier CI/CD pipeline: PR Preview (Netlify) → Staging (Netlify) → Production (GitHub Pages)",
+        "Implemented Infrastructure-as-Code approach with Docker containerization, multi-stage builds, and cross-platform support (ARM64/AMD64)",
+        "Built automated dependency management system with intelligent PR recreation and zero-maintenance updates achieving 99%+ pipeline success rate",
+        "Engineered multi-format PDF generation system (Screen/Print/ATS optimized) with Puppeteer achieving 99.5% bandwidth reduction through image optimization",
+        "Designed comprehensive testing strategy with 20 viewport/theme combinations, accessibility compliance (WCAG 2.1 AA), and performance monitoring",
+        "Created automated release management with Release-Please integration, conventional commits enforcement, and semantic versioning",
+        "Implemented enterprise security practices including vulnerability scanning, secret detection, and environment protection rules",
+        "Achieved 95+ Lighthouse scores, sub-3-second load times, and comprehensive observability with detailed pipeline monitoring"
+      ],
+      "keywords": [
+        "Platform Engineering",
+        "DevOps",
+        "CI/CD",
+        "Docker",
+        "GitHub Actions",
+        "Infrastructure as Code",
+        "Multi-Environment Deployment",
+        "Performance Optimization",
+        "Security Automation",
+        "Release Management"
+      ]
+    },
+    {
+      "name": "Self-Service Terraform Platform with Atlantis Integration",
+      "url": "https://www.runatlantis.io/",
+      "description": "Enterprise-grade GitOps platform enabling teams to self-apply Terraform through GitHub PR interface using Atlantis",
+      "highlights": [
+        "Built self-service Terraform deployment system using Atlantis enabling 50+ developers to independently manage infrastructure",
+        "Integrated Atlantis with GitHub PR workflows for automated Terraform plan/apply via PR comments",
+        "Implemented GitOps workflows with Terragrunt and Atlantis allowing teams to apply infrastructure changes seamlessly",
+        "Created secure multi-environment promotion pipelines with Atlantis server reducing deployment time from days to minutes",
+        "Established governance controls with policy-as-code using Sentinel and OPA integrated with Atlantis workflows",
+        "Released v4.2.0 with enhanced industry-standard version management and comprehensive CI/CD pipeline"
+      ],
+      "keywords": [
+        "Terraform",
+        "Atlantis",
+        "Terragrunt",
+        "GitOps",
+        "GitHub Actions",
+        "OPA",
+        "Sentinel",
+        "Self-Service",
+        "Infrastructure as Code"
+      ]
+    },
+    {
+      "name": "Multi-Cloud DNS & Hybrid Network Architecture",
+      "url": "",
+      "description": "Designed and implemented hybrid multi-cloud networking with intelligent DNS routing",
+      "highlights": [
+        "Architected multi-cloud DNS strategy using AWS Route53 with health checks and failover routing",
+        "Built hybrid connectivity between AWS, on-premises data centers, and edge locations",
+        "Implemented intelligent traffic routing reducing latency by 35% across 3 geographic regions",
+        "Designed disaster recovery with automated DNS failover achieving 99.99% uptime SLA",
+        "Created network segmentation with VPC peering and Transit Gateway for secure multi-cloud communication"
+      ],
+      "keywords": [
+        "AWS Route53",
+        "Multi-Cloud",
+        "Hybrid Network",
+        "DNS",
+        "VPC",
+        "Transit Gateway",
+        "On-Premises",
+        "HA/DR"
+      ]
+    },
+    {
+      "name": "Infrastructure Automation Toolkit",
+      "url": "",
+      "description": "Collection of Terraform modules and automation scripts for cloud infrastructure",
+      "highlights": [
+        "Developed reusable Terraform modules for AWS/GCP multi-cloud deployments",
+        "Created monitoring and alerting automation reducing MTTR by 70%",
+        "Built cost optimization scripts identifying $200K+ in potential savings",
+        "Implemented security scanning and compliance automation for infrastructure-as-code"
+      ],
+      "keywords": [
+        "Terraform",
+        "AWS",
+        "GCP",
+        "Python",
+        "Bash",
+        "Monitoring",
+        "Security"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "Cloud Platforms & IaC",
+      "level": "Expert",
+      "keywords": [
+        "AWS",
+        "GCP",
+        "Terraform",
+        "Ansible",
+        "Helm"
+      ],
+      "links": {
+        "AWS": "https://aws.amazon.com/",
+        "GCP": "https://cloud.google.com/",
+        "Terraform": "https://www.terraform.io/",
+        "Ansible": "https://www.ansible.com/",
+        "Helm": "https://helm.sh/"
+      }
+    },
+    {
+      "name": "Container Orchestration",
+      "level": "Expert",
+      "keywords": [
+        "Kubernetes",
+        "Docker",
+        "Helm",
+        "Kustomize",
+        "Istio",
+        "ArgoCD",
+        "Google Kubernetes Engine",
+        "Amazon EKS"
+      ],
+      "links": {
+        "Kubernetes": "https://kubernetes.io/",
+        "Docker": "https://www.docker.com/",
+        "Helm": "https://helm.sh/",
+        "Kustomize": "https://kustomize.io/",
+        "Istio": "https://istio.io/",
+        "ArgoCD": "https://argoproj.github.io/cd/",
+        "Google Kubernetes Engine": "https://cloud.google.com/kubernetes-engine",
+        "Amazon EKS": "https://aws.amazon.com/eks/"
+      }
+    },
+    {
+      "name": "CI/CD & DevOps",
+      "level": "Expert",
+      "keywords": [
+        "GitHub Actions",
+        "GitLab CI",
+        "Jenkins",
+        "Atlantis",
+        "Bazel"
+      ],
+      "links": {
+        "GitHub Actions": "https://github.com/features/actions",
+        "GitLab CI": "https://docs.gitlab.com/ee/ci/",
+        "Jenkins": "https://www.jenkins.io/",
+        "Atlantis": "https://www.runatlantis.io/",
+        "Bazel": "https://bazel.build/"
+      }
+    },
+    {
+      "name": "Observability & Monitoring",
+      "level": "Expert",
+      "keywords": [
+        "Prometheus",
+        "Grafana",
+        "ELK",
+        "Loki",
+        "Mimir",
+        "Datadog",
+        "Chronosphere",
+        "New Relic",
+        "SignOz"
+      ],
+      "links": {
+        "Prometheus": "https://prometheus.io/",
+        "Grafana": "https://grafana.com/",
+        "ELK": "https://www.elastic.co/elastic-stack",
+        "Loki": "https://grafana.com/oss/loki/",
+        "Mimir": "https://grafana.com/oss/mimir/",
+        "Datadog": "https://www.datadoghq.com/",
+        "Chronosphere": "https://chronosphere.io/",
+        "New Relic": "https://newrelic.com/",
+        "SignOz": "https://signoz.io/"
+      }
+    },
+    {
+      "name": "Programming & Scripting",
+      "level": "Advanced",
+      "keywords": [
+        "Python",
+        "Bash",
+        "Go",
+        "JavaScript",
+        "YAML",
+        "HCL",
+        "SQL"
+      ],
+      "links": {
+        "Python": "https://www.python.org/",
+        "Bash": "https://www.gnu.org/software/bash/",
+        "Go": "https://golang.org/",
+        "JavaScript": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+        "YAML": "https://yaml.org/",
+        "HCL": "https://github.com/hashicorp/hcl",
+        "SQL": "https://www.iso.org/standard/63555.html"
+      }
+    },
+    {
+      "name": "Big Data & Databases",
+      "level": "Advanced",
+      "keywords": [
+        "Apache Kafka",
+        "Hadoop",
+        "Apache Spark",
+        "PostgreSQL",
+        "Redis",
+        "Elasticsearch",
+        "BigQuery"
+      ],
+      "links": {
+        "Apache Kafka": "https://kafka.apache.org/",
+        "Hadoop": "https://hadoop.apache.org/",
+        "Apache Spark": "https://spark.apache.org/",
+        "PostgreSQL": "https://www.postgresql.org/",
+        "Redis": "https://redis.io/",
+        "Elasticsearch": "https://www.elastic.co/elasticsearch/",
+        "BigQuery": "https://cloud.google.com/bigquery"
+      }
+    },
+    {
+      "name": "Security & Compliance",
+      "level": "Advanced",
+      "keywords": [
+        "RBAC",
+        "SAML/SSO",
+        "Vault",
+        "Security Scanning",
+        "Compliance Auditing",
+        "Infrastructure Security"
+      ],
+      "links": {
+        "RBAC": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+        "SAML/SSO": "https://auth0.com/intro-to-iam/what-is-saml",
+        "Vault": "https://www.vaultproject.io/",
+        "Security Scanning": "https://owasp.org/www-community/Vulnerability_Scanning_Tools",
+        "Compliance Auditing": "https://www.nist.gov/cyberframework",
+        "Infrastructure Security": "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final"
+      }
+    },
+    {
+      "name": "Soft Skills",
+      "level": "Expert",
+      "keywords": [
+        "Effective in cross-functional teams",
+        "Clear technical writing",
+        "Leadership",
+        "Mentoring",
+        "Problem solving"
+      ],
+      "links": {
+        "Effective in cross-functional teams": "https://www.atlassian.com/team-playbook/plays/cross-functional-collaboration",
+        "Clear technical writing": "https://developers.google.com/tech-writing",
+        "Leadership": "https://hbr.org/topic/leadership",
+        "Mentoring": "https://www.mentoring.org/what-is-mentoring/",
+        "Problem solving": "https://www.mckinsey.com/capabilities/strategy-and-corporate-finance/our-insights/problem-solving"
+      }
+    }
+  ],
+  "meta": {
+    "lastUpdated": "2025-08-21",
+    "availability": {
+      "status": "open_to_work",
+      "icon": "🟢",
+      "text": "Open to Work",
+      "types": [
+        "Full-time",
+        "Contract",
+        "Remote"
+      ]
+    }
+  }
+}

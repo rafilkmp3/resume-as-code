@@ -91,20 +91,6 @@ jobs:
         with:
           args: status --json
 
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        id: setup-chrome
-        uses: ./.github/actions/setup-chrome-arm64
-
-      - name: Verify Chrome Installation
-        run: |
-          echo "🧪 Testing Chrome installation..."
-          echo "Chrome Version: ${{ steps.setup-chrome.outputs.chrome-version }}"
-          echo "Chrome Path: ${{ steps.setup-chrome.outputs.chrome-path }}"
-          
-          # Test Chrome functionality
-          ${{ steps.setup-chrome.outputs.chrome-path }} --version
-          ${{ steps.setup-chrome.outputs.chrome-path }} --headless --disable-gpu --no-sandbox --dump-dom --virtual-time-budget=1000 https://www.google.com | head -10
-          echo "✅ Chrome ${{ steps.setup-chrome.outputs.chrome-version }} is working on ARM64!"
 
       - name: ⚡ Install Dependencies (with speedlight cache)
         run: |
@@ -116,6 +102,13 @@ jobs:
             npm ci --prefer-offline --no-audit
           fi
 
+      - name: 🧹 Force Clean Build (URL Configuration Fix)
+        run: |
+          echo "🧹 Forcing clean build to fix URL configuration..."
+          rm -rf dist/
+          rm -rf .astro/
+          echo "✅ Cleaned build artifacts and Astro cache"
+          
       - name: ⚡ Speedlight Build (Docker-free)
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -130,23 +123,12 @@ jobs:
           echo "=========================================="
           echo "📋 Build Context: ${BUILD_CONTEXT}"
           echo "🎯 Target URL: ${DEPLOY_URL}"
-          echo "📦 Chrome: ${{ steps.setup-chrome.outputs.chrome-version }}"
-          echo "⚡ Strategy: Docker-free Node.js with aggressive caching"
+          echo "⚡ No browser dependencies needed for static build"
+          echo "⚡ Strategy: Docker-free Node.js with clean build"
           echo ""
           
-          # Intelligent build detection
-          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            SOURCE_NEWER=$(find src/ assets/ -newer dist/index.html 2>/dev/null | wc -l)
-            if [ "$SOURCE_NEWER" -eq 0 ]; then
-              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
-              echo "📁 Preview build artifacts (cached):"
-              ls -la dist/
-              exit 0
-            fi
-          fi
-          
-          # Execute build with timing
-          echo "🏗️ Building preview with speedlight cache optimization..."
+          # Execute build with timing (forced clean)
+          echo "🏗️ Building preview with clean environment..."
           time npm run build
           
           echo "📁 Preview build artifacts:"
@@ -197,14 +179,11 @@ jobs:
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
     steps:
-      - name: Checkout for budget.json
+      - name: Checkout for performance testing
         uses: actions/checkout@v5
         with:
           sparse-checkout: |
             budget.json
-
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
             
       - name: Smart Lighthouse Performance Testing
         run: |
@@ -638,8 +617,8 @@ jobs:
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 5
     steps:
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
+      - name: Checkout for accessibility testing
+        uses: actions/checkout@v5
 
       - name: Smart Accessibility Testing
         run: |

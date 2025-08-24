@@ -1,0 +1,177 @@
+---
+// Google Tag Manager Event Tracking for Resume Site
+// Tracks user interactions with resume content and downloads
+---
+
+<script type="text/javascript">
+// GTM Event Tracking for Resume Analytics
+(function() {
+  'use strict';
+  
+  // Check if GTM is loaded
+  const isGTMLoaded = () => window.dataLayer && window.gtag;
+  
+  // Generic event tracking function
+  const trackEvent = (eventName, parameters = {}) => {
+    if (!isGTMLoaded()) return;
+    
+    window.gtag('event', eventName, {
+      ...parameters,
+      timestamp: new Date().toISOString(),
+      page_location: window.location.href,
+      user_agent_type: navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+    });
+  };
+  
+  // Wait for DOM to be ready
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // Track PDF downloads
+    document.querySelectorAll('a[href*=".pdf"], button[data-pdf-type]').forEach(element => {
+      element.addEventListener('click', function(e) {
+        const pdfType = this.getAttribute('data-pdf-type') || 
+                       this.href?.split('/').pop()?.replace('.pdf', '') || 'unknown';
+        
+        trackEvent('file_download', {
+          file_name: `resume-${pdfType}.pdf`,
+          file_extension: 'pdf',
+          download_type: pdfType,
+          link_text: this.textContent?.trim() || 'PDF Download'
+        });
+      });
+    });
+    
+    // Track external link clicks (social profiles, project links)
+    document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.hostname + '"])').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const url = new URL(this.href);
+        const domain = url.hostname.replace('www.', '');
+        
+        trackEvent('outbound_click', {
+          link_domain: domain,
+          link_url: this.href,
+          link_text: this.textContent?.trim() || 'External Link',
+          link_id: this.id || null
+        });
+      });
+    });
+    
+    // Track contact method interactions
+    document.querySelectorAll('[data-contact-type]').forEach(element => {
+      element.addEventListener('click', function(e) {
+        const contactType = this.getAttribute('data-contact-type');
+        const contactValue = this.href || this.getAttribute('data-contact-value') || '';
+        
+        trackEvent('contact_interaction', {
+          contact_method: contactType,
+          contact_value: contactValue,
+          interaction_type: 'click'
+        });
+      });
+    });
+    
+    // Track section visibility (scroll tracking)
+    const observeSection = (sectionId, sectionName) => {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            trackEvent('section_view', {
+              section_name: sectionName,
+              section_id: sectionId,
+              scroll_depth: Math.round((window.scrollY / document.body.scrollHeight) * 100)
+            });
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      observer.observe(section);
+    };
+    
+    // Track resume sections
+    ['work', 'education', 'skills', 'projects'].forEach(section => {
+      observeSection(section, section.replace('-', '_'));
+    });
+    
+    // Track theme changes
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        trackEvent('theme_change', {
+          from_theme: currentTheme,
+          to_theme: newTheme,
+          interaction_type: 'toggle_click'
+        });
+      });
+    }
+    
+    // Track page performance metrics
+    window.addEventListener('load', function() {
+      // Wait for performance data to be available
+      setTimeout(() => {
+        if (window.performance && window.performance.timing) {
+          const timing = window.performance.timing;
+          const loadTime = timing.loadEventEnd - timing.navigationStart;
+          const domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
+          
+          trackEvent('page_performance', {
+            load_time: loadTime,
+            dom_ready_time: domReady,
+            performance_rating: loadTime < 3000 ? 'good' : loadTime < 5000 ? 'fair' : 'poor'
+          });
+        }
+      }, 1000);
+    });
+    
+    // Track form interactions (if any forms are added later)
+    document.addEventListener('submit', function(e) {
+      const form = e.target;
+      if (form.tagName === 'FORM') {
+        trackEvent('form_submit', {
+          form_id: form.id || 'unknown',
+          form_method: form.method || 'get',
+          form_action: form.action || window.location.href
+        });
+      }
+    });
+    
+    // Track error events
+    window.addEventListener('error', function(e) {
+      trackEvent('javascript_error', {
+        error_message: e.message,
+        error_filename: e.filename,
+        error_line: e.lineno,
+        error_column: e.colno
+      });
+    });
+    
+  });
+  
+  // Track page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    trackEvent('page_visibility', {
+      visibility_state: document.visibilityState,
+      hidden: document.hidden
+    });
+  });
+  
+})();
+</script>
+
+<style>
+/* Enhanced click tracking styles */
+[data-contact-type], [data-pdf-type] {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-contact-type]:hover, [data-pdf-type]:hover {
+  transform: translateY(-1px);
+}
+</style>

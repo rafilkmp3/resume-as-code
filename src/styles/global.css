@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Theme variables removed to prevent conflicts - they are defined in index.astro for better control */
+
+  * {
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    color: var(--foreground);
+    font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1, 'calt' 1;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

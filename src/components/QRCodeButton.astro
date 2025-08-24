@@ -1,0 +1,258 @@
+---
+import LiquidGlassIcon from './LiquidGlassIcon.astro';
+
+export interface Props {
+  url: string;
+  class?: string;
+}
+
+const { url, class: className } = Astro.props;
+
+// Use local QR code images generated at build time for better performance
+const qrCodeUrl = '/assets/images/qr-code-modal.png';
+---
+
+<button 
+  class={`qr-button ${className}`}
+  onclick={`showQRModal('${qrCodeUrl}', '${url}')`}
+  type="button"
+  aria-label="Show QR code to share this resume"
+  data-contact-type="qr-share"
+  data-contact-value={url}
+>
+  <div class="flex items-center space-x-3 p-4">
+    <LiquidGlassIcon name="heroicons:qr-code" size={24} />
+    <div class="flex-1 min-w-0 text-left">
+      <div class="text-sm font-medium text-glass-foreground">
+        Share via QR
+      </div>
+      <div class="text-sm text-glass-muted truncate">
+        Scan to open on phone
+      </div>
+    </div>
+  </div>
+</button>
+
+<!-- QR Modal -->
+<div id="qr-modal" class="qr-modal" onclick="closeQRModal()">
+  <div class="qr-content" onclick="event.stopPropagation()">
+    <div class="qr-header">
+      <h3>Scan to View Resume</h3>
+      <button onclick="closeQRModal()" class="close-btn">&times;</button>
+    </div>
+    <div class="qr-image-container">
+      <img id="qr-image" src="" alt="QR Code" />
+    </div>
+    <div class="qr-url" id="qr-url"></div>
+    <div class="qr-footer">
+      <p>Scan with your phone camera or QR reader</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .qr-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    padding: 0;
+  }
+  
+  .qr-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .qr-button:hover span {
+    transform: scale(1.1);
+  }
+  
+  .glass-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .qr-button:hover .glass-icon-container {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+  
+  .text-glass-foreground {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+  
+  .text-glass-muted {
+    color: var(--foreground-muted);
+  }
+  
+  .icon-svg {
+    filter: invert(var(--icon-invert, 0.8));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .qr-button:hover .icon-svg {
+    filter: invert(var(--icon-invert, 0.8)) sepia(1) saturate(2) hue-rotate(var(--icon-hue, 200deg));
+  }
+  
+  /* Theme-aware icon colors */
+  :root {
+    --icon-invert: 0.2;
+    --icon-hue: 200deg;
+  }
+  
+  :global(.dark) {
+    --icon-invert: 1;
+    --icon-hue: 220deg;
+  }
+  
+  :global(.light) {
+    --icon-invert: 0.2;
+    --icon-hue: 200deg;
+  }
+
+  .qr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .qr-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .qr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .qr-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #718096;
+    line-height: 1;
+  }
+
+  .close-btn:hover {
+    color: #2d3748;
+  }
+
+  .qr-image-container {
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .qr-image-container img {
+    max-width: 250px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .qr-url {
+    font-size: 0.9rem;
+    color: #667eea;
+    word-break: break-all;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+
+  .qr-footer {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .qr-content {
+      padding: 1.5rem;
+    }
+    
+    .qr-image-container img {
+      max-width: 200px;
+    }
+  }
+</style>
+
+<script>
+  function showQRModal(qrImageUrl, url) {
+    const modal = document.getElementById('qr-modal');
+    const image = document.getElementById('qr-image');
+    const urlElement = document.getElementById('qr-url');
+    
+    if (modal && image && urlElement) {
+      image.src = qrImageUrl;
+      urlElement.textContent = url;
+      modal.style.display = 'flex';
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeQRModal() {
+    const modal = document.getElementById('qr-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      // Restore body scroll
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeQRModal();
+    }
+  });
+
+  // Make functions global so they can be called from onclick
+  if (typeof window !== 'undefined') {
+    window.showQRModal = showQRModal;
+    window.closeQRModal = closeQRModal;
+  }
+</script>

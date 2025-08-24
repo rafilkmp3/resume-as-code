@@ -1,0 +1,158 @@
+name: 'Conventional Commits Validation'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop, 'release/**', 'hotfix/**']
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+
+jobs:
+  validate-commits:
+    name: 'Validate Conventional Commits'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 'Install Dependencies'
+        run: |
+          npm ci
+          
+      - name: 'Validate Commit Messages'
+        id: commitlint
+        run: |
+          echo "## 🤖 Conventional Commits Validation Results" > commit-results.md
+          echo "" >> commit-results.md
+          
+          # Get commit range for validation
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            COMMIT_RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+            echo "📋 **Validating PR commits**: $COMMIT_RANGE" >> commit-results.md
+          else
+            COMMIT_RANGE="${{ github.event.before }}..${{ github.sha }}"
+            echo "📋 **Validating push commits**: $COMMIT_RANGE" >> commit-results.md
+          fi
+          
+          echo "" >> commit-results.md
+          
+          # Track validation results
+          VALIDATION_FAILED=false
+          
+          # Validate each commit in the range
+          git log --format="%H %s" $COMMIT_RANGE | while IFS=' ' read -r commit_sha commit_message; do
+            echo "### 📝 Commit: \`${commit_sha:0:7}\`" >> commit-results.md
+            echo "**Message**: $commit_message" >> commit-results.md
+            echo "" >> commit-results.md
+            
+            # Create temporary commit message file
+            echo "$commit_message" > /tmp/commit-msg-$commit_sha
+            
+            # Run our AI-friendly validator (ensure .cjs extension for CommonJS)
+            if node scripts/ai-friendly-commitlint.cjs /tmp/commit-msg-$commit_sha > /tmp/commit-output-$commit_sha 2>&1; then
+              echo "✅ **Status**: Valid conventional commit format" >> commit-results.md
+              echo "" >> commit-results.md
+            else
+              echo "❌ **Status**: Invalid conventional commit format" >> commit-results.md
+              echo "" >> commit-results.md
+              echo "\`\`\`" >> commit-results.md
+              cat /tmp/commit-output-$commit_sha >> commit-results.md
+              echo "\`\`\`" >> commit-results.md
+              echo "" >> commit-results.md
+              VALIDATION_FAILED=true
+            fi
+            
+            echo "---" >> commit-results.md
+            echo "" >> commit-results.md
+          done
+          
+          # Set output for next steps
+          if [[ "$VALIDATION_FAILED" == "true" ]]; then
+            echo "validation_failed=true" >> $GITHUB_OUTPUT
+            echo "" >> commit-results.md
+            echo "## 🔧 How to Fix" >> commit-results.md
+            echo "" >> commit-results.md
+            echo "Use interactive rebase to fix commit messages:" >> commit-results.md
+            echo "\`\`\`bash" >> commit-results.md
+            echo "git rebase -i HEAD~n  # where n is number of commits to edit" >> commit-results.md
+            echo "# Change 'pick' to 'reword' for commits that need fixing" >> commit-results.md
+            echo "# Follow the conventional commit format shown in the error messages above" >> commit-results.md
+            echo "\`\`\`" >> commit-results.md
+            echo "" >> commit-results.md
+            echo "📖 **Learn more**: [Conventional Commits](https://conventionalcommits.org/)" >> commit-results.md
+            echo "🤖 **This validation ensures automated changelogs work properly with release-please**" >> commit-results.md
+          else
+            echo "validation_failed=false" >> $GITHUB_OUTPUT
+            echo "## ✅ All commits follow conventional format!" >> commit-results.md
+            echo "" >> commit-results.md
+            echo "🚀 **Ready for automated changelog generation**" >> commit-results.md
+          fi
+        continue-on-error: true
+        
+      - name: 'Comment on PR with Results'
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsContent = fs.readFileSync('commit-results.md', 'utf8');
+            
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🤖 Conventional Commits Validation Results')
+            );
+            
+            const commentBody = resultsContent;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+            
+      - name: 'Fail if Validation Failed'
+        if: steps.commitlint.outputs.validation_failed == 'true'
+        run: |
+          echo "❌ Conventional commit validation failed"
+          echo "📋 Check the PR comment or workflow logs for detailed error messages"
+          echo "🔧 Fix commit messages using interactive rebase: git rebase -i HEAD~n"
+          exit 1
+          
+      - name: 'Success Summary'
+        if: steps.commitlint.outputs.validation_failed == 'false'
+        run: |
+          echo "✅ All commits follow conventional commit format"
+          echo "🚀 Ready for automated changelog generation with release-please"

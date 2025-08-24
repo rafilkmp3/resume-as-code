@@ -1,0 +1,167 @@
+---
+// Google Tag Manager component for Astro
+// Handles GTM integration with proper environment detection and privacy compliance
+
+interface Props {
+  gtmId?: string;
+  enabled?: boolean;
+  environment?: 'development' | 'preview' | 'staging' | 'production';
+  debug?: boolean;
+}
+
+// Default GTM configuration
+const {
+  gtmId = import.meta.env.PUBLIC_GTM_ID || 'GTM-XXXXXXX',
+  enabled = import.meta.env.PUBLIC_ANALYTICS_ENABLED !== 'false',
+  environment = import.meta.env.PUBLIC_ENVIRONMENT || 'production',
+  debug = import.meta.env.NODE_ENV === 'development'
+} = Astro.props;
+
+// Only enable GTM in production and staging environments
+const shouldLoadGTM = enabled && gtmId !== 'GTM-XXXXXXX' && ['production', 'staging'].includes(environment);
+
+// Environment-specific GTM configuration
+const gtmConfig = {
+  gtm_auth: import.meta.env.PUBLIC_GTM_AUTH || '',
+  gtm_preview: import.meta.env.PUBLIC_GTM_PREVIEW || '',
+  gtm_cookies_win: import.meta.env.PUBLIC_GTM_COOKIES_WIN || 'x'
+};
+
+// Build GTM URL with environment parameters
+const buildGTMUrl = (id: string) => {
+  const baseUrl = `https://www.googletagmanager.com/gtm.js?id=${id}`;
+  const params = new URLSearchParams();
+  
+  if (gtmConfig.gtm_auth) params.append('gtm_auth', gtmConfig.gtm_auth);
+  if (gtmConfig.gtm_preview) params.append('gtm_preview', gtmConfig.gtm_preview);
+  if (gtmConfig.gtm_cookies_win) params.append('gtm_cookies_win', gtmConfig.gtm_cookies_win);
+  
+  return params.toString() ? `${baseUrl}&${params.toString()}` : baseUrl;
+};
+
+const gtmUrl = buildGTMUrl(gtmId);
+---
+
+{shouldLoadGTM && (
+  <>
+    <!-- Google Tag Manager - Head Script (Performance Optimized) -->
+    <script define:vars={{ gtmId, gtmUrl, debug, environment }} type="text/javascript">
+      // Google Tag Manager initialization with performance optimization
+      (function(w, d, s, l, i) {
+        // Debug logging for development
+        if (debug) {
+          console.log(`🏷️ GTM Loading: ${i} (${environment})`);
+        }
+        
+        // Initialize dataLayer before GTM loads
+        w[l] = w[l] || [];
+        w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+        
+        // PERFORMANCE: Defer GTM loading until after page load to avoid blocking LCP
+        function loadGTM() {
+          var f = d.getElementsByTagName(s)[0],
+              j = d.createElement(s),
+              dl = l != 'dataLayer' ? '&l=' + l : '';
+          j.async = true;
+          j.src = gtmUrl;
+          f.parentNode.insertBefore(j, f);
+          
+          // Track environment in dataLayer
+          w[l].push({
+            'event': 'gtm_loaded',
+            'environment': environment,
+            'gtm_container_id': i
+          });
+        }
+        
+        // Load GTM after page is fully loaded or after user interaction
+        if (d.readyState === 'complete') {
+          setTimeout(loadGTM, 100);
+        } else {
+          w.addEventListener('load', function() {
+            setTimeout(loadGTM, 100);
+          });
+        }
+        
+        // Also load on first user interaction for better perceived performance
+        var interactionEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+        var loaded = false;
+        interactionEvents.forEach(function(event) {
+          w.addEventListener(event, function() {
+            if (!loaded) {
+              loaded = true;
+              loadGTM();
+            }
+          }, { once: true, passive: true });
+        });
+        
+      })(window, document, 'script', 'dataLayer', gtmId);
+    </script>
+
+    <!-- Enhanced eCommerce and Performance Tracking Setup -->
+    <script type="text/javascript">
+      // Initialize enhanced tracking for resume analytics
+      window.dataLayer = window.dataLayer || [];
+      
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      
+      // Configure enhanced measurement
+      gtag('config', gtmId, {
+        // Privacy and performance settings
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+        
+        // Enhanced measurement for resume site
+        enhanced_measurement: {
+          scrolls: true,
+          outbound_clicks: true,
+          site_search: false,
+          video_engagement: false,
+          file_downloads: true,
+          page_changes: false
+        },
+        
+        // Custom parameters for resume analytics
+        custom_map: {
+          'custom_parameter_1': 'page_section',
+          'custom_parameter_2': 'interaction_type'
+        }
+      });
+      
+      // Track resume-specific events
+      gtag('event', 'page_view', {
+        'page_title': document.title,
+        'page_location': window.location.href,
+        'environment': environment,
+        'user_agent': navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+      });
+    </script>
+  </>
+)}
+
+{debug && !shouldLoadGTM && (
+  <script define:vars={{ enabled, gtmId, environment, shouldLoadGTM }} type="text/javascript">
+    console.log('🚫 GTM Disabled:', {
+      enabled,
+      gtmId,
+      environment,
+      shouldLoad: shouldLoadGTM
+    });
+  </script>
+)}
+
+<!-- Google Tag Manager (noscript) - Body fallback -->
+{shouldLoadGTM && (
+  <noscript>
+    <iframe 
+      src={`https://www.googletagmanager.com/ns.html?id=${gtmId}${gtmConfig.gtm_auth ? `&gtm_auth=${gtmConfig.gtm_auth}&gtm_preview=${gtmConfig.gtm_preview}&gtm_cookies_win=${gtmConfig.gtm_cookies_win}` : ''}`}
+      height="0" 
+      width="0" 
+      style="display:none;visibility:hidden"
+      title="Google Tag Manager"
+    ></iframe>
+  </noscript>
+)}

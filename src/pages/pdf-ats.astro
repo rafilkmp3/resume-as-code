@@ -1,0 +1,298 @@
+---
+import resumeData from '../data/resume.json';
+import { getRuntimeSiteUrl } from '../utils/site-url.ts';
+
+const { basics, work, skills, education, projects } = resumeData;
+
+// Use runtime URL detection for reliable preview environment URLs
+// This ensures QR codes and links work correctly in all environments
+const siteUrl = getRuntimeSiteUrl();
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{basics.name} - Resume (ATS)</title>
+  <style>
+    /* ATS-OPTIMIZED: Minimal formatting for maximum machine readability */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.3;
+      color: #000;
+      background: white;
+      padding: 15px;
+      font-size: 12pt;
+      /* Larger font for better OCR recognition */
+    }
+    
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: left;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #000; /* Clear section separator for ATS */
+    }
+    
+    h1 {
+      font-size: 16pt; /* Reduced size for ATS simplicity */
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 8px;
+      text-transform: none; /* Remove uppercase for better ATS reading */
+    }
+    
+    .contact-info {
+      font-size: 10pt;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    
+    .section {
+      margin: 15px 0;
+    }
+    
+    h2 {
+      font-size: 13pt; /* Slightly smaller for ATS */
+      color: #000;
+      margin-bottom: 6px;
+      margin-top: 12px; /* Clear section separation */
+      font-weight: bold;
+      text-transform: none; /* Remove uppercase for ATS readability */
+      border-bottom: 1px solid #000; /* Clear section markers */
+      padding-bottom: 2px;
+    }
+    
+    .job {
+      margin-bottom: 12px;
+    }
+    
+    .job-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #000;
+    }
+    
+    .company {
+      font-size: 12pt;
+      font-weight: normal;
+      color: #000;
+    }
+    
+    .date {
+      font-size: 10pt;
+      color: #000;
+      margin-bottom: 5px;
+    }
+    
+    .job-description {
+      font-size: 11pt;
+      margin: 5px 0;
+      text-align: left;
+    }
+    
+    .skills-section {
+      margin-bottom: 15px;
+    }
+    
+    .skill-category h3 {
+      font-size: 11pt;
+      color: #000;
+      margin-bottom: 3px;
+      font-weight: bold;
+    }
+    
+    .skill-list {
+      font-size: 10pt;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    
+    .summary {
+      text-align: left;
+      line-height: 1.4;
+      margin-bottom: 15px;
+      font-size: 11pt;
+    }
+    
+    ul {
+      padding-left: 15px;
+      margin: 5px 0;
+    }
+    
+    li {
+      margin-bottom: 2px;
+      font-size: 10pt;
+    }
+    
+    /* ATS-friendly: no colors, simple layout */
+    .keywords {
+      font-size: 1px;
+      color: white;
+      line-height: 1px;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .footer {
+      margin-top: 20px;
+      padding-top: 10px;
+      font-size: 9pt;
+      color: #000;
+    }
+    
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    
+    .footer-text {
+      flex: 1;
+    }
+    
+    .footer-qr {
+      flex-shrink: 0;
+    }
+    
+    .qr-code {
+      width: 70px;
+      height: 70px;
+      border: 1px solid #000;
+    }
+    
+    .footer a {
+      color: #000;
+      text-decoration: none;
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>{basics.name}</h1>
+      <div class="contact-info">
+        Email: {basics.email}<br/>
+        {basics.phone && <><span>Phone: {basics.phone}</span><br/></>}
+        Location: {basics.location.city}, {basics.location.region}
+        {basics.profiles && basics.profiles.map((profile) => (
+          <><br/>{profile.network}: {profile.url}</>
+        ))}
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <h2>Professional Summary</h2>
+        <p class="summary">{basics.summary}</p>
+      </section>
+
+      <section class="section">
+        <h2>Professional Experience</h2>
+        {work.map((job) => (
+          <div class="job">
+            <div class="job-title">{job.position}</div>
+            <div class="company">{job.name}</div>
+            <div class="date">{job.startDate} - {job.endDate || 'Present'}</div>
+            <div class="job-description">{job.summary}</div>
+            {job.highlights && (
+              <ul>
+                {job.highlights.map((highlight) => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </section>
+
+      <section class="section">
+        <h2>Core Competencies</h2>
+        <div class="skills-section">
+          <!-- ATS OPTIMIZED: All skills in one block for maximum keyword density -->
+          <div style="margin-bottom: 10px; font-size: 11pt; line-height: 1.4;">
+            <strong>Technical Skills:</strong><br/>
+            {skills.flatMap(group => group.keywords).join(' • ')}
+          </div>
+          
+          <!-- Individual categories for human readability -->
+          {skills.map((skillGroup) => (
+            <div class="skill-category">
+              <h3 style="font-size: 11pt; margin-bottom: 3px;">{skillGroup.name}:</h3>
+              <div class="skill-list">{skillGroup.keywords.join(', ')}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {projects && projects.length > 0 && (
+        <section class="section">
+          <h2>Key Projects</h2>
+          {projects.map((project) => (
+            <div class="job">
+              <div class="job-title">{project.name}</div>
+              {project.url && <div class="company">{project.url}</div>}
+              <div style="margin-bottom: 8px; font-style: italic;">{project.description}</div>
+              {project.highlights && (
+                <ul>
+                  {project.highlights.map((highlight) => (
+                    <li>{highlight}</li>
+                  ))}
+                </ul>
+              )}
+              {project.keywords && (
+                <div style="margin-top: 8px;">
+                  <strong>TECHNOLOGIES:</strong> {project.keywords.join(', ')}
+                </div>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {education && education.length > 0 && (
+        <section class="section">
+          <h2>Education</h2>
+          {education.map((edu) => (
+            <div class="job">
+              <div class="job-title">{edu.studyType} in {edu.area}</div>
+              <div class="company">{edu.institution}</div>
+              <div class="date">{edu.startDate} - {edu.endDate}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <!-- Hidden keywords for ATS scanning -->
+      <div class="keywords" aria-hidden="true">
+        {skills.flatMap(group => group.keywords).join(' ')} 
+        Infrastructure Engineer DevOps Platform Engineer AWS GCP Cloud Architect Kubernetes Docker Terraform
+      </div>
+    </main>
+    
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-text">
+          <p>📄 View the latest version of this resume online: <a href={siteUrl}>{siteUrl}</a></p>
+        </div>
+        <div class="footer-qr">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(siteUrl)}`}
+            alt="QR Code for resume website"
+            class="qr-code"
+          />
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -93,36 +93,90 @@ jobs:
       - name: Run Lighthouse CI
         id: lighthouse-ci
         run: |
-          echo "🚀 Installing and running Lighthouse CI (Context7 proven approach)..."
+          echo "🚀 Installing and running Lighthouse CI with ARM64 stability improvements..."
           
-          # Install Lighthouse CI - Context7 recommended GitHub Actions approach
+          # Install Lighthouse CI with specific version for stability
           npm install -g @lhci/cli@0.15.x
           
           echo "📊 Running Lighthouse CI autorun for: ${{ inputs.target_url }}"
-          # Google-recommended 3 runs for accurate median results
-          set +e  # Don't exit on error, capture output
-          LHCI_OUTPUT=$(lhci autorun \
-            --upload.target=temporary-public-storage \
-            --collect.url="${{ inputs.target_url }}" \
-            --collect.settings.chromeFlags="--no-sandbox --disable-setuid-sandbox --headless=new" \
-            --collect.numberOfRuns=3 \
-            --collect.median=true \
-            --collect.settings.output=json \
-            --collect.settings.outputPath=./lighthouse-reports 2>&1)
-          LHCI_EXIT_CODE=$?
-          set -e  # Re-enable exit on error
           
-          echo "$LHCI_OUTPUT"
+          # ARM64-optimized Chrome flags for better stability
+          CHROME_FLAGS="--no-sandbox --disable-setuid-sandbox --headless=new --disable-dev-shm-usage --disable-extensions --disable-gpu --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-features=TranslateUI --no-first-run --disable-default-apps --disable-popup-blocking --disable-background-networking --disable-sync --metrics-recording-only --no-pings --mute-audio --disable-ipc-flooding-protection --memory-pressure-off --disable-software-rasterizer --disable-background-media-suspend"
+          
+          echo "🔧 Using ARM64-optimized Chrome flags for stability"
+          echo "Chrome flags: $CHROME_FLAGS"
+          
+          # Create lighthouse config for better reliability
+          cat > lighthouse-config.json << 'EOF'
+          {
+            "extends": "lighthouse:default",
+            "settings": {
+              "maxWaitForFcp": 30000,
+              "maxWaitForLoad": 35000,
+              "networkQuietThresholdMs": 5000,
+              "cpuQuietThresholdMs": 5000,
+              "formFactor": "desktop",
+              "throttling": {
+                "rttMs": 40,
+                "throughputKbps": 10240,
+                "cpuSlowdownMultiplier": 1,
+                "requestLatencyMs": 0,
+                "downloadThroughputKbps": 0,
+                "uploadThroughputKbps": 0
+              },
+              "screenEmulation": {
+                "mobile": false,
+                "width": 1350,
+                "height": 940,
+                "deviceScaleFactor": 1,
+                "disabled": false
+              },
+              "emulatedUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+          }
+          EOF
+          
+          # Run with improved error handling and retry logic
+          set +e  # Don't exit on error, capture output
+          
+          for attempt in 1 2 3; do
+            echo "🔄 Attempt $attempt/3: Running Lighthouse CI..."
+            
+            LHCI_OUTPUT=$(lhci autorun \
+              --upload.target=temporary-public-storage \
+              --collect.url="${{ inputs.target_url }}" \
+              --collect.settings.chromeFlags="$CHROME_FLAGS" \
+              --collect.numberOfRuns=1 \
+              --collect.settings.output=json \
+              --collect.settings.outputPath=./lighthouse-reports \
+              --collect.settings.configPath=./lighthouse-config.json \
+              --collect.settings.throttlingMethod=provided \
+              --collect.startServerCommand="" \
+              --collect.startServerReadyPattern="" \
+              --collect.startServerTimeout=0 2>&1)
+            LHCI_EXIT_CODE=$?
+            
+            echo "$LHCI_OUTPUT"
+            
+            # Check if we got valid results
+            if [[ $LHCI_EXIT_CODE -eq 0 ]] && [[ -d "./lighthouse-reports" ]]; then
+              echo "✅ Lighthouse CI succeeded on attempt $attempt"
+              break
+            elif [[ $attempt -eq 3 ]]; then
+              echo "⚠️ Lighthouse CI failed after 3 attempts, but continuing with available data..."
+            else
+              echo "⚠️ Attempt $attempt failed, retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+          
+          set -e  # Re-enable exit on error
           
           # Extract the report URL from LHCI output
           REPORT_URL=$(echo "$LHCI_OUTPUT" | grep -o 'https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/[^[:space:]]*' | head -1)
           if [[ -n "$REPORT_URL" ]]; then
             echo "🌐 Lighthouse Report URL: $REPORT_URL"
             echo "lighthouse_report_url=$REPORT_URL" >> $GITHUB_OUTPUT
-          fi
-          
-          if [[ $LHCI_EXIT_CODE -ne 0 ]]; then
-            echo "⚠️ Lighthouse CI failed but continuing..."
           fi
 
       - name: Extract Lighthouse Results

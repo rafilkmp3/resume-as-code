@@ -1,0 +1,244 @@
+---
+import LiquidGlassIcon from './LiquidGlassIcon.astro';
+
+export interface Props {
+  name: string;
+  imageSrc: string;
+  title: string;
+  class?: string;
+}
+
+const { name, imageSrc, title, class: className } = Astro.props;
+---
+
+<!-- Profile Photo Modal -->
+<div id="profile-modal" class="profile-modal" onclick="closeProfileModal()">
+  <div class="profile-content" onclick="event.stopPropagation()">
+    <div class="profile-header">
+      <h3>Profile Photo</h3>
+      <button onclick="closeProfileModal()" class="close-btn" aria-label="Close profile photo modal">&times;</button>
+    </div>
+    <div class="profile-image-container">
+      <img id="profile-image" src={imageSrc} alt={`${name} - Profile Photo`} loading="lazy" />
+    </div>
+    <div class="profile-info">
+      <h4 id="profile-name">{name}</h4>
+      <p id="profile-title">{title}</p>
+    </div>
+    <div class="profile-footer">
+      <p>High-resolution profile photo</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .profile-content {
+    background: white;
+    border-radius: 20px; /* Apple-style larger border radius */
+    padding: 2rem;
+    max-width: 500px; /* Larger for profile photo */
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { 
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8) translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) translateY(0);
+    }
+  }
+
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.375rem; /* Apple HIG Title 2 */
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #718096;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .close-btn:hover {
+    color: #2d3748;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .profile-image-container {
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .profile-image-container img {
+    max-width: 300px; /* Large high-res display */
+    width: 100%;
+    height: auto;
+    border-radius: 20px; /* Apple-style rounded corners */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 3px solid #1e40af; /* Matching the profile badge border */
+  }
+
+  .profile-info {
+    margin: 1.5rem 0;
+  }
+
+  .profile-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-size: 1.25rem; /* Apple HIG Title 3 */
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  .profile-info p {
+    margin: 0;
+    color: #667eea;
+    font-size: 1rem; /* Apple HIG Body */
+    font-weight: 400;
+    line-height: 1.47;
+  }
+
+  .profile-footer {
+    font-size: 0.875rem; /* Apple HIG Footnote */
+    color: #718096;
+    margin-top: 1rem;
+    font-weight: 400;
+    line-height: 1.43;
+  }
+
+  /* Dark theme support */
+  :global(.dark) .profile-content {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  :global(.dark) .profile-header h3 {
+    color: #f7fafc;
+  }
+
+  :global(.dark) .profile-info h4 {
+    color: #f7fafc;
+  }
+
+  :global(.dark) .profile-info p {
+    color: #90cdf4;
+  }
+
+  :global(.dark) .profile-footer {
+    color: #a0aec0;
+  }
+
+  :global(.dark) .close-btn {
+    color: #a0aec0;
+  }
+
+  :global(.dark) .close-btn:hover {
+    color: #f7fafc;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: 640px) {
+    .profile-content {
+      padding: 1.5rem;
+      max-width: 95%;
+    }
+    
+    .profile-image-container img {
+      max-width: 250px;
+      border-radius: 16px;
+    }
+
+    .profile-header h3 {
+      font-size: 1.25rem; /* Smaller on mobile */
+    }
+  }
+</style>
+
+<script>
+  function showProfileModal(imageSrc, name, title) {
+    const modal = document.getElementById('profile-modal');
+    const image = document.getElementById('profile-image');
+    const nameElement = document.getElementById('profile-name');
+    const titleElement = document.getElementById('profile-title');
+    
+    if (modal && image && nameElement && titleElement) {
+      image.src = imageSrc;
+      nameElement.textContent = name;
+      titleElement.textContent = title;
+      modal.style.display = 'flex';
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      // Restore body scroll
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeProfileModal();
+    }
+  });
+
+  // Make functions global so they can be called from onclick
+  if (typeof window !== 'undefined') {
+    window.showProfileModal = showProfileModal;
+    window.closeProfileModal = closeProfileModal;
+  }
+</script>
