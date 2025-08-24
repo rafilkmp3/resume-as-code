@@ -323,7 +323,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     
                     return (
                       <Component 
-                        class={`glass-button px-3 py-1 text-sm font-medium transition-all duration-300 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
+                        class={`glass-token px-4 py-2 text-sm font-medium transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
                         style="color: var(--glass-text);"
                         {...linkProps}
                       >
@@ -408,6 +408,42 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   [data-theme="light"] {
     --icon-invert: 0.2;
     --icon-hue: 200deg;
+  }
+
+  /* Apple HIG Token Design (Capsule Shape) */
+  .glass-token {
+    background: rgba(37, 99, 235, 0.08);
+    backdrop-filter: blur(10px) saturate(150%);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 999px; /* Capsule shape as per Apple HIG */
+    color: var(--glass-text);
+    text-decoration: none;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    transition: all 0.2s ease-out;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  
+  .glass-token:hover {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  /* Theme-aware token styling */
+  [data-theme="dark"] .glass-token {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  }
+  
+  [data-theme="dark"] .glass-token:hover {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
   }
 </style>
 

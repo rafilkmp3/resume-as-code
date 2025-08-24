@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@axe-core/cli": "^4.10.2",
+    "ajv-cli": "^5.0.0",
     "axe-core": "^4.10.3",
     "lighthouse": "^12.8.1"
   }
