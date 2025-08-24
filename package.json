@@ -9,7 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@iconify-json/heroicons": "^1.2.2",
