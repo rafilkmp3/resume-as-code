@@ -17,8 +17,8 @@ const {
   src,
   alt,
   class: className = '',
-  loading = 'lazy',
-  fetchpriority = 'auto',
+  loading = 'eager', // Profile image is above-the-fold, should load immediately
+  fetchpriority = 'high', // High priority for LCP optimization
   width = 200,
   height = 200,
   sizes = '(max-width: 320px) 64px, (max-width: 480px) 96px, (max-width: 768px) 128px, (max-width: 1024px) 160px, 200px'

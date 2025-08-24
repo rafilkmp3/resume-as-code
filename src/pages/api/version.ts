@@ -33,8 +33,8 @@ function getEnvironmentInfo() {
     nodeVersion: process.version,
     platform: process.platform,
     arch: process.arch,
-    deployPrimeUrl: process.env.DEPLOY_PRIME_URL,
-    netlifyUrl: process.env.NETLIFY_URL,
+    // Deprecated deployPrimeUrl - use siteUrl instead for consistency
+    deployUrl: getRuntimeSiteUrl(), // Single, reliable URL detection
     isCI: !!process.env.CI,
     isNetlify: !!process.env.NETLIFY,
     context: process.env.CONTEXT || 'unknown',
@@ -48,9 +48,8 @@ export const GET: APIRoute = async ({ site }) => {
   const gitInfo = getGitInfo();
   const envInfo = getEnvironmentInfo();
   
-  // Use runtime URL detection to ensure correct preview URLs
-  // Fallback to Astro site config if runtime detection fails
-  const siteUrl = getRuntimeSiteUrl() || site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
+  // Use single consistent URL detection - no more confusing multiple URL fields
+  const siteUrl = getRuntimeSiteUrl();
   
   // Generate cache busting version based on commit hash and timestamp
   const cacheVersion = `${gitInfo.shortHash}-${Date.now()}`;

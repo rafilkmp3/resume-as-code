@@ -44,9 +44,9 @@ const gtmUrl = buildGTMUrl(gtmId);
 
 {shouldLoadGTM && (
   <>
-    <!-- Google Tag Manager - Head Script -->
+    <!-- Google Tag Manager - Head Script (Performance Optimized) -->
     <script define:vars={{ gtmId, gtmUrl, debug, environment }} type="text/javascript">
-      // Google Tag Manager initialization with privacy compliance
+      // Google Tag Manager initialization with performance optimization
       (function(w, d, s, l, i) {
         // Debug logging for development
         if (debug) {
@@ -57,19 +57,42 @@ const gtmUrl = buildGTMUrl(gtmId);
         w[l] = w[l] || [];
         w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
         
-        // Load GTM script
-        var f = d.getElementsByTagName(s)[0],
-            j = d.createElement(s),
-            dl = l != 'dataLayer' ? '&l=' + l : '';
-        j.async = true;
-        j.src = gtmUrl;
-        f.parentNode.insertBefore(j, f);
+        // PERFORMANCE: Defer GTM loading until after page load to avoid blocking LCP
+        function loadGTM() {
+          var f = d.getElementsByTagName(s)[0],
+              j = d.createElement(s),
+              dl = l != 'dataLayer' ? '&l=' + l : '';
+          j.async = true;
+          j.src = gtmUrl;
+          f.parentNode.insertBefore(j, f);
+          
+          // Track environment in dataLayer
+          w[l].push({
+            'event': 'gtm_loaded',
+            'environment': environment,
+            'gtm_container_id': i
+          });
+        }
         
-        // Track environment in dataLayer
-        w[l].push({
-          'event': 'gtm_loaded',
-          'environment': environment,
-          'gtm_container_id': i
+        // Load GTM after page is fully loaded or after user interaction
+        if (d.readyState === 'complete') {
+          setTimeout(loadGTM, 100);
+        } else {
+          w.addEventListener('load', function() {
+            setTimeout(loadGTM, 100);
+          });
+        }
+        
+        // Also load on first user interaction for better perceived performance
+        var interactionEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+        var loaded = false;
+        interactionEvents.forEach(function(event) {
+          w.addEventListener(event, function() {
+            if (!loaded) {
+              loaded = true;
+              loadGTM();
+            }
+          }, { once: true, passive: true });
         });
         
       })(window, document, 'script', 'dataLayer', gtmId);
