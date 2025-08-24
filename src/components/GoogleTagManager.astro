@@ -143,7 +143,7 @@ const gtmUrl = buildGTMUrl(gtmId);
 )}
 
 {debug && !shouldLoadGTM && (
-  <script type="text/javascript">
+  <script define:vars={{ enabled, gtmId, environment, shouldLoadGTM }} type="text/javascript">
     console.log('🚫 GTM Disabled:', {
       enabled,
       gtmId,

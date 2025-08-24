@@ -8,8 +8,8 @@ export interface Props {
 
 const { url, class: className } = Astro.props;
 
-// Generate QR code URL using qr-server.com API (free service)
-const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+// Use local QR code images generated at build time for better performance
+const qrCodeUrl = '/assets/images/qr-code-modal.png';
 ---
 
 <button 
