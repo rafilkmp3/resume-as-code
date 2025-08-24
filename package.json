@@ -8,7 +8,8 @@
     "build:clean": "rm -rf dist && npm run build",
     "preview": "astro preview",
     "astro": "astro",
-    "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'"
+    "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'",
+    "prepare": "husky"
   },
   "dependencies": {
     "@iconify-json/heroicons": "^1.2.2",
@@ -24,8 +25,11 @@
   },
   "devDependencies": {
     "@axe-core/cli": "^4.10.2",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "ajv-cli": "^5.0.0",
     "axe-core": "^4.10.3",
+    "husky": "^9.1.7",
     "lighthouse": "^12.8.1"
   }
 }
