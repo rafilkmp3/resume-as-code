@@ -13,7 +13,7 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
 ---
 
 <button 
-  class={`qr-button ${className}`}
+  class={`glass-button-modern ${className}`}
   onclick={`showQRModal('${qrCodeUrl}', '${url}')`}
   type="button"
   aria-label="Show QR code to share this resume"
@@ -51,82 +51,14 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
 </div>
 
 <style>
-  .qr-button {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    font-family: inherit;
-    width: 100%;
-    padding: 0;
-  }
-  
-  .qr-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-  
-  .qr-button:hover span {
-    transform: scale(1.1);
-  }
-  
-  .glass-icon-container {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .qr-button:hover .glass-icon-container {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-  }
-  
   .text-glass-foreground {
     color: var(--foreground);
     font-weight: 600;
   }
   
   .text-glass-muted {
-    color: var(--foreground-muted);
-  }
-  
-  .icon-svg {
-    filter: invert(var(--icon-invert, 0.8));
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .qr-button:hover .icon-svg {
-    filter: invert(var(--icon-invert, 0.8)) sepia(1) saturate(2) hue-rotate(var(--icon-hue, 200deg));
-  }
-  
-  /* Theme-aware icon colors */
-  :root {
-    --icon-invert: 0.2;
-    --icon-hue: 200deg;
-  }
-  
-  :global(.dark) {
-    --icon-invert: 1;
-    --icon-hue: 220deg;
-  }
-  
-  :global(.light) {
-    --icon-invert: 0.2;
-    --icon-hue: 200deg;
+    color: var(--foreground-muted, var(--foreground));
+    opacity: 0.7;
   }
 
   .qr-modal {
