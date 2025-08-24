@@ -9,7 +9,8 @@ export const GET: APIRoute = async ({ site }) => {
   return new Response(null, {
     status: 302,
     headers: {
-      'Location': `${baseUrl}/pdf-screen`
+      'Location': `${baseUrl}/pdf-screen`,
+      'Content-Type': 'text/html'
     }
   });
 };

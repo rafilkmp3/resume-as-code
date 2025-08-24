@@ -176,13 +176,74 @@ const siteUrl = getRuntimeSiteUrl();
       font-weight: 500;
     }
     
-    /* PDF optimizations */
+    /* Enhanced Paper CSS-inspired print optimizations */
+    @page {
+      size: A4;
+      margin: 0.5in;
+    }
+    
+    /* Enhanced PDF optimizations for browser Print to PDF */
     @media print {
-      body { margin: 0; padding: 15px; }
-      .container { border: none; max-width: none; }
-      .header { page-break-inside: avoid; }
-      .section { page-break-inside: avoid; }
-      .job { page-break-inside: avoid; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      body { 
+        margin: 0; 
+        padding: 0;
+        font-size: 12pt;
+        line-height: 1.4;
+      }
+      
+      .container { 
+        border: none; 
+        max-width: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .header { 
+        page-break-inside: avoid;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%) !important;
+        margin-bottom: 20pt;
+      }
+      
+      .section { 
+        page-break-inside: avoid;
+        margin: 15pt 0;
+        padding: 0 0;
+      }
+      
+      .job { 
+        page-break-inside: avoid;
+        margin-bottom: 15pt;
+        border-bottom: 1pt solid #e0e0e0;
+      }
+      
+      .footer {
+        page-break-inside: avoid;
+        margin-top: 20pt;
+      }
+      
+      .footer-content {
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .qr-code {
+        width: 60pt;
+        height: 60pt;
+      }
+      
+      /* Typography optimizations for print */
+      h1 { font-size: 24pt; }
+      h2 { font-size: 18pt; }
+      .job-title { font-size: 14pt; }
+      .company { font-size: 12pt; }
+      .date, .description { font-size: 11pt; }
+      .skill-tag { font-size: 10pt; }
     }
     
     .summary {

@@ -4,7 +4,7 @@
   "version": "4.8.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/generate-pdfs.mjs",
+    "build": "astro build",
     "build:clean": "rm -rf dist && npm run build",
     "build:astro-only": "astro build",
     "preview": "astro preview",
@@ -31,7 +31,6 @@
     "ajv-cli": "^5.0.0",
     "axe-core": "^4.10.3",
     "husky": "^9.1.7",
-    "lighthouse": "^12.8.1",
-    "puppeteer": "^24.16.2"
+    "lighthouse": "^12.8.1"
   }
 }
