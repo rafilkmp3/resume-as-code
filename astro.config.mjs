@@ -23,6 +23,13 @@ function getBuildSiteUrl() {
     return process.env.DEPLOY_URL;
   }
   
+  // TEMPORARY DEBUG: Force correct URL for branch fix/pdf-first-page-layout
+  if (process.env.BRANCH === 'fix/pdf-first-page-layout' && process.env.REVIEW_ID === '78') {
+    const debugUrl = 'https://deploy-preview-78--resume-as-code.netlify.app';
+    console.log('🐛 DEBUG: Force correct URL:', debugUrl);
+    return debugUrl;
+  }
+  
   // Production environment (GitHub Pages)
   if (process.env.GITHUB_PAGES === 'true' || (process.env.CI && !process.env.DEPLOY_URL)) {
     const prodUrl = 'https://rafilkmp3.github.io/resume-as-code';
