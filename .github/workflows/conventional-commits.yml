@@ -5,6 +5,13 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches: [main, develop, 'release/**', 'hotfix/**']
+    paths:
+      # Self-trigger: validate commit validation changes
+      - '.github/workflows/conventional-commits.yml'
+      - 'scripts/ai-friendly-commitlint.cjs'
+      - 'commitlint.config.cjs'
+      # All other files - validate their commits
+      - '**'
 
 permissions:
   contents: read

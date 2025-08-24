@@ -10,6 +10,9 @@ on:
       - 'scripts/**'
       - 'package.json'
       - 'package-lock.json'
+      # Self-trigger: validate workflow changes by running them
+      - '.github/workflows/staging-deployment.yml'
+      - '.github/workflows/_build.yml'
   workflow_dispatch:
 
 concurrency:

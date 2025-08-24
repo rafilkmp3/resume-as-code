@@ -4,6 +4,12 @@ name: 🚀 Production Deployment
 on:
   release:
     types: [published]
+  # Self-trigger: validate workflow changes by testing them
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/production-deploy.yml'
+      - '.github/workflows/_build.yml'
 
 concurrency:
   group: production-deploy-${{ github.ref }}
