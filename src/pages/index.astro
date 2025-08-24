@@ -4,6 +4,7 @@ import LiquidGlassCard from '../components/LiquidGlassCard.astro';
 import ContactButton from '../components/ContactButton.astro';
 import QRCodeButton from '../components/QRCodeButton.astro';
 import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
+import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
 
 const { basics, work, skills, education, projects } = resumeData;
@@ -20,10 +21,14 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Hero Section with Advanced Liquid Glass -->
       <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12">
         <div class="mb-6">
-          <img 
+          <ResponsiveImage 
             src={basics.image} 
             alt={basics.name}
             class="w-32 h-32 mx-auto rounded-full border-4 border-white/20 shadow-2xl"
+            loading="eager"
+            fetchpriority="high"
+            width={128}
+            height={128}
           />
         </div>
         
@@ -121,6 +126,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
+              data-pdf-type="screen"
             >
               <div class="mr-3">
                 <LiquidGlassIcon name="heroicons:computer-desktop" size={20} variant="subtle" />
@@ -135,6 +141,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
+              data-pdf-type="print"
             >
               <div class="mr-3">
                 <LiquidGlassIcon name="heroicons:printer" size={20} variant="subtle" />
@@ -149,6 +156,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
+              data-pdf-type="ats"
             >
               <div class="mr-3">
                 <LiquidGlassIcon name="heroicons:cpu-chip" size={20} variant="subtle" />

@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import GoogleTagManager from '../components/GoogleTagManager.astro';
+import GTMEvents from '../components/GTMEvents.astro';
 
 export interface Props {
   title: string;
@@ -18,6 +20,9 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    
+    <!-- Google Tag Manager -->
+    <GoogleTagManager />
     
     <!-- Liquid Glass Background -->
     <style>
@@ -76,6 +81,9 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
     </div>
     
     <slot />
+    
+    <!-- GTM Event Tracking -->
+    <GTMEvents />
     
     <script>
       // Theme switching logic

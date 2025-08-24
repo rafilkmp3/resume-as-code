@@ -1,0 +1,90 @@
+---
+// Responsive Image component with modern format support
+// Uses optimized AVIF/WebP/JPEG variants for mobile and desktop
+
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  width?: number;
+  height?: number;
+  sizes?: string;
+}
+
+const {
+  src,
+  alt,
+  class: className = '',
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  width = 200,
+  height = 200,
+  sizes = '(max-width: 320px) 64px, (max-width: 480px) 96px, (max-width: 768px) 128px, (max-width: 1024px) 160px, 200px'
+} = Astro.props;
+
+// Extract base name from src (e.g., 'profile-optimized.jpg' -> 'profile')
+const baseName = src.split('/').pop()?.split('-')[0] || 'profile';
+
+// Generate responsive image variants
+const generateSrcSet = (format: string) => {
+  const variants = [
+    { suffix: 'xs', width: 64 },
+    { suffix: 'sm', width: 96 },
+    { suffix: 'md', width: 128 },
+    { suffix: 'lg', width: 160 },
+    { suffix: 'xl', width: 200 }
+  ];
+  
+  return variants
+    .map(variant => `assets/images/${baseName}-${variant.suffix}.${format} ${variant.width}w`)
+    .join(', ');
+};
+
+// Fallback image (largest JPEG variant)
+const fallbackSrc = `assets/images/${baseName}-xl.jpeg`;
+---
+
+<picture class={className}>
+  <!-- AVIF: Modern format with best compression -->
+  <source 
+    srcset={generateSrcSet('avif')} 
+    sizes={sizes} 
+    type="image/avif"
+  />
+  
+  <!-- WebP: Good compression with wide browser support -->
+  <source 
+    srcset={generateSrcSet('webp')} 
+    sizes={sizes} 
+    type="image/webp"
+  />
+  
+  <!-- JPEG: Universal fallback -->
+  <img 
+    src={fallbackSrc}
+    srcset={generateSrcSet('jpeg')}
+    sizes={sizes}
+    alt={alt}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding="async"
+    width={width}
+    height={height}
+    style="object-fit: cover; object-position: center;"
+  />
+</picture>
+
+<style>
+  picture {
+    display: inline-block;
+    line-height: 0;
+  }
+  
+  picture img {
+    max-width: 100%;
+    height: auto;
+    border-radius: inherit;
+  }
+</style>

@@ -17,6 +17,8 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data
   onclick={`showQRModal('${qrCodeUrl}', '${url}')`}
   type="button"
   aria-label="Show QR code to share this resume"
+  data-contact-type="qr-share"
+  data-contact-value={url}
 >
   <div class="flex items-center space-x-3 p-4">
     <LiquidGlassIcon name="heroicons:qr-code" size={24} />
