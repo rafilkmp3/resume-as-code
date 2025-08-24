@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { execSync } from 'child_process';
-import { getRuntimeSiteUrl } from '../../utils/site-url';
+import { getRuntimeSiteUrl } from '../../utils/site-url.ts';
 
 function getGitInfo() {
   try {

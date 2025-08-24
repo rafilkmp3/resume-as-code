@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getRuntimeSiteUrl } from '../../../utils/site-url';
+import { getRuntimeSiteUrl } from '../../../utils/site-url.ts';
 
 export const GET: APIRoute = async ({ site }) => {
   // Use runtime URL detection to ensure correct preview URLs
