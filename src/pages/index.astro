@@ -256,9 +256,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     {job.highlights.map((highlight) => (
                       <div class="apple-highlight-card">
-                        <div class="apple-highlight-icon">
-                          <LiquidGlassIcon name="heroicons:check-circle" size={16} variant="subtle" />
-                        </div>
                         <p class="apple-highlight-text">{highlight}</p>
                       </div>
                     ))}
@@ -314,9 +311,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                 <div class="grid grid-cols-1 gap-3 mb-4">
                   {project.highlights.map((highlight) => (
                     <div class="apple-highlight-card">
-                      <div class="apple-highlight-icon">
-                        <LiquidGlassIcon name="heroicons:check-circle" size={16} variant="subtle" />
-                      </div>
                       <p class="apple-highlight-text">{highlight}</p>
                     </div>
                   ))}
@@ -1228,16 +1222,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
   /* Remove old mobile/desktop scaling - now using fluid typography */
 
-  /* Apple-Style Highlight Cards - Subtle, lightweight styling */
+  /* Apple-Style Highlight Cards - Clean text-only styling */
   .apple-highlight-card {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(8px) saturate(110%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
-    padding: 0.75rem 0.875rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.625rem;
+    padding: 0.875rem 1rem;
     transition: all 0.2s ease-out;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     position: relative;
@@ -1265,18 +1256,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
-  .apple-highlight-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 8px;
-    background: rgba(var(--link-color-rgb, 30, 64, 175), 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
 
   .apple-highlight-text {
     font-size: 0.875rem; /* 14pt */
@@ -1301,9 +1280,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
-  :global(.dark) .apple-highlight-icon {
-    background: rgba(96, 165, 250, 0.2);
-  }
 
   /* CSS custom properties for color calculations */
   :root {
