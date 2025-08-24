@@ -1,0 +1,341 @@
+---
+import resumeData from '../data/resume.json';
+
+const { basics, work, skills, education, projects } = resumeData;
+
+// Use runtime URL detection for reliable preview environment URLs
+// This ensures QR codes and links work correctly in all environments
+const isLocal = Astro.url.hostname === 'localhost';
+const siteUrl = isLocal ? 'http://localhost:4321' : `https://${Astro.url.hostname}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{basics.name} - Resume (Screen)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: white;
+      padding: 30px;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 0;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 30px 30px 20px;
+      border-bottom: 2px solid #1e40af;
+      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    }
+    
+    .profile-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      display: block;
+      border: 3px solid #1e40af;
+    }
+    
+    h1 {
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      font-size: 1.1em;
+      color: #4a5568;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .contact-item {
+      font-size: 0.9em;
+      color: #1e40af;
+    }
+    
+    .section {
+      margin: 25px 0;
+      padding: 0 30px;
+    }
+    
+    h2 {
+      font-size: 1.5em;
+      color: #2d3748;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1e40af;
+    }
+    
+    .job {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .job:last-child {
+      border-bottom: none;
+    }
+    
+    .job-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #2563eb;
+    }
+    
+    .company {
+      font-size: 1em;
+      font-weight: 500;
+      color: #2d3748;
+    }
+    
+    .date {
+      font-size: 0.9em;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+    
+    .description {
+      font-size: 0.95em;
+      color: #374151;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .skill-category h3 {
+      font-size: 1.1em;
+      color: #1e40af;
+      margin-bottom: 10px;
+    }
+    
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .skill-tag {
+      background: #1e40af;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.85em;
+      margin: 2px;
+      display: inline-block;
+    }
+    
+    /* PDF optimizations */
+    @media print {
+      body { margin: 0; padding: 15px; }
+      .container { border: none; max-width: none; }
+      .header { page-break-inside: avoid; }
+      .section { page-break-inside: avoid; }
+      .job { page-break-inside: avoid; }
+    }
+    
+    .summary {
+      text-align: justify;
+      line-height: 1.7;
+      margin-bottom: 30px;
+    }
+    
+    ul {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 5px;
+    }
+    
+    .footer {
+      margin-top: 30px;
+      padding: 20px 30px;
+      border-top: 2px solid #1e40af;
+      color: #374151;
+      font-size: 0.9em;
+      background: #f8f9ff;
+    }
+    
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    
+    .footer-text {
+      flex: 1;
+    }
+    
+    .footer-qr {
+      flex-shrink: 0;
+    }
+    
+    .qr-code {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid #1e40af;
+    }
+    
+    .footer a {
+      color: #1e40af;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    @media print {
+      .footer-content {
+        flex-direction: row;
+        align-items: center;
+      }
+      .qr-code {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img src={basics.image} alt={basics.name} class="profile-img" />
+      <h1>{basics.name}</h1>
+      <p class="subtitle">{basics.label}</p>
+      <div class="contact-info">
+        <span class="contact-item">📧 {basics.email}</span>
+        <span class="contact-item">📱 {basics.phone}</span>
+        <span class="contact-item">📍 {basics.location.city}, {basics.location.region}</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <h2>Professional Summary</h2>
+        <p class="summary">{basics.summary}</p>
+      </section>
+
+      <section class="section">
+        <h2>Professional Experience</h2>
+        {work.map((job) => (
+          <div class="job">
+            <div class="job-title">{job.position}</div>
+            <div class="company">{job.name}</div>
+            <div class="date">{job.startDate} - {job.endDate || 'Present'}</div>
+            <p>{job.summary}</p>
+            {job.highlights && (
+              <ul>
+                {job.highlights.map((highlight) => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </section>
+
+      <section class="section">
+        <h2>Technical Skills</h2>
+        <div class="skills-grid">
+          {skills.map((skillGroup) => (
+            <div class="skill-category">
+              <h3>{skillGroup.name}</h3>
+              <div class="skill-tags">
+                {skillGroup.keywords.map((skill) => (
+                  <span class="skill-tag">{skill}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {projects && projects.length > 0 && (
+        <section class="section">
+          <h2>Key Projects</h2>
+          {projects.map((project) => (
+            <div class="job">
+              <div class="job-title">{project.name}</div>
+              {project.url && <div class="company"><a href={project.url}>{project.url}</a></div>}
+              <div class="description">{project.description}</div>
+              {project.highlights && (
+                <ul>
+                  {project.highlights.map((highlight) => (
+                    <li>{highlight}</li>
+                  ))}
+                </ul>
+              )}
+              {project.keywords && (
+                <div class="skill-tags" style="margin-top: 0.5rem;">
+                  {project.keywords.map((keyword) => (
+                    <span class="skill-tag">{keyword}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {education && education.length > 0 && (
+        <section class="section">
+          <h2>Education</h2>
+          {education.map((edu) => (
+            <div class="job">
+              <div class="job-title">{edu.studyType} in {edu.area}</div>
+              <div class="company">{edu.institution}</div>
+              <div class="date">{edu.startDate} - {edu.endDate}</div>
+            </div>
+          ))}
+        </section>
+      )}
+    </main>
+    
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-text">
+          <p>📄 View the latest version of this resume online: <a href={siteUrl}>{siteUrl}</a></p>
+        </div>
+        <div class="footer-qr">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(siteUrl)}`}
+            alt="QR Code for resume website"
+            class="qr-code"
+          />
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

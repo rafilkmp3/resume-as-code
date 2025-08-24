@@ -1,0 +1,50 @@
+---
+export interface Props {
+  class?: string;
+  style?: string;
+  variant?: 'default' | 'intense' | 'subtle';
+}
+
+const { class: className = '', style = '', variant = 'default' } = Astro.props;
+
+const variants = {
+  default: 'bg-glass-100 backdrop-blur-glass border-glass-200',
+  intense: 'bg-glass-200 backdrop-blur-xl border-glass-200',
+  subtle: 'bg-glass-50 backdrop-blur-md border-glass-100'
+};
+---
+
+<div 
+  class={`glass-card ${className}`}
+  style={style}
+>
+  <slot />
+</div>
+
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  :global([data-theme="dark"]) .glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  :global([data-theme="dark"]) .glass-card:hover {
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+</style>

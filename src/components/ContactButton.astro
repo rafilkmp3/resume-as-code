@@ -1,0 +1,87 @@
+---
+import LiquidGlassIcon from './LiquidGlassIcon.astro';
+
+export interface Props {
+  icon: string;
+  label: string;
+  value: string;
+  href: string;
+  network?: string;
+}
+
+const { icon, label, value, href, network = '' } = Astro.props;
+
+// Map network names to Iconify icon names
+const getIconName = (network: string, fallbackIcon: string) => {
+  const iconMap: Record<string, string> = {
+    'LinkedIn': 'simple-icons:linkedin',
+    'GitHub': 'simple-icons:github',
+    'WhatsApp': 'simple-icons:whatsapp',
+    'cal.com': 'heroicons:calendar',
+    'Email': 'heroicons:envelope'
+  };
+  
+  // If fallbackIcon is already an Iconify name (contains ':'), use it directly
+  if (fallbackIcon.includes(':')) {
+    return fallbackIcon;
+  }
+  
+  // If fallbackIcon is a URL (contains 'http'), ignore it and use network mapping
+  if (fallbackIcon.includes('http')) {
+    return iconMap[network] || 'heroicons:link';
+  }
+  
+  return iconMap[network] || iconMap[fallbackIcon] || 'heroicons:link';
+};
+
+const iconName = getIconName(network, icon);
+---
+
+<a 
+  href={href} 
+  class="glass-button group block w-full sm:w-auto"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`${label}: ${value}`}
+>
+  <div class="flex items-center space-x-3 p-4">
+    <LiquidGlassIcon name={iconName} size={24} />
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-medium text-glass-foreground group-hover:text-primary">
+        {label}
+      </div>
+      <div class="text-sm text-glass-muted truncate">
+        {value}
+      </div>
+    </div>
+  </div>
+</a>
+
+<style>
+  .glass-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .text-glass-foreground {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+  
+  .text-glass-muted {
+    color: var(--foreground-muted);
+  }
+</style>

@@ -1,0 +1,107 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Professional resume of Rafael Bernardo Sathler - Infrastructure Engineer, DevOps, Platform Engineer, AWS/GCP Cloud Architect' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    
+    <!-- Liquid Glass Background -->
+    <style>
+      body {
+        background: linear-gradient(135deg, 
+          hsl(230, 30%, 95%) 0%,
+          hsl(220, 25%, 92%) 25%,
+          hsl(210, 20%, 89%) 50%,
+          hsl(200, 25%, 92%) 75%,
+          hsl(230, 30%, 95%) 100%);
+        min-height: 100vh;
+      }
+      
+      [data-theme="dark"] body {
+        background: linear-gradient(135deg,
+          hsl(230, 15%, 8%) 0%,
+          hsl(220, 20%, 12%) 25%,
+          hsl(210, 25%, 15%) 50%,
+          hsl(200, 20%, 12%) 75%,
+          hsl(230, 15%, 8%) 100%);
+      }
+      
+      .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+      
+      [data-theme="dark"] .glass-card {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+      
+      .glass-button {
+        background: rgba(37, 99, 235, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        transition: all 0.2s ease;
+      }
+      
+      .glass-button:hover {
+        background: rgba(37, 99, 235, 0.2);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Theme Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+      <button id="theme-toggle" class="glass-button rounded-full p-3 text-2xl">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+    
+    <slot />
+    
+    <script>
+      // Theme switching logic
+      const themeToggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const themeIcon = document.querySelector('.theme-icon');
+      
+      // Load saved theme or default to light
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      html.setAttribute('data-theme', savedTheme);
+      updateIcon(savedTheme);
+      
+      themeToggle?.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+      
+      function updateIcon(theme) {
+        if (themeIcon) {
+          themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -37,9 +37,9 @@ jobs:
         run: |
           npm install -g @commitlint/cli @commitlint/config-conventional
 
-      - name: Create commitlint config
+      - name: Create commitlint config  
         run: |
-          cat > commitlint.config.js << 'EOF'
+          cat > commitlint.config.cjs << 'EOF'
           module.exports = {
             extends: ['@commitlint/config-conventional'],
             rules: {
@@ -129,8 +129,8 @@ jobs:
             echo ""
             echo "🔍 Checking: $message"
 
-            # Capture detailed error output
-            ERROR_OUTPUT=$(echo "$message" | npx commitlint --config commitlint.config.js 2>&1) || COMMIT_FAILED=true
+            # Capture detailed error output  
+            ERROR_OUTPUT=$(echo "$message" | npx commitlint --config commitlint.config.cjs 2>&1) || COMMIT_FAILED=true
 
             if [ -z "$COMMIT_FAILED" ]; then
               echo "✅ Valid: $message"

@@ -197,11 +197,12 @@ jobs:
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
     steps:
-      - name: Checkout for budget.json
+      - name: Checkout for performance testing
         uses: actions/checkout@v5
         with:
           sparse-checkout: |
             budget.json
+            .github/actions/setup-chrome-arm64
 
       - name: 🌐 Setup Chrome (ARM64 Compatible)
         uses: ./.github/actions/setup-chrome-arm64
@@ -638,6 +639,12 @@ jobs:
     if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 5
     steps:
+      - name: Checkout for accessibility testing
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/actions/setup-chrome-arm64
+
       - name: 🌐 Setup Chrome (ARM64 Compatible)
         uses: ./.github/actions/setup-chrome-arm64
 

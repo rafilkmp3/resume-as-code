@@ -1,0 +1,445 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LiquidGlassCard from '../components/LiquidGlassCard.astro';
+import ContactButton from '../components/ContactButton.astro';
+import QRCodeButton from '../components/QRCodeButton.astro';
+import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
+import resumeData from '../data/resume.json';
+
+const { basics, work, skills, education, projects } = resumeData;
+
+// Use build-time site URL from Astro config for consistent deployment URLs
+// This leverages the same environment detection used in PDF API routes
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
+---
+
+<Layout title={`${basics.name} - ${basics.label}`} description={basics.summary}>
+  <main class="min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto space-y-8">
+      
+      <!-- Hero Section with Advanced Liquid Glass -->
+      <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12">
+        <div class="mb-6">
+          <img 
+            src={basics.image} 
+            alt={basics.name}
+            class="w-32 h-32 mx-auto rounded-full border-4 border-white/20 shadow-2xl"
+          />
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-bold mb-4" style="color: var(--heading-color);">
+          {basics.name}
+        </h1>
+        
+        <p class="text-xl md:text-2xl mb-6 leading-relaxed" style="color: var(--foreground);">
+          {basics.label}
+        </p>
+        
+        <p class="text-base md:text-lg max-w-3xl mx-auto leading-relaxed" style="color: var(--foreground);">
+          {basics.summary}
+        </p>
+        
+        <!-- Location Badge -->
+        <a 
+          href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center mt-6 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer"
+          aria-label="View Rio de Janeiro location on Google Maps"
+        >
+          <div class="mr-2">
+            <LiquidGlassIcon name="heroicons:map-pin" size={16} variant="subtle" />
+          </div>
+          <span class="text-sm font-medium" style="color: var(--foreground);">{basics.location.city}, {basics.location.region}</span>
+        </a>
+      </LiquidGlassCard>
+
+      <!-- Connect & Download Section -->
+      <LiquidGlassCard class="p-8">
+        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center" style="color: var(--heading-color);">Let's Connect</h2>
+        
+        <!-- Contact Methods -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--link-color);">Get In Touch</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- LinkedIn -->
+            <ContactButton
+              icon="simple-icons:linkedin"
+              label="Connect on LinkedIn"
+              value="Professional profile"
+              href="https://www.linkedin.com/in/rafaelbsathler/"
+              network="LinkedIn"
+            />
+            
+            <!-- GitHub -->
+            <ContactButton
+              icon="simple-icons:github"
+              label="View GitHub"
+              value="Code & projects"
+              href="https://github.com/rafaelbsathler"
+              network="GitHub"
+            />
+            
+            <!-- Cal.com -->
+            <ContactButton
+              icon="heroicons:calendar"
+              label="Book or Check Availability"
+              value="Quick or long calls"
+              href="https://cal.com/rafaelbsathler"
+              network="cal.com"
+            />
+            
+            <!-- WhatsApp -->
+            <ContactButton
+              icon="simple-icons:whatsapp"
+              label="Chat on WhatsApp"
+              value="+55 21 997988682"
+              href="https://wa.me/5521997988682"
+              network="WhatsApp"
+            />
+            
+            <!-- Email Contact -->
+            <ContactButton
+              icon="heroicons:envelope"
+              label="Send Email"
+              value={basics.email}
+              href={`mailto:${basics.email}`}
+              network="Email"
+            />
+
+            <!-- QR Code Button -->
+            <QRCodeButton url={siteUrl} />
+          </div>
+        </div>
+
+        <!-- PDF Downloads -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--link-color);">Download PDF</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a 
+              href="/api/pdf/screen"
+              class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="mr-3">
+                <LiquidGlassIcon name="heroicons:computer-desktop" size={20} variant="subtle" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold">View Online</div>
+                <div class="text-xs opacity-80">Interactive version</div>
+              </div>
+            </a>
+            <a 
+              href="/api/pdf/print"
+              class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="mr-3">
+                <LiquidGlassIcon name="heroicons:printer" size={20} variant="subtle" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold">Print PDF</div>
+                <div class="text-xs opacity-80">Printer-friendly</div>
+              </div>
+            </a>
+            <a 
+              href="/api/pdf/ats"
+              class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="mr-3">
+                <LiquidGlassIcon name="heroicons:cpu-chip" size={20} variant="subtle" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold">ATS PDF</div>
+                <div class="text-xs opacity-80">Machine-readable</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </LiquidGlassCard>
+
+      <!-- Experience Section -->
+      <LiquidGlassCard class="p-8">
+        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Professional Experience</h2>
+        <div class="space-y-8" id="experience-container">
+          {work.map((job, index) => (
+            <div class={`experience-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                <div>
+                  <h3 class="text-xl md:text-2xl font-semibold" style="color: var(--heading-color);">{job.position}</h3>
+                  <p class="text-lg font-medium" style="color: var(--foreground);">{job.name}</p>
+                </div>
+                <div class="text-sm md:text-base mt-2 md:mt-0 font-medium" style="color: var(--foreground-muted);">
+                  {job.startDate} - {job.endDate || 'Present'}
+                </div>
+              </div>
+              
+              <p class="mb-4 leading-relaxed" style="color: var(--foreground);">{job.summary}</p>
+              
+              {job.highlights && (
+                <ul class="space-y-2">
+                  {job.highlights.map((highlight) => (
+                    <li class="flex items-start space-x-2">
+                      <span class="mt-1" style="color: var(--link-color);">•</span>
+                      <span class="text-base leading-relaxed" style="color: var(--foreground);">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+        
+        <!-- Load More Button for Experience -->
+        {work.length > 3 && (
+          <div class="text-center mt-8">
+            <button 
+              id="load-more-experience"
+              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
+              onclick="toggleExperienceItems()"
+            >
+              <div class="mr-2">
+                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
+              </div>
+              <span id="experience-button-text">Show More Experience</span>
+            </button>
+          </div>
+        )}
+      </LiquidGlassCard>
+
+      <!-- Key Projects Section -->
+      <LiquidGlassCard class="p-8">
+        <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Key Projects</h2>
+        <div class="space-y-8" id="projects-container">
+          {projects.map((project, index) => (
+            <div class={`project-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-semibold mb-2" style="color: var(--link-color);">
+                    {project.url ? (
+                      <a href={project.url} target="_blank" rel="noopener noreferrer" class="hover:underline">
+                        {project.name}
+                      </a>
+                    ) : project.name}
+                  </h3>
+                  <p class="text-base leading-relaxed mb-4" style="color: var(--foreground);">{project.description}</p>
+                </div>
+              </div>
+              
+              {project.highlights && (
+                <div class="mb-4">
+                  <ul class="space-y-2">
+                    {project.highlights.map((highlight) => (
+                      <li class="flex items-start space-x-2">
+                        <span class="mt-1" style="color: var(--link-color);">•</span>
+                        <span class="text-base leading-relaxed" style="color: var(--foreground);">{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {project.keywords && (
+                <div class="flex flex-wrap gap-2">
+                  {project.keywords.map((keyword) => (
+                    <span class="px-2 py-1 rounded-full text-xs font-medium border" style="background-color: var(--link-color); color: white; border-color: var(--link-color);">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        
+        <!-- Load More Button for Projects -->
+        {projects.length > 3 && (
+          <div class="text-center mt-8">
+            <button 
+              id="load-more-projects"
+              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
+              onclick="toggleProjectItems()"
+            >
+              <div class="mr-2">
+                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
+              </div>
+              <span id="projects-button-text">Show More Projects</span>
+            </button>
+          </div>
+        )}
+      </LiquidGlassCard>
+
+      <!-- Skills Section -->
+      <LiquidGlassCard class="p-8">
+        <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Technical Skills</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {skills.map((skillGroup, index) => {
+            // Map skill groups to appropriate icons (removing emoji duplication)
+            const skillIcons = [
+              'heroicons:cloud',              // Cloud Platforms & IaC
+              'simple-icons:kubernetes',      // Container Orchestration  
+              'heroicons:arrow-path',         // CI/CD & DevOps
+              'heroicons:chart-bar',          // Observability & Monitoring
+              'heroicons:code-bracket',       // Programming & Scripting
+              'heroicons:server',             // Big Data & Databases
+              'heroicons:shield-check',       // Security & Compliance
+              'heroicons:users'               // Soft Skills
+            ];
+            
+            const iconName = skillIcons[index] || 'heroicons:wrench-screwdriver';
+            
+            return (
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold flex items-center" style="color: var(--link-color);">
+                  <div class="mr-2">
+                    <LiquidGlassIcon name={iconName} size={20} variant="subtle" />
+                  </div>
+                  {skillGroup.name}
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                  {skillGroup.keywords.map((skill) => (
+                    <span class="px-3 py-1 rounded-full text-sm font-medium border" style="background-color: var(--link-color); color: white; border-color: var(--link-color);">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </LiquidGlassCard>
+
+
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .glass-button-modern {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: var(--foreground);
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-button-modern:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-button-modern:hover span {
+    transform: scale(1.1);
+  }
+
+  .glass-icon-container-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-button-modern:hover .glass-icon-container-small {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+  
+  .icon-svg-small {
+    filter: invert(var(--icon-invert, 0.2));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-button-modern:hover .icon-svg-small {
+    filter: invert(var(--icon-invert, 0.2)) sepia(1) saturate(2) hue-rotate(var(--icon-hue, 200deg));
+  }
+
+  /* Theme-aware colors for small icons */
+  :root {
+    --icon-invert: 0.2;
+    --icon-hue: 200deg;
+  }
+  
+  [data-theme="dark"] {
+    --icon-invert: 1;
+    --icon-hue: 220deg;
+  }
+  
+  [data-theme="light"] {
+    --icon-invert: 0.2;
+    --icon-hue: 200deg;
+  }
+</style>
+
+<script>
+  // Toggle Experience Items
+  function toggleExperienceItems() {
+    const hiddenItems = document.querySelectorAll('.experience-item.hidden');
+    const visibleItems = document.querySelectorAll('.experience-item:not(.hidden)');
+    const button = document.getElementById('load-more-experience');
+    const buttonText = document.getElementById('experience-button-text');
+    
+    if (hiddenItems.length > 0) {
+      // Show all hidden items
+      hiddenItems.forEach(item => item.classList.remove('hidden'));
+      buttonText.textContent = 'Show Less Experience';
+      button.querySelector('span').textContent = '📋';
+    } else {
+      // Hide items after index 2 (show only first 3)
+      const allItems = document.querySelectorAll('.experience-item');
+      allItems.forEach((item, index) => {
+        if (index >= 3) {
+          item.classList.add('hidden');
+        }
+      });
+      buttonText.textContent = 'Show More Experience';
+      button.querySelector('span').textContent = '📋';
+    }
+  }
+
+  // Toggle Project Items
+  function toggleProjectItems() {
+    const hiddenItems = document.querySelectorAll('.project-item.hidden');
+    const visibleItems = document.querySelectorAll('.project-item:not(.hidden)');
+    const button = document.getElementById('load-more-projects');
+    const buttonText = document.getElementById('projects-button-text');
+    
+    if (hiddenItems.length > 0) {
+      // Show all hidden items
+      hiddenItems.forEach(item => item.classList.remove('hidden'));
+      buttonText.textContent = 'Show Less Projects';
+      button.querySelector('span').textContent = '🚀';
+    } else {
+      // Hide items after index 2 (show only first 3)
+      const allItems = document.querySelectorAll('.project-item');
+      allItems.forEach((item, index) => {
+        if (index >= 3) {
+          item.classList.add('hidden');
+        }
+      });
+      buttonText.textContent = 'Show More Projects';
+      button.querySelector('span').textContent = '🚀';
+    }
+  }
+
+  // Make functions global so they can be called from onclick
+  if (typeof window !== 'undefined') {
+    window.toggleExperienceItems = toggleExperienceItems;
+    window.toggleProjectItems = toggleProjectItems;
+  }
+</script>
