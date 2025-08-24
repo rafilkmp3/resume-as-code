@@ -301,19 +301,36 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
             const iconName = skillIcons[index] || 'heroicons:wrench-screwdriver';
             
             return (
-              <div class="space-y-4">
+              <div class="glass-card p-6 space-y-4">
                 <h3 class="text-lg font-semibold flex items-center" style="color: var(--link-color);">
                   <div class="mr-2">
-                    <LiquidGlassIcon name={iconName} size={20} variant="subtle" />
+                    <LiquidGlassIcon name={iconName} size={20} variant="default" />
                   </div>
                   {skillGroup.name}
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                  {skillGroup.keywords.map((skill) => (
-                    <span class="px-3 py-1 rounded-full text-sm font-medium border" style="background-color: var(--link-color); color: white; border-color: var(--link-color);">
-                      {skill}
-                    </span>
-                  ))}
+                  {skillGroup.keywords.map((skill) => {
+                    const hasLink = skillGroup.links && skillGroup.links[skill];
+                    const Component = hasLink ? 'a' : 'span';
+                    const linkProps = hasLink ? {
+                      href: skillGroup.links[skill],
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      title: `Learn more about ${skill} - Educational resource`,
+                      'data-contact-type': 'skill-education',
+                      'data-contact-value': skill
+                    } : {};
+                    
+                    return (
+                      <Component 
+                        class={`glass-button px-3 py-1 text-sm font-medium transition-all duration-300 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
+                        style="color: var(--glass-text);"
+                        {...linkProps}
+                      >
+                        {skill}
+                      </Component>
+                    );
+                  })}
                 </div>
               </div>
             );

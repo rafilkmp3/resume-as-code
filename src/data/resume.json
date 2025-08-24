@@ -422,7 +422,14 @@
         "Leadership",
         "Mentoring",
         "Problem solving"
-      ]
+      ],
+      "links": {
+        "Effective in cross-functional teams": "https://www.atlassian.com/team-playbook/plays/cross-functional-collaboration",
+        "Clear technical writing": "https://developers.google.com/tech-writing",
+        "Leadership": "https://hbr.org/topic/leadership",
+        "Mentoring": "https://www.mentoring.org/what-is-mentoring/",
+        "Problem solving": "https://www.mckinsey.com/capabilities/strategy-and-corporate-finance/our-insights/problem-solving"
+      }
     }
   ],
   "meta": {
