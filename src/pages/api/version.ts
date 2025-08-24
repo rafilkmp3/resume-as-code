@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { execSync } from 'child_process';
+import { getRuntimeSiteUrl } from '../../utils/site-url';
 
 function getGitInfo() {
   try {
@@ -47,8 +48,9 @@ export const GET: APIRoute = async ({ site }) => {
   const gitInfo = getGitInfo();
   const envInfo = getEnvironmentInfo();
   
-  // Use build-time site URL from Astro config (consistent with PDF routes and QR codes)
-  const siteUrl = site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
+  // Use runtime URL detection to ensure correct preview URLs
+  // Fallback to Astro site config if runtime detection fails
+  const siteUrl = getRuntimeSiteUrl() || site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
   
   // Generate cache busting version based on commit hash and timestamp
   const cacheVersion = `${gitInfo.shortHash}-${Date.now()}`;

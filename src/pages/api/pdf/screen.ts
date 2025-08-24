@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
+import { getRuntimeSiteUrl } from '../../../utils/site-url';
 
 export const GET: APIRoute = async ({ site }) => {
-  // Use Astro's build-time configured site URL
-  // This is set in astro.config.mjs based on deployment environment
-  const baseUrl = site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
+  // Use runtime URL detection to ensure correct preview URLs
+  // Fallback to Astro site config if runtime detection fails
+  const baseUrl = getRuntimeSiteUrl() || site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
   
   return new Response(null, {
     status: 302,
