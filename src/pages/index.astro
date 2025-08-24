@@ -227,7 +227,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
             <div class={`experience-item ${index >= 3 ? 'hidden' : ''}`}>
               {/* Apple HIG Job Separator */}
               {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+              <div class="apple-experience-container">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <div>
                   <h3 class="apple-title-2">{job.position}</h3>
                   {job.url ? (
@@ -249,20 +250,21 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                 </h5>
               </div>
               
-              <p class="apple-body apple-text-flow mb-4">{job.summary}</p>
-              
-              {job.highlights && (
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                  {job.highlights.map((highlight) => (
-                    <div class="apple-highlight-card">
-                      <div class="apple-highlight-icon">
-                        <LiquidGlassIcon name="heroicons:check-circle" size={16} variant="subtle" />
+                <p class="apple-experience-summary">{job.summary}</p>
+                
+                {job.highlights && (
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                    {job.highlights.map((highlight) => (
+                      <div class="apple-highlight-card">
+                        <div class="apple-highlight-icon">
+                          <LiquidGlassIcon name="heroicons:check-circle" size={16} variant="subtle" />
+                        </div>
+                        <p class="apple-highlight-text">{highlight}</p>
                       </div>
-                      <p class="apple-highlight-text">{highlight}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -304,7 +306,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                       </a>
                     ) : project.name}
                   </h3>
-                  <p class="apple-body apple-text-flow mb-4">{project.description}</p>
+                  <p class="apple-experience-summary">{project.description}</p>
                 </div>
               </div>
               
@@ -1329,6 +1331,120 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     .apple-highlight-text {
       font-size: 0.8125rem; /* 13pt on mobile */
       line-height: 1.4;
+    }
+  }
+
+  /* Apple Experience Container - Hover boundaries for full experience */
+  .apple-experience-container {
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: -0.5rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .apple-experience-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+  }
+
+  .apple-experience-container:hover::before {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .apple-experience-container:hover {
+    transform: translateY(-4px);
+    cursor: pointer;
+  }
+
+  /* "Show More" indicator on hover */
+  .apple-experience-container::after {
+    content: '⌄ Show Details';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.75rem; /* 12pt */
+    font-weight: 500;
+    color: var(--link-color);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateY(4px);
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+  }
+
+  .apple-experience-container:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Dark theme for experience container */
+  :global(.dark) .apple-experience-container::before {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  :global(.dark) .apple-experience-container:hover::before {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Dark theme for "Show Details" indicator */
+  :global(.dark) .apple-experience-container::after {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: var(--link-color);
+  }
+
+  /* Enhanced Experience Summary Typography */
+  .apple-experience-summary {
+    font-size: clamp(1rem, 1.5vw, 1.125rem); /* 16pt - 18pt fluid */
+    font-weight: 450; /* Apple Inter weight between 400-500 */
+    line-height: clamp(1.5, 1.55, 1.6);
+    letter-spacing: -0.005em; /* Subtle negative tracking */
+    color: var(--foreground);
+    margin-bottom: 1.25rem;
+    text-wrap: balance;
+    max-width: 75ch; /* Optimal reading width */
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    font-optical-sizing: auto;
+    /* Apple HIG text rendering optimization */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile adjustments for experience summary */
+  @media (max-width: 640px) {
+    .apple-experience-container {
+      padding: 1rem;
+      margin: -0.25rem;
+    }
+    
+    .apple-experience-summary {
+      font-size: 1rem; /* 16pt on mobile */
+      line-height: 1.5;
+      margin-bottom: 1rem;
     }
   }
 </style>
