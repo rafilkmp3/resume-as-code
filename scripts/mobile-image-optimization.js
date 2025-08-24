@@ -36,9 +36,10 @@ const IMAGE_CONFIGS = {
       // Mobile-first responsive variants
       { width: 64, height: 64, suffix: 'xs', quality: 75 },       // Mobile portrait (320px)
       { width: 96, height: 96, suffix: 'sm', quality: 80 },       // Mobile landscape (480px)
+      { width: 120, height: 120, suffix: 'base', quality: 80 },   // Common display size (PageSpeed optimization)
       { width: 128, height: 128, suffix: 'md', quality: 85 },     // Tablet (768px)
       { width: 160, height: 160, suffix: 'lg', quality: 90 },     // Desktop (1024px)
-      { width: 200, height: 200, suffix: 'xl', quality: 92 },     // Large desktop (1280px)
+      { width: 200, height: 200, suffix: 'xl', quality: 85 },     // Large desktop (lower quality for compression)
       { width: 48, height: 48, suffix: 'thumbnail', quality: 75 }, // PDF/thumbnails
     ],
     formats: ['avif', 'webp', 'jpeg'], // Modern formats first for best compression

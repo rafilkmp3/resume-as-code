@@ -19,7 +19,7 @@ const { name, imageSrc, title, class: className } = Astro.props;
       <button onclick="closeProfileModal()" class="close-btn" aria-label="Close profile photo modal">&times;</button>
     </div>
     <div class="profile-image-container">
-      <img id="profile-image" src={imageSrc} alt={`${name} - Profile Photo`} />
+      <img id="profile-image" src={imageSrc} alt={`${name} - Profile Photo`} loading="lazy" />
     </div>
     <div class="profile-info">
       <h4 id="profile-name">{name}</h4>
