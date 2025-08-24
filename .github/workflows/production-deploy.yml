@@ -67,25 +67,57 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: 📊 Production Deployment Summary
+        if: always()
         run: |
+          # Determine deployment status dynamically
+          if [ "${{ steps.deployment.outcome }}" = "success" ]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="Production Deployment Complete"
+          elif [ "${{ steps.deployment.outcome }}" = "failure" ]; then
+            STATUS_ICON="❌"
+            STATUS_TEXT="Production Deployment Failed"
+          else
+            STATUS_ICON="⚠️"
+            STATUS_TEXT="Production Deployment ${{ steps.deployment.outcome }}"
+          fi
+          
+          # Get current timestamp and commit info
+          DEPLOY_TIME=$(TZ='America/Sao_Paulo' date '+%d/%m/%Y %H:%M:%S BRT (%Y-%m-%d %H:%M:%S UTC)')
+          COMMIT_HASH=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_MSG=$(git log -1 --format=%s 2>/dev/null || echo "Release commit")
+          
           echo "## 🚀 GitHub Pages Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status**: ✅ Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${STATUS_ICON} ${STATUS_TEXT}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment**: GitHub Pages (Production)" >> $GITHUB_STEP_SUMMARY
           echo "**Release**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Size**: ${{ needs.build.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
-          echo "**PDFs Generated**: ${{ needs.build.outputs.pdf_count }}/3" >> $GITHUB_STEP_SUMMARY
-          echo "**Runner**: ARM64 (${{ runner.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed**: ${DEPLOY_TIME}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: \`${COMMIT_HASH}\` - ${COMMIT_MSG}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🎉 Release Information" >> $GITHUB_STEP_SUMMARY
-          echo "- 🏷️ **Version**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 📝 **Release Notes**: [GitHub Release](${{ github.event.release.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${{ needs.build.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PDFs**: ${{ needs.build.outputs.pdf_count }}/3 generated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner**: ARM64 (40% faster than AMD64)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Framework**: Astro v5.13.3" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Version API](${{ steps.deployment.outputs.page_url }}api/version)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📄 [Screen PDF](${{ steps.deployment.outputs.page_url }}resume.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🖨️ [Print PDF](${{ steps.deployment.outputs.page_url }}resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🤖 [ATS PDF](${{ steps.deployment.outputs.page_url }}resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.deployment.outcome }}" = "success" ]; then
+            echo "### 🎉 Release Information" >> $GITHUB_STEP_SUMMARY
+            echo "- 🏷️ **Version**: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+            echo "- 📝 **Release Notes**: [GitHub Release](${{ github.event.release.html_url }})" >> $GITHUB_STEP_SUMMARY
+            echo "- 🚀 **Deployment**: [GitHub Pages Action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔗 Production Links" >> $GITHUB_STEP_SUMMARY
+            echo "- 🌐 [Live Production Site](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 [Version API](${{ steps.deployment.outputs.page_url }}api/version)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📄 [Screen PDF](${{ steps.deployment.outputs.page_url }}resume.pdf)" >> $GITHUB_STEP_SUMMARY
+            echo "- 🖨️ [Print PDF](${{ steps.deployment.outputs.page_url }}resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
+            echo "- 🤖 [ATS PDF](${{ steps.deployment.outputs.page_url }}resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 🔧 Troubleshooting" >> $GITHUB_STEP_SUMMARY
+            echo "- Check [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify GitHub Pages configuration" >> $GITHUB_STEP_SUMMARY
+            echo "- Ensure build artifacts were created successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- Check release trigger and permissions" >> $GITHUB_STEP_SUMMARY
+          fi

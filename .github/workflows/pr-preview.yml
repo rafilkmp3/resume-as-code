@@ -664,6 +664,7 @@ jobs:
 
     steps:
       - name: Generate PR Preview Summary
+        if: always()
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -672,34 +673,66 @@ jobs:
           SHORT_SHA="${HEAD_SHA:0:7}"
           SAFE_BRANCH_NAME="${BRANCH_NAME}"
           DEPLOY_URL="https://deploy-preview-${PR_NUMBER}--resume-as-code.netlify.app"
+          
+          # Determine deployment status dynamically
+          if [ "${{ needs.build-and-deploy.result }}" = "success" ]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="Ready"
+            STATUS_DETAIL="GitHub Actions built & deployed to Netlify"
+          elif [ "${{ needs.build-and-deploy.result }}" = "failure" ]; then
+            STATUS_ICON="❌"
+            STATUS_TEXT="Failed"
+            STATUS_DETAIL="Deployment failed - check workflow logs"
+          else
+            STATUS_ICON="⚠️"
+            STATUS_TEXT="${{ needs.build-and-deploy.result }}"
+            STATUS_DETAIL="Deployment status: ${{ needs.build-and-deploy.result }}"
+          fi
+          
+          # Get current timestamp
+          DEPLOY_TIME=$(TZ='America/Sao_Paulo' date '+%d/%m/%Y %H:%M:%S BRT (%Y-%m-%d %H:%M:%S UTC)')
 
           {
             echo "## 🔍 PR Preview Environment"
             echo ""
-            echo "| Resource | URL |"
-            echo "|----------|-----|"
-            echo "| 🌐 **Live Preview** | [View Preview](${DEPLOY_URL}) |"
-            echo "| 📄 **Screen PDF** | [Screen PDF](${DEPLOY_URL}/resume.pdf) |"
-            echo "| 🖨️ **Print PDF** | [Print PDF](${DEPLOY_URL}/resume-print.pdf) |"
-            echo "| 🤖 **ATS PDF** | [ATS PDF](${DEPLOY_URL}/resume-ats.pdf) |"
-            echo ""
+            
+            if [ "${{ needs.build-and-deploy.result }}" = "success" ]; then
+              echo "| Resource | URL |"
+              echo "|----------|-----|"
+              echo "| 🌐 **Live Preview** | [View Preview](${DEPLOY_URL}) |"
+              echo "| 📄 **Screen PDF** | [Screen PDF](${DEPLOY_URL}/resume.pdf) |"
+              echo "| 🖨️ **Print PDF** | [Print PDF](${DEPLOY_URL}/resume-print.pdf) |"
+              echo "| 🤖 **ATS PDF** | [ATS PDF](${DEPLOY_URL}/resume-ats.pdf) |"
+              echo ""
+            fi
+            
             echo "### 📋 Build Information"
             echo "- **PR Number**: #${PR_NUMBER}"
             echo "- **Branch**: \`${SAFE_BRANCH_NAME}\`"
             echo "- **Commit**: \`${SHORT_SHA}\`"
-            echo "- **Deploy Status**: ✅ **Ready** - GitHub Actions built & deployed to Netlify"
+            echo "- **Deploy Status**: ${STATUS_ICON} **${STATUS_TEXT}** - ${STATUS_DETAIL}"
+            echo "- **Deployed**: ${DEPLOY_TIME}"
+            echo "- **Framework**: Astro v5.13.3"
             echo ""
-            echo "### 🧪 Quality Assurance Checklist"
-            echo "- [ ] Desktop display validation"
-            echo "- [ ] Mobile responsiveness check"
-            echo "- [ ] PDF generation verification (all 3 versions)"
-            echo "- [ ] Dark/light mode toggle functionality"
-            echo "- [ ] QR code display and functionality"
-            echo "- [ ] Profile image loading"
-            echo "- [ ] Content rendering accuracy"
-            echo "- [ ] Browser console error check"
-            echo ""
-            echo "> 💡 **Tip**: Preview environment automatically updates when you push new commits"
+            
+            if [ "${{ needs.build-and-deploy.result }}" = "success" ]; then
+              echo "### 🧪 Quality Assurance Checklist"
+              echo "- [ ] Desktop display validation"
+              echo "- [ ] Mobile responsiveness check"
+              echo "- [ ] PDF generation verification (all 3 versions)"
+              echo "- [ ] Dark/light mode toggle functionality"
+              echo "- [ ] QR code display and functionality"
+              echo "- [ ] Profile image loading"
+              echo "- [ ] Content rendering accuracy"
+              echo "- [ ] Browser console error check"
+              echo ""
+              echo "> 💡 **Tip**: Preview environment automatically updates when you push new commits"
+            else
+              echo "### 🔧 Troubleshooting"
+              echo "- Check [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details"
+              echo "- Verify Netlify secrets configuration"
+              echo "- Ensure build process completed successfully"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Add PR Preview Comment (Atlantis-style)

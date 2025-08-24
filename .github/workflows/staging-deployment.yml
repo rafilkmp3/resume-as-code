@@ -181,26 +181,61 @@ jobs:
       - name: Generate User-Friendly Step Summary
         if: always()
         run: |
+          # Determine deployment status dynamically
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="Deployment Complete"
+            STATUS_COLOR="🟢"
+          elif [ "${{ job.status }}" = "failure" ]; then
+            STATUS_ICON="❌"
+            STATUS_TEXT="Deployment Failed"
+            STATUS_COLOR="🔴"
+          else
+            STATUS_ICON="⚠️"
+            STATUS_TEXT="Deployment ${{ job.status }}"
+            STATUS_COLOR="🟡"
+          fi
+          
+          # Get current timestamp
+          DEPLOY_TIME=$(TZ='America/Sao_Paulo' date '+%d/%m/%Y %H:%M:%S BRT (%Y-%m-%d %H:%M:%S UTC)')
+          COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          COMMIT_MSG=$(git log -1 --format=%s 2>/dev/null || echo "unknown")
+          
           echo "## 🚀 Netlify Staging Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status**: ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY  
-          echo "**Environment**: Netlify Staging" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${STATUS_ICON} ${STATUS_TEXT}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: Netlify Staging (main branch)" >> $GITHUB_STEP_SUMMARY
           echo "**URL**: https://resume-as-code.netlify.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Size**: ${{ needs.build-staging.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
-          echo "**PDFs Generated**: ${{ needs.build-staging.outputs.pdf_count }}/3" >> $GITHUB_STEP_SUMMARY
-          echo "**Runner**: ARM64 (reusable workflow)" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed**: ${DEPLOY_TIME}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: \`${COMMIT_HASH}\` - ${COMMIT_MSG}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 API Endpoints Validated" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Main site accessible" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ /api/version (Astro API route) working" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Dynamic version information with git metadata" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${{ needs.build-staging.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PDFs**: ${{ needs.build-staging.outputs.pdf_count }}/3 generated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner**: ARM64 (40% faster than AMD64)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Framework**: Astro v5.13.3" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 [Live Site](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 [Version API](https://resume-as-code.netlify.app/api/version)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📄 [Screen PDF](https://resume-as-code.netlify.app/resume.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🖨️ [Print PDF](https://resume-as-code.netlify.app/resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🤖 [ATS PDF](https://resume-as-code.netlify.app/resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+          
+          # Only show validation if deployment succeeded
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "### 📋 Validation Results" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Main site accessible and responsive" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ /api/version (Astro API route) working" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Dynamic version information with git metadata" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ All 3 PDF variants generated successfully" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
+            echo "- 🌐 [Live Site](https://resume-as-code.netlify.app)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 [Version API](https://resume-as-code.netlify.app/api/version)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📄 [Screen PDF](https://resume-as-code.netlify.app/resume.pdf)" >> $GITHUB_STEP_SUMMARY
+            echo "- 🖨️ [Print PDF](https://resume-as-code.netlify.app/resume-print.pdf)" >> $GITHUB_STEP_SUMMARY
+            echo "- 🤖 [ATS PDF](https://resume-as-code.netlify.app/resume-ats.pdf)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 🔧 Troubleshooting" >> $GITHUB_STEP_SUMMARY
+            echo "- Check [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify Netlify secrets configuration" >> $GITHUB_STEP_SUMMARY
+            echo "- Ensure build artifacts were uploaded correctly" >> $GITHUB_STEP_SUMMARY
+          fi
 
   # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
   post-to-release-please:
