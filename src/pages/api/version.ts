@@ -10,12 +10,50 @@ function getGitInfo() {
     const lastCommitDate = execSync('git log -1 --format=%ci', { encoding: 'utf8' }).trim();
     const lastCommitMessage = execSync('git log -1 --format=%s', { encoding: 'utf8' }).trim();
     
+    // Get commit counts for different environments
+    let commitsAheadOfMain = 0;
+    let commitsAheadOfLatestRelease = 0;
+    let latestReleaseTag = null;
+    let latestReleaseDate = null;
+    
+    try {
+      // Get latest release tag
+      latestReleaseTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+      latestReleaseDate = execSync(`git log -1 --format=%ci ${latestReleaseTag}`, { encoding: 'utf8' }).trim();
+      
+      // Count commits ahead of latest release (for production info)
+      commitsAheadOfLatestRelease = parseInt(
+        execSync(`git rev-list --count ${latestReleaseTag}..HEAD`, { encoding: 'utf8' }).trim()
+      );
+    } catch (e) {
+      // No releases yet or git describe failed
+      latestReleaseTag = 'v0.0.0';
+      latestReleaseDate = 'No releases yet';
+    }
+    
+    try {
+      // Count commits ahead of main (for preview environment)
+      commitsAheadOfMain = parseInt(
+        execSync('git rev-list --count main..HEAD', { encoding: 'utf8' }).trim()
+      );
+    } catch (e) {
+      // Not on a branch ahead of main, or main doesn't exist
+      commitsAheadOfMain = 0;
+    }
+    
     return {
       hash: commitHash,
       shortHash,
       branch,
       lastCommitDate,
-      lastCommitMessage
+      lastCommitMessage,
+      commitsAheadOfMain,
+      commitsAheadOfLatestRelease,
+      latestRelease: {
+        tag: latestReleaseTag,
+        date: latestReleaseDate,
+        url: `https://github.com/rafilkmp3/resume-as-code/releases/tag/${latestReleaseTag}`
+      }
     };
   } catch (error) {
     return {
@@ -23,12 +61,42 @@ function getGitInfo() {
       shortHash: 'unknown', 
       branch: 'unknown',
       lastCommitDate: new Date().toISOString(),
-      lastCommitMessage: 'unknown'
+      lastCommitMessage: 'unknown',
+      commitsAheadOfMain: 0,
+      commitsAheadOfLatestRelease: 0,
+      latestRelease: {
+        tag: 'unknown',
+        date: 'unknown',
+        url: 'https://github.com/rafilkmp3/resume-as-code/releases'
+      }
     };
   }
 }
 
 function getEnvironmentInfo() {
+  // Determine environment type based on context
+  let environmentType = 'unknown';
+  let environmentName = 'unknown';
+  
+  if (process.env.GITHUB_PAGES === 'true') {
+    environmentType = 'production';
+    environmentName = 'GitHub Pages';
+  } else if (process.env.NETLIFY === 'true') {
+    if (process.env.CONTEXT === 'production') {
+      environmentType = 'staging';
+      environmentName = 'Netlify Staging';
+    } else if (process.env.CONTEXT === 'deploy-preview') {
+      environmentType = 'preview';
+      environmentName = 'Netlify Preview';
+    } else {
+      environmentType = 'development';
+      environmentName = 'Netlify Development';
+    }
+  } else {
+    environmentType = 'local';
+    environmentName = 'Local Development';
+  }
+  
   return {
     nodeVersion: process.version,
     platform: process.platform,
@@ -39,7 +107,10 @@ function getEnvironmentInfo() {
     isNetlify: !!process.env.NETLIFY,
     context: process.env.CONTEXT || 'unknown',
     head: process.env.HEAD || 'unknown',
-    reviewId: process.env.REVIEW_ID
+    reviewId: process.env.REVIEW_ID,
+    // Enhanced environment classification
+    environmentType,
+    environmentName
   };
 }
 
@@ -54,6 +125,43 @@ export const GET: APIRoute = async ({ site }) => {
   // Generate cache busting version based on commit hash and timestamp
   const cacheVersion = `${gitInfo.shortHash}-${Date.now()}`;
   
+  // Generate environment-specific version info as requested
+  let environmentVersionInfo = {};
+  
+  if (envInfo.environmentType === 'preview') {
+    // Preview: Show commits ahead of main
+    environmentVersionInfo = {
+      type: 'preview',
+      description: `Preview deployment - ${gitInfo.commitsAheadOfMain} commits ahead of main`,
+      commitsAhead: gitInfo.commitsAheadOfMain,
+      baseBranch: 'main'
+    };
+  } else if (envInfo.environmentType === 'staging') {
+    // Staging (main): Show commits ahead of latest release
+    environmentVersionInfo = {
+      type: 'staging',
+      description: `Staging deployment - ${gitInfo.commitsAheadOfLatestRelease} commits ahead of latest release`,
+      commitsAhead: gitInfo.commitsAheadOfLatestRelease,
+      baseBranch: gitInfo.latestRelease.tag
+    };
+  } else if (envInfo.environmentType === 'production') {
+    // Production: Show release info
+    environmentVersionInfo = {
+      type: 'production',
+      description: `Production release - ${gitInfo.latestRelease.tag}`,
+      releaseTag: gitInfo.latestRelease.tag,
+      releaseDate: gitInfo.latestRelease.date,
+      releaseUrl: gitInfo.latestRelease.url
+    };
+  } else {
+    // Local/development
+    environmentVersionInfo = {
+      type: envInfo.environmentType,
+      description: `${envInfo.environmentName} environment`,
+      commitsAhead: gitInfo.commitsAheadOfLatestRelease
+    };
+  }
+
   const versionInfo = {
     // Runtime metadata
     requestTime: now.toISOString(),
@@ -65,6 +173,9 @@ export const GET: APIRoute = async ({ site }) => {
     
     // Environment information
     environment: envInfo,
+    
+    // Environment-specific version counter (as requested by user)
+    environmentVersion: environmentVersionInfo,
     
     // Site URL (build-time configuration)
     siteUrl,
