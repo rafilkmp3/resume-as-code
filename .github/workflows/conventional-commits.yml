@@ -62,8 +62,8 @@ jobs:
             # Create temporary commit message file
             echo "$commit_message" > /tmp/commit-msg-$commit_sha
             
-            # Run our AI-friendly validator
-            if node scripts/ai-friendly-commitlint.js /tmp/commit-msg-$commit_sha > /tmp/commit-output-$commit_sha 2>&1; then
+            # Run our AI-friendly validator (ensure .cjs extension for CommonJS)
+            if node scripts/ai-friendly-commitlint.cjs /tmp/commit-msg-$commit_sha > /tmp/commit-output-$commit_sha 2>&1; then
               echo "✅ **Status**: Valid conventional commit format" >> commit-results.md
               echo "" >> commit-results.md
             else

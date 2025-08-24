@@ -60,8 +60,28 @@ try {
   // Parse commitlint error output for specific guidance
   const errorOutput = error.stderr || error.stdout || '';
   
+  // Show the actual commitlint error for debugging
+  if (errorOutput.trim()) {
+    console.log('🔍 DETAILED ERROR FROM COMMITLINT:');
+    console.log(errorOutput.trim());
+    console.log('');
+  }
+  
   // AI-Friendly error messages with specific fixes
-  if (errorOutput.includes('type-enum')) {
+  if (errorOutput.includes('subject-empty') || errorOutput.includes('type-empty')) {
+    console.log('🎯 MISSING TYPE OR SUBJECT ERROR');
+    console.log('Problem: Commit message must include both type and subject');
+    console.log('');
+    console.log('✅ REQUIRED FORMAT: type: subject');
+    console.log('');
+    console.log('🔧 FIX EXAMPLES:');
+    console.log(`  Instead of: "${commitMessage}"`);
+    console.log('  Try:        "feat: add user authentication system"');
+    console.log('  Or:         "fix: resolve database connection timeout"');
+    console.log('  Or:         "docs: update installation instructions"');
+  }
+  
+  else if (errorOutput.includes('type-enum')) {
     console.log('🎯 INVALID TYPE ERROR');
     console.log('Problem: The commit type is not allowed');
     console.log('');
@@ -95,15 +115,22 @@ try {
   }
   
   if (errorOutput.includes('subject-max-length') || errorOutput.includes('header-max-length')) {
-    console.log('📏 SUBJECT TOO LONG ERROR');
-    console.log('Problem: Commit header must be 72 characters or less');
+    console.log('📏 GITHUB-OPTIMIZED LENGTH ERROR');
+    console.log('Problem: Subject must be ≤50 chars, header must be ≤65 chars for GitHub PR compatibility');
     console.log('');
-    console.log('🔧 FIX: Shorten the description');
-    console.log(`  Instead of: "${commitMessage}"`);
-    console.log('  Try:        "feat: add responsive navigation"');
-    console.log('  Or:         "fix: resolve auth timeout"');
+    console.log('🎯 WHY THESE LIMITS:');
+    console.log('  • GitHub truncates PR titles at ~70 characters');
+    console.log('  • 50-char subjects ensure full visibility in commit lists');
+    console.log('  • Mobile GitHub app displays ~40 characters');
+    console.log('  • Git CLI shows ~50 characters in oneline format');
     console.log('');
-    console.log('💡 TIP: Use the commit body for longer descriptions');
+    console.log('🔧 FIX: Shorten to GitHub-friendly length');
+    console.log(`  Instead of: "${commitMessage}" (${commitMessage.length} chars)`);
+    console.log('  Try:        "feat: add responsive nav" (26 chars)');
+    console.log('  Or:         "fix: resolve auth timeout" (26 chars)');
+    console.log('  Or:         "perf: optimize image load" (26 chars)');
+    console.log('');
+    console.log('💡 TIP: Use commit body for detailed descriptions');
   }
   
   if (errorOutput.includes('subject-case')) {
@@ -135,7 +162,41 @@ try {
     console.log('  Or:         "fix: resolve login issue"');
   }
   
-  if (errorOutput.includes('scope-enum')) {
+  if (errorOutput.includes('body-leading-blank')) {
+    console.log('📄 BODY FORMATTING ERROR');
+    console.log('Problem: Body should start with a blank line after subject');
+    console.log('');
+    console.log('🎯 GITHUB PRESENTATION:');
+    console.log('  • GitHub commit view displays body separately from subject');
+    console.log('  • Blank line improves readability and GitHub parsing');
+    console.log('  • Essential for conventional commit specification');
+    console.log('');
+    console.log('🔧 FIX: Add blank line between subject and body');
+    console.log(`  Instead of:`);
+    console.log(`    feat: add new feature`);
+    console.log(`    This is the body text`);
+    console.log('  Try:');
+    console.log(`    feat: add new feature`);
+    console.log(``);
+    console.log(`    This is the body text`);
+  }
+  
+  else if (errorOutput.includes('body-max-line-length')) {
+    console.log('📄 BODY LINE LENGTH ERROR');
+    console.log('Problem: Body lines must be ≤72 chars for GitHub optimal display');
+    console.log('');
+    console.log('🎯 GITHUB PRESENTATION:');
+    console.log('  • GitHub commit view wraps text at ~72 characters');
+    console.log('  • Longer lines cause horizontal scrolling in GitHub');
+    console.log('  • 72 chars ensures readability across all Git tools');
+    console.log('');
+    console.log('🔧 FIX: Break long lines at 72 characters');
+    console.log('  • Use manual line breaks for better readability');
+    console.log('  • Each paragraph can have multiple lines');
+    console.log('  • Separate concepts with blank lines');
+  }
+  
+  else if (errorOutput.includes('scope-enum')) {
     console.log('🏷️  INVALID SCOPE WARNING');
     console.log('Problem: Scope is not in the recommended list (optional)');
     console.log('');
