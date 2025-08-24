@@ -102,6 +102,13 @@ jobs:
             npm ci --prefer-offline --no-audit
           fi
 
+      - name: 🧹 Force Clean Build (URL Configuration Fix)
+        run: |
+          echo "🧹 Forcing clean build to fix URL configuration..."
+          rm -rf dist/
+          rm -rf .astro/
+          echo "✅ Cleaned build artifacts and Astro cache"
+          
       - name: ⚡ Speedlight Build (Docker-free)
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -117,22 +124,11 @@ jobs:
           echo "📋 Build Context: ${BUILD_CONTEXT}"
           echo "🎯 Target URL: ${DEPLOY_URL}"
           echo "⚡ No browser dependencies needed for static build"
-          echo "⚡ Strategy: Docker-free Node.js with aggressive caching"
+          echo "⚡ Strategy: Docker-free Node.js with clean build"
           echo ""
           
-          # Intelligent build detection
-          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            SOURCE_NEWER=$(find src/ assets/ -newer dist/index.html 2>/dev/null | wc -l)
-            if [ "$SOURCE_NEWER" -eq 0 ]; then
-              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
-              echo "📁 Preview build artifacts (cached):"
-              ls -la dist/
-              exit 0
-            fi
-          fi
-          
-          # Execute build with timing
-          echo "🏗️ Building preview with speedlight cache optimization..."
+          # Execute build with timing (forced clean)
+          echo "🏗️ Building preview with clean environment..."
           time npm run build
           
           echo "📁 Preview build artifacts:"

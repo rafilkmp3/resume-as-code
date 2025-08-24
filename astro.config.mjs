@@ -7,22 +7,41 @@ import icon from 'astro-icon';
  * Clean build-time URL configuration for all deployment environments
  */
 function getSiteUrl() {
-  // Preview deployments (GitHub Actions → Netlify)
+  console.log('🔍 Environment debug:');
+  console.log('  DEPLOY_URL:', process.env.DEPLOY_URL);
+  console.log('  NETLIFY_URL:', process.env.NETLIFY_URL);
+  console.log('  DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
+  console.log('  GITHUB_PAGES:', process.env.GITHUB_PAGES);
+  console.log('  CONTEXT:', process.env.CONTEXT);
+  console.log('  REVIEW_ID:', process.env.REVIEW_ID);
+  
+  // PRIORITY 1: Explicit DEPLOY_URL from workflow (Preview deployments)
   if (process.env.DEPLOY_URL) {
-    console.log('🚀 Preview deployment:', process.env.DEPLOY_URL);
+    console.log('✅ Using DEPLOY_URL:', process.env.DEPLOY_URL);
     return process.env.DEPLOY_URL;
   }
   
-  // Production environment (GitHub Pages)
+  // PRIORITY 2: Netlify environment URLs 
+  if (process.env.DEPLOY_PRIME_URL) {
+    console.log('✅ Using DEPLOY_PRIME_URL:', process.env.DEPLOY_PRIME_URL);
+    return process.env.DEPLOY_PRIME_URL;
+  }
+  
+  if (process.env.NETLIFY_URL) {
+    console.log('✅ Using NETLIFY_URL:', process.env.NETLIFY_URL);
+    return process.env.NETLIFY_URL;
+  }
+  
+  // PRIORITY 3: Production environment (GitHub Pages)
   if (process.env.GITHUB_PAGES === 'true') {
     const prodUrl = 'https://rafilkmp3.github.io/resume-as-code';
-    console.log('🚀 Production deployment:', prodUrl);
+    console.log('✅ Using Production URL:', prodUrl);
     return prodUrl;
   }
   
-  // Local development
+  // PRIORITY 4: Local development fallback
   const localUrl = 'http://localhost:4321';
-  console.log('🚀 Local development:', localUrl);
+  console.log('✅ Using Local Development URL:', localUrl);
   return localUrl;
 }
 
