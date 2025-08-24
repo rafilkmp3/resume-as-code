@@ -1,12 +1,12 @@
 ---
 import resumeData from '../data/resume.json';
+import { getRuntimeSiteUrl } from '../utils/site-url.ts';
 
 const { basics, work, skills, education, projects } = resumeData;
 
 // Use runtime URL detection for reliable preview environment URLs
 // This ensures QR codes and links work correctly in all environments
-const isLocal = Astro.url.hostname === 'localhost';
-const siteUrl = isLocal ? 'http://localhost:4321' : `https://${Astro.url.hostname}`;
+const siteUrl = getRuntimeSiteUrl();
 ---
 
 <!DOCTYPE html>
@@ -164,8 +164,8 @@ const siteUrl = isLocal ? 'http://localhost:4321' : `https://${Astro.url.hostnam
     }
     
     .qr-code {
-      width: 35px;
-      height: 35px;
+      width: 70px;
+      height: 70px;
       border: 1px solid #000;
     }
     
@@ -280,11 +280,17 @@ const siteUrl = isLocal ? 'http://localhost:4321' : `https://${Astro.url.hostnam
     </main>
     
     <footer class="footer">
-      <!-- ATS OPTIMIZED: No QR code, simple text-only footer -->
-      <div style="text-align: left; border-top: 1px solid #000; padding-top: 8px;">
-        <p style="font-size: 10pt; color: #000;">
-          Latest version available online: {siteUrl}
-        </p>
+      <div class="footer-content">
+        <div class="footer-text">
+          <p>📄 View the latest version of this resume online: <a href={siteUrl}>{siteUrl}</a></p>
+        </div>
+        <div class="footer-qr">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(siteUrl)}`}
+            alt="QR Code for resume website"
+            class="qr-code"
+          />
+        </div>
       </div>
     </footer>
   </div>
