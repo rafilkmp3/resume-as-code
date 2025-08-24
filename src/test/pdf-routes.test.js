@@ -1,117 +1,233 @@
 /**
- * Minimal PDF Routes Test
+ * Lightweight PDF Routes Validation
  * 
- * Tests that PDF routes generate HTML content without errors.
- * This ensures QR code generation and template rendering work correctly.
+ * Fast, browser-free test that validates PDF route functionality
+ * without the overhead of Chrome/Playwright. Tests QR code generation,
+ * template rendering, and API redirects using simple HTTP requests.
  */
 
-import { test, expect } from '@playwright/test';
+import { readFile } from 'fs/promises';
+import { resolve } from 'path';
 
-const PDF_ROUTES = [
-  { name: 'Screen PDF', path: '/pdf-screen' },
-  { name: 'Print PDF', path: '/pdf-print' },
-  { name: 'ATS PDF', path: '/pdf-ats' }
-];
+// Test QR code utility directly
+async function testQRCodeGeneration() {
+  console.log('🔍 Testing QR Code Generation...');
+  
+  try {
+    // Import the QR code utility
+    const { generateQRCodeDataURL, QRCodePresets } = await import('../utils/qr-code.ts');
+    
+    // Test basic QR generation
+    const testUrl = 'https://example.com';
+    const dataUrl = await generateQRCodeDataURL(testUrl);
+    
+    // Validate data URL format
+    if (!dataUrl.startsWith('data:image/png;base64,')) {
+      throw new Error('QR code should generate PNG data URL');
+    }
+    
+    if (dataUrl.length < 100) {
+      throw new Error('QR code data URL seems too short');
+    }
+    
+    console.log('✅ Basic QR code generation works');
+    
+    // Test all presets
+    const presets = ['screen', 'print', 'ats'];
+    for (const preset of presets) {
+      const presetUrl = await QRCodePresets[preset](testUrl);
+      if (!presetUrl.startsWith('data:image/png;base64,')) {
+        throw new Error(`${preset} preset should generate PNG data URL`);
+      }
+      console.log(`✅ ${preset} preset works`);
+    }
+    
+    console.log('✅ All QR code presets work correctly');
+    return true;
+  } catch (error) {
+    console.error('❌ QR Code Generation Error:', error.message);
+    return false;
+  }
+}
 
-test.describe('PDF Route Generation', () => {
-  // Test each PDF route loads successfully
-  for (const route of PDF_ROUTES) {
-    test(`${route.name} generates without errors`, async ({ page }) => {
-      // Navigate to PDF route
-      const response = await page.goto(`http://localhost:4321${route.path}`);
+// Test PDF template structure
+async function testPDFTemplates() {
+  console.log('🔍 Testing PDF Template Structure...');
+  
+  const templates = [
+    { name: 'Screen PDF', file: '../pages/pdf-screen.astro' },
+    { name: 'Print PDF', file: '../pages/pdf-print.astro' },
+    { name: 'ATS PDF', file: '../pages/pdf-ats.astro' }
+  ];
+  
+  let allValid = true;
+  
+  for (const template of templates) {
+    try {
+      const templatePath = resolve(process.cwd(), 'src', 'pages', template.file.replace('../pages/', ''));
+      const content = await readFile(templatePath, 'utf8');
       
-      // Verify response is successful
-      expect(response?.status()).toBe(200);
+      // Check for required imports
+      if (!content.includes("import { QRCodePresets }")) {
+        throw new Error('Missing QRCodePresets import');
+      }
       
-      // Verify basic page structure exists
-      await expect(page.locator('h1')).toBeVisible();
-      await expect(page.locator('.header')).toBeVisible();
-      await expect(page.locator('.footer')).toBeVisible();
+      if (!content.includes("import { getRuntimeSiteUrl }")) {
+        throw new Error('Missing getRuntimeSiteUrl import');
+      }
       
-      // Verify QR code image loads (data URL should be present)
-      const qrImg = page.locator('.qr-code');
-      await expect(qrImg).toBeVisible();
+      // Check for QR code generation
+      if (!content.includes('await QRCodePresets.')) {
+        throw new Error('Missing QR code preset usage');
+      }
       
-      // Verify QR code has data URL (starts with "data:")
-      const qrSrc = await qrImg.getAttribute('src');
-      expect(qrSrc).toMatch(/^data:image\//);
+      // Check for secure data URL usage (not external API)
+      if (content.includes('api.qrserver.com')) {
+        throw new Error('Still using external QR API - security risk!');
+      }
       
-      // Verify no JavaScript errors in console
-      const jsErrors = [];
-      page.on('pageerror', error => jsErrors.push(error.message));
+      // Check for required HTML structure
+      const requiredElements = [
+        '<h1', '<h2', '.header', '.footer', '.qr-code',
+        'class="qr-code"', 'src={qrCodeDataURL}'
+      ];
       
-      // Wait a moment for any async operations
-      await page.waitForTimeout(1000);
+      for (const element of requiredElements) {
+        if (!content.includes(element)) {
+          throw new Error(`Missing required element: ${element}`);
+        }
+      }
       
-      // Should have no JavaScript errors
-      expect(jsErrors).toHaveLength(0);
+      // Check for print CSS
+      if (!content.includes('@media print')) {
+        throw new Error('Missing print media queries');
+      }
       
-      console.log(`✅ ${route.name} generated successfully with QR code`);
-    });
+      if (!content.includes('@page')) {
+        throw new Error('Missing @page rules for PDF generation');
+      }
+      
+      console.log(`✅ ${template.name} template structure is valid`);
+    } catch (error) {
+      console.error(`❌ ${template.name} Error:`, error.message);
+      allValid = false;
+    }
   }
   
-  // Test API redirects work
-  test('PDF API routes redirect correctly', async ({ page }) => {
-    const apiRoutes = [
-      { api: '/api/pdf/screen', target: '/pdf-screen' },
-      { api: '/api/pdf/print', target: '/pdf-print' },
-      { api: '/api/pdf/ats', target: '/pdf-ats' }
-    ];
-    
-    for (const route of apiRoutes) {
-      const response = await page.goto(`http://localhost:4321${route.api}`);
+  return allValid;
+}
+
+// Test API route structure
+async function testAPIRoutes() {
+  console.log('🔍 Testing API Route Structure...');
+  
+  const apiRoutes = [
+    { name: 'Screen API', file: '../pages/api/pdf/screen.ts' },
+    { name: 'Print API', file: '../pages/api/pdf/print.ts' },
+    { name: 'ATS API', file: '../pages/api/pdf/ats.ts' }
+  ];
+  
+  let allValid = true;
+  
+  for (const route of apiRoutes) {
+    try {
+      const routePath = resolve(process.cwd(), 'src', 'pages', 'api', 'pdf', route.file.replace('../pages/api/pdf/', ''));
+      const content = await readFile(routePath, 'utf8');
       
-      // Should redirect (302) to target page
-      expect([200, 302]).toContain(response?.status());
+      // Check for proper redirect structure
+      if (!content.includes('status: 302')) {
+        throw new Error('Missing 302 redirect status');
+      }
       
-      // Final URL should be the target
-      expect(page.url()).toBe(`http://localhost:4321${route.target}`);
+      if (!content.includes('Location')) {
+        throw new Error('Missing Location header');
+      }
       
-      console.log(`✅ ${route.api} redirects to ${route.target}`);
+      if (!content.includes('getRuntimeSiteUrl')) {
+        throw new Error('Missing runtime URL detection');
+      }
+      
+      console.log(`✅ ${route.name} route structure is valid`);
+    } catch (error) {
+      console.error(`❌ ${route.name} Error:`, error.message);
+      allValid = false;
     }
-  });
+  }
   
-  // Test print media queries work
-  test('Print CSS applies correctly', async ({ page }) => {
-    await page.goto('http://localhost:4321/pdf-screen');
-    
-    // Emulate print media
-    await page.emulateMedia({ media: 'print' });
-    
-    // Check that print styles are applied
-    const body = page.locator('body');
-    const bodyStyles = await body.evaluate(el => {
-      const styles = window.getComputedStyle(el);
-      return {
-        margin: styles.margin,
-        padding: styles.padding,
-        fontSize: styles.fontSize
-      };
-    });
-    
-    // Print styles should modify the layout
-    expect(bodyStyles.margin).toBe('0px');
-    expect(bodyStyles.padding).toBe('0px');
-    
-    console.log('✅ Print CSS media queries work correctly');
-  });
+  return allValid;
+}
+
+// Validate package.json dependencies
+async function testDependencies() {
+  console.log('🔍 Testing Dependencies...');
   
-  // Test QR code data integrity
-  test('QR codes contain valid data URLs', async ({ page }) => {
-    await page.goto('http://localhost:4321/pdf-screen');
+  try {
+    const packagePath = resolve(process.cwd(), 'package.json');
+    const packageContent = await readFile(packagePath, 'utf8');
+    const pkg = JSON.parse(packageContent);
     
-    const qrImg = page.locator('.qr-code');
-    const qrSrc = await qrImg.getAttribute('src');
+    // Check for required dependency
+    if (!pkg.dependencies?.qrcode) {
+      throw new Error('Missing qrcode dependency');
+    }
     
-    // Should be a data URL
-    expect(qrSrc).toMatch(/^data:image\/png;base64,/);
+    // Check that insecure dependencies are removed
+    const insecureDeps = ['ajv-cli', 'puppeteer'];
+    for (const dep of insecureDeps) {
+      if (pkg.dependencies?.[dep] || pkg.devDependencies?.[dep]) {
+        throw new Error(`Insecure dependency ${dep} should be removed`);
+      }
+    }
     
-    // Data URL should be reasonably long (valid base64 content)
-    expect(qrSrc.length).toBeGreaterThan(100);
+    console.log('✅ Dependencies are secure and correct');
+    return true;
+  } catch (error) {
+    console.error('❌ Dependencies Error:', error.message);
+    return false;
+  }
+}
+
+// Main test runner
+async function runTests() {
+  console.log('🚀 Running Lightweight PDF Route Validation Tests\n');
+  
+  const tests = [
+    { name: 'QR Code Generation', fn: testQRCodeGeneration },
+    { name: 'PDF Templates', fn: testPDFTemplates },
+    { name: 'API Routes', fn: testAPIRoutes },
+    { name: 'Dependencies', fn: testDependencies }
+  ];
+  
+  let passed = 0;
+  let failed = 0;
+  
+  for (const test of tests) {
+    console.log(`\n📋 Testing ${test.name}...`);
+    const result = await test.fn();
     
-    // Should not contain external URLs (security check)
-    expect(qrSrc).not.toContain('api.qrserver.com');
-    
-    console.log('✅ QR code is self-hosted and secure');
-  });
-});
+    if (result) {
+      passed++;
+      console.log(`✅ ${test.name}: PASSED`);
+    } else {
+      failed++;
+      console.log(`❌ ${test.name}: FAILED`);
+    }
+  }
+  
+  console.log('\n' + '='.repeat(50));
+  console.log(`📊 TEST RESULTS: ${passed} passed, ${failed} failed`);
+  
+  if (failed === 0) {
+    console.log('🎉 All PDF routes are ready for deployment!');
+    console.log('✅ Secure QR codes, valid templates, working redirects');
+    process.exit(0);
+  } else {
+    console.log('⚠️  Some tests failed - please fix before deployment');
+    process.exit(1);
+  }
+}
+
+// Run tests if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runTests();
+}

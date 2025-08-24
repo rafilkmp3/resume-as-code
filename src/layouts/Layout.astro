@@ -37,6 +37,27 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
     
     <!-- Liquid Glass Background -->
     <style>
+      /* Root theme variables for consistent styling */
+      :root {
+        --foreground: #1a1a1a;
+        --background: #ffffff;
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-hover-bg: rgba(255, 255, 255, 0.15);
+        --separator-light: rgba(0, 0, 0, 0.1);
+        --separator-dark: rgba(0, 0, 0, 0.05);
+      }
+      
+      :global(.dark) {
+        --foreground: #e2e8f0;
+        --background: #0f1419;
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-hover-bg: rgba(0, 0, 0, 0.3);
+        --separator-light: rgba(255, 255, 255, 0.2);
+        --separator-dark: rgba(255, 255, 255, 0.1);
+      }
+      
       body {
         background: linear-gradient(135deg, 
           hsl(230, 30%, 95%) 0%,
@@ -80,6 +101,37 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
         background: rgba(37, 99, 235, 0.2);
         transform: translateY(-2px) scale(1.02);
         box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+      }
+      
+      :global(.dark) .glass-button {
+        background: rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        color: #e2e8f0;
+      }
+      
+      :global(.dark) .glass-button:hover {
+        background: rgba(37, 99, 235, 0.25);
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
+      }
+      
+      /* Modern glass button styles using theme variables */
+      :global(.glass-button-modern) {
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        color: var(--foreground);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+      }
+      
+      :global(.glass-button-modern:hover) {
+        background: var(--glass-hover-bg);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+      
+      :global(.dark .glass-button-modern:hover) {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
       }
     </style>
   </head>
