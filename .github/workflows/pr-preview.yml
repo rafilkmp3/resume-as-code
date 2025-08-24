@@ -91,20 +91,6 @@ jobs:
         with:
           args: status --json
 
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        id: setup-chrome
-        uses: ./.github/actions/setup-chrome-arm64
-
-      - name: Verify Chrome Installation
-        run: |
-          echo "🧪 Testing Chrome installation..."
-          echo "Chrome Version: ${{ steps.setup-chrome.outputs.chrome-version }}"
-          echo "Chrome Path: ${{ steps.setup-chrome.outputs.chrome-path }}"
-          
-          # Test Chrome functionality
-          ${{ steps.setup-chrome.outputs.chrome-path }} --version
-          ${{ steps.setup-chrome.outputs.chrome-path }} --headless --disable-gpu --no-sandbox --dump-dom --virtual-time-budget=1000 https://www.google.com | head -10
-          echo "✅ Chrome ${{ steps.setup-chrome.outputs.chrome-version }} is working on ARM64!"
 
       - name: ⚡ Install Dependencies (with speedlight cache)
         run: |
@@ -130,7 +116,7 @@ jobs:
           echo "=========================================="
           echo "📋 Build Context: ${BUILD_CONTEXT}"
           echo "🎯 Target URL: ${DEPLOY_URL}"
-          echo "📦 Chrome: ${{ steps.setup-chrome.outputs.chrome-version }}"
+          echo "⚡ No browser dependencies needed for static build"
           echo "⚡ Strategy: Docker-free Node.js with aggressive caching"
           echo ""
           
@@ -202,10 +188,6 @@ jobs:
         with:
           sparse-checkout: |
             budget.json
-            .github/actions/setup-chrome-arm64
-
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
             
       - name: Smart Lighthouse Performance Testing
         run: |
@@ -641,12 +623,6 @@ jobs:
     steps:
       - name: Checkout for accessibility testing
         uses: actions/checkout@v5
-        with:
-          sparse-checkout: |
-            .github/actions/setup-chrome-arm64
-
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
 
       - name: Smart Accessibility Testing
         run: |
