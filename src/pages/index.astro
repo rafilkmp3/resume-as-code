@@ -1334,14 +1334,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
   }
 
-  /* Apple Experience Container - Hover boundaries for full experience */
+  /* Apple Experience Container - Clean liquid glass hover boundaries */
   .apple-experience-container {
     border-radius: 16px;
-    padding: 1.5rem;
-    margin: -0.5rem;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    padding: 1.25rem;
+    margin: -1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
   }
 
   .apple-experience-container::before {
@@ -1351,69 +1350,36 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
   }
 
   .apple-experience-container:hover::before {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
 
   .apple-experience-container:hover {
-    transform: translateY(-4px);
-    cursor: pointer;
-  }
-
-  /* "Show More" indicator on hover */
-  .apple-experience-container::after {
-    content: '⌄ Show Details';
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 0.75rem; /* 12pt */
-    font-weight: 500;
-    color: var(--link-color);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    transform: translateY(4px);
-    pointer-events: none;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    white-space: nowrap;
-  }
-
-  .apple-experience-container:hover::after {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-1px);
   }
 
   /* Dark theme for experience container */
   :global(.dark) .apple-experience-container::before {
-    background: rgba(0, 0, 0, 0.1);
-    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.04);
   }
 
   :global(.dark) .apple-experience-container:hover::before {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.25);
     border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Dark theme for "Show Details" indicator */
-  :global(.dark) .apple-experience-container::after {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: var(--link-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 
   /* Enhanced Experience Summary Typography */
