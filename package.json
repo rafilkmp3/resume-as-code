@@ -1,14 +1,14 @@
 {
-  "name": "resume-astro",
+  "name": "resume-as-code",
   "type": "module",
-  "version": "0.0.1",
+  "version": "4.8.0",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "build:clean": "rm -rf dist && npm run build",
     "preview": "astro preview",
     "astro": "astro",
-    "version:check": "node scripts/generate-version.js"
+    "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'"
   },
   "dependencies": {
     "@iconify-json/heroicons": "^1.2.2",
