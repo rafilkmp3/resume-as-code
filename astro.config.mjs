@@ -53,12 +53,27 @@ export default defineConfig({
   output: 'static', // Ensure static output for all deployment targets
   trailingSlash: 'ignore', // Handle both with/without trailing slash
   build: {
-    format: 'directory' // Create clean URLs
+    format: 'directory', // Create clean URLs
+    // CSS optimization to prevent render-blocking (Context7 best practices)
+    inlineStylesheets: 'always', // Always inline CSS to prevent render-blocking for LCP optimization
+    assets: '_astro' // Consistent asset directory for better caching
+  },
+  // Performance optimization for LCP improvement  
+  vite: {
+    plugins: [tailwindcss()],
+    build: {
+      // Optimize CSS delivery
+      cssCodeSplit: true, // Split CSS by entry points for better caching
+      assetsInlineLimit: 4096, // Inline assets smaller than 4KB (balance performance vs cache)
+      rollupOptions: {
+        output: {
+          // Ensure consistent asset naming for better caching
+          assetFileNames: 'assets/[name].[hash][extname]'
+        }
+      }
+    }
   },
   integrations: [
     icon()
-  ],
-  vite: {
-    plugins: [tailwindcss()]
-  }
+  ]
 });

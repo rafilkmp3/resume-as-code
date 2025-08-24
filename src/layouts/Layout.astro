@@ -21,6 +21,12 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     
+    <!-- Critical resource preloading for LCP optimization (Astro best practices) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- Astro will automatically handle CSS optimization with inlineStylesheets: 'auto' -->
+    
     <!-- Google Tag Manager -->
     <GoogleTagManager />
     
