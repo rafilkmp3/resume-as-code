@@ -252,14 +252,16 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               <p class="apple-body apple-text-flow mb-4">{job.summary}</p>
               
               {job.highlights && (
-                <ul class="space-y-3 apple-paragraph-spacing">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                   {job.highlights.map((highlight) => (
-                    <li class="flex items-start space-x-3">
-                      <span class="mt-1.5 font-bold flex-shrink-0" style="color: var(--link-color);">•</span>
-                      <span class="apple-body apple-smart-break flex-1">{highlight}</span>
-                    </li>
+                    <div class="apple-highlight-card">
+                      <div class="apple-highlight-icon">
+                        <LiquidGlassIcon name="heroicons:check-circle" size={16} variant="subtle" />
+                      </div>
+                      <p class="apple-highlight-text">{highlight}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           ))}
@@ -307,15 +309,15 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               </div>
               
               {project.highlights && (
-                <div class="mb-4">
-                  <ul class="space-y-2">
-                    {project.highlights.map((highlight) => (
-                      <li class="flex items-start space-x-2">
-                        <span class="mt-1" style="color: var(--link-color);">•</span>
-                        <span class="apple-body">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                  {project.highlights.map((highlight) => (
+                    <div class="apple-highlight-card">
+                      <div class="apple-highlight-icon">
+                        <LiquidGlassIcon name="heroicons:sparkles" size={16} variant="subtle" />
+                      </div>
+                      <p class="apple-highlight-text">{highlight}</p>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -1223,6 +1225,112 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   }
 
   /* Remove old mobile/desktop scaling - now using fluid typography */
+
+  /* Apple-Style Highlight Cards - Compact containers with fancy styling */
+  .apple-highlight-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .apple-highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      var(--link-color) 0%, 
+      rgba(var(--link-color-rgb, 30, 64, 175), 0.7) 50%,
+      transparent 100%
+    );
+    opacity: 0.8;
+  }
+
+  .apple-highlight-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .apple-highlight-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(var(--link-color-rgb, 30, 64, 175), 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .apple-highlight-text {
+    font-size: 0.875rem; /* 14pt */
+    line-height: 1.5;
+    color: var(--foreground);
+    margin: 0;
+    font-weight: 500;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Dark theme adaptations for highlight cards */
+  :global(.dark) .apple-highlight-card {
+    background: rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  :global(.dark) .apple-highlight-card:hover {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  :global(.dark) .apple-highlight-icon {
+    background: rgba(96, 165, 250, 0.2);
+  }
+
+  /* CSS custom properties for color calculations */
+  :root {
+    --link-color-rgb: 30, 64, 175;
+  }
+
+  :global(.dark) {
+    --link-color-rgb: 96, 165, 250;
+  }
+
+  /* Responsive adjustments for highlight cards */
+  @media (max-width: 768px) {
+    .apple-highlight-card {
+      padding: 0.75rem 0.875rem;
+      gap: 0.625rem;
+    }
+    
+    .apple-highlight-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+    }
+    
+    .apple-highlight-text {
+      font-size: 0.8125rem; /* 13pt on mobile */
+      line-height: 1.4;
+    }
+  }
 </style>
 
 <script>
