@@ -1,21 +1,7 @@
 @import "tailwindcss";
 
 @layer base {
-  :root {
-    --foreground: #000000; /* Pure black for AAA compliance */
-    --foreground-muted: #2d3748; /* Darker muted text for better contrast */
-    --link-color: #1a365d; /* Darker blue for better contrast */
-    --heading-color: #000000; /* Pure black for headings */
-    --glass-text: #000000; /* Ensure glass text is readable */
-  }
-  
-  [data-theme="dark"] {
-    --foreground: #ffffff; /* Pure white for AAA compliance */
-    --foreground-muted: #e2e8f0; /* Lighter muted text for better contrast on dark */
-    --link-color: #63b3ed; /* Lighter blue for better contrast on dark */
-    --heading-color: #ffffff; /* Pure white for headings on dark */
-    --glass-text: #ffffff; /* Ensure glass text is readable on dark */
-  }
+  /* Theme variables removed to prevent conflicts - they are defined in index.astro for better control */
 
   * {
     box-sizing: border-box;

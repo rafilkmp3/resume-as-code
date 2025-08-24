@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import LiquidGlassCard from '../components/LiquidGlassCard.astro';
 import ContactButton from '../components/ContactButton.astro';
 import QRCodeButton from '../components/QRCodeButton.astro';
+import ProfilePhotoModal from '../components/ProfilePhotoModal.astro';
 import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
@@ -16,56 +17,110 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
 <Layout title={`${basics.name} - ${basics.label}`} description={basics.summary}>
   <main class="min-h-screen py-8 px-4">
-    <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8">
+    <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8 apple-motion-container">
       
       <!-- Hero Section with Advanced Liquid Glass -->
-      <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12">
+      <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12 apple-section-animate">
         <div class="mb-6">
-          <ResponsiveImage 
-            src={basics.image} 
-            alt={basics.name}
-            class="w-32 h-32 mx-auto rounded-full border-4 border-white/20 shadow-2xl"
-            loading="eager"
-            fetchpriority="high"
-            width={128}
-            height={128}
-          />
+          <button 
+            onclick={`showProfileModal('${basics.image}', '${basics.name}', '${basics.label}')`}
+            class="profile-photo-button cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            aria-label={`View ${basics.name}'s profile photo in larger size`}
+            type="button"
+          >
+            <ResponsiveImage 
+              src={basics.image} 
+              alt={basics.name}
+              class="w-32 h-32 mx-auto rounded-full border-4 border-white/20 shadow-2xl"
+              loading="eager"
+              fetchpriority="high"
+              width={128}
+              height={128}
+            />
+          </button>
         </div>
         
-        <h1 class="text-4xl md:text-5xl font-bold mb-4" style="color: var(--heading-color);">
-          {basics.name}
-        </h1>
-        
-        <p class="text-xl md:text-2xl mb-6 leading-relaxed" style="color: var(--foreground);">
-          {basics.label}
-        </p>
-        
-        <p class="text-base md:text-lg max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto leading-relaxed" style="color: var(--foreground);">
-          {basics.summary}
-        </p>
-        
-        <!-- Location Badge -->
-        <a 
-          href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center mt-6 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer"
-          aria-label="View Rio de Janeiro location on Google Maps"
-        >
-          <div class="mr-2">
-            <LiquidGlassIcon name="heroicons:map-pin" size={16} variant="subtle" />
+        <!-- Apple-Style Name and Title Section -->
+        <div class="text-center mb-8">
+          <h1 class="apple-display-large mb-3">
+            {basics.name}
+          </h1>
+          
+          <h2 class="apple-subtitle mb-4">
+            {basics.label}
+          </h2>
+        </div>
+
+        <!-- Professional Summary with Apple Typography -->
+        <div class="max-w-4xl mx-auto mb-8">
+          <p class="apple-body text-center leading-relaxed apple-smart-break">
+            {basics.summary}
+          </p>
+        </div>
+
+        <!-- Apple-Style Contact Information Card -->
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 mb-6">
+            <!-- Email Contact Badge -->
+            <a 
+              href={`mailto:${basics.email}`}
+              class="apple-contact-badge group"
+              aria-label={`Email ${basics.name}`}
+            >
+              <div class="apple-contact-icon">
+                <LiquidGlassIcon name="heroicons:envelope" size={20} variant="subtle" />
+              </div>
+              <div class="apple-contact-info">
+                <div class="apple-contact-label">Email</div>
+                <div class="apple-contact-value">{basics.email}</div>
+              </div>
+            </a>
+
+            <!-- Phone Contact Badge -->
+            <a 
+              href={`tel:${basics.phone}`}
+              class="apple-contact-badge group"
+              aria-label={`Call ${basics.name}`}
+            >
+              <div class="apple-contact-icon">
+                <LiquidGlassIcon name="heroicons:phone" size={20} variant="subtle" />
+              </div>
+              <div class="apple-contact-info">
+                <div class="apple-contact-label">Phone</div>
+                <div class="apple-contact-value">{basics.phone}</div>
+              </div>
+            </a>
+
+            <!-- Location Contact Badge -->
+            <a 
+              href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="apple-contact-badge group"
+              aria-label="View Rio de Janeiro location on Google Maps"
+            >
+              <div class="apple-contact-icon">
+                <LiquidGlassIcon name="heroicons:map-pin" size={20} variant="subtle" />
+              </div>
+              <div class="apple-contact-info">
+                <div class="apple-contact-label">Location</div>
+                <div class="apple-contact-value">{basics.location.city}, {basics.location.region}</div>
+              </div>
+            </a>
           </div>
-          <span class="text-sm font-medium" style="color: var(--foreground);">{basics.location.city}, {basics.location.region}</span>
-        </a>
+        </div>
       </LiquidGlassCard>
 
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
       <!-- Connect & Download Section -->
-      <LiquidGlassCard class="p-8">
-        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center" style="color: var(--heading-color);">Let's Connect</h2>
+      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="1">
+        <h2 class="apple-section-title text-center">Let's Connect</h2>
         
         <!-- Contact Methods -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--link-color);">Get In Touch</h3>
+          <h3 class="mb-4 text-center">Get In Touch</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- LinkedIn -->
             <ContactButton
@@ -103,15 +158,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               network="WhatsApp"
             />
             
-            <!-- Email Contact -->
-            <ContactButton
-              icon="heroicons:envelope"
-              label="Send Email"
-              value={basics.email}
-              href={`mailto:${basics.email}`}
-              network="Email"
-            />
-
             <!-- QR Code Button -->
             <QRCodeButton url={siteUrl} />
           </div>
@@ -119,7 +165,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
         <!-- PDF Downloads -->
         <div>
-          <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--link-color);">Download PDF</h3>
+          <h3 class="mb-4 text-center">Download PDF</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
               href="/api/pdf/screen"
@@ -170,30 +216,47 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         </div>
       </LiquidGlassCard>
 
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
       <!-- Experience Section -->
-      <LiquidGlassCard class="p-8">
-        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Professional Experience</h2>
+      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="2">
+        <h2 class="apple-section-title">Professional Experience</h2>
         <div class="space-y-8" id="experience-container">
           {work.map((job, index) => (
-            <div class={`experience-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
+            <div class={`experience-item ${index >= 3 ? 'hidden' : ''}`}>
+              {/* Apple HIG Job Separator */}
+              {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
               <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <div>
-                  <h3 class="text-xl md:text-2xl font-semibold" style="color: var(--heading-color);">{job.position}</h3>
-                  <p class="text-lg font-medium" style="color: var(--foreground);">{job.name}</p>
+                  <h3 class="apple-title-2">{job.position}</h3>
+                  {job.url ? (
+                    <a 
+                      href={job.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      class="apple-title-3 hover:underline transition-all duration-200"
+                      style="color: var(--link-color);"
+                    >
+                      {job.name}
+                    </a>
+                  ) : (
+                    <p class="apple-title-3">{job.name}</p>
+                  )}
                 </div>
-                <div class="text-sm md:text-base mt-2 md:mt-0 font-medium" style="color: var(--foreground-muted);">
+                <h5 class="mt-2 md:mt-0 font-medium">
                   {job.startDate} - {job.endDate || 'Present'}
-                </div>
+                </h5>
               </div>
               
-              <p class="mb-4 leading-relaxed" style="color: var(--foreground);">{job.summary}</p>
+              <p class="apple-body apple-text-flow mb-4">{job.summary}</p>
               
               {job.highlights && (
-                <ul class="space-y-2">
+                <ul class="space-y-3 apple-paragraph-spacing">
                   {job.highlights.map((highlight) => (
-                    <li class="flex items-start space-x-2">
-                      <span class="mt-1" style="color: var(--link-color);">•</span>
-                      <span class="text-base leading-relaxed" style="color: var(--foreground);">{highlight}</span>
+                    <li class="flex items-start space-x-3">
+                      <span class="mt-1.5 font-bold flex-shrink-0" style="color: var(--link-color);">•</span>
+                      <span class="apple-body apple-smart-break flex-1">{highlight}</span>
                     </li>
                   ))}
                 </ul>
@@ -219,22 +282,27 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         )}
       </LiquidGlassCard>
 
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
       <!-- Key Projects Section -->
-      <LiquidGlassCard class="p-8">
-        <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Key Projects</h2>
+      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="3">
+        <h2 class="apple-section-title">Key Projects</h2>
         <div class="space-y-8 2xl:columns-2 2xl:gap-8 2xl:space-y-0" id="projects-container">
           {projects.map((project, index) => (
-            <div class={`project-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
+            <div class={`project-item ${index >= 3 ? 'hidden' : ''}`}>
+              {/* Apple HIG Project Separator */}
+              {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
               <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
                 <div class="flex-1">
-                  <h3 class="text-xl font-semibold mb-2" style="color: var(--link-color);">
+                  <h3 class="apple-title-2 mb-2">
                     {project.url ? (
-                      <a href={project.url} target="_blank" rel="noopener noreferrer" class="hover:underline">
+                      <a href={project.url} target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--link-color);">
                         {project.name}
                       </a>
                     ) : project.name}
                   </h3>
-                  <p class="text-base leading-relaxed mb-4" style="color: var(--foreground);">{project.description}</p>
+                  <p class="apple-body apple-text-flow mb-4">{project.description}</p>
                 </div>
               </div>
               
@@ -244,7 +312,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     {project.highlights.map((highlight) => (
                       <li class="flex items-start space-x-2">
                         <span class="mt-1" style="color: var(--link-color);">•</span>
-                        <span class="text-base leading-relaxed" style="color: var(--foreground);">{highlight}</span>
+                        <span class="apple-body">{highlight}</span>
                       </li>
                     ))}
                   </ul>
@@ -254,7 +322,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               {project.keywords && (
                 <div class="flex flex-wrap gap-2">
                   {project.keywords.map((keyword) => (
-                    <span class="glass-token px-4 py-2 text-sm font-medium transition-all duration-200">
+                    <span class="glass-token apple-subheadline px-4 py-2 transition-all duration-200">
                       {keyword}
                     </span>
                   ))}
@@ -281,9 +349,12 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         )}
       </LiquidGlassCard>
 
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
       <!-- Skills Section -->
-      <LiquidGlassCard class="p-8">
-        <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Technical Skills</h2>
+      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
+        <h2 class="apple-section-title text-center">Technical Skills</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {skills.map((skillGroup, index) => {
             // Map skill groups to appropriate icons (removing emoji duplication)
@@ -302,7 +373,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
             
             return (
               <div class="glass-card p-6 space-y-4">
-                <h3 class="text-lg font-semibold flex items-center" style="color: var(--link-color);">
+                <h3 class="apple-headline flex items-center">
                   <div class="mr-2">
                     <LiquidGlassIcon name={iconName} size={20} variant="default" />
                   </div>
@@ -323,7 +394,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     
                     return (
                       <Component 
-                        class={`glass-token px-4 py-2 text-sm font-medium transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
+                        class={`glass-token apple-subheadline px-4 py-2 transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
                         style="color: var(--glass-text);"
                         {...linkProps}
                       >
@@ -341,6 +412,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
     </div>
   </main>
+  
+  <!-- Profile Photo Modal -->
+  <ProfilePhotoModal 
+    name={basics.name}
+    imageSrc={basics.image}
+    title={basics.label}
+  />
 </Layout>
 
 <style>
@@ -384,6 +462,47 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
   }
+
+  /* Profile Photo Button Styling - Apple-style clickable profile photo */
+  .profile-photo-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-photo-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .profile-photo-button:hover::after {
+    opacity: 1;
+  }
+
+  .profile-photo-button:focus {
+    outline: 3px solid rgba(37, 99, 235, 0.5);
+    outline-offset: 4px;
+  }
+
+  /* Apple-style focus ring */
+  .profile-photo-button:focus:not(:focus-visible) {
+    outline: none;
+  }
   
   .icon-svg-small {
     filter: invert(var(--icon-invert, 0.2));
@@ -394,21 +513,35 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     filter: invert(var(--icon-invert, 0.2)) sepia(1) saturate(2) hue-rotate(var(--icon-hue, 200deg));
   }
 
-  /* Theme-aware colors for small icons */
+  /* Apple HIG Semantic Color System - Complete theme-aware variables */
   :root {
+    /* Icon theming */
     --icon-invert: 0.2;
     --icon-hue: 200deg;
+    
+    /* Apple HIG Semantic Colors - Light Theme */
+    --foreground: #1a1a1a; /* Apple HIG Label Primary */
+    --foreground-muted: #6d6d70; /* Apple HIG Label Secondary */  
+    --link-color: #1e40af; /* Apple HIG Brand Blue - Accessible contrast */
+    --primary: #1e40af; /* Same as link-color for consistency */
+    --background: #ffffff;
+    --surface: rgba(255, 255, 255, 0.8);
   }
   
-  [data-theme="dark"] {
+  :global(.dark) {
+    /* Icon theming */
     --icon-invert: 1;
     --icon-hue: 220deg;
+    
+    /* Apple HIG Semantic Colors - Dark Theme */
+    --foreground: #f2f2f7; /* Apple HIG Label Primary Dark */
+    --foreground-muted: #98989d; /* Apple HIG Label Secondary Dark */
+    --link-color: #60a5fa; /* Apple HIG Blue Dark - WCAG AAA compliant */
+    --primary: #60a5fa; /* Same as link-color for consistency */
+    --background: #1a1a1a;
+    --surface: rgba(255, 255, 255, 0.05);
   }
   
-  [data-theme="light"] {
-    --icon-invert: 0.2;
-    --icon-hue: 200deg;
-  }
 
   /* Apple HIG Token Design (Capsule Shape) */
   .glass-token {
@@ -434,13 +567,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   }
 
   /* Theme-aware token styling */
-  [data-theme="dark"] .glass-token {
+  :global(.dark) .glass-token {
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.25);
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
   }
   
-  [data-theme="dark"] .glass-token:hover {
+  :global(.dark) .glass-token:hover {
     background: rgba(59, 130, 246, 0.18);
     border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
@@ -476,6 +609,620 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       margin-bottom: 1.5rem;
     }
   }
+
+  /* ===== APPLE HIG MOTION DESIGN & SUBTLE SEPARATORS ===== */
+  
+  /* Apple HIG Subtle Separators (Vibrancy Style) */
+  .apple-separator {
+    height: 1px;
+    margin: 3rem auto;
+    max-width: 600px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 20%, 
+      rgba(255, 255, 255, 0.15) 50%, 
+      rgba(255, 255, 255, 0.1) 80%, 
+      transparent 100%
+    );
+    position: relative;
+    overflow: hidden;
+  }
+
+  .apple-separator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+    animation: apple-separator-shine 3s ease-in-out infinite;
+  }
+
+  :global(.dark) .apple-separator {
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.08) 20%, 
+      rgba(255, 255, 255, 0.12) 50%, 
+      rgba(255, 255, 255, 0.08) 80%, 
+      transparent 100%
+    );
+  }
+
+  @keyframes apple-separator-shine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+
+  /* Apple HIG Job Separators (More Subtle for Content Items) */
+  .apple-job-separator {
+    height: 0.5px;
+    margin: 2rem auto 2rem;
+    max-width: 400px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.06) 30%, 
+      rgba(255, 255, 255, 0.08) 50%, 
+      rgba(255, 255, 255, 0.06) 70%, 
+      transparent 100%
+    );
+    position: relative;
+    opacity: 0.6;
+  }
+
+  :global(.dark) .apple-job-separator {
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.04) 30%, 
+      rgba(255, 255, 255, 0.06) 50%, 
+      rgba(255, 255, 255, 0.04) 70%, 
+      transparent 100%
+    );
+  }
+
+  /* Dark Theme Adaptations for Contact Icons */
+  :global(.dark) .apple-contact-icon {
+    background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.08) 50%,
+      rgba(0, 0, 0, 0.15) 100%
+    );
+    
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.03);
+    
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  :global(.dark) .apple-contact-badge:hover .apple-contact-icon {
+    background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.25) 0%,
+      rgba(0, 0, 0, 0.12) 50%,
+      rgba(0, 0, 0, 0.25) 100%
+    );
+    
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 2px 0 rgba(255, 255, 255, 0.05);
+    
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Apple HIG Motion Container */
+  .apple-motion-container {
+    /* Enable staggered animations */
+    counter-reset: section-counter;
+  }
+
+  /* Apple HIG Section Animations (Beautiful & Fluid) */
+  .apple-section-animate {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: apple-section-appear 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    counter-increment: section-counter;
+  }
+
+  .apple-section-animate[data-apple-delay="1"] {
+    animation-delay: 0.2s;
+  }
+
+  .apple-section-animate[data-apple-delay="2"] {
+    animation-delay: 0.4s;
+  }
+
+  .apple-section-animate[data-apple-delay="3"] {
+    animation-delay: 0.6s;
+  }
+
+  .apple-section-animate[data-apple-delay="4"] {
+    animation-delay: 0.8s;
+  }
+
+  @keyframes apple-section-appear {
+    0% {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Apple HIG Breathing Animation for Accent Elements */
+  .apple-breathe {
+    animation: apple-breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes apple-breathe {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+    50% { 
+      opacity: 0.7; 
+      transform: scale(1.05); 
+    }
+  }
+
+  /* Enhanced Apple HIG Button Animations */
+  .glass-button-modern {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: var(--foreground);
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    /* Apple's preferred cubic-bezier for fluid motion */
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-origin: center;
+  }
+  
+  .glass-button-modern:hover {
+    background: rgba(255, 255, 255, 0.15);
+    /* Apple HIG Scale + Lift combination */
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-button-modern:active {
+    /* Apple HIG Quick feedback on tap */
+    transform: translateY(-1px) scale(0.98);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Apple HIG Token Enhance Animations */
+  .glass-token {
+    background: rgba(37, 99, 235, 0.08);
+    backdrop-filter: blur(10px) saturate(150%);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 999px; /* Capsule shape as per Apple HIG */
+    color: var(--glass-text);
+    text-decoration: none;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    /* Apple's spring-like easing for tokens */
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    transform-origin: center;
+  }
+  
+  .glass-token:hover {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+    /* Apple HIG Gentle lift with slight scale */
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .glass-token:active {
+    transform: translateY(0px) scale(0.97);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Apple HIG Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    .apple-section-animate,
+    .apple-separator::before,
+    .apple-job-separator::before {
+      animation: none;
+    }
+    
+    .apple-section-animate {
+      opacity: 1;
+      transform: none;
+    }
+    
+    .glass-button-modern:hover,
+    .glass-token:hover {
+      transform: none;
+    }
+  }
+
+  /* ===== MOBILE VIEWPORT OPTIMIZATIONS (IPHONE 15 PRO MAX & SIMILAR) ===== */
+  
+  @media (max-width: 430px) {
+    /* Apple HIG: Optimize spacing for iPhone 15 Pro Max (430px) */
+    .apple-motion-container {
+      space-y: 6rem; /* Increased spacing between sections */
+    }
+    
+    /* Contact buttons: Better mobile grid layout */
+    .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4 {
+      grid-template-columns: 1fr 1fr; /* 2 columns on mobile for better space usage */
+      gap: 0.75rem; /* Tighter gaps for mobile */
+    }
+    
+    /* Skills grid: Optimize for mobile readability */
+    .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4 {
+      grid-template-columns: 1fr; /* Single column on mobile for readability */
+      gap: 1rem;
+    }
+    
+    /* PDF download buttons: Stack vertically on mobile */
+    .grid.grid-cols-1.sm\\:grid-cols-3 {
+      grid-template-columns: 1fr; /* Single column for mobile */
+      gap: 0.75rem;
+    }
+    
+    /* Apple HIG: Larger touch targets for mobile */
+    .glass-button-modern {
+      min-height: 48px; /* Apple HIG minimum touch target */
+      padding: 1rem 1.5rem;
+    }
+    
+    .glass-token {
+      min-height: 32px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem; /* Slightly larger text on mobile */
+    }
+    
+    /* Apple HIG: Reduce animation intensity on mobile for comfort */
+    .apple-section-animate {
+      animation-duration: 0.6s; /* Faster animations on mobile */
+    }
+    
+    .glass-button-modern:hover {
+      transform: translateY(-1px) scale(1.01); /* Reduced motion on mobile */
+    }
+    
+    .glass-token:hover {
+      transform: translateY(-1px) scale(1.02); /* Gentler mobile interactions */
+    }
+  }
+
+  /* ===== MACBOOK RETINA OPTIMIZATIONS (2560PX & SIMILAR) ===== */
+  
+  @media (min-width: 2560px) {
+    /* Wide screen container optimization */
+    .max-w-4xl.lg\\:max-w-6xl.xl\\:max-w-7xl {
+      max-width: 96rem; /* 1536px - even wider on large displays */
+    }
+    
+    /* Skills: Use more columns on very wide screens */
+    .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4.\\32xl\\:grid-cols-5 {
+      grid-template-columns: repeat(6, 1fr); /* 6 columns on ultra-wide */
+    }
+    
+    /* Contact buttons: Better distribution on wide screens */
+    .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4 {
+      grid-template-columns: repeat(6, 1fr); /* 6 columns for contact buttons */
+    }
+    
+    /* Apple HIG: Optimize sections for wide screen viewing */
+    .apple-motion-container {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
+  }
+
+  /* ===== APPLE HIG COMPREHENSIVE TYPOGRAPHY SYSTEM ===== */
+  /* Fluid typography that prevents text from being too big or too small */
+  
+  /* Apple HIG Display Large - Hero name only (h1) */
+  .apple-display-large, h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem); /* 36pt - 56pt fluid scaling */
+    font-weight: 800; /* Extra Bold for impact */
+    line-height: clamp(1.05, 1.1, 1.15); /* Tight but readable */
+    letter-spacing: clamp(-0.04em, -0.035em, -0.03em); /* Responsive letter spacing */
+    color: var(--foreground);
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    font-optical-sizing: auto;
+    margin-bottom: clamp(1rem, 2.5vw, 2rem);
+  }
+  
+  /* Apple HIG Large Title - Major section headers (h2) */
+  .apple-section-title, h2 {
+    font-size: clamp(1.375rem, 2.75vw, 2rem); /* 22pt - 32pt fluid scaling - Reduced from 40pt */
+    font-weight: 700; /* Bold */
+    line-height: clamp(1.2, 1.25, 1.3); /* Responsive line height */
+    letter-spacing: clamp(-0.025em, -0.02em, -0.015em);
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem); /* Reduced margin */
+    color: var(--foreground);
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+  
+  /* Apple HIG Title 1 - Subsection headers (h3) */
+  .apple-title-1, .apple-title-2, h3 {
+    font-size: clamp(1.125rem, 2.25vw, 1.5rem); /* 18pt - 24pt fluid scaling - Better balance */
+    font-weight: 600; /* Semi-bold */
+    line-height: clamp(1.25, 1.3, 1.35);
+    letter-spacing: clamp(-0.02em, -0.015em, -0.01em);
+    color: var(--foreground);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+  
+  /* Apple HIG Title 2 - Company names/subheaders (h4) */
+  .apple-title-3, h4 {
+    font-size: clamp(1rem, 2vw, 1.375rem); /* 16pt - 22pt fluid scaling */
+    font-weight: 500; /* Medium */
+    line-height: clamp(1.3, 1.35, 1.4);
+    letter-spacing: clamp(-0.015em, -0.01em, -0.005em);
+    color: var(--foreground);
+    margin-bottom: clamp(0.5rem, 1vw, 1rem);
+  }
+  
+  /* Apple HIG Headline - Subsection headers/skill categories */
+  .apple-headline {
+    font-size: clamp(1rem, 1.75vw, 1.25rem); /* 16pt - 20pt fluid scaling - Increased for better balance */
+    font-weight: 600;
+    line-height: clamp(1.35, 1.4, 1.45);
+    letter-spacing: clamp(-0.01em, -0.005em, 0);
+    color: var(--link-color);
+    margin-bottom: clamp(0.75rem, 1.25vw, 1rem); /* Increased margin for better spacing */
+  }
+  
+  /* Apple HIG h5 - For metadata like job dates */
+  h5 {
+    font-size: clamp(0.875rem, 1.25vw, 1rem); /* 14pt - 16pt fluid scaling */
+    font-weight: 500; /* Medium weight */
+    line-height: clamp(1.4, 1.45, 1.5);
+    letter-spacing: clamp(0, 0.005em, 0.01em);
+    color: var(--foreground);
+    opacity: 0.8; /* Slightly muted for metadata */
+    margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
+  }
+  
+  /* Apple HIG Subtitle - For job title under hero name */
+  .apple-subtitle {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem); /* 20pt - 28pt fluid scaling */
+    font-weight: 500; /* Medium weight, lighter than section titles */
+    line-height: clamp(1.3, 1.35, 1.4);
+    letter-spacing: clamp(-0.01em, -0.005em, 0);
+    color: var(--foreground-muted); /* Slightly muted for hierarchy */
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    text-align: center;
+  }
+  
+  /* Apple HIG Subheadline - Small labels (h6) */
+  .apple-subheadline, h6 {
+    font-size: clamp(0.875rem, 1.25vw, 1rem); /* 14pt - 16pt fluid scaling */
+    font-weight: 500;
+    line-height: clamp(1.4, 1.45, 1.5);
+    letter-spacing: clamp(0, 0.005em, 0.01em);
+    color: var(--foreground);
+    margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
+  }
+  
+  /* Apple HIG Body - Main content/descriptions/paragraphs */
+  .apple-body, p, li, span:not(.apple-contact-label):not(.apple-contact-value) {
+    font-size: clamp(0.9375rem, 1.25vw, 1.0625rem); /* 15pt - 17pt fluid scaling */
+    font-weight: 400;
+    line-height: clamp(1.45, 1.47, 1.5); /* Apple's body line height */
+    letter-spacing: 0;
+    color: var(--foreground);
+    text-wrap: balance; /* Better text wrapping */
+    margin-bottom: clamp(0.75rem, 1.25vw, 1rem);
+  }
+
+  /* Apple-Style Text Flow Enhancement */
+  .apple-text-flow {
+    text-align: left;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+    max-width: 65ch; /* Optimal reading width */
+  }
+
+  /* Smart line breaking for responsive text */
+  .apple-smart-break {
+    text-wrap: balance;
+    word-spacing: normal;
+    hanging-punctuation: first last;
+  }
+
+  /* Enhanced paragraph spacing */
+  .apple-paragraph-spacing > * + * {
+    margin-top: 1.5em;
+  }
+  
+  /* Apple HIG Callout - For dates and secondary info */
+  .apple-callout {
+    font-size: 1rem; /* 16pt = 16px = 1rem */
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: var(--foreground);
+    opacity: 0.8; /* Slightly muted for secondary info */
+  }
+  
+  /* Apple HIG Subheadline - For skill tags and small labels */
+  .apple-subheadline {
+    font-size: 0.9375rem; /* 15pt = 15px = 0.9375rem */
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.005em;
+    color: var(--foreground);
+  }
+  
+  /* Apple HIG Footnote - For very small text */
+  .apple-footnote {
+    font-size: 0.8125rem; /* 13pt = 13px = 0.8125rem */
+    font-weight: 400;
+    line-height: 1.38;
+    letter-spacing: 0.01em;
+    color: var(--foreground);
+    opacity: 0.7;
+  }
+  
+  /* Legacy mobile/desktop scaling removed - fluid typography handles all breakpoints */
+
+  /* Old .apple-display-large removed - now using fluid h1 system */
+
+  /* Apple-Style Contact Badge Components with Smart Text Handling */
+  .apple-contact-badge {
+    display: flex;
+    align-items: center;
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(0.875rem, 2vw, 1.25rem);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px; /* Apple HIG rounded corners */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-width: 0; /* Allow flex shrinkage */
+    width: 100%; /* Full width for better text space */
+    box-sizing: border-box;
+    /* Smart text handling - prevents awkward line breaks */
+    container-type: inline-size; /* Enable container queries */
+  }
+
+  .apple-contact-badge:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .apple-contact-icon {
+    width: 44px;
+    height: 44px;
+    /* Liquid Glass Background - Matching LiquidGlassIcon component */
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Enhanced shadows for depth */
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .apple-contact-badge:hover .apple-contact-icon {
+    transform: translateY(-2px) scale(1.05);
+    /* Enhanced lighting on hover */
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.15) 100%
+    );
+    /* Intensified shadows and highlights */
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 2px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .apple-contact-info {
+    flex: 1;
+    min-width: 0; /* Allows text truncation */
+    overflow: hidden; /* Prevent content overflow */
+  }
+
+  .apple-contact-label {
+    font-size: clamp(0.75rem, 1vw, 0.8125rem); /* Fluid: 12pt - 13pt */
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--foreground);
+    opacity: 0.7;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap; /* Prevent label wrapping */
+  }
+
+  .apple-contact-value {
+    font-size: clamp(0.875rem, 1.25vw, 0.9375rem); /* Fluid: 14pt - 15pt */
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--foreground);
+    /* Apple HIG Smart Text Handling - Responsive Approach */
+    overflow-wrap: break-word;
+    word-break: normal; /* Changed from break-word to prevent awkward breaks */
+    hyphens: auto;
+    /* Default: Single line with ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Container queries for responsive text handling */
+  @container (min-width: 200px) {
+    .apple-contact-value {
+      white-space: normal; /* Allow wrapping on wider containers */
+      overflow: visible;
+      text-overflow: unset;
+      word-spacing: -0.02em; /* Tighter word spacing for better fit */
+    }
+  }
+  
+  /* Enhanced responsive breakpoints for contact badges */
+  @media (max-width: 640px) {
+    .apple-contact-badge {
+      padding: 0.75rem 0.875rem; /* Tighter on mobile */
+      min-height: 60px; /* Ensure touch target */
+    }
+    
+    .apple-contact-value {
+      font-size: 0.875rem; /* 14pt on mobile */
+      line-height: 1.25;
+      /* Mobile: Allow controlled wrapping */
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+      hyphens: auto;
+      word-break: break-word;
+      /* Limit to 2 lines maximum on mobile */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  /* Remove old mobile/desktop scaling - now using fluid typography */
 </style>
 
 <script>

@@ -125,7 +125,7 @@ const iconSize = typeof size === 'number' ? `${size}px` : size;
   }
   
   /* Dark Theme Adaptations */
-  [data-theme="dark"] .liquid-glass-icon {
+  :global(.dark) .liquid-glass-icon {
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 0.02) 50%,
@@ -140,7 +140,7 @@ const iconSize = typeof size === 'number' ? `${size}px` : size;
     border-color: rgba(255, 255, 255, 0.1);
   }
   
-  [data-theme="dark"] .liquid-glass-icon:hover {
+  :global(.dark) .liquid-glass-icon:hover {
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.08) 0%,
       rgba(255, 255, 255, 0.04) 50%,

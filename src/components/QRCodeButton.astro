@@ -119,12 +119,12 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data
     --icon-hue: 200deg;
   }
   
-  [data-theme="dark"] {
+  :global(.dark) {
     --icon-invert: 1;
     --icon-hue: 220deg;
   }
   
-  [data-theme="light"] {
+  :global(.light) {
     --icon-invert: 0.2;
     --icon-hue: 200deg;
   }
