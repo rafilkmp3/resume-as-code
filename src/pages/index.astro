@@ -16,7 +16,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
 <Layout title={`${basics.name} - ${basics.label}`} description={basics.summary}>
   <main class="min-h-screen py-8 px-4">
-    <div class="max-w-4xl mx-auto space-y-8">
+    <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8">
       
       <!-- Hero Section with Advanced Liquid Glass -->
       <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12">
@@ -40,7 +40,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           {basics.label}
         </p>
         
-        <p class="text-base md:text-lg max-w-3xl mx-auto leading-relaxed" style="color: var(--foreground);">
+        <p class="text-base md:text-lg max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto leading-relaxed" style="color: var(--foreground);">
           {basics.summary}
         </p>
         
@@ -66,7 +66,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         <!-- Contact Methods -->
         <div class="mb-8">
           <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--link-color);">Get In Touch</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- LinkedIn -->
             <ContactButton
               icon="simple-icons:linkedin"
@@ -173,7 +173,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Experience Section -->
       <LiquidGlassCard class="p-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Professional Experience</h2>
-        <div class="space-y-8" id="experience-container">
+        <div class="space-y-8 2xl:columns-2 2xl:gap-8 2xl:space-y-0" id="experience-container">
           {work.map((job, index) => (
             <div class={`experience-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
               <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
@@ -222,7 +222,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Key Projects Section -->
       <LiquidGlassCard class="p-8">
         <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Key Projects</h2>
-        <div class="space-y-8" id="projects-container">
+        <div class="space-y-8 2xl:columns-2 2xl:gap-8 2xl:space-y-0" id="projects-container">
           {projects.map((project, index) => (
             <div class={`project-item border-b border-white/10 pb-8 last:border-b-0 ${index >= 3 ? 'hidden' : ''}`}>
               <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
@@ -284,7 +284,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Skills Section -->
       <LiquidGlassCard class="p-8">
         <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--heading-color);">Technical Skills</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {skills.map((skillGroup, index) => {
             // Map skill groups to appropriate icons (removing emoji duplication)
             const skillIcons = [
@@ -444,6 +444,32 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     background: rgba(59, 130, 246, 0.18);
     border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Wide Screen Layout Optimizations */
+  @media (min-width: 1536px) {
+    .experience-item, .project-item {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 2rem;
+      display: block;
+    }
+    
+    /* Ensure proper spacing in column layout */
+    #experience-container .experience-item:not(:last-child),
+    #projects-container .project-item:not(:last-child) {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 2rem;
+    }
+  }
+
+  /* Responsive readability optimization */
+  @media (min-width: 1280px) and (max-width: 1535px) {
+    /* xl screens: optimize without columns for better readability */
+    .experience-item, .project-item {
+      margin-bottom: 1.5rem;
+    }
   }
 </style>
 
