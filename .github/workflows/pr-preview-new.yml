@@ -16,6 +16,7 @@ permissions:
   packages: write
   id-token: write
   checks: write
+  statuses: write
 
 jobs:
   build-and-deploy:

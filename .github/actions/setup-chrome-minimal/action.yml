@@ -27,7 +27,6 @@ runs:
           ~/.cache/puppeteer
           /usr/local/bin/chrome-for-testing
           /usr/bin/chromium-browser
-          /var/cache/apt/archives
         key: chrome-minimal-${{ runner.os }}-${{ inputs.cache-key-suffix }}-${{ hashFiles('**/package*.json') }}
         restore-keys: |
           chrome-minimal-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
