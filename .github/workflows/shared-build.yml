@@ -80,7 +80,6 @@ jobs:
       - name: 'Configure Node.js for CI'
         run: |
           echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
-          echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
           
       - name: '⚡ Install Dependencies (with speedlight cache)'
         run: |
@@ -110,6 +109,7 @@ jobs:
           DEPLOY_URL: ${{ inputs.deploy-url }}
           REVIEW_ID: ${{ inputs.pr-number }}
           NODE_ENV: ${{ inputs.build-context == 'dev' && 'development' || 'production' }}
+          NODE_OPTIONS: --max-old-space-size=4096
           GITHUB_PAGES: ${{ inputs.build-context == 'production' }}
           BUILD_CONTEXT: ${{ inputs.build-context }}
         run: |
