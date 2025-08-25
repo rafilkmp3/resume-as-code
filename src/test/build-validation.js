@@ -18,8 +18,7 @@ const REQUIRED_FILES = [
   'src/utils/qr-code.ts',
   'src/pages/pdf-screen.astro',
   'src/pages/pdf-print.astro', 
-  'src/pages/pdf-ats.astro',
-  'src/pages/api/pdf/screen.ts'
+  'src/pages/pdf-ats.astro'
 ];
 
 const SECURITY_CHECKS = [

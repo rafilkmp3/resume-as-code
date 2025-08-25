@@ -17,6 +17,8 @@
     "prepare": "husky || true"
   },
   "dependencies": {
+    "@astrojs/partytown": "^2.1.4",
+    "@astrojs/sitemap": "^3.5.1",
     "@iconify-json/heroicons": "^1.2.2",
     "@iconify-json/material-symbols": "^1.2.33",
     "@iconify-json/simple-icons": "^1.2.48",
@@ -24,6 +26,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.12",
     "astro": "^5.13.3",
+    "astro-compress": "^2.3.8",
     "astro-icon": "^1.1.5",
     "daisyui": "^5.0.50",
     "qrcode": "^1.5.4",
