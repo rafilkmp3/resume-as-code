@@ -6,16 +6,13 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Trigger on semver tags (v1.2.3) created by release-please
-  workflow_dispatch:  # Allow manual triggering from GitHub UI
-  
-  # Self-trigger: validate workflow changes by testing them
-  push:
     branches: [main]
     paths:
       # 🔧 Workflow Self-Triggering (Infrastructure changes)
       - '.github/workflows/production-deploy.yml'
       - '.github/workflows/_build.yml'
       - '.github/actions/**'  # Reusable action changes
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
 
 concurrency:
   group: production-deploy-${{ github.ref }}
