@@ -169,51 +169,54 @@
   "certificates": [
     {
       "name": "Kubernetes Fundamentals",
-      "date": "2025-08-25",
+      "date": "August 2025",
       "issuer": "The Linux Foundation",
       "url": "https://ti-user-certificates.s3.amazonaws.com/e0df7fbf-a057-42af-8a1f-590912be5460/50b904c0-4882-4781-a5a5-3518f7056983-rafael-bernardo-91c7d319-f01c-443d-8675-d50aca9c816a-certificate.pdf",
       "code": "LFS258",
       "certificationId": "LF-2q9ur2adbz",
+      "description": "Comprehensive certification validating expertise in container orchestration and Kubernetes operations. Mastered cluster architecture, pod management, networking, security policies, and production deployments. Hands-on experience with Helm, GitOps workflows, RBAC implementation, and resource optimization for enterprise-grade reliability.",
       "highlights": [
-        "Completed comprehensive Linux Foundation Kubernetes fundamentals training",
         "Mastered container orchestration, cluster architecture, and Kubernetes operations",
-        "Demonstrated expertise in pod management, services, deployments, and networking",
-        "Validated knowledge of security policies, RBAC, and cluster administration"
+        "Demonstrated expertise in pod management, services, deployments, and networking", 
+        "Validated knowledge of security policies, RBAC, and cluster administration",
+        "Digital credential with Pearson Ontology skills mapping and validation"
       ],
       "keywords": [
         "Kubernetes",
-        "Container Orchestration",
+        "Container Orchestration", 
         "Cloud Native",
-        "Linux Foundation",
-        "Cluster Management",
-        "Pod Management",
         "RBAC",
-        "Kubernetes Security"
-      ]
-    },
-    {
-      "name": "Kubernetes Fundamentals Digital Badge",
-      "date": "2025-08-25",
-      "issuer": "The Linux Foundation via Credly",
-      "url": "https://www.credly.com/badges/dd68f95d-d956-4596-b69e-9465986694a9/public_url",
-      "code": "LFS258",
-      "certificationId": "dd68f95d-d956-4596-b69e-9465986694a9",
-      "highlights": [
-        "Digital badge with Pearson Ontology skills mapping and validation",
-        "Verified competencies in Kubernetes, Helm, API Programming, Security Policies",
-        "Skills validated: Event Logging, Scheduling, Site Reliability Engineering, System Administration",
-        "Industry-recognized digital credential with blockchain verification"
+        "Pod Management",
+        "Kubernetes Networking",
+        "Helm Charts",
+        "kubectl CLI",
+        "Cluster Administration",
+        "Service Discovery",
+        "ConfigMaps & Secrets",
+        "Ingress Controllers",
+        "Resource Quotas",
+        "Rolling Updates",
+        "Multi-node Clusters"
       ],
-      "keywords": [
-        "Kubernetes",
-        "Digital Badge",
-        "Credly",
-        "Helm",
-        "API Programming Interface",
-        "Security Policies",
-        "Event Logging",
-        "Site Reliability Engineering",
-        "System Administration"
+      "formats": [
+        {
+          "type": "pdf",
+          "label": "View PDF Certificate",
+          "url": "https://ti-user-certificates.s3.amazonaws.com/e0df7fbf-a057-42af-8a1f-590912be5460/50b904c0-4882-4781-a5a5-3518f7056983-rafael-bernardo-91c7d319-f01c-443d-8675-d50aca9c816a-certificate.pdf",
+          "description": "Official PDF certificate"
+        },
+        {
+          "type": "badge",
+          "label": "View Digital Badge",
+          "url": "https://www.credly.com/badges/dd68f95d-d956-4596-b69e-9465986694a9/public_url",
+          "description": "Credly digital badge with skills validation"
+        },
+        {
+          "type": "course",
+          "label": "Course Details",
+          "url": "https://training.linuxfoundation.org/training/kubernetes-fundamentals/",
+          "description": "Linux Foundation Kubernetes Fundamentals training course"
+        }
       ]
     }
   ],

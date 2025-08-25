@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: /sitemap-index.xml
+
+# Allow indexing of main resume page and sections
+Allow: /#header
+Allow: /#connect
+Allow: /#experience
+Allow: /#projects
+Allow: /#certifications
+Allow: /#skills
+
+# Allow PDF versions for better discoverability
+Allow: /pdf-screen/
+Allow: /pdf-print/
+Allow: /pdf-ats/
+
+# Disallow admin or development paths if any
+Disallow: /api/

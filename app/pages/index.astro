@@ -20,7 +20,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8 apple-motion-container">
       
       <!-- Hero Section with Advanced Liquid Glass -->
-      <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12 apple-section-animate">
+      <LiquidGlassCard id="header" variant="intense" class="text-center p-8 md:p-12 apple-section-animate">
         <div class="mb-6">
           <button 
             onclick={`showProfileModal('${basics.image}', '${basics.name}', '${basics.label}')`}
@@ -115,8 +115,12 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <div class="apple-separator" aria-hidden="true"></div>
       
       <!-- Connect & Download Section -->
-      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="1">
-        <h2 class="apple-section-title text-center">Let's Connect</h2>
+      <LiquidGlassCard id="connect" class="p-8 apple-section-animate" data-apple-delay="1">
+        <h2 class="apple-section-title text-center mb-8">
+          <a href="#connect" class="hover:underline transition-all duration-200">
+            Let's Connect
+          </a>
+        </h2>
         
         <!-- Contact Methods -->
         <div class="mb-8">
@@ -220,8 +224,12 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <div class="apple-separator" aria-hidden="true"></div>
       
       <!-- Experience Section -->
-      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="2">
-        <h2 class="apple-section-title">Professional Experience</h2>
+      <LiquidGlassCard id="experience" class="p-8 apple-section-animate" data-apple-delay="2">
+        <h2 class="apple-section-title mb-8">
+          <a href="#experience" class="hover:underline transition-all duration-200">
+            Professional Experience
+          </a>
+        </h2>
         <div class="space-y-8" id="experience-container">
           {work.map((job, index) => (
             <div class={`experience-item ${index >= 3 ? 'hidden' : ''}`}>
@@ -287,8 +295,12 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <div class="apple-separator" aria-hidden="true"></div>
       
       <!-- Key Projects Section -->
-      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="3">
-        <h2 class="apple-section-title">Key Projects</h2>
+      <LiquidGlassCard id="projects" class="p-8 apple-section-animate" data-apple-delay="3">
+        <h2 class="apple-section-title mb-8">
+          <a href="#projects" class="hover:underline transition-all duration-200">
+            Key Projects
+          </a>
+        </h2>
         <div class="space-y-8 2xl:columns-2 2xl:gap-8 2xl:space-y-0" id="projects-container">
           {projects.map((project, index) => (
             <div class={`project-item ${index >= 3 ? 'hidden' : ''}`}>
@@ -353,59 +365,81 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Certifications Section -->
       {certificates && certificates.length > 0 && (
         <>
-          <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
-            <h2 class="apple-section-title">Certifications</h2>
+          <LiquidGlassCard id="certifications" class="p-8 apple-section-animate" data-apple-delay="4">
+            <h2 class="apple-section-title mb-8">
+              <a href="#certifications" class="hover:underline transition-all duration-200">
+                Certifications
+              </a>
+            </h2>
             <div class="space-y-6">
               {certificates.map((cert, index) => (
                 <div class="certification-item">
                   {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
                   
-                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
-                    <div class="flex-1">
-                      <h3 class="apple-job-title text-2xl font-semibold">
-                        {cert.name}
-                      </h3>
-                      <div class="apple-company">
-                        {cert.issuer}
-                        {cert.code && <span class="opacity-80"> • {cert.code}</span>}
+                  <div class="apple-experience-container">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                      <div>
+                        <h3 class="apple-title-2">{cert.name}</h3>
+                        <p class="apple-title-3">{cert.issuer}</p>
+                        {cert.code && (
+                          <a 
+                            href={cert.formats?.find(f => f.type === 'course')?.url || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="glass-token apple-subheadline px-4 py-2 transition-all duration-200 mt-2 inline-block hover:scale-105 hover:shadow-lg cursor-pointer"
+                            title="View course details"
+                          >
+                            {cert.code}
+                          </a>
+                        )}
                       </div>
+                      <h5 class="mt-2 md:mt-0 font-medium">
+                        {cert.date}
+                      </h5>
                     </div>
-                    <div class="flex items-center gap-3">
-                      <span class="apple-date">{cert.date}</span>
-                      {cert.url && (
-                        <a 
-                          href={cert.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          class="glass-button-modern inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-                          aria-label={`View ${cert.name} certificate`}
-                        >
-                          <LiquidGlassIcon name="heroicons:academic-cap" size={16} variant="subtle" class="mr-2" />
-                          View Certificate
-                        </a>
-                      )}
-                    </div>
+                    
+                    {cert.formats && cert.formats.length > 0 && (
+                      <div class="flex flex-wrap gap-3 mb-4">
+                        {cert.formats.map((format) => (
+                          <a 
+                            href={format.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="glass-button-modern inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all group"
+                            aria-label={format.label}
+                            title={format.description}
+                          >
+                            <div class="mr-2">
+                              <LiquidGlassIcon 
+                                name={
+                                  format.type === 'badge' ? 'heroicons:shield-check' : 
+                                  format.type === 'course' ? 'heroicons:academic-cap' :
+                                  'heroicons:document-text'
+                                } 
+                                size={20} 
+                                variant="subtle" 
+                              />
+                            </div>
+                            {format.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {cert.description && (
+                      <p class="apple-experience-summary">{cert.description}</p>
+                    )}
+
+                    {cert.keywords && cert.keywords.length > 0 && (
+                      <div class="flex flex-wrap gap-2 mt-4">
+                        {cert.keywords.map((keyword) => (
+                          <span class="glass-token apple-subheadline px-4 py-2 transition-all duration-200">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-
-                  {cert.highlights && cert.highlights.length > 0 && (
-                    <ul class="space-y-1 mb-4">
-                      {cert.highlights.map((highlight) => (
-                        <li class="apple-list-item text-sm leading-relaxed">
-                          {highlight}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {cert.keywords && cert.keywords.length > 0 && (
-                    <div class="flex flex-wrap gap-2">
-                      {cert.keywords.map((keyword) => (
-                        <span class="glass-token apple-subheadline px-3 py-1 text-xs opacity-90">
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -417,8 +451,12 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       )}
       
       <!-- Skills Section -->
-      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="5">
-        <h2 class="apple-section-title text-center">Technical Skills</h2>
+      <LiquidGlassCard id="skills" class="p-8 apple-section-animate" data-apple-delay="5">
+        <h2 class="apple-section-title text-center mb-8">
+          <a href="#skills" class="hover:underline transition-all duration-200">
+            Technical Skills
+          </a>
+        </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {skills.map((skillGroup, index) => {
             // Map skill groups to appropriate icons (removing emoji duplication)
@@ -486,6 +524,16 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 </Layout>
 
 <style>
+  /* Smooth scroll behavior for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Scroll target padding to account for fixed headers if any */
+  .scroll-target {
+    scroll-margin-top: 2rem;
+  }
+
   /* Glass button modern base styles now defined in Layout.astro */
   .glass-button-modern {
     border-radius: 16px;

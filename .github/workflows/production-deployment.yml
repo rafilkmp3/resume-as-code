@@ -220,3 +220,43 @@ jobs:
             echo "- Ensure build artifacts were created successfully" >> $GITHUB_STEP_SUMMARY
             echo "- Check release trigger and permissions" >> $GITHUB_STEP_SUMMARY
           fi
+
+  # 🔍 FIND RELEASE-PLEASE PR FOR RESULTS POSTING
+  find-release-pr:
+    name: 🔍 Find Release PR
+    runs-on: ubuntu-latest
+    if: needs.deploy.result == 'success'
+    needs: [build, deploy]
+    outputs:
+      pr_number: ${{ steps.find-pr.outputs.pr_number }}
+    steps:
+      - name: Find Release-Please PR
+        id: find-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Search for open release-please PR
+          RELEASE_PR=$(gh pr list --repo ${{ github.repository }} --search "chore(release)" --state open --json number --jq '.[0].number // empty' || echo "")
+          if [ -n "$RELEASE_PR" ]; then
+            echo "pr_number=$RELEASE_PR" >> $GITHUB_OUTPUT
+            echo "✅ Found release-please PR #$RELEASE_PR for production test results"
+          else
+            echo "pr_number=" >> $GITHUB_OUTPUT
+            echo "ℹ️ No open release-please PR found for production test results"
+          fi
+
+  # 🚀 POST-DEPLOYMENT LIGHTHOUSE TESTING
+  lighthouse-production:
+    name: 🚀 Lighthouse (Production)
+    needs: [build, deploy, find-release-pr]
+    if: needs.deploy.result == 'success'
+    uses: ./.github/workflows/comprehensive-testing.yml
+    with:
+      target_url: 'https://rafilkmp3.github.io/resume-as-code'
+      environment_name: 'production'
+      environment_context: '${{ github.event.release.tag_name || github.ref_name }}'
+      test_types: 'lighthouse,accessibility,performance'
+      lighthouse_budget_path: './budget.json'
+      artifact_retention_days: 3
+      post_pr_comment: true
+      pr_number: '${{ needs.find-release-pr.outputs.pr_number }}'
