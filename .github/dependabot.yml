@@ -53,6 +53,16 @@ updates:
           - 'patch'
           - 'minor'
           
+      # 🚀 Astro Framework Stack - Critical Frontend Framework
+      astro-framework:
+        patterns:
+          - 'astro'
+          - '@astrojs/*'
+          - 'astro-*'
+        update-types:
+          - 'patch'
+          - 'minor'
+          
       # 🔧 Build & Development Tools
       build-tools:
         patterns:
@@ -89,6 +99,11 @@ updates:
         update-types: ['version-update:semver-major'] 
       # 📄 Template engine stability (breaking changes affect builds)
       - dependency-name: 'handlebars'
+        update-types: ['version-update:semver-major']
+      # 🚀 Astro framework stability (major versions can break builds)
+      - dependency-name: 'astro'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@astrojs/*'
         update-types: ['version-update:semver-major']
 
   # 🐳 Docker Images - Monthly BRT Schedule
