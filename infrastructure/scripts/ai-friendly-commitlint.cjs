@@ -43,7 +43,7 @@ console.log('');
 
 // Run commitlint and capture output
 try {
-  execSync(`npx commitlint --edit ${commitMsgFile}`, { 
+  execSync(`npx commitlint --config infrastructure/ci/commitlint.config.cjs --edit ${commitMsgFile}`, { 
     stdio: 'pipe',
     encoding: 'utf8'
   });

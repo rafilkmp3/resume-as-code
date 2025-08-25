@@ -8,8 +8,8 @@ on:
     paths:
       # Self-trigger: validate commit validation changes
       - '.github/workflows/conventional-commits.yml'
-      - 'scripts/ai-friendly-commitlint.cjs'
-      - 'commitlint.config.cjs'
+      - 'infrastructure/scripts/ai-friendly-commitlint.cjs'
+      - 'infrastructure/ci/commitlint.config.cjs'
       # All other files - validate their commits
       - '**'
 
@@ -70,7 +70,7 @@ jobs:
             echo "$commit_message" > /tmp/commit-msg-$commit_sha
             
             # Run our AI-friendly validator (ensure .cjs extension for CommonJS)
-            if node scripts/ai-friendly-commitlint.cjs /tmp/commit-msg-$commit_sha > /tmp/commit-output-$commit_sha 2>&1; then
+            if node infrastructure/scripts/ai-friendly-commitlint.cjs /tmp/commit-msg-$commit_sha > /tmp/commit-output-$commit_sha 2>&1; then
               echo "✅ **Status**: Valid conventional commit format" >> commit-results.md
               echo "" >> commit-results.md
             else

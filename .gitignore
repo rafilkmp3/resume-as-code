@@ -219,3 +219,6 @@ dist/resume-ats-test*.png
 # Local Netlify folder
 .netlify
 netlify-browsers/
+
+# Workspace directory (build artifacts, reports, temp files)
+workspace/

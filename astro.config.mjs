@@ -52,6 +52,8 @@ const site = getSiteUrl();
 
 // https://astro.build/config
 export default defineConfig({
+  srcDir: './app', // Use app/ instead of src/
+  outDir: './workspace/build', // Output to workspace
   site: site,
   output: 'static', // Ensure static output for all deployment targets
   trailingSlash: 'ignore', // Handle both with/without trailing slash

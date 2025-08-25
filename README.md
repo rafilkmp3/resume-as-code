@@ -57,6 +57,32 @@ graph TB
 - **🔄 CI/CD**: GitHub Actions with bot orchestration and ARM64 performance optimization
 - **📦 Deployment**: GitHub Pages (production) + Netlify (preview) with automated PR comments
 
+## 📁 Project Structure
+
+Modern, semantic directory organization based on AI consensus and enterprise best practices:
+
+```
+├── app/                    # Source code (Astro srcDir)
+│   ├── components/         # Reusable Astro components
+│   ├── data/              # Resume data and content
+│   ├── layouts/           # Page layout templates
+│   ├── pages/             # Astro pages and API routes
+│   ├── schemas/           # Zod validation schemas
+│   ├── styles/            # Global CSS and styling
+│   └── utils/             # Utility functions
+├── infrastructure/        # DevOps and tooling
+│   ├── ai/               # AI tools and Context7 configs
+│   ├── ci/               # CI/CD configurations
+│   └── scripts/          # Build and automation scripts
+├── docs/                 # Modular documentation
+├── tests/                # Test suites (E2E, unit, visual)
+├── public/               # Static assets served directly
+└── workspace/            # Build artifacts and reports
+    ├── build/            # Astro build output
+    ├── reports/          # Generated reports and analysis
+    └── temp/             # Temporary files (gitignored)
+```
+
 ## ⚡ Quick Start
 
 ### Prerequisites
