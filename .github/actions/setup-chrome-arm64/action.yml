@@ -26,59 +26,88 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: 🚀 Cache Chrome Dependencies & Installation
+      uses: actions/cache@v4
+      id: chrome-cache
+      with:
+        path: |
+          /var/cache/apt/archives
+          /usr/bin/chromium-browser
+          /usr/lib/chromium-browser
+          /usr/share/chromium-browser
+          /etc/chromium-browser
+        key: chrome-arm64-${{ runner.os }}-${{ inputs.chrome-version }}-${{ hashFiles('/usr/bin/chromium-browser') }}
+        restore-keys: |
+          chrome-arm64-${{ runner.os }}-${{ inputs.chrome-version }}-
+          chrome-arm64-${{ runner.os }}-
+          
     - name: Install Chrome and Configure for CI/CD
       id: setup
       shell: bash
       run: |
         echo "🔧 Setting up Chrome ${{ inputs.chrome-version }} for ARM64..."
         
-        # Install required dependencies for Chrome (Ubuntu 24.04 ARM64 compatible)
-        sudo apt-get update
-        sudo apt-get install -y \
-          wget \
-          gnupg \
-          software-properties-common \
-          apt-transport-https \
-          ca-certificates \
-          fonts-liberation \
-          libappindicator3-1 \
-          libasound2t64 \
-          libatk-bridge2.0-0 \
-          libdrm2 \
-          libgtk-3-0 \
-          libnspr4 \
-          libnss3 \
-          libx11-xcb1 \
-          libxcomposite1 \
-          libxdamage1 \
-          libxrandr2 \
-          xdg-utils \
-          libxss1 \
-          libglib2.0-0 \
-          libxcb1
+        # Check if Chrome is already cached and working
+        if [[ "${{ steps.chrome-cache.outputs.cache-hit }}" == "true" ]] && [[ -f "/usr/bin/chromium-browser" ]] && /usr/bin/chromium-browser --version >/dev/null 2>&1; then
+          echo "⚡ Chrome cache hit - installation skipped!"
+          CHROME_BIN="/usr/bin/chromium-browser"
+          CHROME_VERSION=$(/usr/bin/chromium-browser --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
+        else
+          echo "📥 Installing Chrome dependencies and browser..."
+          
+          # Update package lists only if needed
+          if [[ ! -f "/var/lib/apt/periodic/update-success-stamp" ]] || [[ $(find /var/lib/apt/periodic/update-success-stamp -mtime +1) ]]; then
+            sudo apt-get update -qq
+          fi
+          
+          # Install dependencies in batch with optimizations  
+          sudo apt-get install -y --no-install-recommends -qq \
+            wget \
+            gnupg \
+            software-properties-common \
+            apt-transport-https \
+            ca-certificates \
+            fonts-liberation \
+            libappindicator3-1 \
+            libasound2t64 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libgtk-3-0 \
+            libnspr4 \
+            libnss3 \
+            libx11-xcb1 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            xdg-utils \
+            libxss1 \
+            libglib2.0-0 \
+            libxcb1
         
-        # Install Chromium Browser (ARM64 Compatible)
-        # Note: Google Chrome is not available for ARM64 Linux
-        # Using Chromium which is the open-source base of Chrome
-        echo "📝 Note: Google Chrome is not available for ARM64 Linux"
-        echo "🔄 Installing Chromium Browser (open-source Chrome base) instead"
-        
-        case "${{ inputs.chrome-version }}" in
-          "stable")
-            sudo apt-get install -y chromium-browser
-            CHROME_BIN="/usr/bin/chromium-browser"
-            ;;
-          "beta"|"dev")
-            echo "⚠️ Beta/Dev versions not available for Chromium on Ubuntu"
-            echo "🔄 Installing stable Chromium instead"
-            sudo apt-get install -y chromium-browser
-            CHROME_BIN="/usr/bin/chromium-browser"
-            ;;
-          *)
-            echo "❌ Invalid Chrome version: ${{ inputs.chrome-version }}"
-            exit 1
-            ;;
-        esac
+          # Install Chromium Browser with optimizations
+          echo "📝 Note: Google Chrome is not available for ARM64 Linux"
+          echo "🔄 Installing Chromium Browser (open-source Chrome base) instead"
+          
+          case "${{ inputs.chrome-version }}" in
+            "stable")
+              sudo apt-get install -y --no-install-recommends -qq chromium-browser
+              CHROME_BIN="/usr/bin/chromium-browser"
+              ;;
+            "beta"|"dev")
+              echo "⚠️ Beta/Dev versions not available for Chromium on Ubuntu"
+              echo "🔄 Installing stable Chromium instead"
+              sudo apt-get install -y --no-install-recommends -qq chromium-browser
+              CHROME_BIN="/usr/bin/chromium-browser"
+              ;;
+            *)
+              echo "❌ Invalid Chrome version: ${{ inputs.chrome-version }}"
+              exit 1
+              ;;
+          esac
+          
+          # Get Chromium version
+          CHROME_VERSION=$($CHROME_BIN --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
+        fi
         
         # Verify Chromium installation
         if [[ ! -f "$CHROME_BIN" ]]; then
@@ -159,54 +188,76 @@ runs:
         echo "📁 Chromium executable: $CHROME_BIN"
         echo "🔧 CI wrapper available at: /usr/local/bin/chrome-ci"
     
+    - name: 🚀 Cache ChromeDriver
+      if: inputs.install-chromedriver == 'true'
+      uses: actions/cache@v4
+      id: chromedriver-cache
+      with:
+        path: |
+          /usr/local/bin/chromedriver
+        key: chromedriver-arm64-${{ steps.setup.outputs.chrome-version }}-${{ runner.os }}
+        restore-keys: |
+          chromedriver-arm64-${{ runner.os }}-
+        
     - name: Install ChromeDriver (Optional)
       if: inputs.install-chromedriver == 'true'
       shell: bash
       run: |
         echo "🚗 Installing ChromeDriver for ARM64..."
         
-        # Get Chrome version for ChromeDriver compatibility
-        CHROME_VERSION=${{ steps.setup.outputs.chrome-version }}
-        CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
-        
-        echo "🔍 Finding compatible ChromeDriver for Chrome $CHROME_MAJOR_VERSION..."
-        
-        # Use ChromeDriver's latest release API to get compatible version
-        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_MAJOR_VERSION")
-        
-        if [[ -z "$CHROMEDRIVER_VERSION" ]]; then
-          echo "⚠️ Could not determine ChromeDriver version for Chrome $CHROME_MAJOR_VERSION, using latest"
-          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE")
-        fi
-        
-        echo "📥 Downloading ChromeDriver $CHROMEDRIVER_VERSION for ARM64..."
-        
-        # Check if ARM64 ChromeDriver is available, fallback to x64 with emulation
-        CHROMEDRIVER_URL_ARM64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux-arm64/chromedriver-linux-arm64.zip"
-        CHROMEDRIVER_URL_X64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
-        
-        echo "🔍 Checking for ARM64 ChromeDriver availability..."
-        if curl --head --silent --fail "$CHROMEDRIVER_URL_ARM64" >/dev/null 2>&1; then
-          echo "✅ ARM64 ChromeDriver available, downloading native binary..."
-          wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_ARM64"
-          CHROMEDRIVER_ARCH="linux-arm64"
+        # Check if ChromeDriver is already cached and working
+        if [[ "${{ steps.chromedriver-cache.outputs.cache-hit }}" == "true" ]] && [[ -f "/usr/local/bin/chromedriver" ]] && /usr/local/bin/chromedriver --version >/dev/null 2>&1; then
+          echo "⚡ ChromeDriver cache hit - installation skipped!"
+          CHROMEDRIVER_VERSION_ACTUAL=$(/usr/local/bin/chromedriver --version | cut -d ' ' -f2)
         else
-          echo "⚠️ ARM64 ChromeDriver not available, using x64 version with emulation"
-          echo "📥 Installing QEMU for x86_64 emulation..."
-          sudo apt-get update -q
-          sudo apt-get install -y qemu-user-static binfmt-support
+          echo "📥 Installing fresh ChromeDriver..."
           
-          # Download x64 version
-          wget -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_X64"
-          CHROMEDRIVER_ARCH="linux64"
+          # Get Chrome version for ChromeDriver compatibility
+          CHROME_VERSION=${{ steps.setup.outputs.chrome-version }}
+          CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
+          
+          echo "🔍 Finding compatible ChromeDriver for Chrome $CHROME_MAJOR_VERSION..."
+          
+          # Use ChromeDriver's latest release API to get compatible version
+          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_MAJOR_VERSION")
+          
+          if [[ -z "$CHROMEDRIVER_VERSION" ]]; then
+            echo "⚠️ Could not determine ChromeDriver version for Chrome $CHROME_MAJOR_VERSION, using latest"
+            CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE")
+          fi
+          
+          echo "📥 Downloading ChromeDriver $CHROMEDRIVER_VERSION for ARM64..."
+          
+          # Check if ARM64 ChromeDriver is available, fallback to x64 with emulation
+          CHROMEDRIVER_URL_ARM64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux-arm64/chromedriver-linux-arm64.zip"
+          CHROMEDRIVER_URL_X64="https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+          
+          echo "🔍 Checking for ARM64 ChromeDriver availability..."
+          if curl --head --silent --fail "$CHROMEDRIVER_URL_ARM64" >/dev/null 2>&1; then
+            echo "✅ ARM64 ChromeDriver available, downloading native binary..."
+            wget -q -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_ARM64"
+            CHROMEDRIVER_ARCH="linux-arm64"
+          else
+            echo "⚠️ ARM64 ChromeDriver not available, using x64 version with emulation"
+            echo "📥 Installing QEMU for x86_64 emulation..."
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq qemu-user-static binfmt-support
+            
+            # Download x64 version
+            wget -q -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL_X64"
+            CHROMEDRIVER_ARCH="linux64"
+          fi
+          
+          unzip -q /tmp/chromedriver.zip -d /tmp/
+          chmod +x /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver
+          sudo mv /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver /usr/local/bin/chromedriver
+          
+          # Verify ChromeDriver
+          CHROMEDRIVER_VERSION_ACTUAL=$(/usr/local/bin/chromedriver --version | cut -d ' ' -f2)
+          
+          # Cleanup
+          rm -rf /tmp/chromedriver.zip /tmp/chromedriver-$CHROMEDRIVER_ARCH/
         fi
-        
-        unzip /tmp/chromedriver.zip -d /tmp/
-        chmod +x /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver
-        sudo mv /tmp/chromedriver-$CHROMEDRIVER_ARCH/chromedriver /usr/local/bin/chromedriver
-        
-        # Verify ChromeDriver
-        CHROMEDRIVER_VERSION_ACTUAL=$(/usr/local/bin/chromedriver --version | cut -d ' ' -f2)
         
         # Set environment variables
         echo "CHROMEDRIVER_PATH=/usr/local/bin/chromedriver" >> $GITHUB_ENV
@@ -214,9 +265,6 @@ runs:
         
         echo "✅ ChromeDriver $CHROMEDRIVER_VERSION_ACTUAL installed"
         echo "📁 ChromeDriver path: /usr/local/bin/chromedriver"
-        
-        # Cleanup
-        rm -rf /tmp/chromedriver.zip /tmp/chromedriver-$CHROMEDRIVER_ARCH/
     
     - name: Verify Setup and Display Summary
       shell: bash

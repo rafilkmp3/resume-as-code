@@ -84,8 +84,19 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: 🌐 Setup Chrome (ARM64 Compatible)
-        uses: ./.github/actions/setup-chrome-arm64
+      - name: 🚀 Cache Lighthouse CI Installation
+        uses: actions/cache@v4
+        id: lhci-cache
+        with:
+          path: ~/.npm
+          key: lhci-${{ runner.os }}-${{ hashFiles('**/package*.json', '.github/workflows/lighthouse-testing.yml') }}
+          restore-keys: |
+            lhci-${{ runner.os }}-
+
+      - name: 🌐 Setup Chrome (Minimal & ARM64 Compatible)
+        uses: ./.github/actions/setup-chrome-minimal
+        with:
+          cache-key-suffix: 'lighthouse-${{ inputs.environment_name }}'
 
       - name: Run Lighthouse CI
         id: lighthouse-ci
@@ -94,8 +105,13 @@ jobs:
         run: |
           echo "🚀 Installing and running Lighthouse CI with ARM64 stability improvements..."
           
-          # Install Lighthouse CI with specific version for stability
-          npm install -g @lhci/cli@0.15.x
+          # Install Lighthouse CI with specific version for stability (cached)
+          if [[ "${{ steps.lhci-cache.outputs.cache-hit }}" == "true" ]] && command -v lhci >/dev/null 2>&1; then
+            echo "⚡ Lighthouse CI cache hit - installation skipped!"
+          else
+            echo "📥 Installing Lighthouse CI..."
+            npm install -g @lhci/cli@0.15.x
+          fi
           
           echo "📊 Running Lighthouse CI autorun for: ${{ inputs.target_url }}"
           echo "🔐 GitHub token configured for status checks"
