@@ -117,39 +117,39 @@ async function testPDFTemplates() {
   return allValid;
 }
 
-// Test API route structure
-async function testAPIRoutes() {
-  console.log('🔍 Testing API Route Structure...');
+// Test HTML PDF pages structure
+async function testHTMLPDFPages() {
+  console.log('🔍 Testing HTML PDF Pages Structure...');
   
-  const apiRoutes = [
-    { name: 'Screen API', file: '../pages/api/pdf/screen.ts' },
-    { name: 'Print API', file: '../pages/api/pdf/print.ts' },
-    { name: 'ATS API', file: '../pages/api/pdf/ats.ts' }
+  const pdfPages = [
+    { name: 'Screen PDF', file: 'pdf-screen.astro' },
+    { name: 'Print PDF', file: 'pdf-print.astro' },
+    { name: 'ATS PDF', file: 'pdf-ats.astro' }
   ];
   
   let allValid = true;
   
-  for (const route of apiRoutes) {
+  for (const page of pdfPages) {
     try {
-      const routePath = resolve(process.cwd(), 'src', 'pages', 'api', 'pdf', route.file.replace('../pages/api/pdf/', ''));
-      const content = await readFile(routePath, 'utf8');
+      const pagePath = resolve(process.cwd(), 'src', 'pages', page.file);
+      const content = await readFile(pagePath, 'utf8');
       
-      // Check for proper redirect structure
-      if (!content.includes('status: 302')) {
-        throw new Error('Missing 302 redirect status');
+      // Check for proper HTML structure
+      if (!content.includes('<!DOCTYPE html>')) {
+        throw new Error('Missing DOCTYPE declaration');
       }
       
-      if (!content.includes('Location')) {
-        throw new Error('Missing Location header');
+      if (!content.includes('@media print')) {
+        throw new Error('Missing print media styles');
       }
       
-      if (!content.includes('getRuntimeSiteUrl')) {
-        throw new Error('Missing runtime URL detection');
+      if (!content.includes('QRCodePresets')) {
+        throw new Error('Missing QR code integration');
       }
       
-      console.log(`✅ ${route.name} route structure is valid`);
+      console.log(`✅ ${page.name} page structure is valid`);
     } catch (error) {
-      console.error(`❌ ${route.name} Error:`, error.message);
+      console.error(`❌ ${page.name} Error:`, error.message);
       allValid = false;
     }
   }
@@ -194,7 +194,7 @@ async function runTests() {
   const tests = [
     { name: 'QR Code Generation', fn: testQRCodeGeneration },
     { name: 'PDF Templates', fn: testPDFTemplates },
-    { name: 'API Routes', fn: testAPIRoutes },
+    { name: 'HTML PDF Pages', fn: testHTMLPDFPages },
     { name: 'Dependencies', fn: testDependencies }
   ];
   
