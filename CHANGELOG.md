@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.9.0...v4.9.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* use tag-based trigger for production deployment ([428ac5e](https://github.com/rafilkmp3/resume-as-code/commit/428ac5ef9a5243e43ed92fb350f3766991b9db83))
+
 ## [4.9.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.8.0...v4.9.0) (2025-08-25)
 
 
