@@ -1,5 +1,5 @@
 ---
-name: 🚀 Staging Deploy (Skips Release Commits)
+name: 🚀 Staging Deploy (Regular Commits Only)
 
 on:
   push:
@@ -37,63 +37,13 @@ env:
   NETLIFY_ENV: staging
 
 jobs:
-  # Check if this is a release-please commit to avoid duplicate deployments
-  check-release-context:
-    name: 🔍 Check Release Context
-    runs-on: ubuntu-24.04-arm
-    outputs:
-      should_deploy_staging: ${{ steps.check.outputs.should_deploy }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 2
-      - name: 🔍 Analyze Commit Message & Author
-        id: check
-        run: |
-          # Get commit info using git log (secure approach)
-          COMMIT_MSG=$(git log --format=%s -n 1 ${{ github.sha }})
-          COMMIT_AUTHOR=$(git log --format=%an -n 1 ${{ github.sha }})
-          
-          echo "📝 Commit message: $COMMIT_MSG"
-          echo "👤 Commit author: $COMMIT_AUTHOR"
-          
-          if echo "$COMMIT_MSG" | grep -q "chore(release):" || \
-             echo "$COMMIT_MSG" | grep -q "chore: release" || \
-             echo "$COMMIT_AUTHOR" | grep -q "release-please"; then
-            echo "🚫 SKIPPING: This is a release-please commit"
-            echo "should_deploy=false" >> $GITHUB_OUTPUT
-          else
-            echo "✅ PROCEEDING: Regular commit, deploying to staging"
-            echo "should_deploy=true" >> $GITHUB_OUTPUT
-          fi
-
-  # 🚫 EXPLICIT SKIP NOTIFICATION - Makes it clear when deployment is skipped
-  skip-staging-deployment:
-    name: 🚫 SKIPPED - Release Commit (No Staging Deploy)
-    needs: check-release-context
-    if: needs.check-release-context.outputs.should_deploy_staging == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🚫 Skip Notification
-        run: |
-          echo "## 🚫 Staging Deployment SKIPPED" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Reason**: This is a release-please commit" >> $GITHUB_STEP_SUMMARY
-          echo "**Behavior**: Release commits skip staging to avoid duplicate deployments" >> $GITHUB_STEP_SUMMARY
-          echo "**Production**: Will be deployed after release via GitHub Pages" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Release Flow" >> $GITHUB_STEP_SUMMARY
-          echo "1. ✅ **Release-please commits** → Skip staging (this workflow)" >> $GITHUB_STEP_SUMMARY
-          echo "2. ✅ **Release tags** → Deploy to production (GitHub Pages)" >> $GITHUB_STEP_SUMMARY
-          echo "3. ✅ **Regular commits** → Deploy to staging (Netlify)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🎯 **This is expected behavior** - no action needed!"
-
   build-staging:
     name: 🏗️ Build Staging
-    needs: check-release-context
-    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
+    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
+    if: |
+      !contains(github.event.head_commit.message, 'chore(release):') &&
+      !contains(github.event.head_commit.message, 'chore: release') &&
+      github.event.head_commit.author.name != 'release-please[bot]'
     uses: ./.github/workflows/shared-build.yml
     with:
       build-context: 'staging'
@@ -102,8 +52,12 @@ jobs:
 
   deploy-staging:
     name: 🚀 Deploy Staging  
-    needs: [check-release-context, build-staging]
-    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
+    needs: build-staging
+    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
+    if: |
+      !contains(github.event.head_commit.message, 'chore(release):') &&
+      !contains(github.event.head_commit.message, 'chore: release') &&
+      github.event.head_commit.author.name != 'release-please[bot]'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     env:
@@ -256,8 +210,13 @@ jobs:
   # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
   post-to-release-please:
     name: 📋 Update PR Status
-    needs: [check-release-context, build-staging, deploy-staging]
-    if: always() && needs.check-release-context.outputs.should_deploy_staging == 'true'
+    needs: [build-staging, deploy-staging]
+    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
+    if: |
+      always() &&
+      !contains(github.event.head_commit.message, 'chore(release):') &&
+      !contains(github.event.head_commit.message, 'chore: release') &&
+      github.event.head_commit.author.name != 'release-please[bot]'
     uses: ./.github/workflows/deployment-status.yml
     with:
       deployment_status: ${{ needs.deploy-staging.result == 'success' && 'ready' || 'failure' }}
