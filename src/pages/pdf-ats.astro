@@ -1,12 +1,16 @@
 ---
 import resumeData from '../data/resume.json';
 import { getRuntimeSiteUrl } from '../utils/site-url.ts';
+import { QRCodePresets } from '../utils/qr-code.ts';
 
 const { basics, work, skills, education, projects } = resumeData;
 
 // Use runtime URL detection for reliable preview environment URLs
 // This ensures QR codes and links work correctly in all environments
 const siteUrl = getRuntimeSiteUrl();
+
+// Generate secure, self-hosted QR code data URL for ATS
+const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
 ---
 
 <!DOCTYPE html>
@@ -174,6 +178,65 @@ const siteUrl = getRuntimeSiteUrl();
       text-decoration: none;
       font-weight: normal;
     }
+    
+    /* Enhanced Paper CSS-inspired print optimizations for ATS */
+    @page {
+      size: letter;
+      margin: 0.75in;
+    }
+    
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      body { 
+        margin: 0; 
+        padding: 0;
+        font-size: 12pt;
+        line-height: 1.4;
+      }
+      
+      .container { 
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .header { 
+        page-break-inside: avoid;
+        margin-bottom: 20pt;
+      }
+      
+      .section { 
+        page-break-inside: avoid;
+        margin: 18pt 0;
+      }
+      
+      .job { 
+        page-break-inside: avoid;
+        margin-bottom: 18pt;
+      }
+      
+      .footer {
+        page-break-inside: avoid;
+        margin-top: 20pt;
+      }
+      
+      .qr-code {
+        width: 60pt;
+        height: 60pt;
+      }
+      
+      /* ATS-optimized typography - larger fonts for better OCR */
+      h1 { font-size: 24pt; }
+      h2 { font-size: 18pt; }
+      .job-title { font-size: 14pt; }
+      .company { font-size: 12pt; }
+      .date, .description { font-size: 12pt; }
+      .skill-tag { font-size: 11pt; }
+    }
   </style>
 </head>
 <body>
@@ -286,7 +349,7 @@ const siteUrl = getRuntimeSiteUrl();
         </div>
         <div class="footer-qr">
           <img 
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(siteUrl)}`}
+            src={qrCodeDataURL}
             alt="QR Code for resume website"
             class="qr-code"
           />

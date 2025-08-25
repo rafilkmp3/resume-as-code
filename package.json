@@ -6,9 +6,14 @@
     "dev": "astro dev",
     "build": "astro build",
     "build:clean": "rm -rf dist && npm run build",
+    "build:astro-only": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "version:check": "curl -s http://localhost:4321/api/version | jq -r '.version'",
+    "test:pdf": "node src/test/pdf-routes.test.js",
+    "test:pdf-ci": "playwright test src/test/pdf-routes.test.js",
+    "test:pdf-dev": "node src/test/pdf-routes.test.js",
+    "test:build": "node src/test/build-validation.js",
     "prepare": "husky || true"
   },
   "dependencies": {
@@ -21,13 +26,14 @@
     "astro": "^5.13.3",
     "astro-icon": "^1.1.5",
     "daisyui": "^5.0.50",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
     "@axe-core/cli": "^4.10.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "ajv-cli": "^5.0.0",
+    "@playwright/test": "^1.55.0",
     "axe-core": "^4.10.3",
     "husky": "^9.1.7",
     "lighthouse": "^12.8.1"

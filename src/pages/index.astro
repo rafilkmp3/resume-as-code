@@ -168,7 +168,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <h3 class="mb-4 text-center">Download PDF</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
-              href="/api/pdf/screen"
+              href="/pdf-screen"
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
@@ -183,7 +183,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               </div>
             </a>
             <a 
-              href="/api/pdf/print"
+              href="/pdf-print"
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
@@ -198,7 +198,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               </div>
             </a>
             <a 
-              href="/api/pdf/ats"
+              href="/pdf-ats"
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
@@ -420,23 +420,11 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 </Layout>
 
 <style>
+  /* Glass button modern base styles now defined in Layout.astro */
   .glass-button-modern {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
-    color: var(--foreground);
     text-decoration: none;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .glass-button-modern:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
   }
 
   .glass-button-modern:hover span {
@@ -618,9 +606,9 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     background: linear-gradient(
       90deg, 
       transparent 0%, 
-      rgba(255, 255, 255, 0.1) 20%, 
-      rgba(255, 255, 255, 0.15) 50%, 
-      rgba(255, 255, 255, 0.1) 80%, 
+      var(--separator-dark) 20%, 
+      var(--separator-light) 50%, 
+      var(--separator-dark) 80%, 
       transparent 100%
     );
     position: relative;
@@ -643,13 +631,11 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     animation: apple-separator-shine 3s ease-in-out infinite;
   }
 
-  :global(.dark) .apple-separator {
+  :global(.dark) .apple-separator::before {
     background: linear-gradient(
-      90deg, 
-      transparent 0%, 
-      rgba(255, 255, 255, 0.08) 20%, 
-      rgba(255, 255, 255, 0.12) 50%, 
-      rgba(255, 255, 255, 0.08) 80%, 
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
       transparent 100%
     );
   }
@@ -668,24 +654,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     background: linear-gradient(
       90deg, 
       transparent 0%, 
-      rgba(255, 255, 255, 0.06) 30%, 
-      rgba(255, 255, 255, 0.08) 50%, 
-      rgba(255, 255, 255, 0.06) 70%, 
+      var(--separator-dark) 30%, 
+      var(--separator-light) 50%, 
+      var(--separator-dark) 70%, 
       transparent 100%
     );
     position: relative;
-    opacity: 0.6;
-  }
-
-  :global(.dark) .apple-job-separator {
-    background: linear-gradient(
-      90deg, 
-      transparent 0%, 
-      rgba(255, 255, 255, 0.04) 30%, 
-      rgba(255, 255, 255, 0.06) 50%, 
-      rgba(255, 255, 255, 0.04) 70%, 
-      transparent 100%
-    );
+    opacity: 0.8;
   }
 
   /* Dark Theme Adaptations for Contact Icons */
@@ -776,27 +751,11 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
   }
 
-  /* Enhanced Apple HIG Button Animations */
+  /* Enhanced Apple HIG Button Animations - now inherits base styles from Layout.astro */
   .glass-button-modern {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    color: var(--foreground);
-    text-decoration: none;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     /* Apple's preferred cubic-bezier for fluid motion */
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform-origin: center;
-  }
-  
-  .glass-button-modern:hover {
-    background: rgba(255, 255, 255, 0.15);
-    /* Apple HIG Scale + Lift combination */
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
   }
 
   .glass-button-modern:active {
