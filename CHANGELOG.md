@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.12.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.0...v4.12.1) (2025-08-25)
+
+
+### Miscellaneous
+
+* cleanup obsolete files and rename workflows ([6b07e88](https://github.com/rafilkmp3/resume-as-code/commit/6b07e882ac692f5cd859d82534e0720f1ca5aeb0))
+
 ## [4.12.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.11.0...v4.12.0) (2025-08-25)
 
 
