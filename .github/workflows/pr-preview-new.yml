@@ -125,7 +125,6 @@ jobs:
     with:
       target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
       environment_name: 'pr-preview'
-      budget_path: './budget.json'
       artifact_retention_days: 3
 
   pr-info:
