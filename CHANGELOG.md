@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.12.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.11.0...v4.12.0) (2025-08-25)
+
+
+### Features
+
+* modernize docs with Astro v5.13.3 + fix Dependabot ([7414259](https://github.com/rafilkmp3/resume-as-code/commit/7414259c12c21762208dd3380749f2608704f7c7))
+* modernize repository structure ([55d2014](https://github.com/rafilkmp3/resume-as-code/commit/55d20145c3cf7d3ad0abcf74463f6190601b90b1))
+
+
+### Bug Fixes
+
+* resolve NODE_OPTIONS env variable issue ([30e43ac](https://github.com/rafilkmp3/resume-as-code/commit/30e43ac1fc3dd8541b84d32be82d1fd023fa8288))
+* resolve workflow artifact naming mismatch ([c0013cf](https://github.com/rafilkmp3/resume-as-code/commit/c0013cfb2af5b6a9d14e278057d9198f6e29ca74))
+
 ## [4.11.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.10.0...v4.11.0) (2025-08-25)
 
 
