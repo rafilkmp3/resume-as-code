@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.12.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.1...v4.12.2) (2025-08-25)
+
+
+### Bug Fixes
+
+* make staging skip behavior explicit and clear ([91cc254](https://github.com/rafilkmp3/resume-as-code/commit/91cc25401de3557aa07df33b2c3d32ab5366f621))
+* prevent staging workflow on release commits ([2cd6034](https://github.com/rafilkmp3/resume-as-code/commit/2cd60343e7bf5c319818c2ff35716aacaf35d613))
+* simple release commit check with startsWith ([ca4dcd0](https://github.com/rafilkmp3/resume-as-code/commit/ca4dcd0ccd51a3fef990e64d16b30b7702ea55cc))
+* use paths-ignore for simple release exclusion ([339100c](https://github.com/rafilkmp3/resume-as-code/commit/339100c4ee6ac035e677a10420697b8ce4f0c8d2))
+
+
+### Miscellaneous
+
+* **release:** test v4.12.2 - testing staging skip behavior ([7470b69](https://github.com/rafilkmp3/resume-as-code/commit/7470b69509e582c435735a2aa0052d654d89063f))
+
 ## [4.12.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.0...v4.12.1) (2025-08-25)
 
 
