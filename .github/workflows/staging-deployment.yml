@@ -4,10 +4,6 @@ name: 🚀 Staging Deploy (Regular Commits Only)
 on:
   push:
     branches: [main]
-    # 🚫 SIMPLE SOLUTION: Ignore files that release-please typically changes
-    paths-ignore:
-      - 'CHANGELOG.md'        # Release-please updates changelog
-      - 'package.json'        # Release-please updates version
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +22,8 @@ env:
 jobs:
   build-staging:
     name: 🏗️ Build Staging
+    # 🚫 SIMPLE CHECK: Skip if release commit
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     uses: ./.github/workflows/shared-build.yml
     with:
       build-context: 'staging'
@@ -35,6 +33,8 @@ jobs:
   deploy-staging:
     name: 🚀 Deploy Staging  
     needs: build-staging
+    # 🚫 SIMPLE CHECK: Skip if release commit  
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     env:
@@ -187,8 +187,9 @@ jobs:
   # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
   post-to-release-please:
     name: 📋 Update PR Status
-    needs: [build-staging, deploy-staging]
-    if: always()
+    needs: [build-staging, deploy-staging] 
+    # 🚫 SIMPLE CHECK: Skip if release commit
+    if: "always() && !startsWith(github.event.head_commit.message, 'chore(release):')"
     uses: ./.github/workflows/deployment-status.yml
     with:
       deployment_status: ${{ needs.deploy-staging.result == 'success' && 'ready' || 'failure' }}
