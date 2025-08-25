@@ -146,9 +146,9 @@ updates:
       - 'ci-cd'
       - 'automated'
       - 'security'
-    # 🎯 Intelligent Action Grouping
+    # 🎯 Intelligent Action Grouping - Complete Coverage
     groups:
-      # 🔧 Core Actions (setup, cache, upload/download)
+      # 🔧 Core Actions (setup, cache, upload/download, checkout)
       core-actions:
         patterns:
           - 'actions/setup-*'
@@ -156,6 +156,9 @@ updates:
           - 'actions/upload-*'
           - 'actions/download-*'
           - 'actions/checkout*'
+          - 'actions/configure-pages*'
+          - 'actions/deploy-pages*'
+          - 'actions/github-script*'
         update-types:
           - 'patch'
           - 'minor'
@@ -166,15 +169,37 @@ updates:
           - 'google/osv-scanner-action*'
           - 'trufflesecurity/trufflehog*'
           - 'aquasecurity/trivy-action*'
+          - 'actions/stale*'
         update-types:
           - 'patch'
           - 'minor'
-      # 🚀 Deployment & Release
+      # 🚀 Deployment & Release Management
       deployment-actions:
         patterns:
           - 'peaceiris/actions-gh-pages*'
           - 'treosh/lighthouse-ci-action*'
           - 'netlify/actions*'
+          - 'South-Paw/action-netlify-cli*'
+          - 'googleapis/release-please-action*'
+          - 'actions/create-github-app-token*'
+        update-types:
+          - 'patch'
+          - 'minor'
+      # 🐳 Docker & Container Actions
+      docker-actions:
+        patterns:
+          - 'docker/setup-buildx-action*'
+          - 'docker/login-action*'
+          - 'docker/build-push-action*'
+          - 'browser-actions/setup-chrome*'
+        update-types:
+          - 'patch'
+          - 'minor'
+      # 💬 PR & Comment Management
+      pr-management-actions:
+        patterns:
+          - 'peter-evans/create-or-update-comment*'
+          - 'actions/github-script*'
         update-types:
           - 'patch'
           - 'minor'
