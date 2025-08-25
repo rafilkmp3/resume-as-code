@@ -95,7 +95,7 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
 
   accessibility-testing:
-    name: ♿ Accessibility - PR Preview URL
+    name: ♿ Accessibility Analysis
     runs-on: ubuntu-latest
     needs: build-and-deploy
     if: needs.build-and-deploy.outputs.preview_url
@@ -118,7 +118,7 @@ jobs:
           echo "✅ Accessibility tests passed"
 
   lighthouse-performance:
-    name: 🚀 Lighthouse - PR Preview URL
+    name: 🚀 Performance Analysis
     uses: ./.github/workflows/lighthouse-testing.yml
     needs: build-and-deploy
     if: needs.build-and-deploy.outputs.preview_url
@@ -127,7 +127,7 @@ jobs:
       environment_name: 'pr-preview'
 
   pr-info:
-    name: 📋 PR Preview Information
+    name: 📋 Update PR Status
     runs-on: ubuntu-latest
     needs: [build-and-deploy]
     if: always() && needs.build-and-deploy.outputs.preview_url
