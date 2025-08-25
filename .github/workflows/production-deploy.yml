@@ -2,8 +2,12 @@
 name: 🚀 Production Deployment
 
 on:
-  release:
-    types: [published]
+  # 🚀 Production deployment triggers
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on semver tags (v1.2.3) created by release-please
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
+  
   # Self-trigger: validate workflow changes by testing them
   push:
     branches: [main]
