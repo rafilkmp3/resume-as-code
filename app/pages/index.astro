@@ -8,7 +8,7 @@ import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
 
-const { basics, work, skills, education, projects } = resumeData;
+const { basics, work, skills, education, projects, certificates } = resumeData;
 
 // Use build-time site URL from Astro config for consistent deployment URLs
 // This leverages the same environment detection used in PDF API routes
@@ -350,8 +350,74 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Apple HIG Subtle Separator -->
       <div class="apple-separator" aria-hidden="true"></div>
       
+      <!-- Certifications Section -->
+      {certificates && certificates.length > 0 && (
+        <>
+          <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
+            <h2 class="apple-section-title">Certifications</h2>
+            <div class="space-y-6">
+              {certificates.map((cert, index) => (
+                <div class="certification-item">
+                  {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
+                  
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+                    <div class="flex-1">
+                      <h3 class="apple-job-title text-2xl font-semibold">
+                        {cert.name}
+                      </h3>
+                      <div class="apple-company">
+                        {cert.issuer}
+                        {cert.code && <span class="opacity-80"> • {cert.code}</span>}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="apple-date">{cert.date}</span>
+                      {cert.url && (
+                        <a 
+                          href={cert.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          class="glass-button-modern inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
+                          aria-label={`View ${cert.name} certificate`}
+                        >
+                          <LiquidGlassIcon name="heroicons:academic-cap" size={16} variant="subtle" class="mr-2" />
+                          View Certificate
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {cert.highlights && cert.highlights.length > 0 && (
+                    <ul class="space-y-1 mb-4">
+                      {cert.highlights.map((highlight) => (
+                        <li class="apple-list-item text-sm leading-relaxed">
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {cert.keywords && cert.keywords.length > 0 && (
+                    <div class="flex flex-wrap gap-2">
+                      {cert.keywords.map((keyword) => (
+                        <span class="glass-token apple-subheadline px-3 py-1 text-xs opacity-90">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </LiquidGlassCard>
+
+          <!-- Apple HIG Subtle Separator -->
+          <div class="apple-separator" aria-hidden="true"></div>
+        </>
+      )}
+      
       <!-- Skills Section -->
-      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
+      <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="5">
         <h2 class="apple-section-title text-center">Technical Skills</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {skills.map((skillGroup, index) => {
