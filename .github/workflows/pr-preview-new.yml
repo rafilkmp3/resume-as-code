@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   build-and-deploy:
-    name: Build & Deploy Preview
+    name: 🏗️ Build & Deploy PR Preview
     runs-on: ubuntu-24.04-arm
     outputs:
       preview_url: ${{ steps.set-url.outputs.preview_url }}
@@ -35,12 +35,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate Netlify Configuration
+      - name: 🔧 Setup Build Environment & Validate Netlify
         uses: ./.github/actions/setup-build-environment
         with:
           cache-suffix: 'pr-${{ github.event.pull_request.number }}'
 
-      - name: Test Netlify CLI functionality
+      - name: 🔐 Test Netlify CLI Authentication
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -61,7 +61,7 @@ jobs:
             exit 1
           fi
 
-      - name: Execute Build
+      - name: 🏗️ Build Astro Site for PR Preview
         uses: ./.github/actions/astro-build
         with:
           build-context: 'pr'
@@ -69,7 +69,7 @@ jobs:
             https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app
           pr-number: ${{ github.event.pull_request.number }}
 
-      - name: Deploy to Netlify
+      - name: 🚀 Deploy to Netlify Preview
         uses: South-Paw/action-netlify-cli@v2
         id: deploy
         with:
@@ -80,14 +80,14 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
-      - name: Set preview URL output
+      - name: 📝 Set Preview URL Output
         id: set-url
         run: |
           PREVIEW_URL="https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app"
           echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
           echo "🌐 Preview URL: ${PREVIEW_URL}"
 
-      - name: Upload Build Artifacts
+      - name: 📦 Upload Build Artifacts
         uses: ./.github/actions/manage-artifacts
         with:
           action: 'upload'
@@ -95,7 +95,7 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
 
   accessibility-testing:
-    name: ♿ Accessibility (Real URL)
+    name: ♿ Accessibility - PR Preview URL
     runs-on: ubuntu-latest
     needs: build-and-deploy
     if: needs.build-and-deploy.outputs.preview_url
@@ -105,12 +105,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Build Environment
+      - name: 🔧 Setup Testing Environment
         uses: ./.github/actions/setup-build-environment
         with:
           cache-suffix: 'accessibility'
 
-      - name: Run Accessibility Tests
+      - name: ♿ Run Accessibility Analysis
         env:
           PREVIEW_URL: ${{ needs.build-and-deploy.outputs.preview_url }}
         run: |
@@ -118,7 +118,7 @@ jobs:
           echo "✅ Accessibility tests passed"
 
   lighthouse-performance:
-    name: 🚀 Lighthouse Performance (Real URL)
+    name: 🚀 Lighthouse - PR Preview URL
     uses: ./.github/workflows/lighthouse-testing.yml
     needs: build-and-deploy
     if: needs.build-and-deploy.outputs.preview_url
@@ -127,13 +127,13 @@ jobs:
       environment_name: 'pr-preview'
 
   pr-info:
-    name: PR Preview Information
+    name: 📋 PR Preview Information
     runs-on: ubuntu-latest
     needs: [build-and-deploy]
     if: always() && needs.build-and-deploy.outputs.preview_url
 
     steps:
-      - name: Update PR with deployment info
+      - name: 📋 Update PR with Deployment Status
         uses: actions/github-script@v7
         with:
           script: |

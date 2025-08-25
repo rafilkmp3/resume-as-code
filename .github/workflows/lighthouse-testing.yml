@@ -50,7 +50,7 @@ permissions:
 
 jobs:
   lighthouse-test:
-    name: 🚀 Lighthouse Analysis
+    name: 🚀 Lighthouse Analysis (${{ inputs.environment_name }})
     runs-on: ubuntu-24.04-arm  # ARM64 compatible
     timeout-minutes: 10
     outputs:
