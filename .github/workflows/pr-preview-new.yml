@@ -22,7 +22,9 @@ jobs:
     runs-on: ubuntu-24.04-arm
     outputs:
       preview_url: ${{ steps.set-url.outputs.preview_url }}
-    if: github.event.action != 'closed' && !startsWith(github.head_ref, 'release-please--')
+    if: >-
+      github.event.action != 'closed' &&
+      !startsWith(github.head_ref, 'release-please--')
     timeout-minutes: 15
 
     steps:
@@ -42,10 +44,10 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
           echo "🔍 Installing and testing Netlify CLI..."
-          
+
           # Install Netlify CLI
           npm install -g netlify-cli
-          
+
           # Test CLI functionality with better error handling
           echo "🔐 Testing Netlify authentication..."
           if netlify status --json > /dev/null 2>&1; then
@@ -61,14 +63,17 @@ jobs:
         uses: ./.github/actions/astro-build
         with:
           build-context: 'pr'
-          deploy-url: 'https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app'
+          deploy-url: >-
+            https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app
           pr-number: ${{ github.event.pull_request.number }}
 
       - name: Deploy to Netlify
         uses: South-Paw/action-netlify-cli@v2
         id: deploy
         with:
-          args: deploy --json --dir=workspace/build --alias=deploy-preview-${{ github.event.pull_request.number }}
+          args: >-
+            deploy --json --dir=workspace/build
+            --alias=deploy-preview-${{ github.event.pull_request.number }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -87,7 +92,7 @@ jobs:
           build-context: 'pr'
           pr-number: ${{ github.event.pull_request.number }}
 
-  # Keep existing accessibility and lighthouse jobs but reference the new build artifacts
+  # Keep existing accessibility and lighthouse jobs but reference new build artifacts
   accessibility-testing:
     name: ♿ Accessibility (Real URL)
     runs-on: ubuntu-latest
@@ -135,30 +140,30 @@ jobs:
         with:
           script: |
             const previewUrl = '${{ needs.build-and-deploy.outputs.preview_url }}';
-            
+
             const comment = `## 🔍 PR Preview Deployment
-            
+
             **Preview URL:** ${previewUrl}
             **Status:** ✅ Deployment successful
-            
+
             Built with new directory structure:
             - Source: \`app/\` (Astro v5.13.3)
             - Output: \`workspace/build/\`
             - Infrastructure: Consolidated composite actions
             `;
-            
+
             // Find and update existing comment or create new one
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number
             });
-            
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
               comment.body.includes('🔍 PR Preview Deployment')
             );
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
