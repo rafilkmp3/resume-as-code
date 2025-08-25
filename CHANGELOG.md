@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.9.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.8.0...v4.9.0) (2025-08-25)
+
+
+### Features
+
+* Essential Astro addons for SEO and performance optimization ([#80](https://github.com/rafilkmp3/resume-as-code/issues/80)) ([07a24cf](https://github.com/rafilkmp3/resume-as-code/commit/07a24cf04836408069ff97c0367f044938d2f3a4))
+* fix PDF generation for Astro deployment ([#79](https://github.com/rafilkmp3/resume-as-code/issues/79)) ([aef66c3](https://github.com/rafilkmp3/resume-as-code/commit/aef66c3807659d8db4b90651e4e0175250792c93))
+* source-code-aware caching and Astro Makefile ([81f110a](https://github.com/rafilkmp3/resume-as-code/commit/81f110a7249a3758f1c9897d6442c69170d97de4))
+* switch to Astro /api/version endpoint ([e95c908](https://github.com/rafilkmp3/resume-as-code/commit/e95c90889adaf448de72979f6a60a57ce9e65073))
+
+
+### Bug Fixes
+
+* add self-triggering to workflow design ([baa08b3](https://github.com/rafilkmp3/resume-as-code/commit/baa08b31aa591fd13f0e8619dff714408889497c))
+* handle dependabot pr comment permissions gracefully in conventional commits workflow ([087f2c0](https://github.com/rafilkmp3/resume-as-code/commit/087f2c0320462971266657560d74cbd6ae1ba971))
+* make workflow summaries dynamic and status-aware ([05f5640](https://github.com/rafilkmp3/resume-as-code/commit/05f5640b3faa7235f7569d8b43fa75e8065ca5e0))
+* Netlify build issues with skip-builds config ([5551db3](https://github.com/rafilkmp3/resume-as-code/commit/5551db363f7691b3db2cce1f8fa44076133cb1c1))
+* professional PDF generation with optimized layout ([#78](https://github.com/rafilkmp3/resume-as-code/issues/78)) ([dba2672](https://github.com/rafilkmp3/resume-as-code/commit/dba2672ddfbc9169eb20040c396cdfd83d1163cc))
+* staging deployment artifact naming mismatch ([4f6a44d](https://github.com/rafilkmp3/resume-as-code/commit/4f6a44d8f3ed11fad60866254ca14685d5f7aec5))
+
 ## [4.8.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.7.0...v4.8.0) (2025-08-22)
 
 
