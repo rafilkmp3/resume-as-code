@@ -114,27 +114,14 @@ jobs:
 
   lighthouse-performance:
     name: 🚀 Lighthouse Performance (Real URL)
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/lighthouse-testing.yml
     needs: build-and-deploy
     if: needs.build-and-deploy.outputs.preview_url
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup Build Environment
-        uses: ./.github/actions/setup-build-environment
-        with:
-          cache-suffix: 'lighthouse'
-
-      - name: Run Lighthouse Tests
-        uses: ./.github/workflows/lighthouse-testing.yml
-        with:
-          target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
-          environment_name: 'pr-preview'
-          budget_path: './budget.json'
-          artifact_retention_days: 3
+    with:
+      target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
+      environment_name: 'pr-preview'
+      budget_path: './budget.json'
+      artifact_retention_days: 3
 
   pr-info:
     name: PR Preview Information
