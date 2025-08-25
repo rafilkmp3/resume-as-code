@@ -1,0 +1,102 @@
+name: 'Setup Chrome (Minimal)'
+description: 'Minimal Chrome installation using Puppeteer browsers CLI - drastically reduces install time'
+author: 'Resume-as-Code'
+
+inputs:
+  cache-key-suffix:
+    description: 'Cache key suffix for different contexts'
+    required: false
+    default: 'default'
+
+outputs:
+  chrome-path:
+    description: 'Path to Chrome executable'
+    value: ${{ steps.setup.outputs.chrome-path }}
+  chrome-version:
+    description: 'Installed Chrome version'
+    value: ${{ steps.setup.outputs.chrome-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 🚀 Cache Chrome Installation
+      uses: actions/cache@v4
+      id: chrome-cache
+      with:
+        path: |
+          ~/.cache/puppeteer
+          /usr/local/bin/chrome-for-testing
+          /usr/bin/chromium-browser
+        key: chrome-minimal-${{ runner.os }}-${{ inputs.cache-key-suffix }}-${{ hashFiles('**/package*.json') }}
+        restore-keys: |
+          chrome-minimal-${{ runner.os }}-${{ inputs.cache-key-suffix }}-
+          chrome-minimal-${{ runner.os }}-
+          
+    - name: Setup Node.js (Required for Puppeteer CLI)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        
+    - name: ⚡ Install Chrome (Minimal)
+      id: setup
+      shell: bash
+      run: |
+        echo "🚀 Minimal Chrome installation using Puppeteer browsers CLI..."
+        
+        # Check if Chrome is already cached and working
+        if [[ "${{ steps.chrome-cache.outputs.cache-hit }}" == "true" ]] && [[ -f "/usr/local/bin/chrome-for-testing" ]] && /usr/local/bin/chrome-for-testing --version >/dev/null 2>&1; then
+          echo "⚡ Chrome cache hit - installation skipped!"
+          CHROME_BIN="/usr/local/bin/chrome-for-testing"
+          CHROME_VERSION=$(/usr/local/bin/chrome-for-testing --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
+        else
+          echo "📥 Installing Chrome using Puppeteer browsers CLI (minimal approach)..."
+          
+          # Check architecture for ARM64 compatibility
+          ARCH=$(uname -m)
+          echo "🔍 Detected architecture: $ARCH"
+          
+          if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+            echo "🔧 ARM64 detected - using Chromium browser for compatibility"
+            # On ARM64, Chrome isn't available, so we'll use Chromium via apt for better compatibility
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends chromium-browser
+            CHROME_BIN="/usr/bin/chromium-browser"
+          else
+            echo "📥 x64 detected - using Puppeteer Chrome installation"
+            # Install Chrome with system dependencies using Puppeteer's recommended approach
+            # This is much faster than manual apt-get installation
+            npx @puppeteer/browsers install chrome@stable --install-deps
+            
+            # Find the installed Chrome binary
+            CHROME_BIN=$(find ~/.cache/puppeteer -name "chrome" -type f -executable | head -1)
+          fi
+          
+          # Create a symlink for easier access
+          sudo ln -sf "$CHROME_BIN" /usr/local/bin/chrome-for-testing
+          CHROME_BIN="/usr/local/bin/chrome-for-testing"
+          
+          # Get Chrome version
+          CHROME_VERSION=$($CHROME_BIN --version 2>/dev/null | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*' | head -1 || echo "Unknown")
+        fi
+        
+        # Verify Chrome installation
+        if [[ ! -f "$CHROME_BIN" ]]; then
+          echo "❌ Chrome installation failed - executable not found: $CHROME_BIN"
+          exit 1
+        fi
+        
+        # Set environment variables for various tools
+        echo "CHROME_BIN=$CHROME_BIN" >> $GITHUB_ENV
+        echo "PUPPETEER_EXECUTABLE_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        echo "CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        echo "CHROMIUM_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        echo "LHCI_CHROME_PATH=$CHROME_BIN" >> $GITHUB_ENV
+        
+        # Output values
+        echo "chrome-path=$CHROME_BIN" >> $GITHUB_OUTPUT
+        echo "chrome-version=$CHROME_VERSION" >> $GITHUB_OUTPUT
+        
+        echo "✅ Chrome $CHROME_VERSION installed (minimal approach)"
+        echo "📁 Chrome executable: $CHROME_BIN"
+        echo "💾 Cache location: ~/.cache/puppeteer"
+        echo "⚡ Next run will be instant with cache hit!"

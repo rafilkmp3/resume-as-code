@@ -92,90 +92,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js (ARM64 optimized)
-        uses: actions/setup-node@v4
+      - name: Setup Build Environment (ARM64 optimized)
+        uses: ./.github/actions/setup-build-environment
         with:
+          cache-suffix: 'arm64-dev'
           node-version: '22'
-          cache: 'npm'
-          architecture: 'arm64'  # Explicit ARM64 Node.js
-
-      - name: 🚀 ARM64 Speedlight Caching Setup
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            ~/.cache
-            node_modules
-            node_modules/.cache
-            dist/
-          key: ${{ runner.os }}-arm64-dev-speedlight-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
-          restore-keys: |
-            ${{ runner.os }}-arm64-dev-speedlight-
-            ${{ runner.os }}-arm64-dev-
-            ${{ runner.os }}-arm64-
-
-      - name: ⚡ Speedlight Dependencies (Native ARM64)
-        run: |
-          echo "🚀 SPEEDLIGHT DEVELOPMENT: ARM64 native with aggressive caching"
-          echo "💡 Expected: Instant dependency resolution on cache hits"
-          
-          # Check cache hit status
-          if [ -d "node_modules" ] && [ -f "package-lock.json" ]; then
-            echo "✅ CACHE HIT: node_modules restored from speedlight cache"
-            # Quick verification
-            npm ls --depth=0 > /dev/null 2>&1 && echo "✅ Dependencies verified" || time npm ci
-          else
-            echo "🔄 CACHE MISS: Installing ARM64 native dependencies"
-            time npm ci
-          fi
-          
-          # Verify ARM64 native binaries
-          echo "🔍 Verifying native ARM64 binaries:"
-          if [ -d "node_modules/sharp" ]; then
-            file node_modules/sharp/lib/libvips-cpp.so.* 2>/dev/null | head -1 || echo "Sharp binary not found"
-          fi
-          if [ -d "node_modules/puppeteer" ]; then
-            echo "  - Puppeteer: $(ls node_modules/puppeteer/.local-chromium/*/chrome-linux/chrome 2>/dev/null | head -1 || echo 'Chrome binary not found')"
-          fi
 
       - name: ⚡ Speedlight Build (Native ARM64)
-        env:
-          NODE_ENV: production
-          GITHUB_PAGES: false
-          NETLIFY: true
-          CONTEXT: arm64-development
-        run: |
-          echo "🚀 SPEEDLIGHT BUILD: Native ARM64 with intelligent caching"
-          echo "💡 Expected: Instant builds on cache hits, ultra-fast native builds on misses"
-          
-          # Smart build detection
-          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            if [ "src/resume-data.json" -ot "dist/index.html" ] && [ "src/templates/template.html" -ot "dist/index.html" ]; then
-              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
-              echo "📦 Skipping build - using cached artifacts"
-            else
-              echo "🔄 Source changed - executing speedlight rebuild"
-              time npm run build
-            fi
-          else
-            echo "🏗️ First build - executing full ARM64 native build"
-            time npm run build
-          fi
-          
-          # Verify build artifacts
-          echo "📋 Build artifacts:"
-          ls -la dist/
-          
-          echo "📊 PDF generation verification:"
-          if [ -f "dist/resume.pdf" ]; then
-            echo "  ✅ Screen PDF: $(ls -lh dist/resume.pdf | awk '{print $5}')"
-          fi
-          if [ -f "dist/resume-print.pdf" ]; then
-            echo "  ✅ Print PDF: $(ls -lh dist/resume-print.pdf | awk '{print $5}')"
-          fi
-          if [ -f "dist/resume-ats.pdf" ]; then
-            echo "  ✅ ATS PDF: $(ls -lh dist/resume-ats.pdf | awk '{print $5}')"
-          fi
+        uses: ./.github/actions/astro-build
+        with:
+          build-context: 'dev'
+          deploy-url: 'http://localhost:4321'
 
       - name: Performance benchmarking
         run: |

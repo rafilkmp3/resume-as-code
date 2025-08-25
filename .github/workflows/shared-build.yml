@@ -1,0 +1,187 @@
+name: 'Shared Build System'
+
+on:
+  workflow_call:
+    inputs:
+      build-context:
+        description: 'Build context (dev, staging, production, pr)'
+        required: true
+        type: string
+      deploy-url:
+        description: 'Target deployment URL'
+        required: false
+        type: string
+        default: ''
+      pr-number:
+        description: 'PR number for preview builds'
+        required: false
+        type: string
+        default: ''
+      cache-key-suffix:
+        description: 'Additional cache key suffix'
+        required: false
+        type: string
+        default: 'default'
+      skip-artifact-upload:
+        description: 'Skip uploading build artifacts'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      build-duration:
+        description: 'Build duration in seconds'
+        value: ${{ jobs.build.outputs.build-duration }}
+      build-size:
+        description: 'Build output size'
+        value: ${{ jobs.build.outputs.build-size }}
+      artifact-name:
+        description: 'Name of uploaded artifact'
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+jobs:
+  build:
+    name: '🔧 Shared Build'
+    runs-on: ubuntu-latest
+    outputs:
+      build-duration: ${{ steps.build-timer.outputs.duration }}
+      build-size: ${{ steps.build-info.outputs.size }}
+      artifact-name: ${{ steps.artifact-info.outputs.name }}
+    
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 'Configure Git for CI'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: '🚀 Speedlight Caching (Dependencies + Build Artifacts)'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+            node_modules
+            node_modules/.cache
+            workspace/build/assets/images
+            workspace/build/assets/optimized
+          key: ${{ runner.os }}-shared-build-${{ inputs.cache-key-suffix }}-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('app/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'infrastructure/scripts/**') }}
+          restore-keys: |
+            ${{ runner.os }}-shared-build-${{ inputs.cache-key-suffix }}-${{ hashFiles('package-lock.json') }}-src-
+            ${{ runner.os }}-shared-build-${{ inputs.cache-key-suffix }}-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-shared-build-${{ inputs.cache-key-suffix }}-
+            ${{ runner.os }}-shared-build-
+            
+      - name: 'Setup Node.js (Speedlight)'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          
+      - name: 'Configure Node.js for CI'
+        run: |
+          echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
+          
+      - name: '⚡ Install Dependencies (with speedlight cache)'
+        run: |
+          echo "📦 Installing dependencies with speedlight cache..."
+          if [ -d "node_modules" ] && [ -f "package-lock.json" ]; then
+            echo "✅ Found cached node_modules, validating..."
+            npm ci --prefer-offline --no-audit
+          else
+            echo "📥 Fresh dependency installation..."
+            npm ci --no-audit
+          fi
+          
+      - name: 'Start build timer'
+        id: build-start
+        run: echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
+        
+      - name: '🧹 Clean Build Environment'
+        run: |
+          echo "🧹 Cleaning workspace/build/ directory..."
+          rm -rf workspace/build/
+          
+      - name: '⚡ Execute Build'
+        env:
+          NETLIFY: ${{ inputs.build-context == 'pr' || inputs.build-context == 'staging' }}
+          NETLIFY_ENV: ${{ inputs.build-context == 'pr' && 'deploy-preview' || inputs.build-context == 'staging' && 'production' || 'development' }}
+          CONTEXT: ${{ inputs.build-context == 'pr' && 'deploy-preview' || inputs.build-context }}
+          DEPLOY_URL: ${{ inputs.deploy-url }}
+          REVIEW_ID: ${{ inputs.pr-number }}
+          NODE_ENV: ${{ inputs.build-context == 'dev' && 'development' || 'production' }}
+          GITHUB_PAGES: ${{ inputs.build-context == 'production' }}
+          BUILD_CONTEXT: ${{ inputs.build-context }}
+        run: |
+          echo "🚀 SHARED BUILD: ${{ inputs.build-context }} (#${{ inputs.pr-number || 'N/A' }})"
+          echo "=========================================="
+          echo "📋 Build Context: ${{ inputs.build-context }}"
+          echo "🎯 Target URL: ${{ inputs.deploy-url || 'N/A' }}"
+          echo "⚡ Astro v5.13.3 with workspace/build/ output"
+          echo ""
+          
+          echo "🏗️ Building with optimized settings..."
+          time npm run build
+          
+      - name: 'Calculate build duration'
+        id: build-timer
+        run: |
+          BUILD_END=$(date +%s)
+          DURATION=$((BUILD_END - BUILD_START))
+          echo "duration=${DURATION}" >> $GITHUB_OUTPUT
+          echo "📊 Build completed in ${DURATION} seconds"
+          
+      - name: '📊 Build Information'
+        id: build-info
+        run: |
+          echo "📁 Build artifacts (workspace/build/):"
+          ls -la workspace/build/
+          
+          # Calculate build size
+          if [ -d "workspace/build" ]; then
+            BUILD_SIZE=$(du -sh workspace/build/ | cut -f1)
+            echo "size=${BUILD_SIZE}" >> $GITHUB_OUTPUT
+            echo "📦 Total build size: ${BUILD_SIZE}"
+            
+            # Validate critical files
+            if [ -f "workspace/build/index.html" ]; then
+              echo "  ✅ HTML: $(ls -lh workspace/build/index.html | awk '{print $5}')"
+            else
+              echo "  ❌ Missing index.html"
+            fi
+            
+            # Check for PDFs (if they exist)
+            for pdf in workspace/build/resume.pdf workspace/build/resume-print.pdf workspace/build/resume-ats.pdf; do
+              if [ -f "$pdf" ]; then
+                echo "  ✅ PDF: $(basename "$pdf") - $(ls -lh "$pdf" | awk '{print $5}')"
+              fi
+            done
+          else
+            echo "❌ Build directory not found!"
+            exit 1
+          fi
+          
+      - name: 'Set artifact name'
+        id: artifact-info  
+        run: |
+          ARTIFACT_NAME="build-${{ inputs.build-context }}"
+          if [ -n "${{ inputs.pr-number }}" ]; then
+            ARTIFACT_NAME="${ARTIFACT_NAME}-pr${{ inputs.pr-number }}"
+          fi
+          echo "name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+          echo "📦 Artifact name: ${ARTIFACT_NAME}"
+          
+      - name: 'Upload Build Artifacts'
+        if: ${{ !inputs.skip-artifact-upload }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact-info.outputs.name }}
+          path: |
+            workspace/build/
+            !workspace/build/node_modules
+          retention-days: 7
+          compression-level: 6

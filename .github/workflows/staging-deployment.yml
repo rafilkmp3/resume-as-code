@@ -6,9 +6,9 @@ on:
     branches: [main]
     paths:
       # 🎯 Source Code (All site content and logic)
-      - 'src/**'              # Astro components, pages, layouts, data
+      - 'app/**'              # Astro components, pages, layouts, data
       - 'public/**'           # Static assets, images, favicon
-      - 'scripts/**'          # Build and utility scripts
+      - 'infrastructure/scripts/**'  # Build and utility scripts
       
       # ⚙️ Configuration Files (Build behavior changes)
       - 'package.json'        # Dependencies and build scripts
@@ -100,10 +100,10 @@ jobs:
           fetch-depth: 0
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: ./.github/actions/manage-artifacts
         with:
-          name: staging-build-staging
-          path: dist/
+          action: 'download'
+          build-context: 'staging'
 
       - name: Deploy to Netlify Staging
         env:
@@ -111,7 +111,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         uses: South-Paw/action-netlify-cli@v2
         with:
-          args: deploy --json --dir=dist --prod --skip-functions-cache
+          args: deploy --json --dir=workspace/build --prod --skip-functions-cache
 
       - name: Verify Staging Deployment
         run: |

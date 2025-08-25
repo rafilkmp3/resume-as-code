@@ -124,8 +124,8 @@ jobs:
           
           # Verify build output
           echo "📋 Build verification:"
-          if [ -f "dist/index.html" ]; then
-            echo "  ✅ HTML: $(ls -lh dist/index.html | awk '{print $5}')"
+          if [ -f "workspace/build/index.html" ]; then
+            echo "  ✅ HTML: $(ls -lh workspace/build/index.html | awk '{print $5}')"
           else
             echo "  ❌ HTML: Missing"
             exit 1
@@ -133,7 +133,7 @@ jobs:
           
           # Count generated PDFs
           PDF_COUNT=0
-          for pdf in dist/resume.pdf dist/resume-print.pdf dist/resume-ats.pdf; do
+          for pdf in workspace/build/resume.pdf workspace/build/resume-print.pdf workspace/build/resume-ats.pdf; do
             if [ -f "$pdf" ]; then
               PDF_COUNT=$((PDF_COUNT + 1))
               echo "  ✅ PDF: $(basename $pdf) - $(ls -lh $pdf | awk '{print $5}')"
@@ -191,8 +191,8 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}-${{ inputs.environment_name }}
           path: |
-            dist/
-            !dist/node_modules
+            workspace/build/
+            !workspace/build/node_modules
           retention-days: 7
           compression-level: 6
 

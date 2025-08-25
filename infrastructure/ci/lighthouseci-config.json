@@ -1,0 +1,55 @@
+{
+  "ci": {
+    "collect": {
+      "url": [],
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-setuid-sandbox --headless=new --disable-dev-shm-usage --disable-extensions --disable-gpu --disable-background-timer-throttling",
+        "output": ["json", "html"],
+        "outputPath": "./lighthouse-reports",
+        "maxWaitForFcp": 15000,
+        "maxWaitForLoad": 20000,
+        "throttlingMethod": "provided",
+        "preset": "desktop"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["warn", {"minScore": 0.85}],
+        "categories:accessibility": ["error", {"minScore": 0.95}],
+        "categories:best-practices": ["warn", {"minScore": 0.85}],
+        "categories:seo": ["error", {"minScore": 0.9}],
+        "first-contentful-paint": ["warn", {"maxNumericValue": 1500, "aggregationMethod": "optimistic"}],
+        "largest-contentful-paint": ["warn", {"maxNumericValue": 2000, "aggregationMethod": "optimistic"}],
+        "cumulative-layout-shift": ["error", {"maxNumericValue": 0.05, "aggregationMethod": "optimistic"}],
+        "speed-index": ["warn", {"maxNumericValue": 2500, "aggregationMethod": "optimistic"}],
+        "total-blocking-time": ["warn", {"maxNumericValue": 200, "aggregationMethod": "optimistic"}],
+        "interactive": ["warn", {"maxNumericValue": 3000, "aggregationMethod": "optimistic"}],
+        "uses-responsive-images": "off",
+        "offscreen-images": "off",
+        "uses-webp-images": "off",
+        "uses-optimized-images": "off",
+        "modern-image-formats": "off",
+        "color-contrast": "off",
+        "uses-rel-preload": "off",
+        "unused-css-rules": "off",
+        "uses-text-compression": "warn",
+        "render-blocking-resources": "warn",
+        "server-response-time": ["warn", {"maxNumericValue": 600}],
+        "redirects-http": "error",
+        "viewport": "error",
+        "document-title": "error",
+        "meta-description": "error",
+        "http-status-code": "error",
+        "crawlable-anchors": "error",
+        "robots-txt": "off",
+        "hreflang": "off",
+        "canonical": "off"
+      }
+    }
+  }
+}

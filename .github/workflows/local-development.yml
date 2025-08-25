@@ -57,26 +57,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js (Local Mode)
-        uses: actions/setup-node@v4
+      - name: Setup Build Environment (Local Mode)
+        uses: ./.github/actions/setup-build-environment
         with:
+          cache-suffix: 'local-dev'
           node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies (Local Mode)
-        run: |
-          echo "📦 Installing dependencies in local mode..."
-          echo "⚡ No Docker required - using host Node.js environment"
-          npm ci
 
       - name: Build project (Local Mode)
-        env:
-          RUN_LOCAL: true
-          NODE_ENV: development
-        run: |
-          echo "🏗️ Building project in local mode..."
-          echo "⚡ No Docker containers - direct Node.js execution"
-          npm run build
+        uses: ./.github/actions/astro-build
+        with:
+          build-context: 'dev'
+          deploy-url: 'http://localhost:4321'
 
       - name: Install Chrome for ARM64 (if needed)
         run: |
@@ -107,7 +98,7 @@ jobs:
             echo "⚠️  test:local not available, running basic validation"
             node -e "console.log('✅ Node.js working:', process.version)"
             [ -f "package.json" ] && echo "✅ package.json found"
-            [ -f "src/resume-data.json" ] && echo "✅ resume-data.json found"
+            [ -f "app/data/resume-data.json" ] && echo "✅ resume-data.json found"
           fi
 
       - name: Local development summary
@@ -134,55 +125,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js (Speedlight Mode)
-        uses: actions/setup-node@v4
+      - name: Setup Build Environment (Speedlight Mode)
+        uses: ./.github/actions/setup-build-environment
         with:
+          cache-suffix: 'speedlight-dev'
           node-version: '22'
-          cache: 'npm'
-
-      - name: 🚀 Speedlight Caching Setup
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            ~/.cache
-            node_modules
-            dist/
-          key: ${{ runner.os }}-speedlight-dev-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
-          restore-keys: |
-            ${{ runner.os }}-speedlight-dev-
-            ${{ runner.os }}-speedlight-
-
-      - name: ⚡ Fast Dependencies (Speedlight)
-        run: |
-          echo "🚀 SPEEDLIGHT BUILD: Docker-free with aggressive caching"
-          echo "💡 Expected: Ultra-fast dependency resolution"
-          if [ -d "node_modules" ] && [ -f "node_modules/.package-lock.json" ]; then
-            echo "✅ CACHE HIT: node_modules restored from speedlight cache"
-            npm ls --depth=0 > /dev/null 2>&1 && echo "✅ Cache verified" || npm ci
-          else
-            echo "🔄 CACHE MISS: Installing dependencies"
-            time npm ci
-          fi
 
       - name: ⚡ Speedlight Build (CI Mode)
-        env:
-          NODE_ENV: development
-          CONTEXT: speedlight-development
-        run: |
-          echo "🚀 SPEEDLIGHT BUILD: Native Node.js with intelligent caching"
-          echo "💡 Expected: Ultra-fast builds without Docker overhead"
-          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            if [ "src/resume-data.json" -ot "dist/index.html" ]; then
-              echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
-            else
-              echo "🔄 Source changed - executing speedlight rebuild"
-              time npm run build
-            fi
-          else
-            echo "🏗️ First build - executing full speedlight build"
-            time npm run build
-          fi
+        uses: ./.github/actions/astro-build
+        with:
+          build-context: 'dev'
+          deploy-url: 'http://localhost:4321'
 
       - name: ⚡ Fast Tests (Speedlight)
         run: |
