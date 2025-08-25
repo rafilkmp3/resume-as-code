@@ -34,9 +34,6 @@ on:
       build-size:
         description: 'Build output size'
         value: ${{ jobs.build.outputs.build-size }}
-      artifact-name:
-        description: 'Name of uploaded artifact'
-        value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
@@ -45,7 +42,6 @@ jobs:
     outputs:
       build-duration: ${{ steps.build-timer.outputs.duration }}
       build-size: ${{ steps.build-info.outputs.size }}
-      artifact-name: ${{ steps.artifact-info.outputs.name }}
     
     steps:
       - name: 'Checkout Repository'
@@ -165,23 +161,11 @@ jobs:
             exit 1
           fi
           
-      - name: 'Set artifact name'
-        id: artifact-info  
-        run: |
-          ARTIFACT_NAME="build-${{ inputs.build-context }}"
-          if [ -n "${{ inputs.pr-number }}" ]; then
-            ARTIFACT_NAME="${ARTIFACT_NAME}-pr${{ inputs.pr-number }}"
-          fi
-          echo "name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
-          echo "📦 Artifact name: ${ARTIFACT_NAME}"
-          
       - name: 'Upload Build Artifacts'
         if: ${{ !inputs.skip-artifact-upload }}
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/manage-artifacts
         with:
-          name: ${{ steps.artifact-info.outputs.name }}
-          path: |
-            workspace/build/
-            !workspace/build/node_modules
+          action: 'upload'
+          build-context: ${{ inputs.build-context }}
+          pr-number: ${{ inputs.pr-number }}
           retention-days: 7
-          compression-level: 6

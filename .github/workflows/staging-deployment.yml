@@ -19,7 +19,7 @@ on:
       
       # 🔧 Workflow Self-Triggering (Infrastructure changes)
       - '.github/workflows/staging-deployment.yml'
-      - '.github/workflows/_build.yml'
+      - '.github/workflows/shared-build.yml'
       - '.github/actions/**'  # Reusable action changes
   workflow_dispatch:
 
@@ -72,22 +72,16 @@ jobs:
     name: 🏗️ Build for Staging (ARM64 Reusable)
     needs: check-release-context
     if: needs.check-release-context.outputs.should_deploy_staging == 'true'
-    uses: ./.github/workflows/_build.yml
+    uses: ./.github/workflows/shared-build.yml
     with:
-      runner_type: 'ubuntu-24.04-arm'
-      node_version: '22'
-      build_mode: 'production'
-      environment_name: 'staging'
-      context: 'deploy'
-      cache_key_suffix: '-staging'
-      upload_artifacts: true
-      artifact_name: 'staging-build'
-      timeout_minutes: 10
+      build-context: 'staging'
+      deploy-url: 'https://resume-as-code.netlify.app'
+      cache-key-suffix: 'staging-arm64'
 
   deploy-staging:
     name: 🚀 Deploy to Netlify Staging  
     needs: [check-release-context, build-staging]
-    if: needs.check-release-context.outputs.should_deploy_staging == 'true' && needs.build-staging.outputs.build_success == 'true'
+    if: needs.check-release-context.outputs.should_deploy_staging == 'true'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     env:
@@ -210,8 +204,8 @@ jobs:
           echo "**Commit**: \`${COMMIT_HASH}\` - ${COMMIT_MSG}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: ${{ needs.build-staging.outputs.build_size }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **PDFs**: ${{ needs.build-staging.outputs.pdf_count }}/3 generated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${{ needs.build-staging.outputs.build-size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duration**: ${{ needs.build-staging.outputs.build-duration }}s" >> $GITHUB_STEP_SUMMARY
           echo "- **Runner**: ARM64 (40% faster than AMD64)" >> $GITHUB_STEP_SUMMARY
           echo "- **Framework**: Astro v5.13.3" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -252,8 +246,8 @@ jobs:
         - ✅ **Build**: ARM64 reusable workflow successful
         - ✅ **Deploy**: Netlify staging deployment complete  
         - ✅ **Version Endpoint**: /version.json accessible and valid
-        - ✅ **PDF Generation**: ${{ needs.build-staging.outputs.pdf_count }}/3 PDFs generated
-        - ✅ **Build Size**: ${{ needs.build-staging.outputs.build_size }}
+        - ✅ **Build Duration**: ${{ needs.build-staging.outputs.build-duration }}s  
+        - ✅ **Build Size**: ${{ needs.build-staging.outputs.build-size }}
         - 🏃‍♂️ **Runner**: ARM64 architecture for 40% performance boost
         
         ### 📊 Environment Info
