@@ -1,0 +1,54 @@
+name: 'Manage Build Artifacts'
+description: 'Upload or download build artifacts with standardized naming for new workspace/build/ structure'
+inputs:
+  action:
+    description: 'Action to perform: upload or download'
+    required: true
+  build-context:
+    description: 'Build context (dev, pr, staging, production)'
+    required: true
+  pr-number:
+    description: 'PR number for preview builds'
+    required: false
+    default: ''
+  retention-days:
+    description: 'Artifact retention days'
+    required: false
+    default: '7'
+
+outputs:
+  artifact-name:
+    description: 'Name of artifact used'
+    value: ${{ steps.name.outputs.artifact-name }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Generate Artifact Name'
+      id: name
+      shell: bash
+      run: |
+        ARTIFACT_NAME="build-${{ inputs.build-context }}"
+        if [ -n "${{ inputs.pr-number }}" ]; then
+          ARTIFACT_NAME="${ARTIFACT_NAME}-pr${{ inputs.pr-number }}"
+        fi
+        echo "artifact-name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+        echo "📦 Artifact name: ${ARTIFACT_NAME}"
+        
+    - name: 'Upload Build Artifacts'
+      if: inputs.action == 'upload'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.name.outputs.artifact-name }}
+        path: |
+          workspace/build/
+          !workspace/build/node_modules
+        retention-days: ${{ inputs.retention-days }}
+        compression-level: 6
+        
+    - name: 'Download Build Artifacts'
+      if: inputs.action == 'download'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ steps.name.outputs.artifact-name }}
+        path: workspace/build/

@@ -1,0 +1,72 @@
+name: 'Setup Build Environment'
+description: 'Common setup for Node.js, dependencies, and build caching with new directory structure'
+inputs:
+  cache-suffix:
+    description: 'Cache key suffix for different contexts (dev, pr, staging, prod)'
+    required: false
+    default: 'default'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '24'
+  skip-install:
+    description: 'Skip npm install step'
+    required: false
+    default: 'false'
+
+outputs:
+  cache-hit:
+    description: 'Whether cache was hit'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Configure Git for CI'
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+    - name: '🚀 Speedlight Caching (Dependencies + Build)'
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          ~/.cache
+          node_modules
+          node_modules/.cache
+          workspace/build/assets/images
+          workspace/build/assets/optimized
+        key: ${{ runner.os }}-setup-${{ inputs.cache-suffix }}-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('app/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'infrastructure/scripts/**') }}
+        restore-keys: |
+          ${{ runner.os }}-setup-${{ inputs.cache-suffix }}-${{ hashFiles('package-lock.json') }}-src-
+          ${{ runner.os }}-setup-${{ inputs.cache-suffix }}-${{ hashFiles('package-lock.json') }}-
+          ${{ runner.os }}-setup-${{ inputs.cache-suffix }}-
+          ${{ runner.os }}-setup-
+          
+    - name: 'Setup Node.js (Speedlight)'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        
+    - name: 'Configure Node.js for CI'
+      shell: bash
+      run: |
+        echo "NODE_NO_WARNINGS=1" >> $GITHUB_ENV
+        echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
+        
+    - name: '⚡ Install Dependencies'
+      if: inputs.skip-install != 'true'
+      shell: bash
+      run: |
+        echo "📦 Installing dependencies with speedlight cache..."
+        if [ -d "node_modules" ] && [ -f "package-lock.json" ]; then
+          echo "✅ Found cached node_modules, validating..."
+          npm ci --prefer-offline --no-audit
+        else
+          echo "📥 Fresh dependency installation..."
+          npm ci --no-audit
+        fi

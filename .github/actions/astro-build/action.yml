@@ -1,0 +1,106 @@
+name: 'Astro Build with New Structure'
+description: 'Execute Astro build with workspace/build/ output and proper environment configuration'
+inputs:
+  build-context:
+    description: 'Build context (dev, pr, staging, production)'
+    required: true
+  deploy-url:
+    description: 'Target deployment URL'
+    required: false
+    default: ''
+  pr-number:
+    description: 'PR number for preview builds'
+    required: false
+    default: ''
+  clean-build:
+    description: 'Clean workspace/build/ before building'
+    required: false
+    default: 'true'
+
+outputs:
+  build-duration:
+    description: 'Build duration in seconds'
+    value: ${{ steps.timer.outputs.duration }}
+  build-size:
+    description: 'Build output size'
+    value: ${{ steps.info.outputs.size }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Start Build Timer'
+      id: start
+      shell: bash
+      run: echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
+      
+    - name: '🧹 Clean Build Environment'
+      if: inputs.clean-build == 'true'
+      shell: bash
+      run: |
+        echo "🧹 Cleaning workspace/build/ directory..."
+        rm -rf workspace/build/
+        
+    - name: '⚡ Execute Astro Build'
+      shell: bash
+      env:
+        NETLIFY: ${{ inputs.build-context == 'pr' || inputs.build-context == 'staging' }}
+        NETLIFY_ENV: ${{ inputs.build-context == 'pr' && 'deploy-preview' || inputs.build-context == 'staging' && 'production' || 'development' }}
+        CONTEXT: ${{ inputs.build-context == 'pr' && 'deploy-preview' || inputs.build-context }}
+        DEPLOY_URL: ${{ inputs.deploy-url }}
+        REVIEW_ID: ${{ inputs.pr-number }}
+        NODE_ENV: ${{ inputs.build-context == 'dev' && 'development' || 'production' }}
+        GITHUB_PAGES: ${{ inputs.build-context == 'production' }}
+        BUILD_CONTEXT: ${{ inputs.build-context }}
+      run: |
+        echo "🚀 ASTRO BUILD: ${{ inputs.build-context }} (#${{ inputs.pr-number || 'N/A' }})"
+        echo "=========================================="
+        echo "📋 Build Context: ${{ inputs.build-context }}"
+        echo "🎯 Target URL: ${{ inputs.deploy-url || 'N/A' }}"
+        echo "🏗️ Output: workspace/build/ (new structure)"
+        echo ""
+        
+        echo "🏗️ Building with Astro v5.13.3..."
+        time npm run build
+        
+    - name: 'Calculate Build Duration'
+      id: timer
+      shell: bash
+      run: |
+        BUILD_END=$(date +%s)
+        DURATION=$((BUILD_END - BUILD_START))
+        echo "duration=${DURATION}" >> $GITHUB_OUTPUT
+        echo "📊 Build completed in ${DURATION} seconds"
+        
+    - name: '📊 Build Information & Validation'
+      id: info
+      shell: bash
+      run: |
+        echo "📁 Build artifacts (workspace/build/):"
+        ls -la workspace/build/
+        
+        # Calculate build size
+        if [ -d "workspace/build" ]; then
+          BUILD_SIZE=$(du -sh workspace/build/ | cut -f1)
+          echo "size=${BUILD_SIZE}" >> $GITHUB_OUTPUT
+          echo "📦 Total build size: ${BUILD_SIZE}"
+          
+          # Validate critical files
+          if [ -f "workspace/build/index.html" ]; then
+            echo "  ✅ HTML: $(ls -lh workspace/build/index.html | awk '{print $5}')"
+          else
+            echo "  ❌ Missing index.html"
+            exit 1
+          fi
+          
+          # Check for PDFs (if they exist)
+          for pdf in workspace/build/resume.pdf workspace/build/resume-print.pdf workspace/build/resume-ats.pdf; do
+            if [ -f "$pdf" ]; then
+              echo "  ✅ PDF: $(basename "$pdf") - $(ls -lh "$pdf" | awk '{print $5}')"
+            fi
+          done
+          
+          echo "✅ Build validation passed"
+        else
+          echo "❌ Build directory not found!"
+          exit 1
+        fi
