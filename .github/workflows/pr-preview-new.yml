@@ -41,13 +41,21 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
-          echo "🔍 Testing Netlify CLI with environment variables..."
-          timeout 120s netlify status 2>/dev/null || {
+          echo "🔍 Installing and testing Netlify CLI..."
+          
+          # Install Netlify CLI
+          npm install -g netlify-cli
+          
+          # Test CLI functionality with better error handling
+          echo "🔐 Testing Netlify authentication..."
+          if netlify status --json > /dev/null 2>&1; then
+            echo "✅ Netlify CLI authentication successful"
+          else
             echo "❌ Netlify CLI authentication failed"
-            echo "📋 Check NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID secrets"
+            echo "📋 Verify NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID secrets are set"
+            echo "🔗 https://github.com/${{ github.repository }}/settings/secrets/actions"
             exit 1
-          }
-          echo "✅ Netlify CLI authentication successful"
+          fi
 
       - name: Execute Build
         uses: ./.github/actions/astro-build
