@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
+import pdf from 'astro-pdf';
 
 /**
  * Clean build-time URL configuration for all deployment environments
@@ -74,6 +75,22 @@ export default defineConfig({
     }
   },
   integrations: [
-    icon()
+    icon(),
+    pdf({
+      // Generate PDFs during build process
+      baseOptions: {
+        waitUntil: 'networkidle2',
+        maxRetries: 3,
+        printBackground: true,
+        format: 'A4',
+        margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' }
+      },
+      pages: {
+        // Generate static PDF files from our PDF-optimized pages
+        '/pdf-screen': '/resume-screen.pdf',
+        '/pdf-print': '/resume-print.pdf', 
+        '/pdf-ats': '/resume-ats.pdf'
+      }
+    })
   ]
 });

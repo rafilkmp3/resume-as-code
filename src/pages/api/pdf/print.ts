@@ -6,10 +6,13 @@ export const GET: APIRoute = async ({ site }) => {
   // Fallback to Astro site config if runtime detection fails
   const baseUrl = getRuntimeSiteUrl() || site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
   
+  // Redirect to the generated static PDF file for inline browser viewing
   return new Response(null, {
     status: 302,
     headers: {
-      'Location': `${baseUrl}/pdf-print`
+      'Location': `${baseUrl}/resume-print.pdf`,
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="resume-print.pdf"'
     }
   });
 };
