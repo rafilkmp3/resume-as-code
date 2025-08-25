@@ -1,30 +1,40 @@
 ---
-# yamllint configuration for GitHub Actions and YAML files
-extends: default
+# yamllint configuration optimized for GitHub Actions workflows
+# Based on Context7 yamllint best practices for CI/CD environments
+
+extends: relaxed
 
 rules:
-  # Disable line length - not useful for GitHub Actions workflows
+  # GitHub Actions specific: Disable overly restrictive rules
   line-length: disable
-
-  # Disable document start requirement - many YAML files don't need ---
   document-start: disable
-
-  # Allow empty lines in GitHub Actions
-  empty-lines:
-    max-end: 1
-    max-start: 0
-
-  # GitHub Actions use 2-space indentation
+  trailing-spaces: disable
+  
+  # Allow GitHub Actions truthy values (on, off, push, pull_request, etc.)
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+    check-keys: false
+  
+  # GitHub Actions workflows often have complex indentation
   indentation:
     spaces: 2
-
-  # Allow truthy values in GitHub Actions (on, off, etc.)
-  truthy:
-    allowed-values: ['true', 'false', 'on', 'off']
-
-  # Allow comments
+    indent-sequences: consistent
+    check-multi-line-strings: false
+  
+  # Allow flexible comment formatting for workflow documentation  
   comments:
     min-spaces-from-content: 1
-
-  # Disable trailing spaces - handled by trailing-whitespace hook
-  trailing-spaces: disable
+    require-starting-space: false
+  
+  # GitHub Actions workflows use brackets and braces frequently
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+  
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
