@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.11.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.10.0...v4.11.0) (2025-08-25)
+
+
+### Features
+
+* add Astro framework group to Dependabot ([c9f83de](https://github.com/rafilkmp3/resume-as-code/commit/c9f83def3bac1d3c0cb0e0578b24da96d360e65c))
+* enhance Dependabot for complete Actions coverage ([4ca35f4](https://github.com/rafilkmp3/resume-as-code/commit/4ca35f4ea9a1242da9b23b53fccf599515790e65))
+
+
+### Bug Fixes
+
+* add checkout step to production deploy job ([d2e340a](https://github.com/rafilkmp3/resume-as-code/commit/d2e340a316e005531a4ccb173e693e65085bc417))
+* remove double v prefix in workflow dispatch ref ([8c037de](https://github.com/rafilkmp3/resume-as-code/commit/8c037de0ec46af52e48488ab84c59e7905245d37))
+* resolve duplicate push triggers in workflow ([b92400d](https://github.com/rafilkmp3/resume-as-code/commit/b92400db10ad4afc3d0f23705bb41c29d4e04e73))
+
+
+### Miscellaneous
+
+* **deps:** update actions/upload-pages-artifact to v4 ([de81e99](https://github.com/rafilkmp3/resume-as-code/commit/de81e99a4a71e090d1746e307803a0ee731a92f5))
+
 ## [4.10.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.9.1...v4.10.0) (2025-08-25)
 
 
