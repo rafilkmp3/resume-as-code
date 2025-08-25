@@ -148,7 +148,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "## Phase 2: Workflow Optimization" >> $GITHUB_STEP_SUMMARY
-          echo "- [ ] Modularize shared-comprehensive-testing.yml (1,036 lines)" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Modularize comprehensive-testing.yml (1,036 lines)" >> $GITHUB_STEP_SUMMARY
           echo "- [ ] Consolidate deployment workflows (DRY principle)" >> $GITHUB_STEP_SUMMARY
           echo "- [ ] Implement Context7-guided best practices" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

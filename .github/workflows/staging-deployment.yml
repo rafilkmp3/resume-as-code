@@ -39,7 +39,7 @@ env:
 jobs:
   # Check if this is a release-please commit to avoid duplicate deployments
   check-release-context:
-    name: 🔍 Detect Release Commits (Skip Staging if Release-Please)
+    name: 🔍 Check Release Context
     runs-on: ubuntu-24.04-arm
     outputs:
       should_deploy_staging: ${{ steps.check.outputs.should_deploy }}
@@ -69,7 +69,7 @@ jobs:
           fi
 
   build-staging:
-    name: 🏗️ Build for Staging (ARM64 Reusable)
+    name: 🏗️ Build Staging
     needs: check-release-context
     if: needs.check-release-context.outputs.should_deploy_staging == 'true'
     uses: ./.github/workflows/shared-build.yml
@@ -79,7 +79,7 @@ jobs:
       cache-key-suffix: 'staging-arm64'
 
   deploy-staging:
-    name: 🚀 Deploy to Netlify Staging  
+    name: 🚀 Deploy Staging  
     needs: [check-release-context, build-staging]
     if: needs.check-release-context.outputs.should_deploy_staging == 'true'
     runs-on: ubuntu-24.04-arm
@@ -233,10 +233,10 @@ jobs:
 
   # 🎯 POST STAGING RESULTS TO RELEASE-PLEASE PR
   post-to-release-please:
-    name: 📋 Post Staging Results to Release-Please PR
+    name: 📋 Update PR Status
     needs: [check-release-context, build-staging, deploy-staging]
     if: always() && needs.check-release-context.outputs.should_deploy_staging == 'true'
-    uses: ./.github/workflows/shared-deployment-status.yml
+    uses: ./.github/workflows/deployment-status.yml
     with:
       deployment_status: ${{ needs.deploy-staging.result == 'success' && 'ready' || 'failure' }}
       deployment_url: 'https://resume-as-code.netlify.app'
