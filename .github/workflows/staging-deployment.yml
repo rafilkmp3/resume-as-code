@@ -1,5 +1,5 @@
 ---
-name: 🚀 Staging Deploy (Netlify)
+name: 🚀 Staging Deploy (Skips Release Commits)
 
 on:
   push:
@@ -67,6 +67,28 @@ jobs:
             echo "✅ PROCEEDING: Regular commit, deploying to staging"
             echo "should_deploy=true" >> $GITHUB_OUTPUT
           fi
+
+  # 🚫 EXPLICIT SKIP NOTIFICATION - Makes it clear when deployment is skipped
+  skip-staging-deployment:
+    name: 🚫 SKIPPED - Release Commit (No Staging Deploy)
+    needs: check-release-context
+    if: needs.check-release-context.outputs.should_deploy_staging == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚫 Skip Notification
+        run: |
+          echo "## 🚫 Staging Deployment SKIPPED" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason**: This is a release-please commit" >> $GITHUB_STEP_SUMMARY
+          echo "**Behavior**: Release commits skip staging to avoid duplicate deployments" >> $GITHUB_STEP_SUMMARY
+          echo "**Production**: Will be deployed after release via GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Release Flow" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ **Release-please commits** → Skip staging (this workflow)" >> $GITHUB_STEP_SUMMARY
+          echo "2. ✅ **Release tags** → Deploy to production (GitHub Pages)" >> $GITHUB_STEP_SUMMARY
+          echo "3. ✅ **Regular commits** → Deploy to staging (Netlify)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 **This is expected behavior** - no action needed!"
 
   build-staging:
     name: 🏗️ Build Staging
