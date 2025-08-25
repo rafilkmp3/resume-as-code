@@ -58,6 +58,10 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
         --separator-dark: rgba(255, 255, 255, 0.1);
       }
       
+      html {
+        scroll-behavior: smooth;
+      }
+      
       body {
         background: linear-gradient(135deg, 
           hsl(230, 30%, 95%) 0%,
@@ -66,6 +70,16 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
           hsl(200, 25%, 92%) 75%,
           hsl(230, 30%, 95%) 100%);
         min-height: 100vh;
+      }
+      
+      /* Scroll margin for anchor links to account for fixed elements */
+      :target {
+        scroll-margin-top: 6rem;
+      }
+      
+      /* Specific scroll margins for section anchors */
+      #header, #connect, #experience, #projects, #certifications, #skills {
+        scroll-margin-top: 6rem;
       }
       
       :global(.dark) body {
@@ -134,6 +148,62 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
       }
     </style>
+    
+    <!-- Structured Data for SEO - Resume Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Rafael Bernardo Sathler",
+        "jobTitle": "Infrastructure Engineer",
+        "description": "Professional resume with deep linking to specific sections",
+        "url": "https://rafilkmp3.github.io/resume-as-code",
+        "sameAs": [
+          "https://www.linkedin.com/in/rafaelsathler/",
+          "https://github.com/rafilkmp3"
+        ],
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://rafilkmp3.github.io/resume-as-code",
+          "mainEntity": {
+            "@type": "Person",
+            "@id": "https://rafilkmp3.github.io/resume-as-code/#header"
+          },
+          "hasPart": [
+            {
+              "@type": "WebPageElement",
+              "@id": "https://rafilkmp3.github.io/resume-as-code/#connect",
+              "name": "Contact Information",
+              "description": "Professional contact details and social media links"
+            },
+            {
+              "@type": "WebPageElement", 
+              "@id": "https://rafilkmp3.github.io/resume-as-code/#experience",
+              "name": "Work Experience",
+              "description": "Professional work history and accomplishments"
+            },
+            {
+              "@type": "WebPageElement",
+              "@id": "https://rafilkmp3.github.io/resume-as-code/#projects",
+              "name": "Projects",
+              "description": "Notable projects and contributions"
+            },
+            {
+              "@type": "WebPageElement",
+              "@id": "https://rafilkmp3.github.io/resume-as-code/#certifications",
+              "name": "Certifications",
+              "description": "Professional certifications and credentials"
+            },
+            {
+              "@type": "WebPageElement",
+              "@id": "https://rafilkmp3.github.io/resume-as-code/#skills",
+              "name": "Skills",
+              "description": "Technical skills and expertise"
+            }
+          ]
+        }
+      }
+    </script>
   </head>
   <body>
     <!-- Theme Toggle -->
