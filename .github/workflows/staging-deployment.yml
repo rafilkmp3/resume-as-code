@@ -4,23 +4,10 @@ name: 🚀 Staging Deploy (Regular Commits Only)
 on:
   push:
     branches: [main]
-    paths:
-      # 🎯 Source Code (All site content and logic)
-      - 'app/**'              # Astro components, pages, layouts, data
-      - 'public/**'           # Static assets, images, favicon
-      - 'infrastructure/scripts/**'  # Build and utility scripts
-      
-      # ⚙️ Configuration Files (Build behavior changes)
-      - 'package.json'        # Dependencies and build scripts
-      - 'package-lock.json'   # Exact dependency versions
-      - 'astro.config.mjs'    # Astro framework configuration
-      - 'tailwind.config.mjs' # Styling configuration
-      - 'tsconfig.json'       # TypeScript configuration
-      
-      # 🔧 Workflow Self-Triggering (Infrastructure changes)
-      - '.github/workflows/staging-deployment.yml'
-      - '.github/workflows/shared-build.yml'
-      - '.github/actions/**'  # Reusable action changes
+    # 🚫 SIMPLE SOLUTION: Ignore files that release-please typically changes
+    paths-ignore:
+      - 'CHANGELOG.md'        # Release-please updates changelog
+      - 'package.json'        # Release-please updates version
   workflow_dispatch:
 
 concurrency:
@@ -39,11 +26,6 @@ env:
 jobs:
   build-staging:
     name: 🏗️ Build Staging
-    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
-    if: |
-      !contains(github.event.head_commit.message, 'chore(release):') &&
-      !contains(github.event.head_commit.message, 'chore: release') &&
-      github.event.head_commit.author.name != 'release-please[bot]'
     uses: ./.github/workflows/shared-build.yml
     with:
       build-context: 'staging'
@@ -53,11 +35,6 @@ jobs:
   deploy-staging:
     name: 🚀 Deploy Staging  
     needs: build-staging
-    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
-    if: |
-      !contains(github.event.head_commit.message, 'chore(release):') &&
-      !contains(github.event.head_commit.message, 'chore: release') &&
-      github.event.head_commit.author.name != 'release-please[bot]'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     env:
@@ -211,12 +188,7 @@ jobs:
   post-to-release-please:
     name: 📋 Update PR Status
     needs: [build-staging, deploy-staging]
-    # 🚫 WORKFLOW-LEVEL FILTER: Completely prevent workflow for release commits
-    if: |
-      always() &&
-      !contains(github.event.head_commit.message, 'chore(release):') &&
-      !contains(github.event.head_commit.message, 'chore: release') &&
-      github.event.head_commit.author.name != 'release-please[bot]'
+    if: always()
     uses: ./.github/workflows/deployment-status.yml
     with:
       deployment_status: ${{ needs.deploy-staging.result == 'success' && 'ready' || 'failure' }}
