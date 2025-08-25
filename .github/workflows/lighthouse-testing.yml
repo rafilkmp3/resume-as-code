@@ -139,6 +139,14 @@ jobs:
           # Run with improved error handling and retry logic
           set +e  # Don't exit on error, capture output
           
+          # Debug Chrome path before starting Lighthouse CI
+          echo "🔍 Chrome Environment Debug:"
+          echo "  CHROME_BIN: ${CHROME_BIN:-'NOT SET'}"
+          echo "  LHCI_CHROME_PATH: ${LHCI_CHROME_PATH:-'NOT SET'}"
+          echo "  CHROME_PATH: ${CHROME_PATH:-'NOT SET'}"
+          echo "  Resolved path: ${CHROME_BIN:-/usr/bin/chromium-browser}"
+          echo ""
+          
           for attempt in 1 2 3; do
             echo "🔄 Attempt $attempt/3: Running Lighthouse CI..."
             
@@ -146,6 +154,7 @@ jobs:
               --upload.target=temporary-public-storage \
               --collect.url="${{ inputs.target_url }}" \
               --collect.settings.chromeFlags="$CHROME_FLAGS" \
+              --collect.settings.chromePath="${CHROME_BIN:-/usr/bin/chromium-browser}" \
               --collect.numberOfRuns=1 \
               --collect.settings.output=json \
               --collect.settings.outputPath=./lighthouse-reports \
