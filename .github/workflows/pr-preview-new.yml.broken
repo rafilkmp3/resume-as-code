@@ -92,6 +92,7 @@ jobs:
           build-context: 'pr'
           pr-number: ${{ github.event.pull_request.number }}
 
+  # Keep existing accessibility and lighthouse jobs but reference new build artifacts
   accessibility-testing:
     name: ♿ Accessibility (Real URL)
     runs-on: ubuntu-latest
@@ -113,6 +114,7 @@ jobs:
           PREVIEW_URL: ${{ needs.build-and-deploy.outputs.preview_url }}
         run: |
           echo "🔍 Running accessibility tests on: ${PREVIEW_URL}"
+          # Add actual accessibility testing commands here
           echo "✅ Accessibility tests passed"
 
   lighthouse-performance:
@@ -176,3 +178,4 @@ jobs:
                 body: comment
               });
             }
+
