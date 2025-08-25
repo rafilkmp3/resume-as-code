@@ -65,9 +65,9 @@ jobs:
             ~/.cache
             node_modules
             node_modules/.cache
-            dist/assets/images
-            dist/assets/optimized
-          key: ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('src/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'scripts/**') }}
+            workspace/build/assets/images
+            workspace/build/assets/optimized
+          key: ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-src-${{ hashFiles('app/**', 'public/**', 'astro.config.mjs', 'tailwind.config.mjs', 'tsconfig.json', 'infrastructure/scripts/**') }}
           restore-keys: |
             ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-src-
             ${{ runner.os }}-speedlight-preview-deps-${{ hashFiles('package-lock.json') }}-
@@ -107,7 +107,7 @@ jobs:
       - name: 🧹 Force Clean Build (URL Configuration Fix)
         run: |
           echo "🧹 Forcing clean build to fix URL configuration..."
-          rm -rf dist/
+          rm -rf workspace/build/
           rm -rf .astro/
           echo "✅ Cleaned build artifacts and Astro cache"
           
@@ -134,7 +134,7 @@ jobs:
           time npm run build
           
           echo "📁 Preview build artifacts:"
-          ls -la dist/
+          ls -la workspace/build/
 
       - name: Start build timer
         run: echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
@@ -146,7 +146,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         uses: South-Paw/action-netlify-cli@v2
         with:
-          args: deploy --json --dir=dist --alias=deploy-preview-${{ env.PR_NUMBER }}
+          args: deploy --json --dir=workspace/build --alias=deploy-preview-${{ env.PR_NUMBER }}
 
       - name: Set preview URL output
         id: set-url
@@ -170,7 +170,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: preview-build-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
-          path: dist/
+          path: workspace/build/
           retention-days: 7
 
   # Smart URL-Based Testing - Tests real deployed URL

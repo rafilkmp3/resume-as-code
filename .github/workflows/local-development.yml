@@ -107,7 +107,7 @@ jobs:
             echo "⚠️  test:local not available, running basic validation"
             node -e "console.log('✅ Node.js working:', process.version)"
             [ -f "package.json" ] && echo "✅ package.json found"
-            [ -f "src/resume-data.json" ] && echo "✅ resume-data.json found"
+            [ -f "app/data/resume.json" ] && echo "✅ resume.json found"
           fi
 
       - name: Local development summary
@@ -147,8 +147,8 @@ jobs:
             ~/.npm
             ~/.cache
             node_modules
-            dist/
-          key: ${{ runner.os }}-speedlight-dev-${{ hashFiles('package-lock.json', 'src/**', 'assets/**') }}
+            workspace/build/
+          key: ${{ runner.os }}-speedlight-dev-${{ hashFiles('package-lock.json', 'app/**', 'public/assets/**') }}
           restore-keys: |
             ${{ runner.os }}-speedlight-dev-
             ${{ runner.os }}-speedlight-
@@ -172,8 +172,8 @@ jobs:
         run: |
           echo "🚀 SPEEDLIGHT BUILD: Native Node.js with intelligent caching"
           echo "💡 Expected: Ultra-fast builds without Docker overhead"
-          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
-            if [ "src/resume-data.json" -ot "dist/index.html" ]; then
+          if [ -d "workspace/build" ] && [ -f "workspace/build/index.html" ]; then
+            if [ "app/data/resume.json" -ot "workspace/build/index.html" ]; then
               echo "⚡ SPEEDLIGHT: Build artifacts cached and up-to-date!"
             else
               echo "🔄 Source changed - executing speedlight rebuild"
