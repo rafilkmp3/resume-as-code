@@ -52,3 +52,51 @@ jobs:
             echo "- 📝 **Note**: Production deployment happens automatically when release is published" >> $GITHUB_STEP_SUMMARY
           fi
 
+  # 🤖 Resume-Pipeline-Bot Orchestrated Production Deployment
+  trigger-production-deployment:
+    name: 🚀 Trigger Production Deployment (Bot-Orchestrated)
+    runs-on: ubuntu-24.04-arm
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - name: 🤖 Generate Bot Token for Enhanced Permissions
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+      
+      - name: 🚀 Trigger Production Deployment via Bot
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          echo "## 🤖 Bot-Orchestrated Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Release**: v$RELEASE_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "🤖 **Bot**: resume-pipeline-bot (enhanced permissions)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Trigger production deployment workflow with bot token
+          if gh workflow run production-deploy.yml \
+               --repo rafilkmp3/resume-as-code \
+               --ref "v$RELEASE_TAG"; then
+            echo "✅ **SUCCESS**: Production deployment triggered!" >> $GITHUB_STEP_SUMMARY
+            echo "🔗 **Monitor**: [GitHub Actions](https://github.com/rafilkmp3/resume-as-code/actions)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🤖 Bot Orchestration Details" >> $GITHUB_STEP_SUMMARY
+            echo "- **App**: resume-pipeline-bot" >> $GITHUB_STEP_SUMMARY
+            echo "- **Permissions**: Enhanced workflow dispatch capabilities" >> $GITHUB_STEP_SUMMARY
+            echo "- **Trigger**: Automatic on release creation" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **ERROR**: Failed to trigger production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Fallback Options" >> $GITHUB_STEP_SUMMARY
+            echo "1. **Manual Trigger**: Visit [Actions](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deploy.yml)" >> $GITHUB_STEP_SUMMARY
+            echo "2. **GitHub CLI**: \`gh workflow run production-deploy.yml --ref v$RELEASE_TAG\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. **Tag-Based**: Production will auto-trigger on next tag push" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "💡 **Note**: This release ($RELEASE_TAG) created the tag, so production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "should have already been triggered by the tag-based trigger mechanism." >> $GITHUB_STEP_SUMMARY
+          fi
+
