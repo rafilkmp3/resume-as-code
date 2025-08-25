@@ -2,9 +2,11 @@
 name: 🔍 PR Preview Deploy & Testing
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
+  # Disabled - replaced by pr-preview-new.yml with composite actions
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  #   branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}

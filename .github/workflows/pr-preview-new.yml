@@ -129,12 +129,12 @@ jobs:
           cache-suffix: 'lighthouse'
 
       - name: Run Lighthouse Tests
-        env:
-          PREVIEW_URL: ${{ needs.build-and-deploy.outputs.preview_url }}
-        run: |
-          echo "🚀 Running Lighthouse tests on: ${PREVIEW_URL}"
-          # Add actual Lighthouse testing commands here
-          echo "✅ Lighthouse tests passed"
+        uses: ./.github/workflows/lighthouse-testing.yml
+        with:
+          target_url: ${{ needs.build-and-deploy.outputs.preview_url }}
+          environment_name: 'pr-preview'
+          budget_path: './budget.json'
+          artifact_retention_days: 3
 
   pr-info:
     name: PR Preview Information
