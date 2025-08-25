@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.10.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.9.1...v4.10.0) (2025-08-25)
+
+
+### Features
+
+* add resume-pipeline-bot orchestrated deployment ([5233f21](https://github.com/rafilkmp3/resume-as-code/commit/5233f2182b1419faac1a39927ae71e33972936aa))
+
 ## [4.9.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.9.0...v4.9.1) (2025-08-25)
 
 
