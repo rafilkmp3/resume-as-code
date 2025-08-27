@@ -27,7 +27,7 @@
     "astro": "^5.13.3",
     "astro-compress": "^2.3.8",
     "astro-icon": "^1.1.5",
-    "daisyui": "^5.0.50",
+    "daisyui": "^5.0.51",
     "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.12"
   },
