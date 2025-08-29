@@ -51,13 +51,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           </h2>
         </div>
 
-        <!-- Professional Summary with Apple Typography -->
-        <div class="max-w-4xl mx-auto mb-8">
-          <p class="apple-body text-center leading-relaxed apple-smart-break">
-            {basics.summary}
-          </p>
-        </div>
-
         <!-- Apple-Style Contact Information Card -->
         <div class="max-w-4xl mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 mb-6">
@@ -124,52 +117,58 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         
         <!-- Contact Methods -->
         <div class="mb-8">
-          <h3 class="mb-4 text-center">Get In Touch</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <!-- LinkedIn -->
-            <ContactButton
-              icon="simple-icons:linkedin"
-              label="Connect on LinkedIn"
-              value="Professional profile"
-              href="https://www.linkedin.com/in/rafaelbsathler/"
-              network="LinkedIn"
-            />
+          <h3 class="apple-headline text-center mb-4">Get In Touch</h3>
+          <div class="flex flex-col items-center gap-4 max-w-4xl mx-auto">
+            <!-- First row: 3 buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+              <!-- LinkedIn -->
+              <ContactButton
+                icon="simple-icons:linkedin"
+                label="Connect on LinkedIn"
+                value="Professional profile"
+                href="https://www.linkedin.com/in/rafaelbsathler/"
+                network="LinkedIn"
+              />
+              
+              <!-- GitHub -->
+              <ContactButton
+                icon="simple-icons:github"
+                label="View GitHub"
+                value="Code & projects"
+                href="https://github.com/rafaelbsathler"
+                network="GitHub"
+              />
+              
+              <!-- Cal.com -->
+              <ContactButton
+                icon="heroicons:calendar"
+                label="Book or Check Availability"
+                value="Quick or long calls"
+                href="https://cal.com/rafaelbsathler"
+                network="cal.com"
+              />
+            </div>
             
-            <!-- GitHub -->
-            <ContactButton
-              icon="simple-icons:github"
-              label="View GitHub"
-              value="Code & projects"
-              href="https://github.com/rafaelbsathler"
-              network="GitHub"
-            />
-            
-            <!-- Cal.com -->
-            <ContactButton
-              icon="heroicons:calendar"
-              label="Book or Check Availability"
-              value="Quick or long calls"
-              href="https://cal.com/rafaelbsathler"
-              network="cal.com"
-            />
-            
-            <!-- WhatsApp -->
-            <ContactButton
-              icon="simple-icons:whatsapp"
-              label="Chat on WhatsApp"
-              value="+55 21 997988682"
-              href="https://wa.me/5521997988682"
-              network="WhatsApp"
-            />
-            
-            <!-- QR Code Button -->
-            <QRCodeButton url={siteUrl} />
+            <!-- Second row: 2 buttons centered -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+              <!-- WhatsApp -->
+              <ContactButton
+                icon="simple-icons:whatsapp"
+                label="Chat on WhatsApp"
+                value="+55 21 997988682"
+                href="https://wa.me/5521997988682"
+                network="WhatsApp"
+              />
+              
+              <!-- QR Code Button -->
+              <QRCodeButton url={siteUrl} />
+            </div>
           </div>
         </div>
 
         <!-- PDF Downloads -->
         <div>
-          <h3 class="mb-4 text-center">Download PDF</h3>
+          <h3 class="apple-headline text-center mb-4">Download PDF</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
               href={`${siteUrl}/pdf-screen`}
@@ -223,9 +222,120 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Apple HIG Subtle Separator -->
       <div class="apple-separator" aria-hidden="true"></div>
       
+      <!-- Enhanced Professional Summary Section - OCD-Friendly -->
+      <LiquidGlassCard id="summary" class="p-8 apple-section-animate" data-apple-delay="2" role="region" aria-labelledby="summary-heading">
+        <header class="mb-8">
+          <h2 id="summary-heading" class="apple-section-title text-center">
+            <a href="#summary" class="hover:underline transition-all duration-200" aria-describedby="summary-description">
+              Professional Summary
+            </a>
+          </h2>
+          <p id="summary-description" class="text-center apple-caption mt-2 opacity-75">
+            10+ years building, securing, and scaling production systems
+          </p>
+        </header>
+        
+        <div class="professional-summary-container">
+          <!-- Core Summary -->
+          <div class="summary-core-section">
+            <div class="summary-highlight-card">
+              <div class="summary-icon-container" aria-hidden="true">
+                <LiquidGlassIcon name="heroicons:rocket-launch" size={24} variant="default" />
+              </div>
+              <div class="summary-content">
+                <h3 class="summary-role-title">Open Source Specialist</h3>
+                <p class="summary-core-text">
+                  10+ years of proven expertise building, securing, and scaling production platforms on AWS & GCP. 
+                  Turn manual toil into GitOps pipelines so product teams ship faster — and sleep better. 
+                  Specialized in ARM64 optimization, delivering enterprise migrations for 5,000+ engineers.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Key Achievements Grid -->
+          <div class="summary-achievements-grid" role="list" aria-label="Key professional achievements">
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">10+</div>
+              <div class="achievement-label">Years Experience</div>
+            </div>
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">85%</div>
+              <div class="achievement-label">ARM Runner Performance Boost</div>
+            </div>
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">Zero</div>
+              <div class="achievement-label">Downtime K8s Upgrades</div>
+            </div>
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">8K+</div>
+              <div class="achievement-label">Repos Migrated</div>
+            </div>
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">5K+</div>
+              <div class="achievement-label">Engineers Supported</div>
+            </div>
+            <div class="summary-achievement-item" role="listitem">
+              <div class="achievement-metric">99.9%</div>
+              <div class="achievement-label">Uptime Achievement</div>
+            </div>
+          </div>
+          
+          <!-- Expertise Areas -->
+          <div class="summary-expertise-section">
+            <h3 class="summary-section-title">Core Expertise</h3>
+            <div class="summary-expertise-grid" role="list" aria-label="Technical expertise areas">
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="simple-icons:amazonwebservices" size={20} />
+                <span>AWS/GCP Cloud Architecture</span>
+              </div>
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="simple-icons:kubernetes" size={20} />
+                <span>Kubernetes & Container Orchestration</span>
+              </div>
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="heroicons:cpu-chip" size={20} />
+                <span>DevOps & CI/CD Automation</span>
+              </div>
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="heroicons:chart-bar" size={20} />
+                <span>Infrastructure Optimization</span>
+              </div>
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="heroicons:shield-check" size={20} />
+                <span>Security & Compliance</span>
+              </div>
+              <div class="expertise-item" role="listitem">
+                <LiquidGlassIcon name="heroicons:academic-cap" size={20} />
+                <span>Technical Leadership</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Current Focus -->
+          <div class="summary-focus-section">
+            <div class="focus-highlight-card">
+              <div class="focus-badge">
+                <span>Recent Achievements</span>
+              </div>
+              <div class="focus-content">
+                <p class="focus-text">
+                  Implemented <strong>ARM64-optimized GitHub Actions</strong> with 85% performance improvements and 
+                  <strong>zero-downtime Kubernetes upgrades</strong> (1.29 → 1.32). 
+                  Led <strong>self-service Terraform/Atlantis</strong> rollout for 10+ squads, cutting infrastructure tickets by half.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </LiquidGlassCard>
+      
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
       <!-- Experience Section -->
-      <LiquidGlassCard id="experience" class="p-8 apple-section-animate" data-apple-delay="2">
-        <h2 class="apple-section-title mb-8">
+      <LiquidGlassCard id="experience" class="p-8 apple-section-animate" data-apple-delay="3">
+        <h2 class="apple-section-title text-center mb-8">
           <a href="#experience" class="hover:underline transition-all duration-200">
             Professional Experience
           </a>
@@ -253,50 +363,209 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     <p class="apple-title-3">{job.name}</p>
                   )}
                 </div>
-                <h5 class="mt-2 md:mt-0 font-medium">
-                  {job.startDate} - {job.endDate || 'Present'}
-                </h5>
+                <div class="mt-2 md:mt-0">
+                  <p class="apple-caption text-sm">
+                    {new Date(job.startDate).getFullYear()} - 
+                    {job.endDate ? new Date(job.endDate).getFullYear() : 'Present'}
+                  </p>
+                </div>
               </div>
               
-                <p class="apple-experience-summary">{job.summary}</p>
-                
-                {job.highlights && (
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                    {job.highlights.map((highlight) => (
-                      <div class="apple-highlight-card">
-                        <p class="apple-highlight-text">{highlight}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Job Summary */}
+              {job.summary && (
+                <div class="mb-4">
+                  <p class="apple-body leading-relaxed">{job.summary}</p>
+                </div>
+              )}
+              
+              {/* Job Highlights */}
+              {job.highlights && job.highlights.length > 0 && (
+                <div class="space-y-2">
+                  {job.highlights.map((highlight, idx) => (
+                    <div class="flex items-start space-x-3">
+                      <span class="apple-bullet-point" aria-hidden="true">•</span>
+                      <p class="apple-body flex-1">{highlight}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
               </div>
             </div>
           ))}
         </div>
         
-        <!-- Load More Button for Experience -->
-        {work.length > 3 && (
-          <div class="text-center mt-8">
-            <button 
-              id="load-more-experience"
-              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
-              onclick="toggleExperienceItems()"
-            >
-              <div class="mr-2">
-                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
-              </div>
-              <span id="experience-button-text">Show More Experience</span>
-            </button>
+        {/* Apple iOS-style Show More with Fade Hint */}
+        {work && work.length > 3 && (
+          <!-- Apple-Style Content Fade Overlay + Show More Button -->
+          <div class="relative -mt-8">
+            <!-- iOS-style content fade overlay -->
+            <div class="apple-ios-content-fade" id="experience-fade-hint" aria-hidden="true"></div>
+            
+            <!-- Apple iOS-native Show More button -->
+            <div class="relative z-30 flex justify-center pt-12">
+              <button 
+                id="experience-toggle"
+                class="apple-ios-button group"
+                onclick="toggleExperienceItems()"
+                type="button"
+                aria-label="Show more work experience"
+              >
+                <div class="flex items-center justify-center space-x-3">
+                  <span class="apple-ios-button-text">Show More Experience</span>
+                  <div class="apple-ios-chevron-container">
+                    <svg class="apple-ios-chevron" id="experience-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
           </div>
         )}
       </LiquidGlassCard>
-
+      
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
+      <!-- Technical Skills Section - OCD-Friendly Organization -->
+      <LiquidGlassCard id="skills" class="p-8 apple-section-animate" data-apple-delay="4" role="region" aria-labelledby="skills-heading">
+        <header class="mb-8">
+          <h2 id="skills-heading" class="apple-section-title text-center">
+            <a href="#skills" class="hover:underline transition-all duration-200" aria-describedby="skills-description">
+              Technical Skills
+            </a>
+          </h2>
+          <p id="skills-description" class="text-center apple-caption mt-2 opacity-75">
+            Organized by expertise level and domain specialization
+          </p>
+        </header>
+        
+        <!-- Skills organized in predictable, hierarchical structure for OCD-friendly navigation -->
+        <div class="ocd-skills-container" role="list" aria-label="Technical skill categories">
+          {skills.map((skillGroup, index) => {
+            // Consistent icon mapping for predictable visual patterns
+            const skillIcons = [
+              'heroicons:cloud',              // Cloud Platforms & IaC
+              'simple-icons:kubernetes',      // Container Orchestration  
+              'heroicons:arrow-path',         // CI/CD & DevOps
+              'heroicons:chart-bar',          // Observability & Monitoring
+              'heroicons:code-bracket',       // Programming & Scripting
+              'heroicons:server',             // Big Data & Databases
+              'heroicons:shield-check',       // Security & Compliance
+              'heroicons:users'               // Soft Skills
+            ];
+            
+            const iconName = skillIcons[index] || 'heroicons:wrench-screwdriver';
+            
+            return (
+              <article 
+                class="ocd-skill-category apple-experience-container" 
+                role="listitem"
+                aria-labelledby={`skill-category-${index}`}
+                data-category-level={skillGroup.level}
+              >
+                <div class="glass-card ocd-skill-card">
+                  <header class="ocd-skill-header">
+                    <h3 id={`skill-category-${index}`} class="apple-headline ocd-category-title">
+                      <div class="ocd-icon-container" aria-hidden="true">
+                        <LiquidGlassIcon name={iconName} size={20} variant="default" />
+                      </div>
+                      <span class="ocd-category-name">{skillGroup.name}</span>
+                    </h3>
+                    {skillGroup.level && (
+                      <div class="ocd-proficiency-badge" role="img" aria-label={`Proficiency level: ${skillGroup.level}`}>
+                        <span class="ocd-level-indicator">{skillGroup.level}</span>
+                      </div>
+                    )}
+                  </header>
+                  
+                  <div class="ocd-skills-grid" role="list" aria-label={`${skillGroup.name} skills`}>
+                    {skillGroup.keywords.map((skill, skillIndex) => {
+                      const hasLink = skillGroup.links && skillGroup.links[skill];
+                      const Component = hasLink ? 'a' : 'span';
+                      const linkProps = hasLink ? {
+                        href: skillGroup.links[skill],
+                        target: '_blank',
+                        rel: 'noopener noreferrer',
+                        title: `Learn more about ${skill} - Educational resource`,
+                        'data-contact-type': 'skill-education',
+                        'data-contact-value': skill,
+                        'aria-describedby': `skill-${index}-${skillIndex}-desc`
+                      } : {
+                        'aria-describedby': `skill-${index}-${skillIndex}-desc`
+                      };
+                      
+                      return (
+                        <div class="ocd-skill-item" role="listitem">
+                          <Component 
+                            class={`ocd-skill-token glass-token apple-subheadline ${hasLink ? 'ocd-skill-link' : 'ocd-skill-static'}`}
+                            {...linkProps}
+                          >
+                            <span class="ocd-skill-text">{skill}</span>
+                            {hasLink && (
+                              <svg class="ocd-external-link-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                <path d="M3.5 3C3.22386 3 3 3.22386 3 3.5C3 3.77614 3.22386 4 3.5 4H7.29289L3.14645 8.14645C2.95118 8.34171 2.95118 8.65829 3.14645 8.85355C3.34171 9.04882 3.65829 9.04882 3.85355 8.85355L8 4.70711V8.5C8 8.77614 8.22386 9 8.5 9C8.77614 9 9 8.77614 9 8.5V3.5C9 3.22386 8.77614 3 8.5 3H3.5Z" fill="currentColor"/>
+                              </svg>
+                            )}
+                          </Component>
+                          <span id={`skill-${index}-${skillIndex}-desc`} class="sr-only">
+                            {hasLink ? `External link to ${skill} documentation` : `${skill} skill in ${skillGroup.name} category`}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </LiquidGlassCard>
+      
+      <!-- Apple HIG Subtle Separator -->
+      <div class="apple-separator" aria-hidden="true"></div>
+      
+      <!-- Education Section -->
+      <LiquidGlassCard id="education" class="p-8 apple-section-animate" data-apple-delay="5">
+        <h2 class="apple-section-title text-center mb-8">
+          <a href="#education" class="hover:underline transition-all duration-200">
+            Education
+          </a>
+        </h2>
+        <div class="space-y-6">
+          {education.map((edu, index) => (
+            <div class="apple-experience-container">
+              {/* Apple HIG Education Separator */}
+              {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
+              
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                <div class="flex-1">
+                  <h3 class="apple-headline mb-2 text-xl font-semibold">
+                    {edu.studyType} in {edu.area}
+                  </h3>
+                  <p class="apple-subheadline mb-3 text-lg font-medium">
+                    {edu.institution}
+                  </p>
+                </div>
+                <div class="flex-shrink-0 mt-2 md:mt-0">
+                  <p class="apple-caption text-sm font-medium px-3 py-1 rounded-full" 
+                     style="background: var(--glass-bg); color: var(--foreground);">
+                    {new Date(edu.startDate).getFullYear()} - {new Date(edu.endDate).getFullYear()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </LiquidGlassCard>
+      
       <!-- Apple HIG Subtle Separator -->
       <div class="apple-separator" aria-hidden="true"></div>
       
       <!-- Key Projects Section -->
-      <LiquidGlassCard id="projects" class="p-8 apple-section-animate" data-apple-delay="3">
-        <h2 class="apple-section-title mb-8">
+      <LiquidGlassCard id="projects" class="p-8 apple-section-animate" data-apple-delay="6">
+        <h2 class="apple-section-title text-center mb-8">
           <a href="#projects" class="hover:underline transition-all duration-200">
             Key Projects
           </a>
@@ -306,7 +575,9 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
             <div class={`project-item ${index >= 3 ? 'hidden' : ''}`}>
               {/* Apple HIG Project Separator */}
               {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
-              <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+              
+              <div class="apple-experience-container">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
                 <div class="flex-1">
                   <h3 class="apple-title-2 mb-2">
                     {project.url ? (
@@ -338,23 +609,37 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                   ))}
                 </div>
               )}
+              </div>
             </div>
           ))}
         </div>
         
-        <!-- Load More Button for Projects -->
+        <!-- Apple iOS-style Show More with Fade Hint for Projects -->
         {projects.length > 3 && (
-          <div class="text-center mt-8">
-            <button 
-              id="load-more-projects"
-              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
-              onclick="toggleProjectItems()"
-            >
-              <div class="mr-2">
-                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
-              </div>
-              <span id="projects-button-text">Show More Projects</span>
-            </button>
+          <!-- Apple-Style Content Fade Overlay + Show More Button -->
+          <div class="relative -mt-8">
+            <!-- iOS-style content fade overlay -->
+            <div class="apple-ios-content-fade" id="projects-fade-hint" aria-hidden="true"></div>
+            
+            <!-- Apple iOS-native Show More button -->
+            <div class="relative z-30 flex justify-center pt-12">
+              <button 
+                id="projects-toggle"
+                class="apple-ios-button group"
+                onclick="toggleProjectItems()"
+                type="button"
+                aria-label="Show more projects"
+              >
+                <div class="flex items-center justify-center space-x-3">
+                  <span class="apple-ios-button-text">Show More Projects</span>
+                  <div class="apple-ios-chevron-container">
+                    <svg class="apple-ios-chevron" id="projects-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
         )}
       </LiquidGlassCard>
@@ -365,8 +650,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Certifications Section -->
       {certificates && certificates.length > 0 && (
         <>
-          <LiquidGlassCard id="certifications" class="p-8 apple-section-animate" data-apple-delay="4">
-            <h2 class="apple-section-title mb-8">
+          <LiquidGlassCard id="certifications" class="p-8 apple-section-animate" data-apple-delay="7">
+            <h2 class="apple-section-title text-center mb-8">
               <a href="#certifications" class="hover:underline transition-all duration-200">
                 Certifications
               </a>
@@ -449,67 +734,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <div class="apple-separator" aria-hidden="true"></div>
         </>
       )}
-      
-      <!-- Skills Section -->
-      <LiquidGlassCard id="skills" class="p-8 apple-section-animate" data-apple-delay="5">
-        <h2 class="apple-section-title text-center mb-8">
-          <a href="#skills" class="hover:underline transition-all duration-200">
-            Technical Skills
-          </a>
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-          {skills.map((skillGroup, index) => {
-            // Map skill groups to appropriate icons (removing emoji duplication)
-            const skillIcons = [
-              'heroicons:cloud',              // Cloud Platforms & IaC
-              'simple-icons:kubernetes',      // Container Orchestration  
-              'heroicons:arrow-path',         // CI/CD & DevOps
-              'heroicons:chart-bar',          // Observability & Monitoring
-              'heroicons:code-bracket',       // Programming & Scripting
-              'heroicons:server',             // Big Data & Databases
-              'heroicons:shield-check',       // Security & Compliance
-              'heroicons:users'               // Soft Skills
-            ];
-            
-            const iconName = skillIcons[index] || 'heroicons:wrench-screwdriver';
-            
-            return (
-              <div class="glass-card p-6 space-y-4">
-                <h3 class="apple-headline flex items-center">
-                  <div class="mr-2">
-                    <LiquidGlassIcon name={iconName} size={20} variant="default" />
-                  </div>
-                  {skillGroup.name}
-                </h3>
-                <div class="flex flex-wrap gap-2">
-                  {skillGroup.keywords.map((skill) => {
-                    const hasLink = skillGroup.links && skillGroup.links[skill];
-                    const Component = hasLink ? 'a' : 'span';
-                    const linkProps = hasLink ? {
-                      href: skillGroup.links[skill],
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                      title: `Learn more about ${skill} - Educational resource`,
-                      'data-contact-type': 'skill-education',
-                      'data-contact-value': skill
-                    } : {};
-                    
-                    return (
-                      <Component 
-                        class={`glass-token apple-subheadline px-4 py-2 transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
-                        style="color: var(--glass-text);"
-                        {...linkProps}
-                      >
-                        {skill}
-                      </Component>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </LiquidGlassCard>
 
 
     </div>
@@ -1382,6 +1606,240 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
   }
 
+  /* Apple iOS-native button styles */
+  .apple-ios-button {
+    background: linear-gradient(180deg, 
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.9) 50%,
+      rgba(241, 245, 249, 0.85) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 17px;
+    font-weight: 590;
+    letter-spacing: -0.24px;
+    color: #007AFF;
+    box-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    position: relative;
+    overflow: hidden;
+    border: none;
+  }
+  
+  .apple-ios-button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 8px 20px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    background: linear-gradient(180deg, 
+      rgba(255, 255, 255, 1) 0%,
+      rgba(250, 252, 255, 0.95) 50%,
+      rgba(245, 248, 252, 0.9) 100%);
+  }
+  
+  .apple-ios-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+  
+  :global(.dark) .apple-ios-button {
+    background: linear-gradient(180deg, 
+      rgba(28, 28, 30, 0.9) 0%,
+      rgba(44, 44, 46, 0.85) 50%,
+      rgba(58, 58, 60, 0.8) 100%);
+    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    color: #0A84FF;
+    box-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  :global(.dark) .apple-ios-button:hover {
+    background: linear-gradient(180deg, 
+      rgba(32, 32, 34, 0.95) 0%,
+      rgba(48, 48, 50, 0.9) 50%,
+      rgba(64, 64, 66, 0.85) 100%);
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.4),
+      0 8px 20px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .apple-ios-button-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .apple-ios-chevron-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .apple-ios-chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .apple-ios-button:hover .apple-ios-chevron-container {
+    transform: translateX(2px);
+  }
+
+  .apple-ios-button:hover .apple-ios-chevron {
+    transform: scale(1.1);
+  }
+
+  /* Medium-style fade hint */
+  .medium-fade-hint {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.95) 20%,
+      rgba(255, 255, 255, 0.8) 40%,
+      rgba(255, 255, 255, 0.6) 60%,
+      rgba(255, 255, 255, 0.3) 80%,
+      transparent 100%);
+    pointer-events: none;
+    border-radius: 0 0 16px 16px;
+  }
+  
+  :global(.dark) .medium-fade-hint {
+    background: linear-gradient(to top,
+      rgba(15, 20, 25, 1) 0%,
+      rgba(15, 20, 25, 0.95) 20%,
+      rgba(15, 20, 25, 0.8) 40%,
+      rgba(15, 20, 25, 0.6) 60%,
+      rgba(15, 20, 25, 0.3) 80%,
+      transparent 100%);
+  }
+
+  /* ===== iOS-STYLE CONTENT FADE OVERLAY SYSTEM ===== */
+  
+  /* iOS-style content fade overlay - positioned to overlap content edge */
+  .apple-ios-content-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6rem; /* 96px - larger fade area for better effect */
+    z-index: 20;
+    pointer-events: none; /* Prevent blocking clicks on underlying content */
+    
+    /* iOS content fade hint indicator */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 3.5rem;
+  }
+  
+  /* Modern browsers with color-mix support */
+  @supports (background: color-mix(in srgb, white 50%, transparent)) {
+    .apple-ios-content-fade {
+      /* iOS-style sophisticated gradient - optimized 4-stop version */
+      background: linear-gradient(to top,
+        var(--background) 0%,
+        color-mix(in srgb, var(--background) 85%, transparent) 35%,
+        color-mix(in srgb, var(--background) 50%, transparent) 70%,
+        transparent 100%
+      );
+    }
+  }
+  
+  /* Legacy browsers fallback */
+  @supports not (background: color-mix(in srgb, white 50%, transparent)) {
+    .apple-ios-content-fade {
+      /* Simple gradient fallback for older Safari/Chrome */
+      background: linear-gradient(to top,
+        var(--background) 0%,
+        rgba(255, 255, 255, 0.8) 35%,
+        rgba(255, 255, 255, 0.3) 70%,
+        transparent 100%
+      );
+    }
+    
+    /* Dark theme fallback */
+    :global(.dark) .apple-ios-content-fade {
+      background: linear-gradient(to top,
+        var(--background) 0%,
+        rgba(15, 20, 25, 0.8) 35%,
+        rgba(15, 20, 25, 0.3) 70%,
+        transparent 100%
+      );
+    }
+  }
+  
+  /* iOS-style content fade with HIG-compliant chevron indicator */
+  .apple-ios-content-fade::before {
+    content: '⌄';  /* iOS-native chevron-down character */
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--foreground);
+    opacity: 0.5;
+    font-size: 1.2rem;
+    font-weight: 400;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    animation: ios-fade-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes ios-fade-pulse {
+    0%, 70%, 100% {
+      opacity: 0.4;
+    }
+    35% {
+      opacity: 0.7;
+    }
+  }
+  
+  /* Dark theme - automatic adaptation using same semantic colors */
+  :global(.dark) .apple-ios-content-fade {
+    /* Uses same background variable - automatically adapts to dark theme */
+    background: linear-gradient(to top,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 98%, transparent) 10%,
+      color-mix(in srgb, var(--background) 95%, transparent) 20%,
+      color-mix(in srgb, var(--background) 88%, transparent) 35%,
+      color-mix(in srgb, var(--background) 75%, transparent) 50%,
+      color-mix(in srgb, var(--background) 55%, transparent) 65%,
+      color-mix(in srgb, var(--background) 30%, transparent) 80%,
+      color-mix(in srgb, var(--background) 10%, transparent) 90%,
+      transparent 100%
+    );
+  }
+  
+  /* Apple HIG: Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .apple-ios-content-fade::before {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
+
   /* Apple Experience Container - Clean liquid glass hover boundaries */
   .apple-experience-container {
     border-radius: 16px;
@@ -1461,21 +1919,804 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       margin-bottom: 1rem;
     }
   }
+
+  /* Beautiful OCD-Friendly Technical Skills Styles */
+  /* Modern design with organized patterns and visual hierarchy */
+  
+  .ocd-skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+    padding: 0 1rem;
+  }
+  
+  .ocd-skill-category {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  
+  .ocd-skill-category:hover {
+    transform: translateY(-4px);
+  }
+  
+  .ocd-skill-card {
+    padding: 2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(255, 255, 255, 0.7) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .ocd-skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      #667eea 0%, 
+      #764ba2 25%, 
+      #f093fb 50%, 
+      #f5576c 75%, 
+      #4facfe 100%);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+  
+  .ocd-skill-card:hover {
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.08),
+      0 8px 24px rgba(0, 0, 0, 0.12),
+      0 4px 12px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* OCD-friendly focus states for keyboard navigation */
+  .ocd-skill-card:focus-within {
+    outline: 3px solid color-mix(in srgb, var(--foreground) 60%, transparent);
+    outline-offset: 2px;
+    box-shadow: 
+      0 8px 32px color-mix(in srgb, var(--foreground) 20%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--foreground) 15%, transparent);
+  }
+  
+  .ocd-skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    position: relative;
+  }
+  
+  .ocd-skill-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      var(--separator-light) 20%, 
+      var(--separator-light) 80%, 
+      transparent 100%);
+  }
+  
+  .ocd-category-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+    flex: 1;
+  }
+  
+  .ocd-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(255, 255, 255, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    flex-shrink: 0;
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+  
+  .ocd-category-name {
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1.2;
+    color: var(--foreground);
+    letter-spacing: -0.025em;
+  }
+  
+  .ocd-proficiency-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%,
+      rgba(37, 99, 235, 0.08) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    box-shadow: 
+      0 2px 8px rgba(37, 99, 235, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+  
+  .ocd-level-indicator {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foreground);
+    text-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 20%, transparent);
+  }
+  
+  .ocd-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    flex: 1;
+  }
+  
+  .ocd-skill-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ocd-skill-token {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    border-radius: 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--glass-border);
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.8) 0%, 
+      rgba(255, 255, 255, 0.6) 100%);
+    color: var(--foreground);
+    text-decoration: none;
+    min-height: 3rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 
+      0 2px 12px rgba(0, 0, 0, 0.08),
+      0 1px 4px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  
+  .ocd-skill-token::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      color-mix(in srgb, white 20%, transparent) 50%, 
+      transparent 100%);
+    transition: left 0.5s ease;
+  }
+  
+  .ocd-skill-token:hover::before {
+    left: 100%;
+  }
+  
+  .ocd-skill-link {
+    cursor: pointer;
+    box-shadow: 
+      0 2px 8px color-mix(in srgb, var(--foreground) 8%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+  }
+  
+  .ocd-skill-link:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%, 
+      rgba(37, 99, 235, 0.08) 100%);
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 4px 16px rgba(37, 99, 235, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  
+  .ocd-skill-link:focus {
+    outline: 2px solid color-mix(in srgb, var(--foreground) 60%, transparent);
+    outline-offset: 2px;
+  }
+  
+  .ocd-skill-static {
+    opacity: 0.85;
+    box-shadow: 
+      0 1px 4px color-mix(in srgb, var(--foreground) 5%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+  }
+  
+  .ocd-skill-static:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+  }
+  
+  .ocd-skill-text {
+    flex: 1;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .ocd-external-link-icon {
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .ocd-skill-link:hover .ocd-external-link-icon {
+    opacity: 1;
+    transform: translateX(2px) translateY(-2px);
+  }
+  
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* Dark theme adaptations - Enhanced consistency */
+  :global(.dark) .ocd-skill-card {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.6) 0%, 
+      rgba(15, 20, 25, 0.3) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  :global(.dark) .ocd-skill-card:hover {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.6),
+      0 4px 16px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  :global(.dark) .ocd-icon-container {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.8) 0%, 
+      rgba(15, 20, 25, 0.4) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  :global(.dark) .ocd-proficiency-badge {
+    background: linear-gradient(135deg, 
+      rgba(226, 232, 240, 0.15) 0%,
+      rgba(226, 232, 240, 0.08) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  :global(.dark) .ocd-skill-token {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.7) 0%, 
+      rgba(15, 20, 25, 0.4) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  :global(.dark) .ocd-skill-link {
+    box-shadow: 
+      0 3px 12px rgba(0, 0, 0, 0.4),
+      0 1px 4px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  :global(.dark) .ocd-skill-link:hover {
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.2) 0%, 
+      rgba(37, 99, 235, 0.1) 100%);
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.5),
+      0 4px 12px rgba(37, 99, 235, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  :global(.dark) .ocd-skill-static {
+    box-shadow: 
+      0 2px 6px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  
+  :global(.dark) .ocd-skill-static:hover {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.8) 0%, 
+      rgba(15, 20, 25, 0.5) 100%);
+  }
+  
+  :global(.dark) .ocd-skill-token::before {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%);
+  }
+  
+  /* Responsive adjustments for beautiful consistent spacing */
+  @media (max-width: 1024px) {
+    .ocd-skills-container {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .ocd-skills-container {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 0 0.5rem;
+    }
+    
+    .ocd-skill-card {
+      padding: 1.5rem;
+    }
+    
+    .ocd-category-name {
+      font-size: 1.25rem;
+    }
+    
+    .ocd-skills-grid {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .ocd-skill-token {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      min-height: 2.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .ocd-skills-container {
+      margin-top: 2rem;
+    }
+    
+    .ocd-skill-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .ocd-skills-grid {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+  }
+  
+  /* High contrast mode support for accessibility */
+  @media (prefers-contrast: high) {
+    .ocd-skill-card {
+      border: 2px solid var(--foreground);
+      background: var(--background);
+    }
+    
+    .ocd-skill-token {
+      border: 2px solid var(--foreground);
+      background: var(--background);
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .ocd-skill-category,
+    .ocd-skill-card,
+    .ocd-skill-token {
+      transition: none;
+    }
+    
+    .ocd-skill-category:hover,
+    .ocd-skill-link:hover {
+      transform: none;
+    }
+    
+    .ocd-skill-token::before {
+      display: none;
+    }
+  }
+
+  /* Enhanced Professional Summary Styles - OCD-Friendly Design */
+  .professional-summary-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 6xl;
+    margin: 0 auto;
+  }
+
+  .summary-core-section {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .summary-highlight-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(255, 255, 255, 0.7) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    max-width: 48rem;
+    width: 100%;
+  }
+
+  .summary-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%, 
+      rgba(37, 99, 235, 0.08) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    box-shadow: 
+      0 4px 12px rgba(37, 99, 235, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+
+  .summary-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .summary-role-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+  }
+
+  .summary-core-text {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--foreground);
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  .summary-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .summary-achievement-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.8) 0%, 
+      rgba(255, 255, 255, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1.25rem;
+    backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .summary-achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .achievement-metric {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--foreground);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .achievement-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .summary-expertise-section {
+    text-align: center;
+  }
+
+  .summary-section-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0 0 1.5rem 0;
+    text-align: center;
+  }
+
+  .summary-expertise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 4xl;
+    margin: 0 auto;
+  }
+
+  .expertise-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.8) 0%, 
+      rgba(255, 255, 255, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 1px 4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    color: var(--foreground);
+    font-size: 0.9375rem;
+  }
+
+  .expertise-item:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .summary-focus-section {
+    display: flex;
+    justify-content: center;
+  }
+
+  .focus-highlight-card {
+    max-width: 48rem;
+    width: 100%;
+    padding: 2rem;
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.1) 0%, 
+      rgba(37, 99, 235, 0.05) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+      0 8px 32px rgba(37, 99, 235, 0.06),
+      0 4px 16px rgba(37, 99, 235, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .focus-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.2) 0%, 
+      rgba(37, 99, 235, 0.1) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 2rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--foreground);
+    margin-bottom: 1rem;
+    box-shadow: 
+      0 2px 8px rgba(37, 99, 235, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .focus-content {
+    margin-top: 1rem;
+  }
+
+  .focus-text {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--foreground);
+    margin: 0;
+  }
+
+  /* Dark theme adaptations for Professional Summary */
+  :global(.dark) .summary-highlight-card {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.8) 0%, 
+      rgba(15, 20, 25, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :global(.dark) .summary-achievement-item {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.7) 0%, 
+      rgba(15, 20, 25, 0.5) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :global(.dark) .expertise-item {
+    background: linear-gradient(135deg, 
+      rgba(15, 20, 25, 0.7) 0%, 
+      rgba(15, 20, 25, 0.5) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      0 1px 4px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :global(.dark) .focus-highlight-card {
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%, 
+      rgba(37, 99, 235, 0.08) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 4px 16px rgba(37, 99, 235, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Responsive adjustments for Professional Summary */
+  @media (max-width: 768px) {
+    .professional-summary-container {
+      gap: 2rem;
+    }
+
+    .summary-highlight-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.5rem;
+      gap: 1rem;
+    }
+
+    .summary-achievements-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      padding: 0;
+    }
+
+    .summary-achievement-item {
+      padding: 1rem;
+    }
+
+    .achievement-metric {
+      font-size: 1.5rem;
+    }
+
+    .summary-expertise-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .focus-highlight-card {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .summary-achievements-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-role-title {
+      font-size: 1.25rem;
+    }
+
+    .summary-core-text {
+      font-size: 1rem;
+    }
+
+    .focus-text {
+      font-size: 1rem;
+    }
+  }
 </style>
 
 <script>
   // Toggle Experience Items
   function toggleExperienceItems() {
     const hiddenItems = document.querySelectorAll('.experience-item.hidden');
-    const visibleItems = document.querySelectorAll('.experience-item:not(.hidden)');
-    const button = document.getElementById('load-more-experience');
-    const buttonText = document.getElementById('experience-button-text');
+    const button = document.getElementById('experience-toggle');
+    const buttonText = button?.querySelector('.apple-ios-button-text');
+    const chevron = document.getElementById('experience-chevron');
+    const fadeHint = document.getElementById('experience-fade-hint');
     
     if (hiddenItems.length > 0) {
       // Show all hidden items
       hiddenItems.forEach(item => item.classList.remove('hidden'));
-      buttonText.textContent = 'Show Less Experience';
-      button.querySelector('span').textContent = '📋';
+      if (buttonText) buttonText.textContent = 'Show Less Experience';
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      // Hide iOS fade overlay when expanded
+      if (fadeHint) fadeHint.style.display = 'none';
     } else {
       // Hide items after index 2 (show only first 3)
       const allItems = document.querySelectorAll('.experience-item');
@@ -1484,23 +2725,28 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           item.classList.add('hidden');
         }
       });
-      buttonText.textContent = 'Show More Experience';
-      button.querySelector('span').textContent = '📋';
+      if (buttonText) buttonText.textContent = 'Show More Experience';
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      // Show iOS fade overlay when collapsed
+      if (fadeHint) fadeHint.style.display = 'flex';
     }
   }
 
   // Toggle Project Items
   function toggleProjectItems() {
     const hiddenItems = document.querySelectorAll('.project-item.hidden');
-    const visibleItems = document.querySelectorAll('.project-item:not(.hidden)');
-    const button = document.getElementById('load-more-projects');
-    const buttonText = document.getElementById('projects-button-text');
+    const button = document.getElementById('projects-toggle');
+    const buttonText = button?.querySelector('.apple-ios-button-text');
+    const chevron = document.getElementById('projects-chevron');
+    const fadeHint = document.getElementById('projects-fade-hint');
     
     if (hiddenItems.length > 0) {
       // Show all hidden items
       hiddenItems.forEach(item => item.classList.remove('hidden'));
-      buttonText.textContent = 'Show Less Projects';
-      button.querySelector('span').textContent = '🚀';
+      if (buttonText) buttonText.textContent = 'Show Less Projects';
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      // Hide iOS fade overlay when expanded
+      if (fadeHint) fadeHint.style.display = 'none';
     } else {
       // Hide items after index 2 (show only first 3)
       const allItems = document.querySelectorAll('.project-item');
@@ -1509,8 +2755,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           item.classList.add('hidden');
         }
       });
-      buttonText.textContent = 'Show More Projects';
-      button.querySelector('span').textContent = '🚀';
+      if (buttonText) buttonText.textContent = 'Show More Projects';
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      // Show iOS fade overlay when collapsed
+      if (fadeHint) fadeHint.style.display = 'flex';
     }
   }
 
