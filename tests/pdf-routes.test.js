@@ -15,7 +15,7 @@ async function testQRCodeGeneration() {
   
   try {
     // Import the QR code utility
-    const { generateQRCodeDataURL, QRCodePresets } = await import('../utils/qr-code.ts');
+    const { generateQRCodeDataURL, QRCodePresets } = await import('../app/utils/qr-code.ts');
     
     // Test basic QR generation
     const testUrl = 'https://example.com';
@@ -64,7 +64,7 @@ async function testPDFTemplates() {
   
   for (const template of templates) {
     try {
-      const templatePath = resolve(process.cwd(), 'src', 'pages', template.file.replace('../pages/', ''));
+      const templatePath = resolve(process.cwd(), 'app', 'pages', template.file.replace('../pages/', ''));
       const content = await readFile(templatePath, 'utf8');
       
       // Check for required imports
@@ -131,7 +131,7 @@ async function testHTMLPDFPages() {
   
   for (const page of pdfPages) {
     try {
-      const pagePath = resolve(process.cwd(), 'src', 'pages', page.file);
+      const pagePath = resolve(process.cwd(), 'app', 'pages', page.file);
       const content = await readFile(pagePath, 'utf8');
       
       // Check for proper HTML structure
