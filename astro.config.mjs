@@ -80,7 +80,20 @@ export default defineConfig({
   },
   integrations: [
     icon(),
-    sitemap(),
+    sitemap({
+      customPages: [
+        // Main sections with anchor links for better SEO indexing
+        `${site}/#header`,
+        `${site}/#connect`, 
+        `${site}/#experience`,
+        `${site}/#projects`,
+        `${site}/#certifications`,
+        `${site}/#skills`,
+      ],
+      changefreq: 'monthly',
+      priority: 0.8,
+      lastmod: new Date(),
+    }),
     compress({
       CSS: true,
       HTML: {
