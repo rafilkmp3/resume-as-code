@@ -5,15 +5,7 @@ on:
   # 🚀 Production deployment triggers
   push:
     tags:
-      - 'v*.*.*'  # Trigger on semver tags (v1.2.3) created by release-please
-    branches: [main]
-    paths:
-      # 🔧 Content and Infrastructure Changes
-      - 'app/**'  # All application content changes
-      - 'infrastructure/**'  # Build scripts and tooling
-      - '.github/workflows/production-deploy.yml'
-      - '.github/workflows/shared-build.yml'
-      - '.github/actions/**'  # Reusable action changes
+      - 'v*.*.*'  # Trigger ONLY on semver tags (v1.2.3) created by release-please
   workflow_dispatch:  # Allow manual triggering from GitHub UI
 
 concurrency:
