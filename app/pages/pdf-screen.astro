@@ -316,7 +316,7 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
 <body>
   <div class="container">
     <header class="header">
-      <img src={`/${basics.image}`} alt={basics.name} class="profile-img" />
+      <img src={`${siteUrl}/${basics.image}`} alt={basics.name} class="profile-img" />
       <h1>{basics.name}</h1>
       <p class="subtitle">{basics.label}</p>
       <div class="contact-info">
