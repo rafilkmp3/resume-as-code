@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.13.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.2...v4.13.0) (2025-08-29)
+
+
+### Features
+
+* add dual Kubernetes certifications ([1ffa6c8](https://github.com/rafilkmp3/resume-as-code/commit/1ffa6c8252d0c2432b27efee66df3c1a363ea2b0))
+
+
+### Bug Fixes
+
+* production deployment triggers for app changes ([7b8c1b4](https://github.com/rafilkmp3/resume-as-code/commit/7b8c1b4cd3c2fbb2e939c7e61176a52ada8aea48))
+* update PDF test directory refs src→app ([87a8efd](https://github.com/rafilkmp3/resume-as-code/commit/87a8efdc332d95eff77addba0410cd2eaa3ea4dc))
+* use full URL for PDF profile image ([1c446b2](https://github.com/rafilkmp3/resume-as-code/commit/1c446b24f691c8c585678a99f3a3cd94d5cb3ed0))
+
+
+### Miscellaneous
+
+* **deps:** bump daisyui from 5.0.50 to 5.0.51 ([fb6761f](https://github.com/rafilkmp3/resume-as-code/commit/fb6761f68b92280c0764d2d400c276b7075cbd94))
+* **deps:** bump daisyui from 5.0.50 to 5.0.51 ([#90](https://github.com/rafilkmp3/resume-as-code/issues/90)) ([6ace991](https://github.com/rafilkmp3/resume-as-code/commit/6ace991969f8be208e3c64a6456b861722027437))
+
 ## [4.12.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.1...v4.12.2) (2025-08-25)
 
 
