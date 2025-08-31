@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.1...v4.14.2) (2025-08-31)
+
+
+### Bug Fixes
+
+* health check asset validation for production ([cbfc384](https://github.com/rafilkmp3/resume-as-code/commit/cbfc384c46d33b0d5982c0f2460dd97d9d03da7d))
+
 ## [4.14.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.0...v4.14.1) (2025-08-31)
 
 
