@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.0...v4.13.1) (2025-08-31)
+
+
+### Bug Fixes
+
+* resolve GitHub Pages PDF download 404s ([1a3c814](https://github.com/rafilkmp3/resume-as-code/commit/1a3c814e01cd47614ee8b9fbfb9313e6a2f86d74))
+
 ## [4.13.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.12.2...v4.13.0) (2025-08-29)
 
 
