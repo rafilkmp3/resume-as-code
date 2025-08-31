@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.0...v4.14.1) (2025-08-31)
+
+
+### Bug Fixes
+
+* update health checks for HTML PDF architecture ([329817e](https://github.com/rafilkmp3/resume-as-code/commit/329817e3ac8bc99ad70e509c264eef8916397b40))
+
 ## [4.14.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.2...v4.14.0) (2025-08-31)
 
 
