@@ -125,8 +125,8 @@ jobs:
           # 3. API Endpoint (if exists)
           check_url "${SITE_URL}api/version" "Version API Endpoint"
           
-          # 4. CSS/Assets Loading
-          check_url "${SITE_URL}assets/" "Assets Directory (CSS/JS)"
+          # 4. Critical Assets Loading
+          check_url "${SITE_URL}assets/images/profile-optimized.jpg" "Profile Image Asset"
           
           # Generate health report
           echo ""

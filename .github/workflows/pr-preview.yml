@@ -140,8 +140,8 @@ jobs:
           check_url "${PREVIEW_URL}/pdf-screen/" "PDF Screen HTML Page"
           check_url "${PREVIEW_URL}/pdf-print/" "PDF Print HTML Page"
           
-          # 3. Basic assets
-          check_url "${PREVIEW_URL}/assets/" "Assets Directory"
+          # 3. Critical assets
+          check_url "${PREVIEW_URL}/assets/images/profile-optimized.jpg" "Profile Image Asset"
           
           # Generate health report
           echo ""
