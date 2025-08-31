@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.1...v4.13.2) (2025-08-31)
+
+
+### Bug Fixes
+
+* add GitHub Pages cache invalidation step ([a48b1c8](https://github.com/rafilkmp3/resume-as-code/commit/a48b1c8aff49d87481e67c87da6e60cd430872ac))
+
 ## [4.13.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.0...v4.13.1) (2025-08-31)
 
 
