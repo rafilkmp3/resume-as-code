@@ -87,6 +87,85 @@ jobs:
           echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
           echo "🌐 Preview URL: ${PREVIEW_URL}"
 
+      - name: 🔍 Post-Deployment Health Check & Verification  
+        timeout-minutes: 3
+        run: |
+          echo "🔍 Starting PR preview health checks..."
+          
+          PREVIEW_URL="https://deploy-preview-${{ github.event.pull_request.number }}--resume-as-code.netlify.app"
+          echo "🌐 Testing: ${PREVIEW_URL}"
+          
+          # Health check tracking
+          HEALTH_CHECKS_PASSED=0
+          TOTAL_HEALTH_CHECKS=4  # Reduced for PR preview
+          FAILED_CHECKS=""
+          
+          # Function to perform HTTP check with retry
+          check_url() {
+            local url="$1"
+            local description="$2"
+            local max_attempts=2  # Reduced for faster PR feedback
+            local attempt=1
+            
+            echo "🔍 Checking: ${description}"
+            
+            while [ $attempt -le $max_attempts ]; do
+              if curl -s -f -w "HTTP %{http_code} | Time: %{time_total}s\n" \
+                   -H "User-Agent: GitHub-Actions-PR-Health-Check/1.0" \
+                   -H "Cache-Control: no-cache" \
+                   "$url" > /dev/null; then
+                echo "  ✅ ${description} - SUCCESS"
+                HEALTH_CHECKS_PASSED=$((HEALTH_CHECKS_PASSED + 1))
+                return 0
+              else
+                echo "  ❌ ${description} - Attempt ${attempt}/${max_attempts} - FAILED"
+                sleep 3
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            FAILED_CHECKS="${FAILED_CHECKS}\n- ${description}"
+            return 1
+          }
+          
+          # Core PR Preview Health Checks  
+          echo ""
+          echo "🏥 Running PR Preview Health Checks..."
+          echo "====================================="
+          
+          # 1. Main site availability
+          check_url "${PREVIEW_URL}" "PR Preview Site (HTML)"
+          
+          # 2. Critical PDF Downloads
+          check_url "${PREVIEW_URL}/resume.pdf" "Screen PDF Download"
+          check_url "${PREVIEW_URL}/resume-print.pdf" "Print PDF Download"
+          
+          # 3. Basic assets
+          check_url "${PREVIEW_URL}/assets/" "Assets Directory"
+          
+          # Generate health report
+          echo ""
+          echo "📊 PR Preview Health Results:"
+          echo "============================"
+          echo "✅ Passed: ${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS}"
+          
+          if [ ${HEALTH_CHECKS_PASSED} -eq ${TOTAL_HEALTH_CHECKS} ]; then
+            echo "🎉 ALL PR PREVIEW CHECKS PASSED - Preview is fully functional!"
+            echo "PR_HEALTH_STATUS=✅ Verified" >> $GITHUB_ENV
+            echo "PR_HEALTH_DETAILS=All ${TOTAL_HEALTH_CHECKS} health checks passed" >> $GITHUB_ENV
+          elif [ ${HEALTH_CHECKS_PASSED} -ge 2 ]; then
+            echo "⚠️ PARTIAL SUCCESS - Core preview available with some issues"
+            echo "Failed checks:${FAILED_CHECKS}"
+            echo "PR_HEALTH_STATUS=⚠️ Degraded" >> $GITHUB_ENV
+            echo "PR_HEALTH_DETAILS=${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS} passed - Some issues" >> $GITHUB_ENV
+          else
+            echo "❌ CRITICAL ISSUES - PR preview may not be functional"
+            echo "Failed checks:${FAILED_CHECKS}"
+            echo "PR_HEALTH_STATUS=❌ Unhealthy" >> $GITHUB_ENV
+            echo "PR_HEALTH_DETAILS=Only ${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS} passed" >> $GITHUB_ENV
+            # Don't fail PR builds, just report issues
+          fi
+
       - name: 📦 Upload Build Artifacts
         uses: ./.github/actions/manage-artifacts
         with:
@@ -139,11 +218,23 @@ jobs:
           script: |
             const previewUrl = '${{ needs.build-and-deploy.outputs.preview_url }}';
 
+            // Get health check results
+            const healthStatus = process.env.PR_HEALTH_STATUS || '⏳ Checking...';
+            const healthDetails = process.env.PR_HEALTH_DETAILS || 'Health checks in progress';
+
             const comment = `## 🔍 PR Preview Deployment
 
             **Preview URL:** ${previewUrl}
             **Status:** ✅ Deployment successful
+            **Health Check:** ${healthStatus}
+            
+            ### 🔍 Post-Deployment Verification
+            - **Status**: ${healthStatus}
+            - **Details**: ${healthDetails}
+            - **Verified**: Main site, PDF downloads, assets loading
+            - **Method**: HTTP checks with retry logic for reliability
 
+            ### 🏗️ Build Information
             Built with new directory structure:
             - Source: \`app/\` (Astro v5.13.3)
             - Output: \`workspace/build/\`

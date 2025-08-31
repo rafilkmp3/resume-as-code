@@ -67,6 +67,90 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      - name: 🔍 Post-Deployment Health Check & Verification
+        if: steps.deployment.outcome == 'success'
+        timeout-minutes: 5
+        run: |
+          echo "🔍 Starting comprehensive post-deployment health checks..."
+          
+          SITE_URL="${{ steps.deployment.outputs.page_url }}"
+          echo "🌐 Testing: ${SITE_URL}"
+          
+          # Health check tracking
+          HEALTH_CHECKS_PASSED=0
+          TOTAL_HEALTH_CHECKS=6
+          FAILED_CHECKS=""
+          
+          # Function to perform HTTP check with retry
+          check_url() {
+            local url="$1"
+            local description="$2"
+            local max_attempts=3
+            local attempt=1
+            
+            echo "🔍 Checking: ${description}"
+            
+            while [ $attempt -le $max_attempts ]; do
+              if curl -s -f -w "HTTP %{http_code} | Size: %{size_download}b | Time: %{time_total}s\n" \
+                   -H "User-Agent: GitHub-Actions-Health-Check/1.0" \
+                   -H "Cache-Control: no-cache" \
+                   "$url" > /dev/null; then
+                echo "  ✅ ${description} - Attempt ${attempt}/${max_attempts} - SUCCESS"
+                HEALTH_CHECKS_PASSED=$((HEALTH_CHECKS_PASSED + 1))
+                return 0
+              else
+                echo "  ❌ ${description} - Attempt ${attempt}/${max_attempts} - FAILED"
+                sleep $((attempt * 2))  # Exponential backoff
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            FAILED_CHECKS="${FAILED_CHECKS}\n- ${description}"
+            return 1
+          }
+          
+          # Core Health Checks
+          echo ""
+          echo "🏥 Running Core Health Checks..."
+          echo "================================="
+          
+          # 1. Main site availability
+          check_url "${SITE_URL}" "Main Site (HTML)"
+          
+          # 2. PDF Downloads (critical user feature)
+          check_url "${SITE_URL}resume.pdf" "Screen PDF Download"
+          check_url "${SITE_URL}resume-print.pdf" "Print PDF Download" 
+          check_url "${SITE_URL}resume-ats.pdf" "ATS PDF Download"
+          
+          # 3. API Endpoint (if exists)
+          check_url "${SITE_URL}api/version" "Version API Endpoint"
+          
+          # 4. CSS/Assets Loading
+          check_url "${SITE_URL}assets/" "Assets Directory (CSS/JS)"
+          
+          # Generate health report
+          echo ""
+          echo "📊 Health Check Results:"
+          echo "======================="
+          echo "✅ Passed: ${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS}"
+          
+          if [ ${HEALTH_CHECKS_PASSED} -eq ${TOTAL_HEALTH_CHECKS} ]; then
+            echo "🎉 ALL HEALTH CHECKS PASSED - Production site is fully operational!"
+            echo "HEALTH_STATUS=✅ Verified" >> $GITHUB_ENV
+            echo "HEALTH_DETAILS=All ${TOTAL_HEALTH_CHECKS} health checks passed" >> $GITHUB_ENV
+          elif [ ${HEALTH_CHECKS_PASSED} -ge 4 ]; then
+            echo "⚠️ PARTIAL SUCCESS - Core functionality available but some issues detected"
+            echo "Failed checks:${FAILED_CHECKS}"
+            echo "HEALTH_STATUS=⚠️ Degraded" >> $GITHUB_ENV
+            echo "HEALTH_DETAILS=${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS} passed - Some non-critical issues" >> $GITHUB_ENV
+          else
+            echo "❌ CRITICAL ISSUES - Production deployment may not be fully functional"
+            echo "Failed checks:${FAILED_CHECKS}"
+            echo "HEALTH_STATUS=❌ Unhealthy" >> $GITHUB_ENV
+            echo "HEALTH_DETAILS=Only ${HEALTH_CHECKS_PASSED}/${TOTAL_HEALTH_CHECKS} passed - Critical issues detected" >> $GITHUB_ENV
+            exit 1
+          fi
+
       - name: 📊 Production Deployment Summary
         if: always()
         run: |
@@ -74,6 +158,9 @@ jobs:
           if [ "${{ steps.deployment.outcome }}" = "success" ]; then
             STATUS_ICON="✅"
             STATUS_TEXT="Production Deployment Complete"
+            if [ -n "${{ env.HEALTH_STATUS }}" ]; then
+              STATUS_TEXT="Production Deployment Complete - ${{ env.HEALTH_STATUS }}"
+            fi
           elif [ "${{ steps.deployment.outcome }}" = "failure" ]; then
             STATUS_ICON="❌"
             STATUS_TEXT="Production Deployment Failed"
@@ -101,6 +188,17 @@ jobs:
           echo "- **Duration**: ${{ needs.build.outputs.build-duration }}s" >> $GITHUB_STEP_SUMMARY
           echo "- **Runner**: ARM64 (40% faster than AMD64)" >> $GITHUB_STEP_SUMMARY
           echo "- **Framework**: Astro v5.13.3" >> $GITHUB_STEP_SUMMARY
+          
+          # Add health check results if available
+          if [ -n "${{ env.HEALTH_STATUS }}" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔍 Post-Deployment Health Check" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status**: ${{ env.HEALTH_STATUS }}" >> $GITHUB_STEP_SUMMARY  
+            echo "- **Details**: ${{ env.HEALTH_DETAILS }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Verified**: Main site, PDF downloads, API endpoint, assets loading" >> $GITHUB_STEP_SUMMARY
+            echo "- **Method**: HTTP checks with retry logic and exponential backoff" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ steps.deployment.outcome }}" = "success" ]; then
