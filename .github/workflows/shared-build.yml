@@ -120,8 +120,47 @@ jobs:
           echo "⚡ Astro v5.13.3 with workspace/build/ output"
           echo ""
           
+          # 🔍 Pre-build Environment Validation
+          echo "🔍 Pre-build diagnostics..."
+          echo "  📁 Working Directory: $(pwd)"
+          echo "  📦 Node.js: $(node --version)"
+          echo "  📦 npm: $(npm --version)"
+          echo "  💾 Available Memory: $(free -h | grep '^Mem:' | awk '{print $2}' || echo 'N/A')"
+          echo "  💾 Available Disk: $(df -h . | tail -1 | awk '{print $4}' || echo 'N/A')"
+          echo ""
+          
+          # 🏗️ Execute Build with Enhanced Error Handling
           echo "🏗️ Building with optimized settings..."
-          time npm run build
+          if time npm run build; then
+            echo "✅ Build completed successfully"
+          else
+            BUILD_EXIT_CODE=$?
+            echo ""
+            echo "❌ BUILD FAILED - Enhanced Debugging Information"
+            echo "================================================"
+            echo "🔍 Exit Code: $BUILD_EXIT_CODE"
+            echo "📁 Current Directory: $(pwd)"
+            echo "📁 Build Directory Status:"
+            [ -d "workspace/build" ] && ls -la workspace/build/ || echo "  ❌ workspace/build/ does not exist"
+            echo ""
+            echo "📦 Package.json scripts:"
+            cat package.json | grep -A 10 '"scripts"' || echo "  ❌ Could not read package.json scripts"
+            echo ""
+            echo "🔧 Environment Variables:"
+            echo "  NODE_ENV: $NODE_ENV"
+            echo "  BUILD_CONTEXT: $BUILD_CONTEXT" 
+            echo "  NETLIFY: $NETLIFY"
+            echo "  NODE_OPTIONS: $NODE_OPTIONS"
+            echo ""
+            echo "💡 Common Build Failure Solutions:"
+            echo "  1. Check app/ directory for syntax errors"
+            echo "  2. Verify all imports are correct in app/components/"
+            echo "  3. Ensure astro.config.mjs is valid"
+            echo "  4. Check resume-data.json format in app/data/"
+            echo "  5. Verify all assets exist in public/ directory"
+            echo ""
+            exit $BUILD_EXIT_CODE
+          fi
           
       - name: 'Calculate build duration'
         id: build-timer
@@ -131,7 +170,7 @@ jobs:
           echo "duration=${DURATION}" >> $GITHUB_OUTPUT
           echo "📊 Build completed in ${DURATION} seconds"
           
-      - name: '📊 Build Information'
+      - name: '📊 Build Information & Validation'
         id: build-info
         run: |
           echo "📁 Build artifacts (workspace/build/):"
@@ -143,19 +182,76 @@ jobs:
             echo "size=${BUILD_SIZE}" >> $GITHUB_OUTPUT
             echo "📦 Total build size: ${BUILD_SIZE}"
             
-            # Validate critical files
+            # 🔍 Enhanced Build Validation
+            echo ""
+            echo "🔍 Build Quality Validation:"
+            echo "==========================="
+            
+            # Critical files validation
+            VALIDATION_PASSED=0
+            TOTAL_VALIDATIONS=5
+            
+            # 1. HTML validation
             if [ -f "workspace/build/index.html" ]; then
-              echo "  ✅ HTML: $(ls -lh workspace/build/index.html | awk '{print $5}')"
+              HTML_SIZE=$(ls -lh workspace/build/index.html | awk '{print $5}')
+              echo "  ✅ HTML: index.html - ${HTML_SIZE}"
+              VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
             else
-              echo "  ❌ Missing index.html"
+              echo "  ❌ Missing index.html (critical failure)"
             fi
             
-            # Check for PDFs (if they exist)
+            # 2. CSS/Assets validation 
+            if [ -d "workspace/build/assets" ]; then
+              ASSET_COUNT=$(find workspace/build/assets -type f | wc -l)
+              echo "  ✅ Assets: ${ASSET_COUNT} files in assets/ directory"
+              VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
+            else
+              echo "  ❌ Missing assets/ directory"
+            fi
+            
+            # 3. PDF validation
+            PDF_COUNT=0
             for pdf in workspace/build/resume.pdf workspace/build/resume-print.pdf workspace/build/resume-ats.pdf; do
               if [ -f "$pdf" ]; then
-                echo "  ✅ PDF: $(basename "$pdf") - $(ls -lh "$pdf" | awk '{print $5}')"
+                PDF_SIZE=$(ls -lh "$pdf" | awk '{print $5}')
+                echo "  ✅ PDF: $(basename "$pdf") - ${PDF_SIZE}"
+                PDF_COUNT=$((PDF_COUNT + 1))
               fi
             done
+            if [ $PDF_COUNT -gt 0 ]; then
+              VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
+              echo "  📄 Generated ${PDF_COUNT} PDF variant(s)"
+            else
+              echo "  ⚠️  No PDFs generated (may be expected for draft builds)"
+            fi
+            
+            # 4. Image optimization validation
+            if [ -d "workspace/build/assets/images" ]; then
+              IMG_COUNT=$(find workspace/build/assets/images -name "*.webp" -o -name "*.jpg" -o -name "*.png" | wc -l)
+              echo "  ✅ Images: ${IMG_COUNT} optimized image files"
+              VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
+            else
+              echo "  ⚠️  No optimized images found"
+            fi
+            
+            # 5. Size validation (reasonable build size)
+            BUILD_SIZE_KB=$(du -sk workspace/build/ | cut -f1)
+            if [ $BUILD_SIZE_KB -lt 100000 ]; then  # Less than 100MB
+              echo "  ✅ Size: Build size is reasonable (${BUILD_SIZE})"
+              VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
+            else
+              echo "  ⚠️  Build size is large (${BUILD_SIZE}) - consider optimization"
+            fi
+            
+            # Summary
+            echo ""
+            echo "📊 Build Validation Summary: ${VALIDATION_PASSED}/${TOTAL_VALIDATIONS} checks passed"
+            if [ $VALIDATION_PASSED -ge 3 ]; then
+              echo "✅ Build quality is acceptable"
+            else
+              echo "⚠️  Build quality issues detected - review above warnings"
+            fi
+            
           else
             echo "❌ Build directory not found!"
             exit 1
