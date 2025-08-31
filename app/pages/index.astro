@@ -168,7 +168,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <h3 class="mb-4 text-center">Download PDF</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
-              href="/pdf-screen"
+              href={`${siteUrl}/pdf-screen`}
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
@@ -183,7 +183,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               </div>
             </a>
             <a 
-              href="/pdf-print"
+              href={`${siteUrl}/pdf-print`}
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
@@ -198,7 +198,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               </div>
             </a>
             <a 
-              href="/pdf-ats"
+              href={`${siteUrl}/pdf-ats`}
               class="glass-button-modern flex items-center px-6 py-4 font-medium transition-all group"
               target="_blank"
               rel="noopener noreferrer"
