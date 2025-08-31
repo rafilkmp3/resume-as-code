@@ -136,9 +136,9 @@ jobs:
           # 1. Main site availability
           check_url "${PREVIEW_URL}" "PR Preview Site (HTML)"
           
-          # 2. Critical PDF Downloads
-          check_url "${PREVIEW_URL}/resume.pdf" "Screen PDF Download"
-          check_url "${PREVIEW_URL}/resume-print.pdf" "Print PDF Download"
+          # 2. Critical PDF-optimized HTML Pages
+          check_url "${PREVIEW_URL}/pdf-screen/" "PDF Screen HTML Page"
+          check_url "${PREVIEW_URL}/pdf-print/" "PDF Print HTML Page"
           
           # 3. Basic assets
           check_url "${PREVIEW_URL}/assets/" "Assets Directory"
