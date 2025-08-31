@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.3](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.2...v4.14.3) (2025-08-31)
+
+
+### Miscellaneous
+
+* **deps:** bump the general-dependencies group with 3 updates ([#97](https://github.com/rafilkmp3/resume-as-code/issues/97)) ([4367f7f](https://github.com/rafilkmp3/resume-as-code/commit/4367f7fb886e4acabee1053e978d4efe1fb30caa))
+
 ## [4.14.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.1...v4.14.2) (2025-08-31)
 
 
