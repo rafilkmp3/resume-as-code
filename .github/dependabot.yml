@@ -13,7 +13,7 @@ updates:
       day: 'tuesday'        # Tuesday morning for optimal review time
       time: '08:30'         # 8:30 AM BRT (11:30 UTC-3) - before daily standup
       timezone: 'America/Sao_Paulo'
-    open-pull-requests-limit: 4
+    open-pull-requests-limit: 2
     rebase-strategy: 'auto'
     commit-message:
       prefix: 'chore'
@@ -29,7 +29,7 @@ updates:
       - 'needs-review'
     # 🎯 Intelligent Enterprise Grouping Strategy
     groups:
-      # 🔥 Critical Production Stack - Individual PRs for maximum safety
+      # 🔥 Critical Production Stack - Grouped patches for efficiency
       core-runtime:
         patterns:
           - 'handlebars'
@@ -39,7 +39,6 @@ updates:
           - 'qrcode'
         update-types:
           - 'patch'
-          - 'minor'
         
       # 🧪 Testing & Quality Assurance Stack
       testing-stack:
@@ -75,7 +74,7 @@ updates:
           - 'patch'
           - 'minor'
           
-      # 📝 TypeScript & Linting Ecosystem
+      # 📝 TypeScript & Linting Ecosystem - All Updates Grouped  
       code-quality:
         patterns:
           - '@types/*'
@@ -87,11 +86,23 @@ updates:
         update-types:
           - 'patch'
           - 'minor'
+          
+      # 🎯 All Other Dependencies - Aggressive Grouping for Noise Reduction
+      general-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - 'patch'
     # 🚫 Strategic Security & Stability Filters
     ignore:
       # 🔒 Major versions require manual security review
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
+      # 🎯 Reduce noise from frequent but non-critical patches
+      - dependency-name: '@types/*'
+        update-types: ['version-update:semver-patch']
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-patch']
       # 🎭 Browser automation stability (Playwright can be flaky)
       - dependency-name: 'playwright'
         update-types: ['version-update:semver-major']
@@ -114,7 +125,7 @@ updates:
       day: 'wednesday'     # Mid-week for better review time
       time: '10:00'        # 10 AM BRT (13:00 UTC-3) - after morning meetings
       timezone: 'America/Sao_Paulo'
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 2
     rebase-strategy: 'auto'
     commit-message:
       prefix: 'chore(deps-docker):'
@@ -149,7 +160,7 @@ updates:
       day: 'friday'         # Friday afternoon for weekend review
       time: '14:00'         # 2 PM BRT (17:00 UTC-3) - end of work day
       timezone: 'America/Sao_Paulo'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     rebase-strategy: 'auto'
     commit-message:
       prefix: 'ci:'
