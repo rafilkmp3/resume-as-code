@@ -3,7 +3,7 @@
 **Modern resume generation system built with Astro v5.13.3, showcasing enterprise platform engineering excellence**
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Resume-Visit_Site-success?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deploy.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deploy.yml)
+[![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)
 [![Release Please](https://img.shields.io/badge/📦_Automated_Releases-Release_Please-purple?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/releases)
 [![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
 

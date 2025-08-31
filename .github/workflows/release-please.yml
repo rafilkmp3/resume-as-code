@@ -78,7 +78,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Trigger production deployment workflow with bot token
-          if gh workflow run production-deploy.yml \
+          if gh workflow run production-deployment.yml \
                --repo rafilkmp3/resume-as-code \
                --ref "$RELEASE_TAG"; then
             echo "✅ **SUCCESS**: Production deployment triggered!" >> $GITHUB_STEP_SUMMARY
@@ -92,8 +92,8 @@ jobs:
             echo "❌ **ERROR**: Failed to trigger production deployment" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### 🔧 Fallback Options" >> $GITHUB_STEP_SUMMARY
-            echo "1. **Manual Trigger**: Visit [Actions](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deploy.yml)" >> $GITHUB_STEP_SUMMARY
-            echo "2. **GitHub CLI**: \`gh workflow run production-deploy.yml --ref $RELEASE_TAG\`" >> $GITHUB_STEP_SUMMARY
+            echo "1. **Manual Trigger**: Visit [Actions](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)" >> $GITHUB_STEP_SUMMARY
+            echo "2. **GitHub CLI**: \`gh workflow run production-deployment.yml --ref $RELEASE_TAG\`" >> $GITHUB_STEP_SUMMARY
             echo "3. **Tag-Based**: Production will auto-trigger on next tag push" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "💡 **Note**: This release ($RELEASE_TAG) created the tag, so production deployment" >> $GITHUB_STEP_SUMMARY
