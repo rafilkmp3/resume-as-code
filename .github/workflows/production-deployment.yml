@@ -117,10 +117,10 @@ jobs:
           # 1. Main site availability
           check_url "${SITE_URL}" "Main Site (HTML)"
           
-          # 2. PDF Downloads (critical user feature)
-          check_url "${SITE_URL}resume.pdf" "Screen PDF Download"
-          check_url "${SITE_URL}resume-print.pdf" "Print PDF Download" 
-          check_url "${SITE_URL}resume-ats.pdf" "ATS PDF Download"
+          # 2. PDF-optimized HTML Pages (client generates PDFs from these)
+          check_url "${SITE_URL}pdf-screen/" "PDF Screen HTML Page"
+          check_url "${SITE_URL}pdf-print/" "PDF Print HTML Page" 
+          check_url "${SITE_URL}pdf-ats/" "PDF ATS HTML Page"
           
           # 3. API Endpoint (if exists)
           check_url "${SITE_URL}api/version" "Version API Endpoint"
