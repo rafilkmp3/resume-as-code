@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.14.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.2...v4.14.0) (2025-08-31)
+
+
+### Features
+
+* add comprehensive build debugging and validation ([31fe69b](https://github.com/rafilkmp3/resume-as-code/commit/31fe69becacaebe0c9f6f699662faf51c61f434a))
+* add Phase 1 post-deployment health checks ([01e5a1d](https://github.com/rafilkmp3/resume-as-code/commit/01e5a1d34a8c2a9ce6098aff9137b425b1e5acb9))
+* implement clean workflow naming pattern ([d9423bf](https://github.com/rafilkmp3/resume-as-code/commit/d9423bf4cb973531b43759be8d8d9af2b41a22ac))
+* optimize Dependabot config for reduced CI noise ([f41dc21](https://github.com/rafilkmp3/resume-as-code/commit/f41dc2147937f0b8076b6a4c187ad7b4f6481dcc))
+* update resume with CI/CD achievements ([898df34](https://github.com/rafilkmp3/resume-as-code/commit/898df34b946ff8e8ff29f0901872a7bb18df04d3))
+* update resume with CI/CD achievements ([9c93ade](https://github.com/rafilkmp3/resume-as-code/commit/9c93aded4cd3125e2ee90531a7c24f1f8b9bad1c))
+
 ## [4.13.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.13.1...v4.13.2) (2025-08-31)
 
 
