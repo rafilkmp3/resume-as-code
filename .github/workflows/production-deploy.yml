@@ -50,6 +50,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
         
+      - name: 🧹 Clear GitHub Pages Cache (Force Rebuild)
+        run: |
+          echo "🧹 Forcing GitHub Pages cache invalidation..."
+          # Create unique timestamp file to force GitHub Pages rebuild
+          echo "Build timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > ./workspace/build/.rebuild-timestamp
+          echo "Build hash: ${{ github.sha }}" >> ./workspace/build/.rebuild-timestamp
+          echo "✅ Cache invalidation marker created"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
