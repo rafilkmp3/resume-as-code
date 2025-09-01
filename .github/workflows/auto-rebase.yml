@@ -17,11 +17,108 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # 🌊 Atlantis-Style Pre-Check: Validate all Dependabot PRs are undiverged
+  atlantis-precheck:
+    name: 🌊 Atlantis Undiverged Pre-Check
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      diverged_prs: ${{ steps.check-diverged.outputs.diverged_prs }}
+      total_dependabot_prs: ${{ steps.check-diverged.outputs.total_dependabot_prs }}
+      should_proceed: ${{ steps.check-diverged.outputs.should_proceed }}
+    steps:
+      - name: 🔍 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: 🔍 Find All Dependabot PRs and Check Divergence
+        id: check-diverged
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "## 🌊 Atlantis Pre-Check: Dependabot PR Divergence Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get all Dependabot PRs
+          DEPENDABOT_PRS=$(gh pr list --author "app/dependabot" --json number,title,baseRefOid,headRefName --jq '.[]')
+          
+          if [ -z "$DEPENDABOT_PRS" ]; then
+            echo "ℹ️ **No Dependabot PRs found**" >> $GITHUB_STEP_SUMMARY
+            echo "should_proceed=skip" >> $GITHUB_OUTPUT
+            echo "total_dependabot_prs=0" >> $GITHUB_OUTPUT
+            echo "diverged_prs=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Get current main branch SHA
+          CURRENT_MAIN_SHA=$(git rev-parse main)
+          echo "🎯 **Current main HEAD:** \`${CURRENT_MAIN_SHA:0:8}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          TOTAL_COUNT=0
+          DIVERGED_COUNT=0
+          DIVERGED_PR_LIST=""
+          
+          echo "| PR | Title | Status | Behind |" >> $GITHUB_STEP_SUMMARY
+          echo "|----|----|----|----|" >> $GITHUB_STEP_SUMMARY
+          
+          echo "$DEPENDABOT_PRS" | while IFS= read -r pr_json; do
+            PR_NUMBER=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+            PR_BASE_SHA=$(echo "$pr_json" | jq -r '.baseRefOid')
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
+            
+            TOTAL_COUNT=$((TOTAL_COUNT + 1))
+            
+            if [ "$PR_BASE_SHA" != "$CURRENT_MAIN_SHA" ]; then
+              COMMITS_BEHIND=$(git rev-list --count "${PR_BASE_SHA}..${CURRENT_MAIN_SHA}")
+              DIVERGED_COUNT=$((DIVERGED_COUNT + 1))
+              
+              if [ -n "$DIVERGED_PR_LIST" ]; then
+                DIVERGED_PR_LIST="${DIVERGED_PR_LIST},$PR_NUMBER"
+              else
+                DIVERGED_PR_LIST="$PR_NUMBER"
+              fi
+              
+              echo "| #$PR_NUMBER | $(echo "$PR_TITLE" | cut -c1-50)... | ❌ **DIVERGED** | $COMMITS_BEHIND commits |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| #$PR_NUMBER | $(echo "$PR_TITLE" | cut -c1-50)... | ✅ Up-to-date | 0 commits |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Dependabot PRs:** $TOTAL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Diverged PRs:** $DIVERGED_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Up-to-date PRs:** $((TOTAL_COUNT - DIVERGED_COUNT))" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Set outputs
+          echo "total_dependabot_prs=$TOTAL_COUNT" >> $GITHUB_OUTPUT
+          echo "diverged_prs=$DIVERGED_PR_LIST" >> $GITHUB_OUTPUT
+          
+          if [ $DIVERGED_COUNT -gt 0 ]; then
+            echo "should_proceed=update_diverged" >> $GITHUB_OUTPUT
+            echo "🔄 **Action Required:** $DIVERGED_COUNT PRs need branch updates" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "should_proceed=all_current" >> $GITHUB_OUTPUT
+            echo "✅ **All PRs are up-to-date** - proceeding with normal auto-rebase operations" >> $GITHUB_STEP_SUMMARY
+          fi
+
   auto-rebase:
+    name: 🔄 Auto-Rebase Dependabot PRs  
+    needs: atlantis-precheck
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+    # Only run if we have PRs to process
+    if: needs.atlantis-precheck.outputs.should_proceed != 'skip'
 
     steps:
       - name: Generate GitHub App Token
@@ -112,7 +209,7 @@ jobs:
             fi
 
             # Attempt to fetch PRs with timeout
-            if timeout 30 gh pr list --author "dependabot[bot]" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json' > /tmp/pr_list.txt 2>/dev/null; then
+            if timeout 30 gh pr list --author "app/dependabot" --json number,title,mergeable,headRefName,createdAt,commits --jq '.[] | @json' > /tmp/pr_list.txt 2>/dev/null; then
               DEPENDABOT_PRS=$(cat /tmp/pr_list.txt)
               echo "✅ Successfully retrieved Dependabot PRs on attempt $attempt"
               CONSECUTIVE_FAILURES=0
@@ -160,6 +257,24 @@ jobs:
                 INVALID_COMMIT_FORMAT=true
               fi
 
+              # 🌊 Atlantis-Style Divergence Check
+              echo "🌊 Checking if PR #$PR_NUMBER is diverged from main..."
+              PR_BASE_SHA=$(gh pr view "$PR_NUMBER" --json baseRefOid --jq '.baseRefOid')
+              CURRENT_MAIN_SHA=$(git rev-parse main)
+              
+              IS_DIVERGED=false
+              COMMITS_BEHIND=0
+              
+              if [ "$PR_BASE_SHA" != "$CURRENT_MAIN_SHA" ]; then
+                IS_DIVERGED=true
+                COMMITS_BEHIND=$(git rev-list --count "${PR_BASE_SHA}..${CURRENT_MAIN_SHA}")
+                echo "🚨 PR #$PR_NUMBER is DIVERGED: $COMMITS_BEHIND commits behind main"
+                echo "   PR base SHA: ${PR_BASE_SHA:0:8}"
+                echo "   Current main: ${CURRENT_MAIN_SHA:0:8}"
+              else
+                echo "✅ PR #$PR_NUMBER is up-to-date with main"
+              fi
+
               # Calculate PR age in days
               if command -v date >/dev/null 2>&1; then
                 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -192,6 +307,10 @@ jobs:
               elif [ "$INVALID_COMMIT_FORMAT" = true ]; then
                 SHOULD_FORCE_RECREATE=true
                 REASON="has invalid conventional commit format"
+              elif [ "$IS_DIVERGED" = true ] && [ "$COMMITS_BEHIND" -gt 5 ]; then
+                # 🌊 Atlantis-Style Protection: Force recreate if significantly diverged
+                SHOULD_FORCE_RECREATE=true
+                REASON="is diverged from main by $COMMITS_BEHIND commits (Atlantis undiverged protection)"
               elif [ "$PR_AGE_DAYS" -gt 90 ]; then
                 SHOULD_FORCE_RECREATE=true
                 REASON="is older than 90 days (${PR_AGE_DAYS} days)"
@@ -293,7 +412,7 @@ jobs:
             fi
           done
 
-          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+          if [ "$PR_AUTHOR" = "app/dependabot" ]; then
             echo "📦 This is a Dependabot PR - applying resilient recreation strategy..."
 
             # Resilient PR details retrieval
@@ -493,7 +612,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Resilient dependabot count with fallback
-          DEPENDABOT_COUNT=$(timeout 10 gh pr list --author "dependabot[bot]" --json number --jq '. | length' 2>/dev/null || echo "Unknown")
+          DEPENDABOT_COUNT=$(timeout 10 gh pr list --author "app/dependabot" --json number --jq '. | length' 2>/dev/null || echo "Unknown")
           echo "**Current Dependabot PRs**: $DEPENDABOT_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔄 **Next execution**: Weekly on Sundays at 9 AM UTC" >> $GITHUB_STEP_SUMMARY

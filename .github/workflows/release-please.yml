@@ -17,39 +17,37 @@ permissions:
 
 jobs:
   release-please:
-    name: 📋 Update Release PR (Changelog + Version)
+    name: 📋 Always Create Release (No PRs)
     runs-on: ubuntu-24.04-arm
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - name: 📝 Update Release PR (Release-Please)
+      - name: 📝 Release Please (Direct Release Mode)
         uses: googleapis/release-please-action@v4
         id: release
         with:
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+          # Always skip PRs and create releases immediately
+          skip-github-pull-request: true
 
-      - name: 📋 Release Process Status Summary
+      - name: 📋 Direct Release Status Summary
         run: |
-          echo "## 📋 Release Process Status" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Direct Release Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Mode**: Always Create Immediate Release (No PRs)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           if [ "${{ steps.release.outputs.release_created }}" = "true" ]; then
-            echo "✅ **RELEASE CREATED** - Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
-            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **IMMEDIATE RELEASE CREATED** - Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created instantly" >> $GITHUB_STEP_SUMMARY
             echo "📋 **Next**: Production deployment workflow will automatically start" >> $GITHUB_STEP_SUMMARY
           else
-            echo "📝 **RELEASE PR UPDATED** - No deployment yet" >> $GITHUB_STEP_SUMMARY
-            echo "⏳ **Status**: Updated release-please PR with new commits" >> $GITHUB_STEP_SUMMARY
-            echo "💡 **Next Step**: Merge the release-please PR to create a GitHub Release" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 Current Action" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Updated release-please PR with latest commits" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Generated/updated CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Bumped version number in package.json" >> $GITHUB_STEP_SUMMARY
-            echo "- ⏳ **Waiting for PR merge to create GitHub Release**" >> $GITHUB_STEP_SUMMARY
-            echo "- 📝 **Note**: Production deployment happens automatically when release is published" >> $GITHUB_STEP_SUMMARY
+            echo "⏳ **NO RELEASE NEEDED** - No conventional commits since last release" >> $GITHUB_STEP_SUMMARY
+            echo "💡 **Status**: All commits are already included in previous releases" >> $GITHUB_STEP_SUMMARY
+            echo "📋 **Note**: A release will be created on next conventional commit" >> $GITHUB_STEP_SUMMARY
           fi
 
   # 🤖 Resume-Pipeline-Bot Orchestrated Production Deployment

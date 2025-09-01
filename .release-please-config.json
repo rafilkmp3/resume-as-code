@@ -23,5 +23,7 @@
     {"type": "ci", "section": "Continuous Integration", "hidden": false}
   ],
   "draft": false,
-  "prerelease": false
+  "prerelease": false,
+  "release-as": "patch",
+  "always-link-local": false
 }
