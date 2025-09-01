@@ -1,0 +1,113 @@
+---
+name: 🌊 Atlantis: Block Diverged PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: atlantis-block-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+  checks: write
+
+jobs:
+  atlantis-undiverged-check:
+    name: 🌊 Atlantis Undiverged Check
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    
+    steps:
+      - name: 🔍 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 🌊 Atlantis Undiverged Validation
+        id: undiverged-check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          echo "## 🌊 Atlantis Undiverged Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull Request:** #$PR_NUMBER" >> $GITHUB_STEP_SUMMARY
+          echo "**Base Branch:** $BASE_BRANCH" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get current base branch SHA
+          CURRENT_BASE_SHA=$(git rev-parse "origin/$BASE_BRANCH")
+          
+          echo "📋 **Branch Comparison:**" >> $GITHUB_STEP_SUMMARY
+          echo "- PR Base SHA: \`${PR_BASE_SHA:0:8}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Current $BASE_BRANCH: \`${CURRENT_BASE_SHA:0:8}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if diverged
+          if [ "$PR_BASE_SHA" != "$CURRENT_BASE_SHA" ]; then
+            COMMITS_BEHIND=$(git rev-list --count "${PR_BASE_SHA}..${CURRENT_BASE_SHA}")
+            
+            echo "🚨 **BRANCH IS DIVERGED**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Status | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ **DIVERGED** | **$COMMITS_BEHIND commits behind $BASE_BRANCH** |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🚫 **Merge Status** | **BLOCKED by Atlantis** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "### 🔧 How to Fix" >> $GITHUB_STEP_SUMMARY
+            echo "1. **Update Branch**: Click 'Update branch' button on this PR" >> $GITHUB_STEP_SUMMARY
+            echo "2. **Manual Update**: \`git pull origin $BASE_BRANCH\` and push" >> $GITHUB_STEP_SUMMARY
+            echo "3. **Wait for Re-check**: This check will automatically re-run" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "### 🌊 About Atlantis Undiverged" >> $GITHUB_STEP_SUMMARY
+            echo "This follows the [Atlantis undiverged requirement](https://www.runatlantis.io/docs/command-requirements#undiverged)" >> $GITHUB_STEP_SUMMARY
+            echo "which ensures PR branches are current with the base branch before allowing merge." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Why this matters:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Prevents merge conflicts" >> $GITHUB_STEP_SUMMARY
+            echo "- Ensures all latest changes are tested together" >> $GITHUB_STEP_SUMMARY
+            echo "- Maintains clean git history" >> $GITHUB_STEP_SUMMARY
+            
+            # Set status check to FAILURE
+            echo "diverged=true" >> $GITHUB_OUTPUT
+            exit 1
+            
+          else
+            echo "✅ **BRANCH IS UP-TO-DATE**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Status | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ **UP-TO-DATE** | **0 commits behind $BASE_BRANCH** |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟢 **Merge Status** | **ALLOWED - Atlantis check passed** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 **This PR is ready for review and merge!**" >> $GITHUB_STEP_SUMMARY
+            
+            # Set status check to SUCCESS
+            echo "diverged=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🟢 Atlantis Check: PASSED
+        if: steps.undiverged-check.outputs.diverged == 'false'
+        run: |
+          echo "✅ Atlantis Undiverged Check: PASSED"
+          echo "Branch is up-to-date with base branch - merge allowed"
+
+      - name: 🔴 Atlantis Check: BLOCKED
+        if: failure()
+        run: |
+          echo "❌ Atlantis Undiverged Check: BLOCKED"
+          echo "Branch is diverged from base branch - merge prevented"
+          echo "Please update your branch and try again"
+          exit 1
