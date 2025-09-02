@@ -1,4 +1,4 @@
-name: 🔍 Zen Divergence Check
+name: 🔍 Divergence Protection
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   divergence-check:
-    name: 🔍 Zen Divergence Check
+    name: 🔍 Divergence Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
