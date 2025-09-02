@@ -1,0 +1,23 @@
+name: 🔍 Zen Divergence Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  divergence-check:
+    name: 🔍 Zen Divergence Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check if branch is up-to-date
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          BEHIND=$(git rev-list --count HEAD..origin/${{ github.base_ref }})
+          if [ "$BEHIND" -gt 0 ]; then
+            echo "❌ Branch is $BEHIND commits behind ${{ github.base_ref }}"
+            exit 1
+          fi
+          echo "✅ Branch is up-to-date"
