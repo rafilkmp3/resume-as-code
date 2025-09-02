@@ -140,7 +140,7 @@ jobs:
           echo "  Status: $INPUT_DEPLOYMENT_STATUS"
           echo "  Environment: $INPUT_DEPLOYMENT_ENV"
 
-      - name: Update PR Comment (Atlantis-style)
+      - name: Update PR Comment (Clean Style)
         if: steps.detect.outputs.pr_number != 'none'
         uses: actions/github-script@v7
         env:
@@ -254,7 +254,7 @@ jobs:
               )
             );
 
-            // Step 3: Hide/minimize ALL previous deployment comments (Atlantis behavior)
+            // Step 3: Hide/minimize ALL previous deployment comments (clean comment management)
             let hiddenCount = 0;
             for (const oldComment of deploymentComments) {
               try {
@@ -273,7 +273,7 @@ jobs:
               }
             }
 
-            console.log(`🔒 Minimized ${hiddenCount} previous deployment status comments (Atlantis-style)`);
+            console.log(`🔒 Minimized ${hiddenCount} previous deployment status comments (clean management)`);
 
             // Step 4: Create new deployment status comment (always fresh, never update)
             const fullCommentBody = `## 📊 Deployment Status\n\n${deploymentInfo}\n\n---\n*🤖 Auto-updated by GitHub Actions - Last updated: ${timestamp}*\n\n<!-- atlantis-style-deployment-${environment}-${Date.now()} -->`;
@@ -286,7 +286,7 @@ jobs:
             });
 
             console.log(`✅ Created fresh deployment status comment for PR #${prNumber} (${hiddenCount} old comments minimized)`);
-            console.log(`🎯 Atlantis-style management: Only latest deployment status visible, previous comments collapsed`)
+            console.log(`🎯 Clean comment management: Only latest deployment status visible, previous comments collapsed`)
 
       - name: Generate Step Summary
         if: always()

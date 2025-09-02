@@ -17,9 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 🌊 Atlantis-Style Pre-Check: Validate all Dependabot PRs are undiverged
-  atlantis-precheck:
-    name: 🌊 Atlantis Undiverged Pre-Check
+  # 🔍 Divergence Pre-Check: Validate all Dependabot PRs are up-to-date
+  divergence-precheck:
+    name: 🔍 Divergence Pre-Check
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     permissions:
@@ -41,7 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "## 🌊 Atlantis Pre-Check: Dependabot PR Divergence Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 Divergence Pre-Check: Dependabot PR Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Get all Dependabot PRs
@@ -112,13 +112,13 @@ jobs:
 
   auto-rebase:
     name: 🔄 Auto-Rebase Dependabot PRs  
-    needs: atlantis-precheck
+    needs: divergence-precheck
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     # Only run if we have PRs to process
-    if: needs.atlantis-precheck.outputs.should_proceed != 'skip'
+    if: needs.divergence-precheck.outputs.should_proceed != 'skip'
 
     steps:
       - name: Generate GitHub App Token
@@ -257,7 +257,7 @@ jobs:
                 INVALID_COMMIT_FORMAT=true
               fi
 
-              # 🌊 Atlantis-Style Divergence Check
+              # 🔍 Divergence Check
               echo "🌊 Checking if PR #$PR_NUMBER is diverged from main..."
               PR_BASE_SHA=$(gh pr view "$PR_NUMBER" --json baseRefOid --jq '.baseRefOid')
               CURRENT_MAIN_SHA=$(git rev-parse main)
@@ -308,9 +308,9 @@ jobs:
                 SHOULD_FORCE_RECREATE=true
                 REASON="has invalid conventional commit format"
               elif [ "$IS_DIVERGED" = true ] && [ "$COMMITS_BEHIND" -gt 5 ]; then
-                # 🌊 Atlantis-Style Protection: Force recreate if significantly diverged
+                # 🔍 Divergence Protection: Force recreate if significantly diverged
                 SHOULD_FORCE_RECREATE=true
-                REASON="is diverged from main by $COMMITS_BEHIND commits (Atlantis undiverged protection)"
+                REASON="is diverged from main by $COMMITS_BEHIND commits (divergence protection)"
               elif [ "$PR_AGE_DAYS" -gt 90 ]; then
                 SHOULD_FORCE_RECREATE=true
                 REASON="is older than 90 days (${PR_AGE_DAYS} days)"
