@@ -1,0 +1,46 @@
+---
+name: 🔍 Zen: Divergence Protection
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: zen-divergence-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+  checks: write
+
+jobs:
+  zen-divergence-check:
+    name: 🔍 Zen Divergence Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: 🔍 Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 🔍 Zen Divergence Validation
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          echo "🔍 Checking branch divergence..."
+          CURRENT_BASE_SHA=$(git rev-parse "origin/$BASE_BRANCH")
+          
+          if [ "$PR_BASE_SHA" != "$CURRENT_BASE_SHA" ]; then
+            COMMITS_BEHIND=$(git rev-list --count "${PR_BASE_SHA}..${CURRENT_BASE_SHA}")
+            echo "❌ Branch is $COMMITS_BEHIND commits behind $BASE_BRANCH"
+            echo "Please update your branch before merging"
+            exit 1
+          else
+            echo "✅ Branch is up-to-date with $BASE_BRANCH"
+          fi
