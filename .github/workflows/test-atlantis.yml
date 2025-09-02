@@ -1,0 +1,16 @@
+---
+name: 🧪 Test Atlantis Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test-atlantis:
+    name: 🌊 Test Atlantis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Status Check
+        run: |
+          echo "Testing Atlantis workflow"
+          echo "This should appear as a status check"
