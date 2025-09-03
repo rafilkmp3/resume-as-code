@@ -48,49 +48,63 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     
     .header {
       text-align: center;
-      margin-bottom: 8px;
-      padding: 8px 15px 6px;
-      border-bottom: 2px solid #1e40af;
-      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+      margin-bottom: 12px;
+      padding: 15px 20px;
+      border-bottom: 3px solid #1e40af;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e6edff 100%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .profile-img {
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      margin: 0 auto 15px;
+      margin: 0 auto 12px;
       display: block;
-      border: 3px solid #1e40af;
+      border: 4px solid #1e40af;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     h1 {
-      font-size: 2.25rem; /* Apple HIG Display Large - same as web version */
-      font-weight: 700;
+      font-size: 2.5rem; /* Larger for email impact */
+      font-weight: 800;
       line-height: 1.1;
       letter-spacing: -0.03em;
-      color: #2d3748;
-      margin-bottom: 8px;
+      color: #1e40af; /* Match brand color */
+      margin-bottom: 6px;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .subtitle {
-      font-size: 1.1em;
-      color: #4a5568;
-      margin-bottom: 15px;
-      font-weight: 500;
+      font-size: 1.2em;
+      color: #2d3748;
+      margin-bottom: 12px;
+      font-weight: 600;
+      letter-spacing: 0.025em;
     }
     
     .contact-info {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
+      gap: 25px;
+      margin-top: 15px;
+      padding: 8px 0;
     }
     
     .contact-item {
-      font-size: 0.9em;
+      font-size: 0.95em;
       color: #1e40af;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .contact-item::before {
+      display: inline-block;
+      width: 16px;
+      text-align: center;
     }
     
     .section {
@@ -99,51 +113,69 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     }
     
     h2 {
-      font-size: 1.375rem; /* Compressed for PDF */
+      font-size: 1.5rem; /* Larger for better hierarchy */
       font-weight: 700;
       line-height: 1.2;
       letter-spacing: -0.025em;
-      color: #2d3748;
-      margin-bottom: 6px;
-      padding-bottom: 4px;
-      border-bottom: 2px solid #1e40af;
+      color: #1e40af; /* Brand color for sections */
+      margin: 12px 0 8px 0;
+      padding: 8px 12px 6px;
+      border-left: 4px solid #1e40af;
+      background: linear-gradient(90deg, #f0f4ff 0%, #ffffff 100%);
+      border-radius: 0 6px 6px 0;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .job {
-      margin-bottom: 5px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      background: #fafbff;
+      border-left: 3px solid #e0e7ff;
+      border-radius: 0 4px 4px 0;
+      transition: all 0.2s ease;
     }
     
     .job:last-child {
       border-bottom: none;
     }
     
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
     .job-title {
-      font-size: 1.375rem; /* Apple HIG Title 2 - 22pt */
-      font-weight: 600;
+      font-size: 1.25rem; /* Optimized for email */
+      font-weight: 700;
       line-height: 1.3;
       letter-spacing: -0.015em;
-      color: #2563eb;
+      color: #1e40af;
+      margin-bottom: 2px;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .company {
-      font-size: 1.125rem; /* Apple HIG Title 3 - 18pt */
-      font-weight: 500;
+      font-size: 1.1rem; /* Company name prominence */
+      font-weight: 600;
       line-height: 1.35;
       letter-spacing: -0.01em;
-      color: #2d3748;
+      color: #374151;
+      margin-bottom: 4px;
     }
     
     .date {
-      font-size: 1rem; /* Apple HIG Callout - 16pt */
-      font-weight: 400;
+      font-size: 0.9rem; /* Subtle but readable */
+      font-weight: 500;
       line-height: 1.5;
-      color: #374151;
-      margin-bottom: 10px;
-      opacity: 0.8;
+      color: #6b7280;
+      background: #e0e7ff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
     }
     
     .description {
@@ -372,9 +404,13 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         <h2>Professional Experience</h2>
         {work.map((job) => (
           <div class="job">
-            <div class="job-title">{job.position}</div>
-            <div class="company">{job.name}</div>
-            <div class="date">{job.startDate} - {job.endDate || 'Present'}</div>
+            <div class="job-header">
+              <div>
+                <div class="job-title">{job.position}</div>
+                <div class="company">{job.name}</div>
+              </div>
+              <div class="date">{job.startDate} - {job.endDate || 'Present'}</div>
+            </div>
             <p>{job.summary}</p>
             {job.highlights && (
               <ul>
@@ -408,8 +444,12 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
           <h2>Key Projects</h2>
           {projects.map((project) => (
             <div class="job">
-              <div class="job-title">{project.name}</div>
-              {project.url && <div class="company"><a href={project.url}>{project.url}</a></div>}
+              <div class="job-header">
+                <div>
+                  <div class="job-title">{project.name}</div>
+                  {project.url && <div class="company"><a href={project.url}>{project.url}</a></div>}
+                </div>
+              </div>
               <div class="description">{project.description}</div>
               {project.highlights && (
                 <ul>
@@ -435,9 +475,13 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
           <h2>Education</h2>
           {education.map((edu) => (
             <div class="job">
-              <div class="job-title">{edu.studyType} in {edu.area}</div>
-              <div class="company">{edu.institution}</div>
-              <div class="date">{edu.startDate} - {edu.endDate}</div>
+              <div class="job-header">
+                <div>
+                  <div class="job-title">{edu.studyType} in {edu.area}</div>
+                  <div class="company">{edu.institution}</div>
+                </div>
+                <div class="date">{edu.startDate} - {edu.endDate}</div>
+              </div>
             </div>
           ))}
         </section>
@@ -448,9 +492,13 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
           <h2>Training</h2>
           {training.map((cert) => (
             <div class="job">
-              <div class="job-title">{cert.name}</div>
-              <div class="company">{cert.issuer}</div>
-              <div class="date">{cert.date}</div>
+              <div class="job-header">
+                <div>
+                  <div class="job-title">{cert.name}</div>
+                  <div class="company">{cert.issuer}</div>
+                </div>
+                <div class="date">{cert.date}</div>
+              </div>
               {cert.highlights && cert.highlights.length > 0 && (
                 <ul>
                   {cert.highlights.map((highlight) => (
