@@ -5,6 +5,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
+  workflow_dispatch:  # Allow manual PR preview runs
 
 concurrency:
   group: pr-preview-${{ github.event.pull_request.number }}

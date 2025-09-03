@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches: [main, develop, 'release/**', 'hotfix/**']
+  workflow_dispatch:  # Allow manual commit validation
     paths:
       # Self-trigger: validate commit validation changes
       - '.github/workflows/conventional-commits.yml'

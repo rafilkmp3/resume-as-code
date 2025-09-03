@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
 
 concurrency:
   group: release-please-${{ github.ref }}
@@ -17,37 +18,40 @@ permissions:
 
 jobs:
   release-please:
-    name: 📋 Always Create Release (No PRs)
+    name: 📋 Create Release PR for Manual Approval
     runs-on: ubuntu-24.04-arm
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
+      pr_created: ${{ steps.release.outputs.pr_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - name: 📝 Release Please (Direct Release Mode)
+      - name: 📝 Release Please (PR Mode)
         uses: googleapis/release-please-action@v4
         id: release
         with:
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Always skip PRs and create releases immediately
-          skip-github-pull-request: true
 
-      - name: 📋 Direct Release Status Summary
+      - name: 📋 Release Please Status Summary
         run: |
-          echo "## 📋 Direct Release Status" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Release Please Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🚀 **Mode**: Always Create Immediate Release (No PRs)" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Mode**: Manual Approval via Pull Request" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ steps.release.outputs.release_created }}" = "true" ]; then
-            echo "✅ **IMMEDIATE RELEASE CREATED** - Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
-            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created instantly" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.release.outputs.pr_created }}" = "true" ]; then
+            echo "✅ **RELEASE PR CREATED** - Ready for manual approval" >> $GITHUB_STEP_SUMMARY
+            echo "📋 **Action Required**: Review and merge the release PR to trigger production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "🔗 **PR Link**: Check [Pull Requests](https://github.com/rafilkmp3/resume-as-code/pulls) for the release PR" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.release.outputs.release_created }}" = "true" ]; then
+            echo "✅ **RELEASE CREATED** - Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Status**: Release v${{ steps.release.outputs.tag_name }} created from merged PR" >> $GITHUB_STEP_SUMMARY
             echo "📋 **Next**: Production deployment workflow will automatically start" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⏳ **NO RELEASE NEEDED** - No conventional commits since last release" >> $GITHUB_STEP_SUMMARY
+            echo "⏳ **NO CHANGES** - No conventional commits since last release" >> $GITHUB_STEP_SUMMARY
             echo "💡 **Status**: All commits are already included in previous releases" >> $GITHUB_STEP_SUMMARY
-            echo "📋 **Note**: A release will be created on next conventional commit" >> $GITHUB_STEP_SUMMARY
+            echo "📋 **Note**: A release PR will be created on next conventional commit" >> $GITHUB_STEP_SUMMARY
           fi
 
   # 🤖 Resume-Pipeline-Bot Orchestrated Production Deployment

@@ -1,6 +1,21 @@
 name: 🚀 Lighthouse Performance Testing
 
 on:
+  workflow_dispatch:  # Allow manual performance testing
+    inputs:
+      target_url:
+        description: 'URL to test for performance'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      budget_path:
+        description: 'Path to Lighthouse budget.json file'
+        required: false
+        type: string
+        default: './budget.json'
   workflow_call:
     inputs:
       target_url:
