@@ -1,0 +1,22 @@
+[build]
+  # Disable Netlify builds - we build in GitHub Actions
+  command = "echo 'Build disabled - serving from GitHub Actions artifacts only'"
+  publish = "workspace/build"
+  ignore = "git diff --quiet HEAD^ HEAD"
+
+# Force cache invalidation
+[build.environment]
+  NETLIFY_SKIP_FUNCTIONS_CACHE = "true"
+
+# Headers to prevent caching issues
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"

@@ -4,7 +4,7 @@
 [build]
   # Skip all build commands - files are pre-built by GitHub Actions
   command = "echo 'Build completed in GitHub Actions - serving pre-built files'"
-  publish = "dist"
+  publish = "workspace/build"
   ignore = "exit 0"  # Always skip builds
 
 [build.environment]
@@ -14,17 +14,17 @@
 # Force skip builds for all contexts
 [context.production]
   command = "echo 'Production build completed in GitHub Actions - serving pre-built files'"
-  publish = "dist"
+  publish = "workspace/build"
 
 [context.deploy-preview]
   command = "echo 'Deploy preview build completed in GitHub Actions - serving pre-built files'"
-  publish = "dist"
+  publish = "workspace/build"
 
 [context.branch-deploy]
   command = "echo 'Branch deploy build completed in GitHub Actions - serving pre-built files'"
-  publish = "dist"
+  publish = "workspace/build"
 
-# Headers for optimal performance
+# Headers for optimal performance and cache invalidation
 [[headers]]
   for = "/*"
   [headers.values]
@@ -32,6 +32,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 # Cache static assets aggressively
 [[headers]]
