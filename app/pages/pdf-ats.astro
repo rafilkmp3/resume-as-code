@@ -154,20 +154,23 @@ const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
     
     .footer-content {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      text-align: center;
+      gap: 6px;
+      width: 100%;
     }
     
     .footer-text {
-      flex: 1;
+      order: 2;
     }
     
     .footer-qr {
-      flex-shrink: 0;
+      order: 1;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      gap: 2px;
     }
     
     .qr-code {
@@ -386,16 +389,16 @@ const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
     
     <footer class="footer">
       <div class="footer-content">
-        <div class="footer-text">
-          <p>📄 <a href={siteUrl}>{siteUrl}</a></p>
-        </div>
         <div class="footer-qr">
           <img 
             src={qrCodeDataURL}
             alt="QR Code for resume website"
             class="qr-code"
           />
-          <p style="font-size: 8pt; text-align: center; margin-top: 3px; color: #000;">Scan for latest version</p>
+          <p style="font-size: 7pt; margin: 0; color: #000;">Scan for latest version</p>
+        </div>
+        <div class="footer-text">
+          <p style="font-size: 8pt; margin: 0;">📄 <a href={siteUrl}>{siteUrl}</a></p>
         </div>
       </div>
     </footer>
