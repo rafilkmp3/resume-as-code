@@ -18,7 +18,7 @@ const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{basics.name.replace(/\s+/g, '-').toLowerCase()}-platform-engineer-resume-ats</title>
+  <title>{basics.name.replace(/\s+/g, '-').toLowerCase()}</title>
   <style>
     /* ATS-OPTIMIZED: Minimal formatting for maximum machine readability */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -165,6 +165,9 @@ const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
     
     .footer-qr {
       flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .qr-code {
@@ -396,5 +399,16 @@ const qrCodeDataURL = await QRCodePresets.ats(siteUrl);
       </div>
     </footer>
   </div>
+
+  <script>
+    // Change title for PDF downloads while keeping screen title clean
+    window.addEventListener('beforeprint', () => {
+      document.title = 'rafael-bernardo-sathler-resume-ats';
+    });
+    
+    window.addEventListener('afterprint', () => {
+      document.title = 'rafael-bernardo-sathler';
+    });
+  </script>
 </body>
 </html>
