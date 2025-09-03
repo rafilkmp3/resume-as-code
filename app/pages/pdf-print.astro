@@ -393,7 +393,7 @@ const qrCodeDataURL = await QRCodePresets.print(siteUrl);
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-text">
-          <p>📄 View the latest version of this resume online: <a href={siteUrl}>{siteUrl}</a></p>
+          <p>📄 <a href={siteUrl}>{siteUrl}</a></p>
         </div>
         <div class="footer-qr">
           <img 
@@ -401,6 +401,7 @@ const qrCodeDataURL = await QRCodePresets.print(siteUrl);
             alt="QR Code for resume website"
             class="qr-code"
           />
+          <p style="font-size: 9pt; text-align: center; margin-top: 4px; color: #000;">Scan for latest version</p>
         </div>
       </div>
     </footer>
