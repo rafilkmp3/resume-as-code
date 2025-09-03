@@ -18,8 +18,8 @@ concurrency:
 
 jobs:
   # 🔍 Divergence Pre-Check: Validate all Dependabot PRs are up-to-date
-  atlantis-undiverged-protection:
-    name: Atlantis undiverged protection for PRs
+  divergence-precheck:
+    name: 🔍 Divergence Pre-Check
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     permissions:
@@ -112,13 +112,13 @@ jobs:
 
   auto-rebase:
     name: 🔄 Auto-Rebase Dependabot PRs  
-    needs: atlantis-undiverged-protection
+    needs: divergence-precheck
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     # Only run if we have PRs to process
-    if: needs.atlantis-undiverged-protection.outputs.should_proceed != 'skip'
+    if: needs.divergence-precheck.outputs.should_proceed != 'skip'
 
     steps:
       - name: Generate GitHub App Token
