@@ -6,7 +6,7 @@
     "email": "rafaelbsathler@gmail.com",
     "phone": "+55 21 997988682",
     "url": "https://rafilkmp3.github.io/resume-as-code/",
-    "summary": "Senior Platform Engineer with a proven track record of building and scaling resilient, cloud-native infrastructure for high-traffic systems. I deliver significant business impact through automation and optimization, achieving over $65K in cost savings and 40% efficiency gains. With deep expertise in AWS, GCP, Kubernetes, and CI/CD, I excel at solving complex technical challenges and mentoring engineers to foster a culture of technical excellence. Successfully implemented comprehensive CI/CD stability improvements featuring Context7-powered documentation, ARM64-optimized workflows with 70-85% performance gains, enterprise-grade post-deployment health verification, and automated end-to-end testing pipelines.",
+    "summary": "Platform Engineer with 10+ years evolving from Linux system administration to enterprise-scale cloud-native architecture. Worn many hats across DevOps, infrastructure automation, and platform engineering. Led 8,000-repo GitHub Actions migration, orchestrated zero-downtime Kubernetes upgrades protecting revenue, and delivered $265K+ cost reductions through rightsizing initiatives, spot-instance strategies, and automation serving 5,000+ engineers across AWS/GCP.",
     "location": {
       "city": "Rio de Janeiro",
       "countryCode": "BR",

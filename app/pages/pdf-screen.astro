@@ -18,7 +18,7 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{basics.name} - Resume (Screen)</title>
+  <title>{basics.name} - Platform Engineer Resume</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -27,8 +27,15 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       line-height: 1.6;
       color: #1a1a1a;
       background: white;
-      padding: 30px;
+      padding: 20px;
       margin: 0;
+    }
+    
+    /* Reduce body padding for print to save space */
+    @media print {
+      body {
+        padding: 0 !important;
+      }
     }
     
     .container {
@@ -194,8 +201,8 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       }
       
       body { 
-        margin: 0; 
-        padding: 0;
+        margin: 0 !important; 
+        padding: 0 !important;
         font-size: 12pt;
         line-height: 1.4;
       }
@@ -204,14 +211,16 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         border: none; 
         max-width: none;
         box-shadow: none;
-        margin: 0;
-        padding: 0;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       
-      .header { 
+      .header {
+        margin-top: 0 !important;
+        padding-top: 15pt !important;
         page-break-inside: avoid;
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%) !important;
-        margin-bottom: 20pt;
+        margin-bottom: 15pt;
       }
       
       .section { 
