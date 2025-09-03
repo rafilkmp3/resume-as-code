@@ -17,6 +17,16 @@ on:
         required: false
         type: string
         default: ''
+      test_types:
+        description: 'Comma-separated test types to run (lighthouse,security,visual)'
+        required: false
+        type: string
+        default: 'lighthouse,visual'
+      lighthouse_budget_path:
+        description: 'Path to Lighthouse budget.json file'
+        required: false
+        type: string
+        default: './budget.json'
   workflow_call:
     inputs:
       target_url:

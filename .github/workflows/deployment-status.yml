@@ -5,21 +5,6 @@ name: Shared Deployment Status
 # Called by other workflows to maintain consistent deployment communication
 
 on:
-  workflow_dispatch:  # Allow manual status updates
-    inputs:
-      pr_number:
-        description: 'PR number for status update'
-        required: true
-        type: string
-      deployment_url:
-        description: 'Deployment URL'
-        required: true
-        type: string
-      status:
-        description: 'Deployment status (success, failure, pending)'
-        required: true
-        type: string
-        default: 'success'
   workflow_call:
     inputs:
       pr_number:

@@ -1,21 +1,6 @@
 name: 📸 Visual Regression Testing
 
 on:
-  workflow_dispatch:  # Allow manual visual regression tests
-    inputs:
-      target_url:
-        description: 'URL to test for visual regression'
-        required: true
-        type: string
-      environment_name:
-        description: 'Environment name (preview, staging, production)'
-        required: true
-        type: string
-      test_matrix:
-        description: 'Test matrix to run (full, mobile, desktop, quick)'
-        required: false
-        type: string
-        default: 'full'
   workflow_call:
     inputs:
       target_url:

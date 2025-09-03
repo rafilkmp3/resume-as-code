@@ -1,27 +1,6 @@
 name: 'Shared Build System'
 
 on:
-  workflow_dispatch:  # Allow manual builds
-    inputs:
-      build-context:
-        description: 'Build context (dev, staging, production, pr)'
-        required: true
-        type: string
-      deploy-url:
-        description: 'Target deployment URL'
-        required: false
-        type: string
-        default: ''
-      pr-number:
-        description: 'PR number for preview builds'
-        required: false
-        type: string
-        default: ''
-      cache-key-suffix:
-        description: 'Cache key suffix'
-        required: false
-        type: string
-        default: 'manual'
   workflow_call:
     inputs:
       build-context:
