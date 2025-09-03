@@ -223,6 +223,16 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         margin-bottom: 15pt;
       }
       
+      /* Hide Netlify deploy preview banners in PDF */
+      iframe,
+      [data-netlify-deploy-banner],
+      .netlify-drawer,
+      div[class*="netlify"],
+      div[id*="netlify"] {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      
       .section { 
         page-break-inside: avoid;
         margin: 15pt 0;
