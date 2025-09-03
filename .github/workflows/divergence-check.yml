@@ -16,12 +16,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Check if branch is up-to-date
+      - name: Check for divergence from base branch
         run: |
           git fetch origin ${{ github.base_ref }}
+          
+          # Check how many commits behind and ahead we are
           BEHIND=$(git rev-list --count HEAD..origin/${{ github.base_ref }})
+          AHEAD=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
+          
+          echo "📊 Branch status:"
+          echo "  • Behind main: $BEHIND commits"
+          echo "  • Ahead of main: $AHEAD commits"
+          
+          # Fail if branch is behind (requires update)
           if [ "$BEHIND" -gt 0 ]; then
-            echo "❌ Branch is $BEHIND commits behind ${{ github.base_ref }}"
+            echo ""
+            echo "❌ DIVERGENCE DETECTED: Branch is $BEHIND commits behind ${{ github.base_ref }}"
+            echo "🔄 Required action: Update branch with latest changes from main"
+            echo "💡 Use 'Update branch' button or run: git pull origin ${{ github.base_ref }}"
+            
+            # Show which commits are missing
+            echo ""
+            echo "📋 Missing commits from ${{ github.base_ref }}:"
+            git log --oneline HEAD..origin/${{ github.base_ref }} | head -5
+            
             exit 1
           fi
-          echo "✅ Branch is up-to-date"
+          
+          echo ""
+          echo "✅ Branch is up-to-date with ${{ github.base_ref }}"
+          if [ "$AHEAD" -gt 0 ]; then
+            echo "🚀 Branch has $AHEAD new commits ready to merge"
+          fi
