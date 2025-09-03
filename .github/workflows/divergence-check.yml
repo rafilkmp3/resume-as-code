@@ -12,6 +12,8 @@ jobs:
   divergence-check:
     name: 🔍 Divergence Check
     runs-on: ubuntu-latest
+    # Skip divergence check for Release Please PRs as they are expected to diverge
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,3 +55,20 @@ jobs:
             echo "✅ Branch is up-to-date with ${{ github.base_ref }}"
             echo "💡 No new commits to merge"
           fi
+
+  release-please-check:
+    name: 🔍 Release Please - Divergence Allowed
+    runs-on: ubuntu-latest
+    # Only run for Release Please PRs
+    if: ${{ startsWith(github.head_ref, 'release-please--') }}
+    steps:
+      - name: Release Please PR - Skip Divergence Check
+        run: |
+          echo "🚀 RELEASE PLEASE PR DETECTED"
+          echo "=============================="
+          echo ""
+          echo "✅ This is a Release Please PR - divergence is expected and allowed"
+          echo "📋 Release Please PRs contain new version commits and CHANGELOG updates"
+          echo "🔄 No branch update required - ready for manual review and merge"
+          echo ""
+          echo "💡 Action: Review the release notes and merge when ready to release"
