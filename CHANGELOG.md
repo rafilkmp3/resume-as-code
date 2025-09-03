@@ -1,5 +1,34 @@
 # Changelog
 
+## [4.15.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.3...v4.15.0) (2025-09-03)
+
+
+### Features
+
+* add Atlantis undiverged protection for PRs ([127c06e](https://github.com/rafilkmp3/resume-as-code/commit/127c06e1514ec27cebc91950fd2db44fd921a4df))
+* implement divergence protection system ([#103](https://github.com/rafilkmp3/resume-as-code/issues/103)) ([5dc733d](https://github.com/rafilkmp3/resume-as-code/commit/5dc733d260df8ec9e1c444761422434c2cd540a2))
+
+
+### Bug Fixes
+
+* enable Release Please manual approval workflow ([#108](https://github.com/rafilkmp3/resume-as-code/issues/108)) ([40b9a7d](https://github.com/rafilkmp3/resume-as-code/commit/40b9a7da3b1ef6982b5a4f2d0025e00803aceaf0))
+* exempt Release Please PRs from divergence check ([46c865c](https://github.com/rafilkmp3/resume-as-code/commit/46c865c981922f9feaa57b60396d4d2b853edd18))
+* handle manual dispatch for Release Please branches ([#114](https://github.com/rafilkmp3/resume-as-code/issues/114)) ([1488464](https://github.com/rafilkmp3/resume-as-code/commit/14884649c588a9d1c80f82a7964948806cdf2be7))
+* release-please config and workflow syntax fixes ([0e01a21](https://github.com/rafilkmp3/resume-as-code/commit/0e01a21b38c8ff40cba0d6cc9a61667adce05db2))
+* update Netlify publish dir and cache headers ([#107](https://github.com/rafilkmp3/resume-as-code/issues/107)) ([538933a](https://github.com/rafilkmp3/resume-as-code/commit/538933a4dad9b0944f3868c264f49a3e496ff7e4))
+
+
+### Miscellaneous
+
+* clean up redundant and misleading workflows ([0208522](https://github.com/rafilkmp3/resume-as-code/commit/0208522ee2ea257f7b4c902845bb1df4cc06a1bd))
+* **deps:** bump astro from 5.13.3 to 5.13.5 in the astro-framework group ([#112](https://github.com/rafilkmp3/resume-as-code/issues/112)) ([470b686](https://github.com/rafilkmp3/resume-as-code/commit/470b686559c112b592945f4ac798729cc3e40ea8))
+* **deps:** bump daisyui from 5.0.54 to 5.1.4 ([#111](https://github.com/rafilkmp3/resume-as-code/issues/111)) ([5d0711c](https://github.com/rafilkmp3/resume-as-code/commit/5d0711c2d024ef0ac133d58248401a836a1d5e3f))
+
+
+### Code Refactoring
+
+* consolidate Kubernetes certification ([#105](https://github.com/rafilkmp3/resume-as-code/issues/105)) ([0eb0b9f](https://github.com/rafilkmp3/resume-as-code/commit/0eb0b9f632d5cdaff0900fcf0f9cc263ec4111d6))
+
 ## [4.14.3](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.2...v4.14.3) (2025-08-31)
 
 
