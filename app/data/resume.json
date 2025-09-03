@@ -166,7 +166,7 @@
       "endDate": "2016-06"
     }
   ],
-  "certificates": [
+  "training": [
     {
       "name": "Kubernetes Fundamentals (LFS258)",
       "date": "2025-08-25",
@@ -181,10 +181,8 @@
         "credlyId": "dd68f95d-d956-4596-b69e-9465986694a9"
       },
       "highlights": [
-        "Successfully completed intensive 35-hour Kubernetes training program with comprehensive hands-on laboratories",
-        "Demonstrated proficiency in container orchestration, cluster architecture, and Kubernetes API resource management",
-        "Validated expertise in Helm package management, Ingress controllers, security policies, and production troubleshooting",
-        "Industry-recognized certification with official PDF certificate and verified Credly digital badge"
+        "35-hour hands-on training covering cluster architecture, container orchestration, Helm, Ingress, RBAC, and production troubleshooting",
+        "Linux Foundation training course with certificate of completion and verified Credly digital badge"
       ],
       "keywords": [
         "Kubernetes",

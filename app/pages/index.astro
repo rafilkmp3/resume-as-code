@@ -8,7 +8,7 @@ import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
 
-const { basics, work, skills, education, projects, certificates } = resumeData;
+const { basics, work, skills, education, projects, training } = resumeData;
 
 // Use build-time site URL from Astro config for consistent deployment URLs
 // This leverages the same environment detection used in PDF API routes
@@ -350,13 +350,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Apple HIG Subtle Separator -->
       <div class="apple-separator" aria-hidden="true"></div>
       
-      <!-- Certifications Section -->
-      {certificates && certificates.length > 0 && (
+      <!-- Training Section -->
+      {training && training.length > 0 && (
         <>
           <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
-            <h2 class="apple-section-title">Certifications</h2>
+            <h2 class="apple-section-title">Training</h2>
             <div class="space-y-6">
-              {certificates.map((cert, index) => (
+              {training.map((cert, index) => (
                 <div class="certification-item">
                   {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
                   

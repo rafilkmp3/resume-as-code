@@ -3,7 +3,7 @@ import resumeData from '../data/resume.json';
 import { getRuntimeSiteUrl } from '../utils/site-url.ts';
 import { QRCodePresets } from '../utils/qr-code.ts';
 
-const { basics, work, skills, education, projects, certificates } = resumeData;
+const { basics, work, skills, education, projects, training } = resumeData;
 
 // Use runtime URL detection for reliable preview environment URLs
 // This ensures QR codes and links work correctly in all environments
@@ -344,10 +344,10 @@ const qrCodeDataURL = await QRCodePresets.print(siteUrl);
         </section>
       )}
 
-      {certificates && certificates.length > 0 && (
+      {training && training.length > 0 && (
         <section class="section">
-          <h2>CERTIFICATIONS</h2>
-          {certificates.map((cert) => (
+          <h2>TRAINING</h2>
+          {training.map((cert) => (
             <div class="job">
               <div class="job-header">
                 <div>
