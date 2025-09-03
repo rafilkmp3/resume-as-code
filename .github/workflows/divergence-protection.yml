@@ -13,7 +13,7 @@ permissions:
 jobs:
   # 🔍 Divergence Protection: Validate PR is up-to-date with main
   divergence-precheck:
-    name: 🔍 Divergence Pre-Check
+    name: Divergence Check
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
