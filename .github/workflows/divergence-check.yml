@@ -44,7 +44,10 @@ jobs:
           fi
           
           echo ""
-          echo "✅ Branch is up-to-date with ${{ github.base_ref }}"
           if [ "$AHEAD" -gt 0 ]; then
-            echo "🚀 Branch has $AHEAD new commits ready to merge"
+            echo "✅ Branch is ahead by $AHEAD commits and ready to merge"
+            echo "🚀 No update needed - branch contains new changes"
+          else
+            echo "✅ Branch is up-to-date with ${{ github.base_ref }}"
+            echo "💡 No new commits to merge"
           fi
