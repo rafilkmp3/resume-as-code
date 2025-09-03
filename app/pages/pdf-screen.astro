@@ -94,7 +94,7 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     }
     
     .section {
-      margin: 25px 0;
+      margin: 18px 0;
       padding: 0 30px;
     }
     
@@ -104,15 +104,15 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       line-height: 1.2;
       letter-spacing: -0.025em;
       color: #2d3748;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
       border-bottom: 2px solid #1e40af;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .job {
-      margin-bottom: 25px;
-      padding-bottom: 20px;
+      margin-bottom: 18px;
+      padding-bottom: 15px;
       border-bottom: 1px solid #e0e0e0;
     }
     
@@ -217,10 +217,10 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       
       .header {
         margin-top: 0 !important;
-        padding-top: 10pt !important;
+        padding-top: 8pt !important;
         page-break-inside: avoid;
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%) !important;
-        margin-bottom: 10pt;
+        margin-bottom: 6pt;
       }
       
       /* Hide Netlify deploy preview banners in PDF */
@@ -243,19 +243,19 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       
       .section { 
         page-break-inside: avoid;
-        margin: 8pt 0;
+        margin: 4pt 0;
         padding: 0 0;
       }
       
       .job { 
         page-break-inside: avoid;
-        margin-bottom: 8pt;
+        margin-bottom: 5pt;
         border-bottom: 1pt solid #e0e0e0;
       }
       
       .footer {
         page-break-inside: avoid;
-        margin-top: 15pt;
+        margin-top: 8pt;
       }
       
       .footer-content {
@@ -268,13 +268,20 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         height: 60pt;
       }
       
-      /* Typography optimizations for print */
-      h1 { font-size: 24pt; }
-      h2 { font-size: 18pt; }
-      .job-title { font-size: 14pt; }
-      .company { font-size: 12pt; }
-      .date, .description { font-size: 11pt; }
-      .skill-tag { font-size: 10pt; }
+      /* Typography optimizations for print - compressed */
+      h1 { font-size: 22pt; line-height: 1.1; }
+      h2 { font-size: 16pt; line-height: 1.2; margin-bottom: 6pt; }
+      .job-title { font-size: 13pt; line-height: 1.2; }
+      .company { font-size: 11pt; line-height: 1.2; }
+      .date, .description { font-size: 10pt; line-height: 1.3; }
+      .skill-tag { font-size: 9pt; }
+      
+      /* Compress list spacing */
+      ul { margin: 4pt 0; }
+      li { margin-bottom: 1pt; line-height: 1.3; }
+      
+      /* Compress paragraph spacing */
+      p { margin: 2pt 0; line-height: 1.3; }
     }
     
     .summary {
