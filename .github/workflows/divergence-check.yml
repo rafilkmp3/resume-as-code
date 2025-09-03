@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Check out the actual PR branch, not the merge commit
+          ref: ${{ github.head_ref }}
       - name: Check for divergence from base branch
         run: |
           git fetch origin ${{ github.base_ref }}
