@@ -12,8 +12,8 @@ jobs:
   divergence-check:
     name: 🔍 Divergence Check
     runs-on: ubuntu-latest
-    # Skip divergence check for Release Please PRs as they are expected to diverge
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    # Skip divergence check for Release Please PRs and manual dispatch on Release Please branches
+    if: ${{ !startsWith(github.head_ref, 'release-please--') && !startsWith(github.ref_name, 'release-please--') }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,27 +22,29 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Check for divergence from base branch
         run: |
-          git fetch origin ${{ github.base_ref }}
+          # Use main as default base branch for manual dispatch
+          BASE_BRANCH="${{ github.base_ref || 'main' }}"
+          git fetch origin $BASE_BRANCH
           
           # Check how many commits behind and ahead we are
-          BEHIND=$(git rev-list --count HEAD..origin/${{ github.base_ref }})
-          AHEAD=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
+          BEHIND=$(git rev-list --count HEAD..origin/$BASE_BRANCH)
+          AHEAD=$(git rev-list --count origin/$BASE_BRANCH..HEAD)
           
           echo "📊 Branch status:"
-          echo "  • Behind main: $BEHIND commits"
-          echo "  • Ahead of main: $AHEAD commits"
+          echo "  • Behind $BASE_BRANCH: $BEHIND commits"
+          echo "  • Ahead of $BASE_BRANCH: $AHEAD commits"
           
           # Fail if branch is behind (requires update)
           if [ "$BEHIND" -gt 0 ]; then
             echo ""
-            echo "❌ DIVERGENCE DETECTED: Branch is $BEHIND commits behind ${{ github.base_ref }}"
-            echo "🔄 Required action: Update branch with latest changes from main"
-            echo "💡 Use 'Update branch' button or run: git pull origin ${{ github.base_ref }}"
+            echo "❌ DIVERGENCE DETECTED: Branch is $BEHIND commits behind $BASE_BRANCH"
+            echo "🔄 Required action: Update branch with latest changes from $BASE_BRANCH"
+            echo "💡 Use 'Update branch' button or run: git pull origin $BASE_BRANCH"
             
             # Show which commits are missing
             echo ""
-            echo "📋 Missing commits from ${{ github.base_ref }}:"
-            git log --oneline HEAD..origin/${{ github.base_ref }} | head -5
+            echo "📋 Missing commits from $BASE_BRANCH:"
+            git log --oneline HEAD..origin/$BASE_BRANCH | head -5
             
             exit 1
           fi
@@ -52,15 +54,15 @@ jobs:
             echo "✅ Branch is ahead by $AHEAD commits and ready to merge"
             echo "🚀 No update needed - branch contains new changes"
           else
-            echo "✅ Branch is up-to-date with ${{ github.base_ref }}"
+            echo "✅ Branch is up-to-date with $BASE_BRANCH"
             echo "💡 No new commits to merge"
           fi
 
   release-please-check:
     name: 🔍 Release Please - Divergence Allowed
     runs-on: ubuntu-latest
-    # Only run for Release Please PRs
-    if: ${{ startsWith(github.head_ref, 'release-please--') }}
+    # Only run for Release Please PRs or manual dispatch on Release Please branches
+    if: ${{ startsWith(github.head_ref, 'release-please--') || startsWith(github.ref_name, 'release-please--') }}
     steps:
       - name: Release Please PR - Skip Divergence Check
         run: |
