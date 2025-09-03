@@ -416,6 +416,8 @@ This project demonstrates enterprise-level platform engineering practices:
 
 ---
 
+<!-- Release Please workflow status trigger -->
+
 <div align="center">
 
 **🎯 Built to demonstrate platform engineering excellence in action**
