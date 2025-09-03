@@ -29,10 +29,10 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-      line-height: 1.6;
+      line-height: 1.3;
       color: #1a1a1a;
       background: white;
-      padding: 20px;
+      padding: 8px;
       margin: 0;
     }
     
@@ -167,8 +167,8 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     
     .skills-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
     }
     
     .skill-category h3 {
@@ -183,19 +183,19 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     .skill-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 2px;
     }
     
     .skill-tag {
       background: #1e40af;
       color: white;
-      padding: 6px 12px;
+      padding: 3px 8px;
       border-radius: 999px; /* Apple HIG capsule shape */
       font-size: 0.75rem; /* Apple HIG Caption 1 - 12pt */
-      margin: 2px;
+      margin: 1px;
       display: inline-block;
       font-weight: 500;
-      line-height: 1.33;
+      line-height: 1.2;
       letter-spacing: 0px;
     }
     
@@ -215,8 +215,8 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       body { 
         margin: 0 !important; 
         padding: 0 !important;
-        font-size: 12pt;
-        line-height: 1.4;
+        font-size: 10pt;
+        line-height: 1.2;
       }
       
       .container { 
@@ -229,10 +229,9 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       
       .header {
         margin-top: 0 !important;
-        padding-top: 8pt !important;
-        page-break-inside: avoid;
+        padding-top: 4pt !important;
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%) !important;
-        margin-bottom: 6pt;
+        margin-bottom: 2pt;
       }
       
       /* Hide Netlify deploy preview banners in PDF */
@@ -254,20 +253,17 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       }
       
       .section { 
-        page-break-inside: avoid;
-        margin: 4pt 0;
+        margin: 3pt 0;
         padding: 0 0;
       }
       
       .job { 
-        page-break-inside: avoid;
-        margin-bottom: 5pt;
+        margin-bottom: 1pt;
         border-bottom: 1pt solid #e0e0e0;
       }
       
       .footer {
-        page-break-inside: avoid;
-        margin-top: 8pt;
+        margin-top: 4pt;
       }
       
       .footer-content {
@@ -280,26 +276,39 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         height: 60pt;
       }
       
-      /* Typography optimizations for print - compressed */
-      h1 { font-size: 22pt; line-height: 1.1; }
-      h2 { font-size: 16pt; line-height: 1.2; margin-bottom: 6pt; }
-      .job-title { font-size: 13pt; line-height: 1.2; }
-      .company { font-size: 11pt; line-height: 1.2; }
-      .date, .description { font-size: 10pt; line-height: 1.3; }
-      .skill-tag { font-size: 9pt; }
+      /* Typography optimizations for print - balanced */
+      h1 { font-size: 20pt; line-height: 1.1; margin: 2pt 0; }
+      h2 { 
+        font-size: 15pt; 
+        line-height: 1.2; 
+        margin-bottom: 4pt; 
+        margin-top: 8pt; 
+        page-break-after: avoid;
+      }
+      .job-title { font-size: 12pt; line-height: 1.2; margin: 2pt 0 1pt 0; }
+      .company { font-size: 10pt; line-height: 1.2; margin: 0; }
+      .date, .description { font-size: 9pt; line-height: 1.3; margin: 1pt 0; }
+      .skill-tag { font-size: 8pt; padding: 2pt 6pt; margin: 1pt; }
       
-      /* Compress list spacing */
-      ul { margin: 4pt 0; }
-      li { margin-bottom: 1pt; line-height: 1.3; }
+      /* Strategic page breaks to keep jobs together */
+      .job { 
+        page-break-inside: avoid;
+        margin-bottom: 4pt;
+        padding-bottom: 2pt;
+      }
       
-      /* Compress paragraph spacing */
-      p { margin: 2pt 0; line-height: 1.3; }
+      /* Balanced list spacing */
+      ul { margin: 2pt 0; padding-left: 10pt; }
+      li { margin-bottom: 0.5pt; line-height: 1.3; }
+      
+      /* Balanced paragraph spacing */
+      p { margin: 1pt 0; line-height: 1.3; }
     }
     
     .summary {
       text-align: justify;
-      line-height: 1.3;
-      margin-bottom: 8px;
+      line-height: 1.2;
+      margin-bottom: 2px;
     }
     
     ul {
