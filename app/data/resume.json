@@ -174,8 +174,6 @@
       "issuerUrl": "https://www.linuxfoundation.org/",
       "url": "https://ti-user-certificates.s3.amazonaws.com/e0df7fbf-a057-42af-8a1f-590912be5460/50b904c0-4882-4781-a5a5-3518f7056983-rafael-bernardo-91c7d319-f01c-443d-8675-d50aca9c816a-certificate.pdf",
       "courseUrl": "https://training.linuxfoundation.org/training/kubernetes-fundamentals/",
-      "code": "LFS258",
-      "certificationId": "LF-2q9ur2adbz",
       "digitalBadge": {
         "url": "https://www.credly.com/badges/dd68f95d-d956-4596-b69e-9465986694a9/public_url",
         "credlyId": "dd68f95d-d956-4596-b69e-9465986694a9"
