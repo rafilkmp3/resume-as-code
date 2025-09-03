@@ -224,13 +224,21 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       }
       
       /* Hide Netlify deploy preview banners in PDF */
+      iframe[src*="netlify.com"],
+      iframe[src*="app.netlify.com"],
       iframe,
       [data-netlify-deploy-banner],
       .netlify-drawer,
       div[class*="netlify"],
-      div[id*="netlify"] {
+      div[id*="netlify"],
+      *[src*="app.netlify.com"] {
         display: none !important;
         visibility: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
       }
       
       .section { 
