@@ -4,7 +4,7 @@
     ".": {
       "release-type": "node",
       "extra-files": [
-        "src/resume-data.json"
+        "app/data/resume.json"
       ]
     }
   },
@@ -24,6 +24,5 @@
   ],
   "draft": false,
   "prerelease": false,
-  "release-as": "patch",
   "always-link-local": false
 }
