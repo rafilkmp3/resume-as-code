@@ -179,22 +179,23 @@
         "credlyId": "dd68f95d-d956-4596-b69e-9465986694a9"
       },
       "highlights": [
-        "Comprehensive Kubernetes fundamentals training covering container orchestration and cluster architecture",
-        "Expertise in pod management, services, deployments, networking, and storage solutions",
-        "Advanced knowledge of security policies, RBAC, cluster administration, and troubleshooting",
-        "Industry-recognized certification with dual credentials: PDF certificate and verified digital badge"
+        "Successfully completed intensive 35-hour Kubernetes training program with comprehensive hands-on laboratories",
+        "Demonstrated proficiency in container orchestration, cluster architecture, and Kubernetes API resource management",
+        "Validated expertise in Helm package management, Ingress controllers, security policies, and production troubleshooting",
+        "Earned industry-recognized certification preparing for CKA with verified Credly digital badge"
       ],
       "keywords": [
         "Kubernetes",
         "Container Orchestration",
-        "Cloud Native",
         "Linux Foundation",
-        "Cluster Management",
-        "Pod Management",
-        "RBAC",
-        "Kubernetes Security",
+        "API Objects",
         "Helm",
-        "API Programming",
+        "Ingress",
+        "Security Policies",
+        "Logging and Troubleshooting",
+        "Scheduling",
+        "System Administration",
+        "Custom Resource Definitions",
         "Site Reliability Engineering"
       ]
     }
