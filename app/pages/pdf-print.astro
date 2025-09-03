@@ -18,7 +18,7 @@ const qrCodeDataURL = await QRCodePresets.print(siteUrl);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{basics.name} - Resume (Print)</title>
+  <title>{basics.name.replace(/\s+/g, '-').toLowerCase()}-platform-engineer-resume-print</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -233,6 +233,24 @@ const qrCodeDataURL = await QRCodePresets.print(siteUrl);
       .qr-code {
         width: 50pt;
         height: 50pt;
+      }
+      
+      /* Hide Netlify deploy preview banners in PDF */
+      iframe[src*="netlify.com"],
+      iframe[src*="app.netlify.com"],
+      iframe,
+      [data-netlify-deploy-banner],
+      .netlify-drawer,
+      div[class*="netlify"],
+      div[id*="netlify"],
+      *[src*="app.netlify.com"] {
+        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
       }
       
       .page-break { 

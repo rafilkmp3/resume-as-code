@@ -18,17 +18,29 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{basics.name} - Resume (Screen)</title>
+  <title>{basics.name.replace(/\s+/g, '-').toLowerCase()}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
+    /* Hide any potential title bleeding through */
+    html, html * {
+      position: relative;
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-      line-height: 1.6;
+      line-height: 1.3;
       color: #1a1a1a;
       background: white;
-      padding: 30px;
+      padding: 8px;
       margin: 0;
+    }
+    
+    /* Reduce body padding for print to save space */
+    @media print {
+      body {
+        padding: 0 !important;
+      }
     }
     
     .container {
@@ -41,71 +53,75 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     
     .header {
       text-align: center;
-      margin-bottom: 30px;
-      padding: 30px 30px 20px;
+      margin-bottom: 2px;
+      padding: 2px 8px 1px;
       border-bottom: 2px solid #1e40af;
       background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
     }
     
     .profile-img {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      margin: 0 auto 15px;
+      margin: 0 auto 6px;
       display: block;
-      border: 3px solid #1e40af;
+      border: 2px solid #1e40af;
     }
     
     h1 {
-      font-size: 2.25rem; /* Apple HIG Display Large - same as web version */
+      font-size: 2.125rem; /* Apple HIG Large Title - 34pt */
       font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+      line-height: 1.08;
+      letter-spacing: -0.5px;
       color: #2d3748;
-      margin-bottom: 8px;
+      margin-bottom: 2px;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .subtitle {
-      font-size: 1.1em;
+      font-size: 1.063rem; /* Apple HIG Body/Headline - 17pt */
       color: #4a5568;
-      margin-bottom: 15px;
+      margin-bottom: 4px;
       font-weight: 500;
+      line-height: 1.43;
+      letter-spacing: -0.32px;
     }
     
     .contact-info {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
+      gap: 10px;
+      margin-top: 4px;
     }
     
     .contact-item {
-      font-size: 0.9em;
+      font-size: 1.063rem; /* Apple HIG Body - 17pt */
       color: #1e40af;
+      line-height: 1.43;
+      letter-spacing: -0.32px;
     }
     
     .section {
-      margin: 25px 0;
-      padding: 0 30px;
+      margin: 2px 0;
+      padding: 0 12px;
     }
     
     h2 {
-      font-size: 2.125rem; /* Apple HIG Large Title - 34pt */
+      font-size: 1.75rem; /* Apple HIG Title 1 - 28pt */
       font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: -0.025em;
+      line-height: 1.20;
+      letter-spacing: -0.3px;
       color: #2d3748;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
+      margin-bottom: 2px;
+      padding-bottom: 1px;
       border-bottom: 2px solid #1e40af;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .job {
-      margin-bottom: 25px;
-      padding-bottom: 20px;
+      margin-bottom: 2px;
+      padding-bottom: 2px;
       border-bottom: 1px solid #e0e0e0;
     }
     
@@ -116,17 +132,17 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     .job-title {
       font-size: 1.375rem; /* Apple HIG Title 2 - 22pt */
       font-weight: 600;
-      line-height: 1.3;
-      letter-spacing: -0.015em;
+      line-height: 1.28;
+      letter-spacing: 0.35px;
       color: #2563eb;
       font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     }
     
     .company {
-      font-size: 1.125rem; /* Apple HIG Title 3 - 18pt */
+      font-size: 1.063rem; /* Apple HIG Body - 17pt */
       font-weight: 500;
-      line-height: 1.35;
-      letter-spacing: -0.01em;
+      line-height: 1.43;
+      letter-spacing: -0.32px;
       color: #2d3748;
     }
     
@@ -134,50 +150,53 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       font-size: 1rem; /* Apple HIG Callout - 16pt */
       font-weight: 400;
       line-height: 1.5;
+      letter-spacing: -0.32px;
       color: #374151;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
       opacity: 0.8;
     }
     
     .description {
-      font-size: 1.0625rem; /* Apple HIG Body - 17pt */
+      font-size: 1rem; /* Apple HIG Callout - 16pt */
       font-weight: 400;
       line-height: 1.47;
       color: #374151;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
       font-style: italic;
     }
     
     .skills-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
     }
     
     .skill-category h3 {
-      font-size: 1.0625rem; /* Apple HIG Headline - 17pt */
+      font-size: 1.25rem; /* Apple HIG Title 3 - 20pt */
       font-weight: 600;
-      line-height: 1.4;
-      letter-spacing: -0.005em;
+      line-height: 1.25;
+      letter-spacing: 0.38px;
       color: #1e40af;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
     
     .skill-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 2px;
     }
     
     .skill-tag {
       background: #1e40af;
       color: white;
-      padding: 6px 12px;
+      padding: 3px 8px;
       border-radius: 999px; /* Apple HIG capsule shape */
-      font-size: 0.85em;
-      margin: 2px;
+      font-size: 0.75rem; /* Apple HIG Caption 1 - 12pt */
+      margin: 1px;
       display: inline-block;
       font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: 0px;
     }
     
     /* Enhanced Paper CSS-inspired print optimizations */
@@ -193,42 +212,59 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         print-color-adjust: exact !important;
       }
       
+      
       body { 
-        margin: 0; 
-        padding: 0;
-        font-size: 12pt;
-        line-height: 1.4;
+        margin: 0 !important; 
+        padding: 0 !important;
+        font-size: 10pt;
+        line-height: 1.2;
       }
       
       .container { 
         border: none; 
         max-width: none;
         box-shadow: none;
-        margin: 0;
-        padding: 0;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       
-      .header { 
-        page-break-inside: avoid;
+      .header {
+        margin-top: 0 !important;
+        padding-top: 4pt !important;
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%) !important;
-        margin-bottom: 20pt;
+        margin-bottom: 2pt;
+      }
+      
+      /* Hide Netlify deploy preview banners in PDF */
+      iframe[src*="netlify.com"],
+      iframe[src*="app.netlify.com"],
+      iframe,
+      [data-netlify-deploy-banner],
+      .netlify-drawer,
+      div[class*="netlify"],
+      div[id*="netlify"],
+      *[src*="app.netlify.com"] {
+        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
       }
       
       .section { 
-        page-break-inside: avoid;
-        margin: 15pt 0;
+        margin: 3pt 0;
         padding: 0 0;
       }
       
       .job { 
-        page-break-inside: avoid;
-        margin-bottom: 15pt;
+        margin-bottom: 1pt;
         border-bottom: 1pt solid #e0e0e0;
       }
       
       .footer {
-        page-break-inside: avoid;
-        margin-top: 20pt;
+        margin-top: 4pt;
       }
       
       .footer-content {
@@ -241,32 +277,54 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
         height: 60pt;
       }
       
-      /* Typography optimizations for print */
-      h1 { font-size: 24pt; }
-      h2 { font-size: 18pt; }
-      .job-title { font-size: 14pt; }
-      .company { font-size: 12pt; }
-      .date, .description { font-size: 11pt; }
-      .skill-tag { font-size: 10pt; }
+      /* Typography optimizations for print - balanced */
+      h1 { font-size: 20pt; line-height: 1.1; margin: 2pt 0; }
+      h2 { 
+        font-size: 15pt; 
+        line-height: 1.2; 
+        margin-bottom: 4pt; 
+        margin-top: 8pt; 
+        page-break-after: avoid;
+      }
+      .job-title { font-size: 12pt; line-height: 1.2; margin: 2pt 0 1pt 0; }
+      .company { font-size: 10pt; line-height: 1.2; margin: 0; }
+      .date, .description { font-size: 9pt; line-height: 1.3; margin: 1pt 0; }
+      .skill-tag { font-size: 8pt; padding: 2pt 6pt; margin: 1pt; }
+      
+      /* Strategic page breaks to keep jobs together */
+      .job { 
+        page-break-inside: avoid;
+        margin-bottom: 4pt;
+        padding-bottom: 2pt;
+      }
+      
+      /* Balanced list spacing */
+      ul { margin: 2pt 0; padding-left: 10pt; }
+      li { margin-bottom: 0.5pt; line-height: 1.3; }
+      
+      /* Balanced paragraph spacing */
+      p { margin: 1pt 0; line-height: 1.3; }
     }
     
     .summary {
       text-align: justify;
-      line-height: 1.7;
-      margin-bottom: 30px;
+      line-height: 1.2;
+      margin-bottom: 2px;
     }
     
     ul {
-      padding-left: 20px;
+      padding-left: 12px;
+      margin: 2px 0;
     }
     
     li {
-      margin-bottom: 5px;
+      margin-bottom: 0px;
+      line-height: 1.2;
     }
     
     .footer {
-      margin-top: 30px;
-      padding: 20px 30px;
+      margin-top: 8px;
+      padding: 6px 12px;
       border-top: 2px solid #1e40af;
       color: #374151;
       font-size: 0.9em;
@@ -278,6 +336,7 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       align-items: center;
       justify-content: space-between;
       gap: 20px;
+      width: 100%;
     }
     
     .footer-text {
@@ -286,6 +345,9 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
     
     .footer-qr {
       flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .qr-code {
@@ -443,5 +505,16 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
       </div>
     </footer>
   </div>
+
+  <script>
+    // Change title for PDF downloads while keeping screen title clean
+    window.addEventListener('beforeprint', () => {
+      document.title = 'rafael-bernardo-sathler-resume-screen';
+    });
+    
+    window.addEventListener('afterprint', () => {
+      document.title = 'rafael-bernardo-sathler';
+    });
+  </script>
 </body>
 </html>
