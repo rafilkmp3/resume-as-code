@@ -3,6 +3,7 @@ name: 🔍 Divergence Protection
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:  # Allow manual divergence checks
 
 permissions:
   contents: read

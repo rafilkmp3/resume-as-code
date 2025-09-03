@@ -2,6 +2,21 @@
 name: 🧪 Shared Comprehensive Testing Suite
 
 on:
+  workflow_dispatch:  # Allow manual testing runs
+    inputs:
+      target_url:
+        description: 'URL to test (any environment)'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      environment_context:
+        description: 'Additional context (PR number, release tag, etc.)'
+        required: false
+        type: string
+        default: ''
   workflow_call:
     inputs:
       target_url:

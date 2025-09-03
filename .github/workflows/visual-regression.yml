@@ -1,6 +1,21 @@
 name: 📸 Visual Regression Testing
 
 on:
+  workflow_dispatch:  # Allow manual visual regression tests
+    inputs:
+      target_url:
+        description: 'URL to test for visual regression'
+        required: true
+        type: string
+      environment_name:
+        description: 'Environment name (preview, staging, production)'
+        required: true
+        type: string
+      test_matrix:
+        description: 'Test matrix to run (full, mobile, desktop, quick)'
+        required: false
+        type: string
+        default: 'full'
   workflow_call:
     inputs:
       target_url:
@@ -34,6 +49,7 @@ on:
       regression_detected:
         description: 'Whether visual regression was detected (true/false)'
         value: ${{ jobs.visual-test.outputs.regression_detected }}
+  workflow_dispatch:  # Allow manual runs
 
 permissions:
   contents: read
@@ -48,6 +64,7 @@ jobs:
       tests_failed: ${{ steps.visual-results.outputs.tests_failed }}
       total_screenshots: ${{ steps.visual-results.outputs.total_screenshots }}
       regression_detected: ${{ steps.visual-results.outputs.regression_detected }}
+  workflow_dispatch:  # Allow manual runs
 
     steps:
       - name: Checkout
@@ -58,6 +75,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+  workflow_dispatch:  # Allow manual runs
 
       - name: Install dependencies
         run: npm ci
