@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.15.0...v4.16.0) (2025-09-03)
+
+
+### Features
+
+* improve professional summary and PDF generation ([#115](https://github.com/rafilkmp3/resume-as-code/issues/115)) ([85d2e51](https://github.com/rafilkmp3/resume-as-code/commit/85d2e515035e1ebc412637dfc2e8826e7f5badc3))
+* optimize CI performance and remove jq installation ([8589370](https://github.com/rafilkmp3/resume-as-code/commit/85893700611985898c7d6dd48218fa020ebec075))
+
+
+### Miscellaneous
+
+* remove divergence protection workflow completely ([d460c53](https://github.com/rafilkmp3/resume-as-code/commit/d460c53632efdb0a95d5fae60856edd614411288))
+
 ## [4.15.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.14.3...v4.15.0) (2025-09-03)
 
 
