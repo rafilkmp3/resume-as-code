@@ -413,7 +413,7 @@ const qrCodeDataURL = await QRCodePresets.screen(siteUrl);
           {certificates.map((cert) => (
             <div class="job">
               <div class="job-title">{cert.name}</div>
-              <div class="company">{cert.issuer} {cert.code && `• ${cert.code}`}</div>
+              <div class="company">{cert.issuer}</div>
               <div class="date">{cert.date}</div>
               {cert.highlights && cert.highlights.length > 0 && (
                 <ul>

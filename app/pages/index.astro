@@ -378,8 +378,19 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                         )}
                       </h3>
                       <div class="apple-company">
-                        {cert.issuer}
-                        {cert.code && <span class="opacity-80"> • {cert.code}</span>}
+                        {cert.issuerUrl ? (
+                          <a 
+                            href={cert.issuerUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="hover:underline transition-all duration-200"
+                            style="color: var(--link-color);"
+                          >
+                            {cert.issuer}
+                          </a>
+                        ) : (
+                          cert.issuer
+                        )}
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
