@@ -55,7 +55,6 @@ on:
       build-size:
         description: 'Build output size'
         value: ${{ jobs.build.outputs.build-size }}
-  workflow_dispatch:  # Allow manual runs
 
 jobs:
   build:
@@ -64,7 +63,6 @@ jobs:
     outputs:
       build-duration: ${{ steps.build-timer.outputs.duration }}
       build-size: ${{ steps.build-info.outputs.size }}
-  workflow_dispatch:  # Allow manual runs
     
     steps:
       - name: 'Checkout Repository'
@@ -99,7 +97,6 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-  workflow_dispatch:  # Allow manual runs
           
       - name: 'Configure Node.js for CI'
         run: |
@@ -210,7 +207,6 @@ jobs:
             echo ""
             echo "🔍 Build Quality Validation:"
             echo "==========================="
-  workflow_dispatch:  # Allow manual runs
             
             # Critical files validation
             VALIDATION_PASSED=0

@@ -50,7 +50,6 @@ on:
         required: false
         type: string
         description: 'Build duration if available'
-  workflow_dispatch:  # Allow manual runs
 
 permissions:
   contents: read
@@ -62,7 +61,6 @@ jobs:
     name: Update Deployment Status
     runs-on: ubuntu-latest
     timeout-minutes: 5
-  workflow_dispatch:  # Allow manual runs
 
     steps:
       - name: Checkout
