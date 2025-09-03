@@ -8,7 +8,7 @@ import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
 
-const { basics, work, skills, education, projects, certificates } = resumeData;
+const { basics, work, skills, education, projects, training } = resumeData;
 
 // Use build-time site URL from Astro config for consistent deployment URLs
 // This leverages the same environment detection used in PDF API routes
@@ -350,40 +350,77 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Apple HIG Subtle Separator -->
       <div class="apple-separator" aria-hidden="true"></div>
       
-      <!-- Certifications Section -->
-      {certificates && certificates.length > 0 && (
+      <!-- Training Section -->
+      {training && training.length > 0 && (
         <>
           <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="4">
-            <h2 class="apple-section-title">Certifications</h2>
+            <h2 class="apple-section-title">Training</h2>
             <div class="space-y-6">
-              {certificates.map((cert, index) => (
+              {training.map((cert, index) => (
                 <div class="certification-item">
                   {index > 0 && <div class="apple-job-separator" aria-hidden="true"></div>}
                   
                   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
                     <div class="flex-1">
                       <h3 class="apple-job-title text-2xl font-semibold">
-                        {cert.name}
+                        {cert.courseUrl ? (
+                          <a 
+                            href={cert.courseUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="hover:underline transition-all duration-200"
+                            style="color: var(--link-color);"
+                          >
+                            {cert.name}
+                          </a>
+                        ) : (
+                          cert.name
+                        )}
                       </h3>
                       <div class="apple-company">
-                        {cert.issuer}
-                        {cert.code && <span class="opacity-80"> • {cert.code}</span>}
+                        {cert.issuerUrl ? (
+                          <a 
+                            href={cert.issuerUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="hover:underline transition-all duration-200"
+                            style="color: var(--link-color);"
+                          >
+                            {cert.issuer}
+                          </a>
+                        ) : (
+                          cert.issuer
+                        )}
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
                       <span class="apple-date">{cert.date}</span>
-                      {cert.url && (
-                        <a 
-                          href={cert.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          class="glass-button-modern inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-                          aria-label={`View ${cert.name} certificate`}
-                        >
-                          <LiquidGlassIcon name="heroicons:academic-cap" size={16} variant="subtle" class="mr-2" />
-                          View Certificate
-                        </a>
-                      )}
+                      <div class="flex gap-2">
+                        {cert.url && (
+                          <a 
+                            href={cert.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="glass-button-modern inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
+                            aria-label={`View ${cert.name} certificate PDF`}
+                          >
+                            <LiquidGlassIcon name="heroicons:academic-cap" size={16} variant="subtle" class="mr-2" />
+                            View Certificate
+                          </a>
+                        )}
+                        {cert.digitalBadge && cert.digitalBadge.url && (
+                          <a 
+                            href={cert.digitalBadge.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="glass-button-modern inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
+                            aria-label={`View ${cert.name} digital badge on Credly`}
+                          >
+                            <LiquidGlassIcon name="heroicons:shield-check" size={16} variant="subtle" class="mr-2" />
+                            Digital Badge
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
 
