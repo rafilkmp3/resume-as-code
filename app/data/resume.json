@@ -168,17 +168,21 @@
   ],
   "certificates": [
     {
-      "name": "Kubernetes Fundamentals",
+      "name": "Linux Foundation Kubernetes Fundamentals (LFS258)",
       "date": "2025-08-25",
       "issuer": "The Linux Foundation",
       "url": "https://ti-user-certificates.s3.amazonaws.com/e0df7fbf-a057-42af-8a1f-590912be5460/50b904c0-4882-4781-a5a5-3518f7056983-rafael-bernardo-91c7d319-f01c-443d-8675-d50aca9c816a-certificate.pdf",
       "code": "LFS258",
       "certificationId": "LF-2q9ur2adbz",
+      "digitalBadge": {
+        "url": "https://www.credly.com/badges/dd68f95d-d956-4596-b69e-9465986694a9/public_url",
+        "credlyId": "dd68f95d-d956-4596-b69e-9465986694a9"
+      },
       "highlights": [
-        "Completed comprehensive Linux Foundation Kubernetes fundamentals training",
-        "Mastered container orchestration, cluster architecture, and Kubernetes operations",
-        "Demonstrated expertise in pod management, services, deployments, and networking",
-        "Validated knowledge of security policies, RBAC, and cluster administration"
+        "Comprehensive Kubernetes fundamentals training covering container orchestration and cluster architecture",
+        "Expertise in pod management, services, deployments, networking, and storage solutions",
+        "Advanced knowledge of security policies, RBAC, cluster administration, and troubleshooting",
+        "Industry-recognized certification with dual credentials: PDF certificate and verified digital badge"
       ],
       "keywords": [
         "Kubernetes",
@@ -188,32 +192,10 @@
         "Cluster Management",
         "Pod Management",
         "RBAC",
-        "Kubernetes Security"
-      ]
-    },
-    {
-      "name": "Kubernetes Fundamentals Digital Badge",
-      "date": "2025-08-25",
-      "issuer": "The Linux Foundation via Credly",
-      "url": "https://www.credly.com/badges/dd68f95d-d956-4596-b69e-9465986694a9/public_url",
-      "code": "LFS258",
-      "certificationId": "dd68f95d-d956-4596-b69e-9465986694a9",
-      "highlights": [
-        "Digital badge with Pearson Ontology skills mapping and validation",
-        "Verified competencies in Kubernetes, Helm, API Programming, Security Policies",
-        "Skills validated: Event Logging, Scheduling, Site Reliability Engineering, System Administration",
-        "Industry-recognized digital credential with blockchain verification"
-      ],
-      "keywords": [
-        "Kubernetes",
-        "Digital Badge",
-        "Credly",
+        "Kubernetes Security",
         "Helm",
-        "API Programming Interface",
-        "Security Policies",
-        "Event Logging",
-        "Site Reliability Engineering",
-        "System Administration"
+        "API Programming",
+        "Site Reliability Engineering"
       ]
     }
   ],
