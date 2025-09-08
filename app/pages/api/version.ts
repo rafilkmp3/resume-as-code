@@ -102,7 +102,7 @@ function getEnvironmentInfo() {
     environmentType = 'production';
     environmentName = 'GitHub Pages';
   } else if (process.env.NETLIFY === 'true') {
-    if (process.env.CONTEXT === 'production') {
+    if (process.env.CONTEXT === 'production' || process.env.CONTEXT === 'staging') {
       environmentType = 'staging';
       environmentName = 'Netlify Staging';
     } else if (process.env.CONTEXT === 'deploy-preview') {
