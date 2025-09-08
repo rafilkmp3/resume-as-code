@@ -73,6 +73,26 @@ function getGitInfo() {
   }
 }
 
+function generateSemanticVersion(gitInfo, envInfo) {
+  // Ultra-simple semantic version generation - no complex logic
+  const baseVersion = gitInfo.latestRelease.tag || 'v0.0.0';
+  
+  // Use environment context to determine suffix
+  const context = envInfo.context || 'unknown';
+  const reviewId = envInfo.reviewId;
+  
+  // Simple mapping: context -> version format
+  const versionMap = {
+    'production': baseVersion, // Production = clean version
+    'deploy-preview': reviewId ? `${baseVersion}-preview.${reviewId}` : `${baseVersion}-preview.${gitInfo.shortHash}`,
+    'staging': gitInfo.commitsAheadOfLatestRelease > 0 ? `${baseVersion}+${gitInfo.commitsAheadOfLatestRelease}` : baseVersion,
+    'development': `${baseVersion}-dev.${gitInfo.shortHash}`
+  };
+  
+  // Return mapped version or fallback
+  return versionMap[context] || `${baseVersion}-${gitInfo.shortHash}`;
+}
+
 function getEnvironmentInfo() {
   // Determine environment type based on context
   let environmentType = 'unknown';
@@ -122,45 +142,20 @@ export const GET: APIRoute = async ({ site }) => {
   // Use single consistent URL detection - no more confusing multiple URL fields
   const siteUrl = getRuntimeSiteUrl();
   
+  // Generate semantic version based on environment and git info
+  const semanticVersion = generateSemanticVersion(gitInfo, envInfo);
+  
   // Generate cache busting version based on commit hash and timestamp
   const cacheVersion = `${gitInfo.shortHash}-${Date.now()}`;
   
-  // Generate environment-specific version info as requested
-  let environmentVersionInfo = {};
-  
-  if (envInfo.environmentType === 'preview') {
-    // Preview: Show commits ahead of main
-    environmentVersionInfo = {
-      type: 'preview',
-      description: `Preview deployment - ${gitInfo.commitsAheadOfMain} commits ahead of main`,
-      commitsAhead: gitInfo.commitsAheadOfMain,
-      baseBranch: 'main'
-    };
-  } else if (envInfo.environmentType === 'staging') {
-    // Staging (main): Show commits ahead of latest release
-    environmentVersionInfo = {
-      type: 'staging',
-      description: `Staging deployment - ${gitInfo.commitsAheadOfLatestRelease} commits ahead of latest release`,
-      commitsAhead: gitInfo.commitsAheadOfLatestRelease,
-      baseBranch: gitInfo.latestRelease.tag
-    };
-  } else if (envInfo.environmentType === 'production') {
-    // Production: Show release info
-    environmentVersionInfo = {
-      type: 'production',
-      description: `Production release - ${gitInfo.latestRelease.tag}`,
-      releaseTag: gitInfo.latestRelease.tag,
-      releaseDate: gitInfo.latestRelease.date,
-      releaseUrl: gitInfo.latestRelease.url
-    };
-  } else {
-    // Local/development
-    environmentVersionInfo = {
-      type: envInfo.environmentType,
-      description: `${envInfo.environmentName} environment`,
-      commitsAhead: gitInfo.commitsAheadOfLatestRelease
-    };
-  }
+  // Simple environment version info - no complex branching
+  const environmentVersionInfo = {
+    type: envInfo.environmentType,
+    description: `${envInfo.environmentName} - ${semanticVersion}`,
+    semanticVersion: semanticVersion,
+    commitsAhead: envInfo.context === 'deploy-preview' ? gitInfo.commitsAheadOfMain : gitInfo.commitsAheadOfLatestRelease,
+    baseBranch: envInfo.context === 'deploy-preview' ? 'main' : gitInfo.latestRelease.tag
+  };
 
   const versionInfo = {
     // Runtime metadata
@@ -183,8 +178,11 @@ export const GET: APIRoute = async ({ site }) => {
     // Version for long TTL static assets
     staticAssetsVersion: gitInfo.shortHash,
     
-    // Human readable version
-    version: `${gitInfo.shortHash} (${gitInfo.branch})`,
+    // Human readable version - semantic when possible, fallback to git hash
+    version: semanticVersion,
+    
+    // Technical version info
+    gitVersion: `${gitInfo.shortHash} (${gitInfo.branch})`,
     
     // API metadata
     api: {
