@@ -1,0 +1,79 @@
+---
+name: 🔖 Preview Version Generator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  generate-preview-version:
+    name: 🏷️ Generate Preview Version
+    runs-on: ubuntu-latest
+    if: >-
+      !startsWith(github.head_ref, 'release-please--')
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 🔖 Generate Preview Version with Release Please
+        id: release-please
+        uses: googleapis/release-please-action@v4
+        with:
+          command: manifest-pr
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+          skip-github-release: true
+          
+      - name: 📋 Set Preview Version Output
+        id: preview-version
+        run: |
+          # Get version from Release Please or fallback to git-based version
+          if [ -n "${{ steps.release-please.outputs.version }}" ]; then
+            NEXT_VERSION="${{ steps.release-please.outputs.version }}"
+          else
+            # Fallback: calculate next version from git tags
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v4.16.0")
+            NEXT_VERSION="${LATEST_TAG}"
+          fi
+          
+          PREVIEW_VERSION="${NEXT_VERSION}-preview.${{ github.event.number }}"
+          echo "version=${PREVIEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "🔖 Preview version: ${PREVIEW_VERSION}"
+          
+      - name: 💬 Comment PR with Version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.preview-version.outputs.version }}';
+            const comment = `## 🔖 Preview Version
+            
+            **Version**: \`${version}\`
+            
+            This preview deployment will be available at: \`/api/version\`
+            
+            <details>
+            <summary>📋 Version Details</summary>
+            
+            - **Base version**: From Release Please analysis
+            - **Preview suffix**: \`-preview.${{ github.event.number }}\`
+            - **PR Number**: #${{ github.event.number }}
+            
+            </details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+    outputs:
+      preview-version: ${{ steps.preview-version.outputs.version }}
