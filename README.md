@@ -19,10 +19,21 @@ This isn't just a resume—it's a **comprehensive demonstration of modern Astro 
 - **⚡ Astro v5.13.3 Power**: Lightning-fast static site generation with server-side rendering capabilities
 - **📊 Data-Driven Architecture**: Resume content managed through Astro's Content Collections with type-safe frontmatter
 - **🤖 Context7 AI Integration**: Real-time documentation and intelligent dependency management
+- **🔖 Semantic Versioning**: Ultra-simple context-based versioning across all environments
 - **🔒 Enterprise Security**: Comprehensive vulnerability scanning, secret detection, and GitHub Advanced Security
 - **📈 Performance Optimized**: Sub-2-second load times, 95+ Lighthouse scores, optimized images with Sharp
 - **♿ Accessibility Excellence**: WCAG 2.1 AA compliant with comprehensive keyboard navigation and semantic HTML
 - **🎨 Responsive Design**: Optimized for all devices with print-friendly CSS
+
+### 🔖 Semantic Versioning Implementation
+
+Environment-specific version formats demonstrate CI/CD maturity:
+
+- **Production**: `v4.16.0` - Clean semantic versions for stable releases
+- **Staging**: `v4.16.0+3` - Build metadata showing commits ahead of release  
+- **Preview**: `v4.16.0-preview.121` - Prerelease format for PR deployments
+
+Test live: `/api/version` endpoint across all environments
 
 ## 🏗️ Modern Architecture Overview
 
