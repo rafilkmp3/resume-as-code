@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.17.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.16.0...v4.17.0) (2025-09-08)
+
+
+### Features
+
+* implement ultra-simple semantic versioning for preview environments ([223f8f1](https://github.com/rafilkmp3/resume-as-code/commit/223f8f1f68ecde68a6e22a75c458ef6387d47c86))
+
+
+### Bug Fixes
+
+* correct staging environment detection ([4ce8c77](https://github.com/rafilkmp3/resume-as-code/commit/4ce8c779e7916bc53584ed24991f0f546ce71bfe))
+
+
+### Documentation
+
+* add semantic versioning showcase ([ca0f0eb](https://github.com/rafilkmp3/resume-as-code/commit/ca0f0ebb17949b3fd2ef8a92369cd62d6e041d31))
+
 ## [4.16.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.15.0...v4.16.0) (2025-09-03)
 
 
