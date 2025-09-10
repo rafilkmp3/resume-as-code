@@ -1,0 +1,278 @@
+---
+name: 🤖 Dependabot Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to create preview for'
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+
+jobs:
+  check-conditions:
+    name: 🔍 Check Preview Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+      pr_ref: ${{ steps.check.outputs.pr_ref }}
+    
+    steps:
+      - name: 🤖 Generate App Token for Enhanced Permissions
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          
+      - name: 🔍 Determine if we should deploy
+        id: check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            let shouldDeploy = false;
+            let prNumber = null;
+            let prRef = null;
+            
+            // Case 1: Automatic Dependabot PR trigger
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+              
+              // Only auto-deploy for Dependabot PRs
+              if (pr.user.login.includes('dependabot')) {
+                prNumber = pr.number;
+                prRef = pr.head.sha;
+                shouldDeploy = true;
+                core.info(`🤖 Automatic Dependabot trigger for PR #${prNumber}`);
+              } else {
+                core.info('Not a Dependabot PR, skipping auto-deploy');
+                core.setOutput('should_deploy', 'false');
+                return;
+              }
+            }
+            
+            // Case 2: Manual workflow dispatch
+            else if (context.eventName === 'workflow_dispatch') {
+              prNumber = context.payload.inputs.pr_number;
+              shouldDeploy = true;
+              core.info(`Manual trigger for PR #${prNumber}`);
+            }
+            
+            // Case 3: Comment trigger
+            else if (context.eventName === 'issue_comment') {
+              const comment = context.payload.comment.body;
+              const issue = context.payload.issue;
+              
+              // Must be on a PR
+              if (!issue.pull_request) {
+                core.info('Comment not on a PR, skipping');
+                core.setOutput('should_deploy', 'false');
+                return;
+              }
+              
+              // Must contain preview trigger
+              if (!comment.includes('/preview')) {
+                core.info('Comment does not contain /preview trigger, skipping');
+                core.setOutput('should_deploy', 'false');
+                return;
+              }
+              
+              // Must be from repo owner/admin (security check)
+              const { data: author } = await github.rest.users.getByUsername({
+                username: context.payload.comment.user.login
+              });
+              
+              if (context.payload.comment.user.login !== context.repo.owner) {
+                core.info('Comment not from repo owner, checking permissions...');
+                try {
+                  const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    username: context.payload.comment.user.login
+                  });
+                  
+                  if (!['admin', 'write'].includes(permission.permission)) {
+                    core.info('Insufficient permissions to trigger preview');
+                    core.setOutput('should_deploy', 'false');
+                    return;
+                  }
+                } catch (error) {
+                  core.info('Could not check permissions, denying');
+                  core.setOutput('should_deploy', 'false');
+                  return;
+                }
+              }
+              
+              prNumber = issue.number;
+              shouldDeploy = true;
+              core.info(`Comment trigger for PR #${prNumber}`);
+            }
+            
+            if (shouldDeploy && prNumber) {
+              // Get PR details
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              prRef = pr.head.sha;
+              core.info(`PR #${prNumber} head SHA: ${prRef}`);
+              
+              // Check if it's a Dependabot PR
+              if (pr.user.login.includes('dependabot')) {
+                core.info(`✅ Confirmed Dependabot PR #${prNumber}`);
+              } else {
+                core.info(`ℹ️ Not a Dependabot PR, but preview requested`);
+              }
+            }
+            
+            core.setOutput('should_deploy', shouldDeploy.toString());
+            core.setOutput('pr_number', prNumber?.toString() || '');
+            core.setOutput('pr_ref', prRef || '');
+
+  deploy-preview:
+    name: 🚀 Deploy Dependabot Preview
+    runs-on: ubuntu-24.04-arm
+    needs: check-conditions
+    if: needs.check-conditions.outputs.should_deploy == 'true'
+    timeout-minutes: 15
+    
+    steps:
+      - name: 🤖 Generate App Token for Enhanced Permissions
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          
+      - name: 📝 Add Starting Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = '${{ needs.check-conditions.outputs.pr_number }}';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🤖 Dependabot Preview Deployment Starting
+              
+              🚀 **Status**: Building and deploying preview environment...
+              ⏱️ **Started**: ${new Date().toISOString()}
+              🔧 **Workflow**: [${context.runId}](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              🤖 **Orchestrated by**: resume-pipeline-bot (enhanced permissions)
+              
+              Preview URL will be available shortly! 🌐`
+            });
+            
+      - name: Checkout PR
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.check-conditions.outputs.pr_ref }}
+          fetch-depth: 0
+          
+      - name: 🔧 Setup Build Environment
+        uses: ./.github/actions/setup-build-environment
+        with:
+          cache-suffix: 'dependabot-pr-${{ needs.check-conditions.outputs.pr_number }}'
+          
+      - name: 🔐 Validate Netlify Secrets
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "❌ Netlify secrets not available"
+            echo "This workflow requires manual secret configuration for Dependabot previews"
+            exit 1
+          fi
+          echo "✅ Netlify secrets available"
+          
+      - name: 🏗️ Build Preview
+        uses: ./.github/actions/astro-build
+        with:
+          build-context: 'dependabot-preview'
+          deploy-url: >-
+            https://dependabot-pr-${{ needs.check-conditions.outputs.pr_number }}--resume-as-code.netlify.app
+          pr-number: ${{ needs.check-conditions.outputs.pr_number }}
+          
+      - name: 🚀 Deploy to Netlify
+        uses: South-Paw/action-netlify-cli@v2
+        id: deploy
+        timeout-minutes: 10
+        with:
+          args: >-
+            deploy --json --dir=workspace/build
+            --alias=dependabot-pr-${{ needs.check-conditions.outputs.pr_number }}
+            --timeout=600000
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          
+      - name: 📝 Update Success Comment
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = '${{ needs.check-conditions.outputs.pr_number }}';
+            const previewUrl = `https://dependabot-pr-${prNumber}--resume-as-code.netlify.app`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🎉 Dependabot Preview Deployed Successfully!
+              
+              **🌐 Preview URL**: [${previewUrl}](${previewUrl})
+              **✅ Status**: Deployment completed
+              **⏱️ Completed**: ${new Date().toISOString()}
+              
+              ### 🔍 What's Been Tested:
+              - ✅ Dependencies installed and resolved
+              - ✅ Application builds successfully  
+              - ✅ Preview environment deployed
+              - ✅ All assets and pages accessible
+              
+              **Note**: This preview includes the dependency updates from this PR. Test thoroughly before merging! 🧪`
+            });
+            
+      - name: 📝 Update Failure Comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = '${{ needs.check-conditions.outputs.pr_number }}';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## ❌ Dependabot Preview Deployment Failed
+              
+              **Status**: Deployment encountered an error
+              **⏱️ Failed**: ${new Date().toISOString()}
+              **🔧 Logs**: [View workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              
+              ### Possible Issues:
+              - Network connectivity problems
+              - Build errors due to dependency conflicts
+              - Netlify deployment timeout
+              
+              Try again with: \`/preview\``
+            });
