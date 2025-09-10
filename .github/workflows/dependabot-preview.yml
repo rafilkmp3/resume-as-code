@@ -207,7 +207,7 @@ jobs:
         with:
           build-context: 'dependabot-preview'
           deploy-url: >-
-            https://dependabot-pr-${{ needs.check-conditions.outputs.pr_number }}--resume-as-code.netlify.app
+            https://deploy-preview-${{ needs.check-conditions.outputs.pr_number }}--resume-as-code.netlify.app
           pr-number: ${{ needs.check-conditions.outputs.pr_number }}
           
       - name: 🚀 Deploy to Netlify
@@ -217,7 +217,7 @@ jobs:
         with:
           args: >-
             deploy --json --dir=workspace/build
-            --alias=dependabot-pr-${{ needs.check-conditions.outputs.pr_number }}
+            --alias=deploy-preview-${{ needs.check-conditions.outputs.pr_number }}
             --timeout=600000
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -230,7 +230,7 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const prNumber = '${{ needs.check-conditions.outputs.pr_number }}';
-            const previewUrl = `https://dependabot-pr-${prNumber}--resume-as-code.netlify.app`;
+            const previewUrl = `https://deploy-preview-${prNumber}--resume-as-code.netlify.app`;
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
