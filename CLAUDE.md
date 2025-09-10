@@ -196,6 +196,40 @@ The repository uses GitHub Actions composite actions to eliminate code duplicati
 
 ---
 
+## 🤖 Dependabot Preview Environments
+
+**✅ WORKING SOLUTION**: Comment-triggered preview deployments for dependency updates!
+
+### How It Works
+- **❌ No Automatic Previews**: Dependabot PRs cannot access secrets due to GitHub's security model
+- **✅ Comment Trigger**: Add `/preview` comment to any Dependabot PR
+- **🤖 GitHub App**: Uses `resume-pipeline-bot` with enhanced permissions for secret access
+- **🌐 Preview URLs**: `https://deploy-preview-{number}--resume-as-code.netlify.app`
+
+### Usage Examples
+```bash
+# On any Dependabot PR, simply comment:
+/preview
+
+# Manual workflow dispatch also available via Actions tab
+gh workflow run "🤖 Dependabot Preview Environment" --ref main -f pr_number=130
+
+# Preview URLs follow this pattern:
+# https://deploy-preview-130--resume-as-code.netlify.app
+# https://deploy-preview-129--resume-as-code.netlify.app
+```
+
+### Security & Permissions  
+- ✅ Repository owner/admin can trigger previews
+- ✅ GitHub App provides full secret access (NETLIFY_AUTH_TOKEN, etc.)
+- ✅ Complete audit trail in GitHub Actions logs
+- ✅ Same deployment quality as regular PR previews
+
+### Documentation
+See **[docs/dependabot-previews.md](docs/dependabot-previews.md)** for complete usage guide and troubleshooting.
+
+---
+
 ## 📚 Quick Reference
 
 For detailed information, see the modular documentation:
@@ -205,6 +239,7 @@ For detailed information, see the modular documentation:
 - **[Platform Engineering](docs/platform-engineering.md)** - CI/CD rules and deployment flows
 - **[ARM64 Performance](docs/arm64-performance.md)** - Performance optimization details
 - **[Composite Actions](docs/composite-actions.md)** - CI/CD building blocks and usage examples
+- **[Dependabot Previews](docs/dependabot-previews.md)** - Dependency update preview environments
 
 ## 🚨 Critical Rules (Never Ignore)
 

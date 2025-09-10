@@ -60,14 +60,14 @@ Example:
 
 ## 🌐 Preview URLs
 
-Dependabot previews use a special URL pattern:
+Dependabot previews use the standard Netlify preview URL pattern:
 ```
-https://dependabot-pr-{PR_NUMBER}--resume-as-code.netlify.app
+https://deploy-preview-{PR_NUMBER}--resume-as-code.netlify.app
 ```
 
 Examples:
-- PR #130: `https://dependabot-pr-130--resume-as-code.netlify.app`  
-- PR #129: `https://dependabot-pr-129--resume-as-code.netlify.app`
+- PR #130: `https://deploy-preview-130--resume-as-code.netlify.app`  
+- PR #129: `https://deploy-preview-129--resume-as-code.netlify.app`
 
 ## 🔧 Advanced Usage
 
