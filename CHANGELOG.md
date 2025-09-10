@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.18.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.17.0...v4.18.0) (2025-09-10)
+
+
+### Features
+
+* enable Dependabot preview environments via GitHub App ([#132](https://github.com/rafilkmp3/resume-as-code/issues/132)) ([7a3eff9](https://github.com/rafilkmp3/resume-as-code/commit/7a3eff980c87afa3e45a2f90d1195ba7ee4ba20d))
+
+
+### Miscellaneous
+
+* **deps:** bump astro from 5.13.5 to 5.13.6 in the astro-framework group ([#125](https://github.com/rafilkmp3/resume-as-code/issues/125)) ([10a184c](https://github.com/rafilkmp3/resume-as-code/commit/10a184c18dc4dc176c8ae0a567f1b23291dd2100))
+* **deps:** bump devalue from 5.1.1 to 5.3.2 in the npm_and_yarn group across 1 directory ([#129](https://github.com/rafilkmp3/resume-as-code/issues/129)) ([44314f9](https://github.com/rafilkmp3/resume-as-code/commit/44314f919d28a807a81ced3f40927f5d28ceb965))
+* **deps:** bump the general-dependencies group across 1 directory with 5 updates ([#130](https://github.com/rafilkmp3/resume-as-code/issues/130)) ([4b8abff](https://github.com/rafilkmp3/resume-as-code/commit/4b8abff143a7a12e3042944a37d95f61e1f90e48))
+
 ## [4.17.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.16.0...v4.17.0) (2025-09-08)
 
 
