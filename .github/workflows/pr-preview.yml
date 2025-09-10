@@ -48,17 +48,47 @@ jobs:
         run: |
           echo "🔍 Installing and testing Netlify CLI..."
 
+          # Validate secrets are present
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "❌ NETLIFY_AUTH_TOKEN secret is not set"
+            echo "📋 Please add the secret at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+
+          if [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "❌ NETLIFY_SITE_ID secret is not set"  
+            echo "📋 Please add the secret at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+
           # Install Netlify CLI
           npm install -g netlify-cli
 
-          # Test CLI functionality with better error handling
+          # Test CLI functionality with timeout and retry
           echo "🔐 Testing Netlify authentication..."
-          if netlify status --json > /dev/null 2>&1; then
+          
+          # Add timeout to prevent hanging
+          timeout 30s netlify status --json > /tmp/netlify_status.json 2>&1
+          NETLIFY_STATUS_CODE=$?
+          
+          if [ $NETLIFY_STATUS_CODE -eq 0 ]; then
             echo "✅ Netlify CLI authentication successful"
+            # Verify site access
+            if netlify sites:list --json > /dev/null 2>&1; then
+              echo "✅ Site access verified"
+            else
+              echo "⚠️ Authentication successful but site access limited"
+            fi
+          elif [ $NETLIFY_STATUS_CODE -eq 124 ]; then
+            echo "❌ Netlify CLI authentication timed out (30s)"
+            echo "🔄 This might be a temporary connectivity issue"
+            echo "📋 Check Netlify status at: https://www.netlifystatus.com/"
+            exit 1
           else
             echo "❌ Netlify CLI authentication failed"
-            echo "📋 Verify NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID secrets are set"
-            echo "🔗 https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "📋 Error details:"
+            cat /tmp/netlify_status.json 2>/dev/null || echo "No detailed error available"
+            echo "🔗 Verify secrets at: https://github.com/${{ github.repository }}/settings/secrets/actions"
             exit 1
           fi
 
@@ -73,10 +103,26 @@ jobs:
       - name: 🚀 Deploy to Netlify Preview
         uses: South-Paw/action-netlify-cli@v2
         id: deploy
+        timeout-minutes: 10
         with:
           args: >-
             deploy --json --dir=workspace/build
             --alias=deploy-preview-${{ github.event.pull_request.number }}
+            --timeout=600000
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: 🔄 Retry Deploy on Failure
+        if: failure() && steps.deploy.outcome == 'failure'
+        uses: South-Paw/action-netlify-cli@v2
+        id: deploy-retry
+        timeout-minutes: 10
+        with:
+          args: >-
+            deploy --json --dir=workspace/build
+            --alias=deploy-preview-${{ github.event.pull_request.number }}
+            --timeout=600000
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
