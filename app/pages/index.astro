@@ -133,8 +133,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               network="WhatsApp"
             />
 
-            <!-- QR Code Button -->
-            <QRCodeButton url={siteUrl} />
+            <!-- QR Code Button - Desktop/Tablet only -->
+            <div class="hidden sm:block">
+              <QRCodeButton url={siteUrl} />
+            </div>
           </div>
         </div>
 
