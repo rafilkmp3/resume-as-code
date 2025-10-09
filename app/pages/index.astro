@@ -52,62 +52,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         </div>
 
         <!-- Professional Summary with Apple Typography -->
-        <div class="max-w-4xl mx-auto mb-8">
+        <div class="max-w-4xl mx-auto">
           <p class="apple-body text-center leading-relaxed apple-smart-break">
             {basics.summary}
           </p>
-        </div>
-
-        <!-- Apple-Style Contact Information Card -->
-        <div class="max-w-4xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 mb-6">
-            <!-- Email Contact Badge -->
-            <a 
-              href={`mailto:${basics.email}`}
-              class="apple-contact-badge group"
-              aria-label={`Email ${basics.name}`}
-            >
-              <div class="apple-contact-icon">
-                <LiquidGlassIcon name="heroicons:envelope" size={20} variant="subtle" />
-              </div>
-              <div class="apple-contact-info">
-                <div class="apple-contact-label">Email</div>
-                <div class="apple-contact-value">{basics.email}</div>
-              </div>
-            </a>
-
-            <!-- Phone Contact Badge -->
-            <a 
-              href={`tel:${basics.phone}`}
-              class="apple-contact-badge group"
-              aria-label={`Call ${basics.name}`}
-            >
-              <div class="apple-contact-icon">
-                <LiquidGlassIcon name="heroicons:phone" size={20} variant="subtle" />
-              </div>
-              <div class="apple-contact-info">
-                <div class="apple-contact-label">Phone</div>
-                <div class="apple-contact-value">{basics.phone}</div>
-              </div>
-            </a>
-
-            <!-- Location Contact Badge -->
-            <a 
-              href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="apple-contact-badge group"
-              aria-label="View Rio de Janeiro location on Google Maps"
-            >
-              <div class="apple-contact-icon">
-                <LiquidGlassIcon name="heroicons:map-pin" size={20} variant="subtle" />
-              </div>
-              <div class="apple-contact-info">
-                <div class="apple-contact-label">Location</div>
-                <div class="apple-contact-value">{basics.location.city}, {basics.location.region}</div>
-              </div>
-            </a>
-          </div>
         </div>
       </LiquidGlassCard>
 
@@ -117,55 +65,84 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       <!-- Connect & Download Section -->
       <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="1">
         <h2 class="apple-section-title text-center">Let's Connect</h2>
-        
+
         <!-- Contact Methods -->
         <div class="mb-8">
           <h3 class="mb-4 text-center">Get In Touch</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Email -->
+            <ContactButton
+              icon="heroicons:envelope"
+              label="Email"
+              value={basics.email}
+              href={`mailto:${basics.email}`}
+              network="Email"
+            />
+
+            <!-- Phone -->
+            <ContactButton
+              icon="heroicons:phone"
+              label="Phone"
+              value={basics.phone}
+              href={`tel:${basics.phone}`}
+              network="Phone"
+            />
+
+            <!-- Location -->
+            <ContactButton
+              icon="heroicons:map-pin"
+              label="Location"
+              value={`${basics.location.city}, ${basics.location.region}`}
+              href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
+              network="Location"
+            />
+
             <!-- LinkedIn -->
             <ContactButton
               icon="simple-icons:linkedin"
-              label="Connect on LinkedIn"
+              label="LinkedIn"
               value="Professional profile"
               href="https://www.linkedin.com/in/rafaelbsathler/"
               network="LinkedIn"
             />
-            
+
             <!-- GitHub -->
             <ContactButton
               icon="simple-icons:github"
-              label="View GitHub"
+              label="GitHub"
               value="Code & projects"
               href="https://github.com/rafaelbsathler"
               network="GitHub"
             />
-            
+
             <!-- Cal.com -->
             <ContactButton
               icon="heroicons:calendar"
-              label="Book or Check Availability"
-              value="Quick or long calls"
+              label="Check Availability"
+              value="Book a meeting"
               href="https://cal.com/rafaelbsathler"
               network="cal.com"
             />
-            
+
             <!-- WhatsApp -->
             <ContactButton
               icon="simple-icons:whatsapp"
-              label="Chat on WhatsApp"
-              value="+55 21 997988682"
+              label="WhatsApp"
+              value="Chat with me"
               href="https://wa.me/5521997988682"
               network="WhatsApp"
             />
-            
-            <!-- QR Code Button -->
-            <QRCodeButton url={siteUrl} />
+
+            <!-- QR Code Button - Desktop/Tablet only -->
+            <div class="hidden sm:block">
+              <QRCodeButton url={siteUrl} />
+            </div>
           </div>
         </div>
 
         <!-- PDF Downloads -->
         <div>
-          <h3 class="mb-4 text-center">Download PDF</h3>
+          <h3 class="mb-4 text-center">Download Resume</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
               href={`${siteUrl}/pdf-screen`}
