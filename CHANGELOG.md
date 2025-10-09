@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.18.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.18.0...v4.18.1) (2025-10-09)
+
+
+### Bug Fixes
+
+* improve contact section UX and button consistency ([#141](https://github.com/rafilkmp3/resume-as-code/issues/141)) ([a050ba4](https://github.com/rafilkmp3/resume-as-code/commit/a050ba4fe5f47906c376859ffa4f74ee867a98f5))
+* remove deprecated command param ([#142](https://github.com/rafilkmp3/resume-as-code/issues/142)) ([582cb03](https://github.com/rafilkmp3/resume-as-code/commit/582cb03bcf3d5de08ef7e6e6c9156d93c83843a1))
+
+
+### Documentation
+
+* improve README UX with audience-specific paths ([#134](https://github.com/rafilkmp3/resume-as-code/issues/134)) ([39621c4](https://github.com/rafilkmp3/resume-as-code/commit/39621c4a0c7c949e01cdb46a523e6937676f9ed6))
+
 ## [4.18.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.17.0...v4.18.0) (2025-09-10)
 
 
