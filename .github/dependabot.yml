@@ -119,7 +119,7 @@ updates:
 
   # 🐳 Docker Images - Monthly BRT Schedule
   - package-ecosystem: 'docker'
-    directory: '/'
+    directory: '/.docker/pre-commit'
     schedule:
       interval: 'monthly'
       day: 'wednesday'     # Mid-week for better review time
