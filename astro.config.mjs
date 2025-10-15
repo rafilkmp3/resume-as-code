@@ -50,11 +50,29 @@ function getSiteUrl() {
 
 const site = getSiteUrl();
 
+/**
+ * Get base path for GitHub Pages vs other environments
+ */
+function getBasePath() {
+  // GitHub Pages requires /resume-as-code/ base path
+  if (process.env.GITHUB_PAGES === 'true') {
+    console.log('✅ Using GitHub Pages base path: /resume-as-code/');
+    return '/resume-as-code/';
+  }
+
+  // Netlify and local development use root path
+  console.log('✅ Using root base path: /');
+  return '/';
+}
+
+const base = getBasePath();
+
 // https://astro.build/config
 export default defineConfig({
   srcDir: './app', // Use app/ instead of src/
   outDir: './workspace/build', // Output to workspace
   site: site,
+  base: base, // Set base path for asset resolution
   output: 'static', // Ensure static output for all deployment targets
   trailingSlash: 'ignore', // Handle both with/without trailing slash
   build: {

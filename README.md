@@ -2,12 +2,45 @@
 
 **Transform your resume into a modern, automated platform that showcases both your experience AND your technical skills**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Resume-Visit_Site-success?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)
-[![Release Please](https://img.shields.io/badge/📦_Automated_Releases-Release_Please-purple?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/releases)
-[![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
+<div align="center">
 
-> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.13.3, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
+## 🚀 **[View Live Resume →](https://rafilkmp3.github.io/resume-as-code/)** | **[Test on Staging →](https://resume-as-code.netlify.app)**
+
+[![Production Deploy](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)
+[![Staging Deploy](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
+[![Release Please](https://github.com/rafilkmp3/resume-as-code/actions/workflows/release-please.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/releases)
+
+</div>
+
+<details>
+<summary>📱 <strong>Preview Screenshots</strong> (click to expand)</summary>
+
+<br>
+
+| Desktop View | Mobile View |
+|:---:|:---:|
+| [<img src="docs/images/readme-screenshot-desktop.webp" width="400" alt="Desktop View">](docs/images/readme-screenshot-desktop.webp) | [<img src="docs/images/readme-screenshot-mobile.webp" width="200" alt="Mobile View">](docs/images/readme-screenshot-mobile.webp) |
+| *Click image to view full size* | *Click image to view full size* |
+
+</details>
+
+> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring modern Astro framework, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
+
+## 📑 Table of Contents
+
+- [Quick Start](#-quick-start---choose-your-path) - Get started in under 2 minutes
+- [What Makes This Special](#-what-makes-this-special) - Key features and benefits
+- [Modern Architecture](#️-modern-architecture-overview) - Technical stack and design
+- [Project Structure](#-project-structure) - Directory organization
+- [Modern Testing Strategy](#-modern-testing-strategy) - Comprehensive testing approach
+- [CI/CD Architecture](#-modern-cicd-architecture) - Production deployment pipeline
+- [Dependency Management](#-next-generation-dependency-management) - AI-powered automation
+- [Content Management](#-intelligent-content-management) - Type-safe content collections
+- [Performance Metrics](#-performance-excellence--quality-metrics) - Quality benchmarks
+- [Advanced Astro Features](#-advanced-astro-features) - Islands Architecture and more
+- [Contributing](#-contributing) - Development workflow and standards
+- [Platform Engineering Showcase](#-platform-engineering-showcase) - Enterprise practices
+- [What's Next?](#-whats-next) - Resources and next steps
 
 ## 🎯 Quick Start - Choose Your Path
 
@@ -42,7 +75,7 @@ Jump straight to what matters:
 
 This isn't just a resume—it's a **comprehensive demonstration of modern Astro framework engineering excellence**:
 
-- **⚡ Astro v5.13.3 Power**: Lightning-fast static site generation with server-side rendering capabilities
+- **⚡ Modern Astro Framework**: Lightning-fast static site generation with server-side rendering capabilities
 - **📊 Data-Driven Architecture**: Resume content managed through Astro's Content Collections with type-safe frontmatter
 - **🤖 Context7 AI Integration**: Real-time documentation and intelligent dependency management
 - **🔖 Semantic Versioning**: Ultra-simple context-based versioning across all environments
@@ -55,17 +88,25 @@ This isn't just a resume—it's a **comprehensive demonstration of modern Astro 
 
 Environment-specific version formats demonstrate CI/CD maturity:
 
-- **Production**: `v4.16.0` - Clean semantic versions for stable releases
-- **Staging**: `v4.16.0+3` - Build metadata showing commits ahead of release  
-- **Preview**: `v4.16.0-preview.121` - Prerelease format for PR deployments
+- **Production**: `v4.19.2` - Clean semantic versions for stable releases
+- **Staging**: `v4.19.2+3` - Build metadata showing commits ahead of release
+- **Preview**: `v4.19.2-preview.121` - Prerelease format for PR deployments
 
 Test live: `/api/version` endpoint across all environments
+
+### 🌐 Environment Access
+
+| Environment | URL | Purpose | Auto-Deploy |
+|-------------|-----|---------|-------------|
+| **Production** | [rafilkmp3.github.io/resume-as-code](https://rafilkmp3.github.io/resume-as-code/) | Live resume for recruiters | ✅ On release |
+| **Staging** | [resume-as-code.netlify.app](https://resume-as-code.netlify.app) | Latest features testing | ✅ On main merge |
+| **PR Preview** | `deploy-preview-{PR#}--resume-as-code.netlify.app` | Feature testing | ✅ On PR |
 
 ## 🏗️ Modern Architecture Overview
 
 ```mermaid
 graph TB
-    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro v5.13.3<br/>(SSG + SSR)"] 
+    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro<br/>(SSG + SSR)"] 
     B --> C["🔧 Build Process<br/>(ARM64 Optimized)"]
     C --> D["📄 Static HTML<br/>(Optimized Assets)"]
     C --> E["📱 Responsive Web<br/>(All Devices)"]
@@ -85,11 +126,11 @@ graph TB
 
 ### **⚡ Modern Technology Stack**
 
-- **🚀 Framework**: Astro v5.13.3 with Islands Architecture and Content Collections
-- **🎨 Styling**: Tailwind CSS v4.1.12 + DaisyUI v5.0.50 for component-driven design
-- **🖼️ Image Optimization**: Sharp v0.34+ with WebP/AVIF generation and responsive sizing
+- **🚀 Framework**: Astro with Islands Architecture and Content Collections
+- **🎨 Styling**: Tailwind CSS v4+ and DaisyUI v5+ for component-driven design
+- **🖼️ Image Optimization**: Sharp with WebP/AVIF generation and responsive sizing
 - **📄 Static Generation**: Pure HTML output for fast loading and reliable access
-- **🧪 Testing**: Playwright v1.55+ (E2E/visual/accessibility) + Lighthouse performance auditing
+- **🧪 Testing**: Playwright (E2E/visual/accessibility) + Lighthouse performance auditing
 - **🤖 AI Integration**: Context7 MCP for real-time documentation and dependency insights
 - **🔄 CI/CD**: GitHub Actions with bot orchestration and ARM64 performance optimization
 - **📦 Deployment**: GitHub Pages (production) + Netlify (preview) with automated PR comments
@@ -125,7 +166,7 @@ Modern, semantic directory organization based on AI consensus and enterprise bes
 
 ### Prerequisites
 
-- **Node.js 18+** (LTS recommended) 
+- **Node.js 20+** (LTS recommended) 
 - **pnpm** or **npm** for package management
 - **GitHub CLI** (optional, for workflow monitoring)
 
@@ -187,7 +228,7 @@ lighthouse                  # Performance auditing and Core Web Vitals
 | Test Type | Coverage | Technology | AI Integration |
 |-----------|----------|------------|----------------|
 | **Content Validation** | Type-safe frontmatter, schema validation | Astro Content Collections | ✅ Context7 schema insights |
-| **Build Process** | Asset optimization, static generation | Astro v5.13.3 + Sharp | ✅ Performance recommendations |
+| **Build Process** | Asset optimization, static generation | Astro + Sharp | ✅ Performance recommendations |
 | **Visual Testing** | Cross-browser, responsive design | Playwright + Visual Regression | ✅ Automated PR comments |
 | **Accessibility** | WCAG 2.1 AA compliance | Axe-core + Playwright | ✅ Enhanced violation reports |
 | **Performance** | Core Web Vitals, asset optimization | Lighthouse + Real User Metrics | ✅ Performance budget alerts |
@@ -222,7 +263,7 @@ lighthouse                  # Performance auditing and Core Web Vitals
 - **Triggers**: Tag-based releases (v*.*.*)  + bot-orchestrated workflows
 - **Technology**: GitHub Pages + ARM64 runners for 40% faster builds
 - **Features**: Resume-pipeline-bot integration, automated release notes, performance telemetry
-- **Guarantee**: Production deployments NEVER blocked by test failures
+- **Deployment Strategy**: Non-blocking releases with comprehensive health checks and staged validation to mitigate risk
 
 ### **🧪 Staging Pipeline** - ⚡ INTEGRATION FOCUSED
 
@@ -339,13 +380,13 @@ npm run preview                         # Production content preview
 
 | Metric | Target | Current Status | Technology |
 |--------|--------|----------------|------------|
-| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro v5.13.3 |
+| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro |
 | **Pipeline Success** | > 95% | ✅ 99.5%+ | Bot orchestration + smart retries |
 | **Lighthouse Score** | > 95 | ✅ 98+ | Astro Islands + optimized assets |
 | **Bundle Size** | < 300KB | ✅ < 200KB | Astro SSG + tree-shaking |
 | **Load Time (LCP)** | < 1.5s | ✅ < 1.2s | Image optimization + CDN |
 | **Visual Consistency** | > 98% | ✅ 99.5%+ | Playwright visual testing |
-| **Accessibility** | WCAG 2.1 AA | ✅ AAA level | Automated axe-core validation |
+| **Accessibility** | WCAG 2.1 AA | ✅ AA compliance | Automated axe-core + Playwright |
 | **Core Web Vitals** | All Green | ✅ Excellent | Real User Monitoring |
 
 ## 🚀 Advanced Astro Features
@@ -434,7 +475,7 @@ This project follows enterprise-grade development practices:
 # Valid commit formats
 git commit -m "feat: add new resume section for certifications"
 git commit -m "fix: resolve QR code URL mismatch in preview environments"  
-git commit -m "chore(deps): bump playwright from 1.40.0 to 1.41.0"
+git commit -m "chore(deps): bump playwright to latest version"
 git commit -m "docs: update platform engineering documentation"
 ```
 
@@ -449,7 +490,7 @@ This project demonstrates enterprise-level platform engineering practices:
 - ✅ Zero-downtime deployments with rollback capabilities
 
 ### **Developer Experience**
-- ✅ Astro v5.13.3 with lightning-fast dev server (`npm run dev`)
+- ✅ Modern Astro with lightning-fast dev server (`npm run dev`)
 - ✅ Context7 AI integration for real-time documentation
 - ✅ Islands Architecture with selective hydration
 - ✅ ARM64 optimization with 40% faster builds
@@ -470,22 +511,12 @@ This project demonstrates enterprise-level platform engineering practices:
 
 ## 🚀 What's Next?
 
-### **🔥 Ready to Build Your Own Resume-as-Code?**
+### **🔥 Take Action**
 
-#### **For Developers**
-- **📋 Fork & Customize**: [Fork this repo](https://github.com/rafilkmp3/resume-as-code/fork) and adapt the content to your experience
-- **🤖 AI Integration**: Set up [Context7 MCP](https://github.com/rafilkmp3/resume-as-code/tree/main/infrastructure/ai) for enhanced development
-- **🔄 Deployment**: Configure your own [GitHub Actions pipeline](https://github.com/rafilkmp3/resume-as-code/tree/main/.github/workflows) for automated deployments
-
-#### **For Recruiters & Hiring Managers**
-- **📊 Technical Assessment**: Use this project to evaluate candidates' platform engineering skills
-- **💼 Best Practices**: Reference the [CI/CD architecture](#-modern-cicd-architecture) for your own team's processes
-- **🎯 Interview Guide**: Focus on [specific technical implementations](#-platform-engineering-showcase) during technical discussions
-
-#### **For Teams & Organizations**  
-- **📚 Learning Resource**: Use as training material for modern web development practices
-- **🏗️ Template Project**: Adapt the architecture patterns for your own documentation sites
-- **🔧 Platform Engineering**: Reference the automation patterns for your DevOps initiatives
+- **📋 [Fork this repository](https://github.com/rafilkmp3/resume-as-code/fork)** to create your own resume-as-code
+- **🤖 Explore [Context7 AI integration](https://github.com/rafilkmp3/resume-as-code/tree/main/infrastructure/ai)** for enhanced development workflow
+- **📊 Reference the [Platform Engineering patterns](#-platform-engineering-showcase)** for your own projects
+- **🏗️ Adapt the [CI/CD architecture](#-modern-cicd-architecture)** for your organization's needs
 
 ### **🤝 Contributing & Community**
 
@@ -499,13 +530,10 @@ This project demonstrates enterprise-level platform engineering practices:
 
 <div align="center">
 
-**🎯 Built to demonstrate platform engineering excellence in action**
+---
 
-[![Astro](https://img.shields.io/badge/Astro-v5.13.3-FF5D01?logo=astro&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
-[![CI/CD](https://img.shields.io/badge/GitHub_Actions-Bot_Orchestrated-success?logo=github&logoColor=white)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Context7](https://img.shields.io/badge/AI_Powered-Context7_MCP-purple?logo=openai&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+**Built with** [![Astro](https://img.shields.io/github/package-json/dependency-version/rafilkmp3/resume-as-code/astro?logo=astro&logoColor=white&label=Astro&color=FF5D01)](https://astro.build) • [![TypeScript](https://img.shields.io/github/package-json/dependency-version/rafilkmp3/resume-as-code/dev/typescript?logo=typescript&logoColor=white&label=TypeScript&color=3178C6)](https://www.typescriptlang.org/) • [![Context7](https://img.shields.io/badge/AI_Powered-Context7-purple?logo=openai&logoColor=white)](https://context7.com)
 
-**[🌐 View Live Resume](https://rafilkmp3.github.io/resume-as-code/) • [📦 See Releases](https://github.com/rafilkmp3/resume-as-code/releases) • [🚀 Check Pipeline Status](https://github.com/rafilkmp3/resume-as-code/actions)**
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) • Made by [Rafael Sathler](https://github.com/rafilkmp3)
 
 </div>
