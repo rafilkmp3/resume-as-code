@@ -532,7 +532,7 @@ This project demonstrates enterprise-level platform engineering practices:
 
 ---
 
-**Built with** [![Astro](https://img.shields.io/badge/Astro-v5.14+-FF5D01?logo=astro&logoColor=white)](https://astro.build) • [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) • [![Context7](https://img.shields.io/badge/AI_Powered-Context7-purple?logo=openai&logoColor=white)](https://context7.com)
+**Built with** [![Astro](https://img.shields.io/github/package-json/dependency-version/rafilkmp3/resume-as-code/astro?logo=astro&logoColor=white&label=Astro&color=FF5D01)](https://astro.build) • [![TypeScript](https://img.shields.io/github/package-json/dependency-version/rafilkmp3/resume-as-code/dev/typescript?logo=typescript&logoColor=white&label=TypeScript&color=3178C6)](https://www.typescriptlang.org/) • [![Context7](https://img.shields.io/badge/AI_Powered-Context7-purple?logo=openai&logoColor=white)](https://context7.com)
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) • Made by [Rafael Sathler](https://github.com/rafilkmp3)
 
