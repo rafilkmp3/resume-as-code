@@ -238,7 +238,9 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 999999; /* Above Netlify deploy preview (z-index: 999998) */
+    overflow-y: auto; /* Allow scrolling if content is taller than viewport */
+    padding: 2rem 0; /* Add vertical padding for better spacing */
   }
 
   .qr-content {
@@ -247,6 +249,7 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     padding: 2rem;
     max-width: 400px;
     width: 90%;
+    margin: auto; /* Center in scrollable container */
     text-align: center;
     position: relative;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
