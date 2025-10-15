@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.19.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.1...v4.19.2) (2025-10-15)
+
+
+### Bug Fixes
+
+* **build:** add QR code generation to build process ([27f27b4](https://github.com/rafilkmp3/resume-as-code/commit/27f27b409604ed5732ba64f1b3482d23bcb507ad))
+* **build:** add QR code generation to build process ([#158](https://github.com/rafilkmp3/resume-as-code/issues/158)) ([b6b83f1](https://github.com/rafilkmp3/resume-as-code/commit/b6b83f1e6cded482158ead341713904475b56d11))
+* **ci:** disable dependabot preview auto-deploy ([a7c8dc5](https://github.com/rafilkmp3/resume-as-code/commit/a7c8dc54cbc53c045febe0da2c5fcf243af39e55))
+* **deps:** correct docker dependabot directory path ([5550b7e](https://github.com/rafilkmp3/resume-as-code/commit/5550b7e9b9b9e79dafd62b0e5dcb9b3c0bb6d232))
+* **deps:** improve dependabot config and workflows ([#154](https://github.com/rafilkmp3/resume-as-code/issues/154)) ([7549b78](https://github.com/rafilkmp3/resume-as-code/commit/7549b783815b4ab0f9c073e6bcda8b70bca65173))
+* **deps:** remove npm groups to fix commit length ([b9b61e6](https://github.com/rafilkmp3/resume-as-code/commit/b9b61e6ff4ecfaf5b637d5a8080dd88eb16260ed))
+* **ui:** improve QR modal centering and z-index ([6f9f729](https://github.com/rafilkmp3/resume-as-code/commit/6f9f729fc2dc83b5c3b205b5cd601429c9d546f5))
+
+
+### Miscellaneous
+
+* **deps:** bump @iconify-json/heroicons from 1.2.2 to 1.2.3 ([2584e5a](https://github.com/rafilkmp3/resume-as-code/commit/2584e5a60267ac476219137d7a16ba8addc0ab81))
+* **deps:** bump @iconify-json/heroicons from 1.2.2 to 1.2.3 ([#157](https://github.com/rafilkmp3/resume-as-code/issues/157)) ([b71471f](https://github.com/rafilkmp3/resume-as-code/commit/b71471feca0e07de4f10fcc5601f400245c75990))
+* **deps:** bump axe-core from 4.10.3 to 4.11.0 ([1e517e7](https://github.com/rafilkmp3/resume-as-code/commit/1e517e77c0af830364b1e07894e7233877a61255))
+* **deps:** bump axe-core from 4.10.3 to 4.11.0 ([#156](https://github.com/rafilkmp3/resume-as-code/issues/156)) ([b770ea5](https://github.com/rafilkmp3/resume-as-code/commit/b770ea5a5aee3f133eba9cbfb6d8f0e49b4f8a94))
+
 ## [4.19.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.0...v4.19.1) (2025-10-15)
 
 
