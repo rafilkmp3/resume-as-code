@@ -12,6 +12,25 @@
 
 </div>
 
+<div align="center">
+
+### 📱 Preview
+
+<table>
+<tr>
+<td width="60%">
+<img src="docs/images/readme-screenshot-desktop.png" alt="Desktop Resume View" />
+<p align="center"><em>Desktop View</em></p>
+</td>
+<td width="40%">
+<img src="docs/images/readme-screenshot-mobile.png" alt="Mobile Resume View" />
+<p align="center"><em>Mobile View</em></p>
+</td>
+</tr>
+</table>
+
+</div>
+
 > **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.14+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
 
 ## 📑 Table of Contents
