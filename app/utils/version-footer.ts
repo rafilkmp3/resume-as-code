@@ -11,13 +11,15 @@ export interface VersionFooterData {
  * Get version footer data based on current environment
  *
  * Production (GitHub Pages): Links to specific release tag
- * Non-production (Netlify/Local): Links to commit SHA for exact code reference
+ * PR Preview (Netlify): Links to PR discussion
+ * Staging/Local: Links to commit SHA for exact code reference
  *
  * @returns VersionFooterData object with text, href, and aria-label
  */
 export function getVersionFooterData(): VersionFooterData {
   const version = process.env.npm_package_version || 'unknown';
   const isProduction = process.env.GITHUB_PAGES === 'true';
+  const prNumber = process.env.REVIEW_ID; // Set by astro-build action for PR previews
 
   if (isProduction) {
     // Production: Link to specific release tag
@@ -29,7 +31,17 @@ export function getVersionFooterData(): VersionFooterData {
     };
   }
 
-  // Non-production: Link to commit SHA (always valid)
+  // PR Preview: Link to PR discussion
+  if (prNumber) {
+    return {
+      text: `v${version} · PR #${prNumber}`,
+      href: `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`,
+      ariaLabel: `View pull request #${prNumber}`,
+      isProduction: false
+    };
+  }
+
+  // Staging/Local: Link to commit SHA (always valid)
   try {
     const commitSha = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
     const shortSha = commitSha.substring(0, 7);
