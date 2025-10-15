@@ -27,72 +27,8 @@ updates:
       - 'dependencies'
       - 'automated'
       - 'needs-review'
-    # 🎯 Intelligent Enterprise Grouping Strategy (SHORT NAMES for commit message compliance)
-    groups:
-      # 🔥 Critical Production Stack - Grouped patches for efficiency
-      core:
-        patterns:
-          - 'handlebars'
-          - 'puppeteer'
-          - 'express'
-          - 'sharp'
-          - 'qrcode'
-        update-types:
-          - 'patch'
-
-      # 🧪 Testing & Quality Assurance Stack
-      test:
-        patterns:
-          - 'jest*'
-          - 'playwright*'
-          - '@jest/*'
-          - '@playwright/*'
-          - 'jsdom'
-        update-types:
-          - 'patch'
-          - 'minor'
-
-      # 🚀 Astro Framework Stack - Critical Frontend Framework
-      astro:
-        patterns:
-          - 'astro'
-          - '@astrojs/*'
-          - 'astro-*'
-        update-types:
-          - 'patch'
-          - 'minor'
-
-      # 🔧 Build & Development Tools
-      build:
-        patterns:
-          - 'chokidar'
-          - 'livereload'
-          - 'nodemon'
-          - '@babel/*'
-          - 'babel-*'
-        update-types:
-          - 'patch'
-          - 'minor'
-
-      # 📝 TypeScript & Linting Ecosystem - All Updates Grouped
-      lint:
-        patterns:
-          - '@types/*'
-          - '*-types'
-          - 'eslint*'
-          - '@eslint/*'
-          - 'prettier*'
-          - 'typescript'
-        update-types:
-          - 'patch'
-          - 'minor'
-
-      # 🎯 All Other Dependencies - Aggressive Grouping for Noise Reduction
-      deps:
-        patterns:
-          - '*'
-        update-types:
-          - 'patch'
+    # ⚠️ Groups removed to ensure short commit messages (≤65 chars)
+    # Individual PRs per dependency provide better testing and clearer history
     # 🚫 Strategic Security & Stability Filters
     ignore:
       # 🔒 Major versions require manual security review
@@ -119,7 +55,7 @@ updates:
 
   # 🐳 Docker Images - Monthly BRT Schedule
   - package-ecosystem: 'docker'
-    directory: '/'
+    directory: '/.docker/pre-commit'
     schedule:
       interval: 'monthly'
       day: 'wednesday'     # Mid-week for better review time

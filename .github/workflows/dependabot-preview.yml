@@ -1,10 +1,10 @@
 ---
 name: 🤖 Dependabot Preview Environment
 
+# ⚠️ SECURITY: Do NOT add pull_request trigger here
+# Dependabot PRs cannot access secrets, so automatic preview deploys will fail
+# Use /preview comment or manual workflow dispatch instead
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
   issue_comment:
     types: [created]
   workflow_dispatch:
@@ -46,32 +46,15 @@ jobs:
             let shouldDeploy = false;
             let prNumber = null;
             let prRef = null;
-            
-            // Case 1: Automatic Dependabot PR trigger
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-              
-              // Only auto-deploy for Dependabot PRs
-              if (pr.user.login.includes('dependabot')) {
-                prNumber = pr.number;
-                prRef = pr.head.sha;
-                shouldDeploy = true;
-                core.info(`🤖 Automatic Dependabot trigger for PR #${prNumber}`);
-              } else {
-                core.info('Not a Dependabot PR, skipping auto-deploy');
-                core.setOutput('should_deploy', 'false');
-                return;
-              }
-            }
-            
-            // Case 2: Manual workflow dispatch
-            else if (context.eventName === 'workflow_dispatch') {
+
+            // Case 1: Manual workflow dispatch
+            if (context.eventName === 'workflow_dispatch') {
               prNumber = context.payload.inputs.pr_number;
               shouldDeploy = true;
-              core.info(`Manual trigger for PR #${prNumber}`);
+              core.info(`📋 Manual trigger for PR #${prNumber}`);
             }
-            
-            // Case 3: Comment trigger
+
+            // Case 2: Comment trigger
             else if (context.eventName === 'issue_comment') {
               const comment = context.payload.comment.body;
               const issue = context.payload.issue;
