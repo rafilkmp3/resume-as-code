@@ -2,12 +2,17 @@
 
 **Transform your resume into a modern, automated platform that showcases both your experience AND your technical skills**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Resume-Visit_Site-success?style=for-the-badge)](https://rafilkmp3.github.io/resume-as-code/)
-[![Production Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)
-[![Release Please](https://img.shields.io/badge/📦_Automated_Releases-Release_Please-purple?style=flat-square)](https://github.com/rafilkmp3/resume-as-code/releases)
-[![Staging Pipeline](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
+<div align="center">
 
-> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.13.3, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
+## 🚀 **[View Live Resume →](https://rafilkmp3.github.io/resume-as-code/)** | **[Test on Staging →](https://resume-as-code.netlify.app)**
+
+[![Production Deploy](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/production-deployment.yml)
+[![Staging Deploy](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/actions/workflows/staging-deployment.yml)
+[![Release Please](https://github.com/rafilkmp3/resume-as-code/actions/workflows/release-please.yml/badge.svg)](https://github.com/rafilkmp3/resume-as-code/releases)
+
+</div>
+
+> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.14+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
 
 ## 🎯 Quick Start - Choose Your Path
 
@@ -42,7 +47,7 @@ Jump straight to what matters:
 
 This isn't just a resume—it's a **comprehensive demonstration of modern Astro framework engineering excellence**:
 
-- **⚡ Astro v5.13.3 Power**: Lightning-fast static site generation with server-side rendering capabilities
+- **⚡ Astro v5.14+ Power**: Lightning-fast static site generation with server-side rendering capabilities
 - **📊 Data-Driven Architecture**: Resume content managed through Astro's Content Collections with type-safe frontmatter
 - **🤖 Context7 AI Integration**: Real-time documentation and intelligent dependency management
 - **🔖 Semantic Versioning**: Ultra-simple context-based versioning across all environments
@@ -55,17 +60,25 @@ This isn't just a resume—it's a **comprehensive demonstration of modern Astro 
 
 Environment-specific version formats demonstrate CI/CD maturity:
 
-- **Production**: `v4.16.0` - Clean semantic versions for stable releases
-- **Staging**: `v4.16.0+3` - Build metadata showing commits ahead of release  
-- **Preview**: `v4.16.0-preview.121` - Prerelease format for PR deployments
+- **Production**: `v4.19.2` - Clean semantic versions for stable releases
+- **Staging**: `v4.19.2+3` - Build metadata showing commits ahead of release
+- **Preview**: `v4.19.2-preview.121` - Prerelease format for PR deployments
 
 Test live: `/api/version` endpoint across all environments
+
+### 🌐 Environment Access
+
+| Environment | URL | Purpose | Auto-Deploy |
+|-------------|-----|---------|-------------|
+| **Production** | [rafilkmp3.github.io/resume-as-code](https://rafilkmp3.github.io/resume-as-code/) | Live resume for recruiters | ✅ On release |
+| **Staging** | [resume-as-code.netlify.app](https://resume-as-code.netlify.app) | Latest features testing | ✅ On main merge |
+| **PR Preview** | `deploy-preview-{PR#}--resume-as-code.netlify.app` | Feature testing | ✅ On PR |
 
 ## 🏗️ Modern Architecture Overview
 
 ```mermaid
 graph TB
-    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro v5.13.3<br/>(SSG + SSR)"] 
+    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro v5.14+<br/>(SSG + SSR)"] 
     B --> C["🔧 Build Process<br/>(ARM64 Optimized)"]
     C --> D["📄 Static HTML<br/>(Optimized Assets)"]
     C --> E["📱 Responsive Web<br/>(All Devices)"]
@@ -85,7 +98,7 @@ graph TB
 
 ### **⚡ Modern Technology Stack**
 
-- **🚀 Framework**: Astro v5.13.3 with Islands Architecture and Content Collections
+- **🚀 Framework**: Astro v5.14+ with Islands Architecture and Content Collections
 - **🎨 Styling**: Tailwind CSS v4.1.12 + DaisyUI v5.0.50 for component-driven design
 - **🖼️ Image Optimization**: Sharp v0.34+ with WebP/AVIF generation and responsive sizing
 - **📄 Static Generation**: Pure HTML output for fast loading and reliable access
@@ -339,7 +352,7 @@ npm run preview                         # Production content preview
 
 | Metric | Target | Current Status | Technology |
 |--------|--------|----------------|------------|
-| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro v5.13.3 |
+| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro v5.14+ |
 | **Pipeline Success** | > 95% | ✅ 99.5%+ | Bot orchestration + smart retries |
 | **Lighthouse Score** | > 95 | ✅ 98+ | Astro Islands + optimized assets |
 | **Bundle Size** | < 300KB | ✅ < 200KB | Astro SSG + tree-shaking |
@@ -449,7 +462,7 @@ This project demonstrates enterprise-level platform engineering practices:
 - ✅ Zero-downtime deployments with rollback capabilities
 
 ### **Developer Experience**
-- ✅ Astro v5.13.3 with lightning-fast dev server (`npm run dev`)
+- ✅ Astro v5.14+ with lightning-fast dev server (`npm run dev`)
 - ✅ Context7 AI integration for real-time documentation
 - ✅ Islands Architecture with selective hydration
 - ✅ ARM64 optimization with 40% faster builds
@@ -501,7 +514,7 @@ This project demonstrates enterprise-level platform engineering practices:
 
 **🎯 Built to demonstrate platform engineering excellence in action**
 
-[![Astro](https://img.shields.io/badge/Astro-v5.13.3-FF5D01?logo=astro&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
+[![Astro](https://img.shields.io/badge/Astro-v5.14+-FF5D01?logo=astro&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-Bot_Orchestrated-success?logo=github&logoColor=white)](https://github.com/rafilkmp3/resume-as-code/actions)
 [![Context7](https://img.shields.io/badge/AI_Powered-Context7_MCP-purple?logo=openai&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
