@@ -225,3 +225,8 @@ workspace/
 
 # Playwright MCP screenshots and artifacts
 .playwright-mcp/
+
+# Test artifacts in root directory
+test-*.png
+test-*.jpg
+test-*.jpeg
