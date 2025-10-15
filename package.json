@@ -4,6 +4,7 @@
   "version": "4.19.1",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node infrastructure/scripts/generate-qr-codes.js",
     "build": "astro build",
     "build:clean": "rm -rf dist && npm run build",
     "build:astro-only": "astro build",
