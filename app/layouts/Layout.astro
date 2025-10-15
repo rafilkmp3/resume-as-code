@@ -9,6 +9,9 @@ export interface Props {
 }
 
 const { title, description = 'Professional resume of Rafael Bernardo Sathler - Infrastructure Engineer, DevOps, Platform Engineer, AWS/GCP Cloud Architect' } = Astro.props;
+
+// Get base URL for proper asset paths across environments
+const baseUrl = import.meta.env.BASE_URL || '/';
 ---
 
 <!doctype html>
@@ -27,8 +30,8 @@ const { title, description = 'Professional resume of Rafael Bernardo Sathler - I
     <link rel="dns-prefetch" href="https://api.qrserver.com">
     
     <!-- Preload critical profile image for faster LCP -->
-    <link rel="preload" as="image" href="/assets/images/profile-optimized.jpg">
-    <link rel="preload" as="image" href="/assets/images/profile-sm.avif" media="(max-width: 768px)">
+    <link rel="preload" as="image" href={`${baseUrl}assets/images/profile-optimized.jpg`}>
+    <link rel="preload" as="image" href={`${baseUrl}assets/images/profile-sm.avif`} media="(max-width: 768px)">
     
     <!-- Astro will automatically handle CSS optimization with inlineStylesheets: 'auto' -->
     
