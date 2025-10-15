@@ -31,12 +31,13 @@ export function getVersionFooterData(): VersionFooterData {
     };
   }
 
-  // PR Preview: Link to PR discussion
+  // PR Preview: Link to PR discussion with preview version format
   if (prNumber) {
+    const previewVersion = `v${version}-preview.${prNumber}`;
     return {
-      text: `v${version} · PR #${prNumber}`,
+      text: previewVersion,
       href: `https://github.com/rafilkmp3/resume-as-code/pull/${prNumber}`,
-      ariaLabel: `View pull request #${prNumber}`,
+      ariaLabel: `View pull request #${prNumber} (${previewVersion})`,
       isProduction: false
     };
   }
