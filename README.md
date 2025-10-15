@@ -14,6 +14,22 @@
 
 > **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.14+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
 
+## 📑 Table of Contents
+
+- [Quick Start](#-quick-start---choose-your-path) - Get started in under 2 minutes
+- [What Makes This Special](#-what-makes-this-special) - Key features and benefits
+- [Modern Architecture](#️-modern-architecture-overview) - Technical stack and design
+- [Project Structure](#-project-structure) - Directory organization
+- [Modern Testing Strategy](#-modern-testing-strategy) - Comprehensive testing approach
+- [CI/CD Architecture](#-modern-cicd-architecture) - Production deployment pipeline
+- [Dependency Management](#-next-generation-dependency-management) - AI-powered automation
+- [Content Management](#-intelligent-content-management) - Type-safe content collections
+- [Performance Metrics](#-performance-excellence--quality-metrics) - Quality benchmarks
+- [Advanced Astro Features](#-advanced-astro-features) - Islands Architecture and more
+- [Contributing](#-contributing) - Development workflow and standards
+- [Platform Engineering Showcase](#-platform-engineering-showcase) - Enterprise practices
+- [What's Next?](#-whats-next) - Resources and next steps
+
 ## 🎯 Quick Start - Choose Your Path
 
 ### 👩‍💻 **For Developers**
@@ -200,7 +216,7 @@ lighthouse                  # Performance auditing and Core Web Vitals
 | Test Type | Coverage | Technology | AI Integration |
 |-----------|----------|------------|----------------|
 | **Content Validation** | Type-safe frontmatter, schema validation | Astro Content Collections | ✅ Context7 schema insights |
-| **Build Process** | Asset optimization, static generation | Astro v5.13.3 + Sharp | ✅ Performance recommendations |
+| **Build Process** | Asset optimization, static generation | Astro v5.14+ + Sharp | ✅ Performance recommendations |
 | **Visual Testing** | Cross-browser, responsive design | Playwright + Visual Regression | ✅ Automated PR comments |
 | **Accessibility** | WCAG 2.1 AA compliance | Axe-core + Playwright | ✅ Enhanced violation reports |
 | **Performance** | Core Web Vitals, asset optimization | Lighthouse + Real User Metrics | ✅ Performance budget alerts |
@@ -235,7 +251,7 @@ lighthouse                  # Performance auditing and Core Web Vitals
 - **Triggers**: Tag-based releases (v*.*.*)  + bot-orchestrated workflows
 - **Technology**: GitHub Pages + ARM64 runners for 40% faster builds
 - **Features**: Resume-pipeline-bot integration, automated release notes, performance telemetry
-- **Guarantee**: Production deployments NEVER blocked by test failures
+- **Deployment Strategy**: Non-blocking releases with comprehensive health checks and staged validation to mitigate risk
 
 ### **🧪 Staging Pipeline** - ⚡ INTEGRATION FOCUSED
 
@@ -358,7 +374,7 @@ npm run preview                         # Production content preview
 | **Bundle Size** | < 300KB | ✅ < 200KB | Astro SSG + tree-shaking |
 | **Load Time (LCP)** | < 1.5s | ✅ < 1.2s | Image optimization + CDN |
 | **Visual Consistency** | > 98% | ✅ 99.5%+ | Playwright visual testing |
-| **Accessibility** | WCAG 2.1 AA | ✅ AAA level | Automated axe-core validation |
+| **Accessibility** | WCAG 2.1 AA | ✅ AA compliance | Automated axe-core + Playwright |
 | **Core Web Vitals** | All Green | ✅ Excellent | Real User Monitoring |
 
 ## 🚀 Advanced Astro Features
