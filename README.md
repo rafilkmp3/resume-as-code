@@ -12,12 +12,17 @@
 
 </div>
 
-### 📱 Preview
+<details>
+<summary>📱 <strong>Preview Screenshots</strong> (click to expand)</summary>
 
-<p align="center">
-  <img src="docs/images/readme-screenshot-desktop.webp" alt="Desktop Resume View" width="48%" />
-  <img src="docs/images/readme-screenshot-mobile.webp" alt="Mobile Resume View" width="48%" />
-</p>
+<br>
+
+| Desktop View | Mobile View |
+|:---:|:---:|
+| [<img src="docs/images/readme-screenshot-desktop.webp" width="400" alt="Desktop View">](docs/images/readme-screenshot-desktop.webp) | [<img src="docs/images/readme-screenshot-mobile.webp" width="200" alt="Mobile View">](docs/images/readme-screenshot-mobile.webp) |
+| *Click image to view full size* | *Click image to view full size* |
+
+</details>
 
 > **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.14+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
 
