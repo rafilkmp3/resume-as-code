@@ -222,3 +222,6 @@ netlify-browsers/
 
 # Workspace directory (build artifacts, reports, temp files)
 workspace/
+
+# Playwright MCP screenshots and artifacts
+.playwright-mcp/
