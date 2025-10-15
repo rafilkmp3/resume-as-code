@@ -7,8 +7,10 @@ import ProfilePhotoModal from '../components/ProfilePhotoModal.astro';
 import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
+import { getVersionFooterData } from '../utils/version-footer';
 
 const { basics, work, skills, education, projects, training } = resumeData;
+const versionFooter = getVersionFooterData();
 
 // Use build-time site URL from Astro config for consistent deployment URLs
 // This leverages the same environment detection used in PDF API routes
@@ -45,10 +47,25 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <h1 class="apple-display-large mb-3">
             {basics.name}
           </h1>
-          
+
           <h2 class="apple-subtitle mb-4">
             {basics.label}
           </h2>
+
+          <!-- Location Badge -->
+          <div class="location-badge">
+            <a
+              href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="location-link"
+              aria-label="View location on Google Maps"
+              title={`${basics.location.city}, ${basics.location.region}`}
+            >
+              <LiquidGlassIcon name="heroicons:map-pin" size={16} variant="subtle" />
+              <span class="location-text">{basics.location.city}, {basics.location.region}</span>
+            </a>
+          </div>
         </div>
 
         <!-- Professional Summary with Apple Typography -->
@@ -69,7 +86,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         <!-- Contact Methods -->
         <div class="mb-8">
           <h3 class="mb-4 text-center">Get In Touch</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- Email -->
             <ContactButton
               icon="heroicons:envelope"
@@ -88,15 +105,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               network="Phone"
             />
 
-            <!-- Location -->
-            <ContactButton
-              icon="heroicons:map-pin"
-              label="Location"
-              value={`${basics.location.city}, ${basics.location.region}`}
-              href="https://maps.google.com/?q=Christ+the+Redeemer,+Rio+de+Janeiro,+Brazil"
-              network="Location"
-            />
-
             <!-- LinkedIn -->
             <ContactButton
               icon="simple-icons:linkedin"
@@ -111,7 +119,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               icon="simple-icons:github"
               label="GitHub"
               value="Code & projects"
-              href="https://github.com/rafaelbsathler"
+              href="https://github.com/rafilkmp3"
               network="GitHub"
             />
 
@@ -133,10 +141,17 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               network="WhatsApp"
             />
 
-            <!-- QR Code Button - Desktop/Tablet only -->
-            <div class="hidden sm:block">
-              <QRCodeButton url={siteUrl} />
-            </div>
+            <!-- Repository Link -->
+            <ContactButton
+              icon="heroicons:code-bracket-square"
+              label="Repository"
+              value="See this resume source code"
+              href="https://github.com/rafilkmp3/resume-as-code"
+              network="Repository"
+            />
+
+            <!-- QR Code Button - Available on all devices -->
+            <QRCodeButton url={siteUrl} />
           </div>
         </div>
 
@@ -489,6 +504,19 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
 
     </div>
+
+    <!-- Footer with Version Link -->
+    <footer class="text-center py-6 mt-8">
+      <a
+        href={versionFooter.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="version-link"
+        aria-label={versionFooter.ariaLabel}
+      >
+        {versionFooter.text}
+      </a>
+    </footer>
   </main>
   
   <!-- Profile Photo Modal -->
@@ -901,7 +929,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     .apple-motion-container {
       space-y: 6rem; /* Increased spacing between sections */
     }
-    
+
     /* Contact buttons: Better mobile grid layout */
     .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4 {
       grid-template-columns: 1fr 1fr; /* 2 columns on mobile for better space usage */
@@ -961,7 +989,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     
     /* Contact buttons: Better distribution on wide screens */
     .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4 {
-      grid-template-columns: repeat(6, 1fr); /* 6 columns for contact buttons */
+      grid-template-columns: repeat(4, 1fr); /* 4 columns for contact buttons on ultra-wide */
     }
     
     /* Apple HIG: Optimize sections for wide screen viewing */
@@ -1425,6 +1453,77 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       font-size: 1rem; /* 16pt on mobile */
       line-height: 1.5;
       margin-bottom: 1rem;
+    }
+  }
+
+  /* Version Link Styling - Subtle footer link */
+  .version-link {
+    font-size: 0.75rem; /* 12pt - small text */
+    font-weight: 500;
+    color: var(--foreground);
+    opacity: 0.5;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .version-link:hover {
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
+  }
+
+  :global(.dark) .version-link:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Location Badge Styling - Hero section location */
+  .location-badge {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .location-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.9375rem; /* 15pt - Apple HIG body size */
+    font-weight: 500;
+    color: var(--foreground);
+    opacity: 0.7;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.375rem 0.75rem;
+    border-radius: 12px;
+  }
+
+  .location-link:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .location-text {
+    white-space: nowrap;
+  }
+
+  :global(.dark) .location-link:hover {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Mobile: Allow location text to truncate gracefully */
+  @media (max-width: 640px) {
+    .location-link {
+      font-size: 0.875rem; /* 14pt on mobile */
+      max-width: 100%;
+    }
+
+    .location-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 </style>
