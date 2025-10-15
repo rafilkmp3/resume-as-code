@@ -540,13 +540,10 @@ This project demonstrates enterprise-level platform engineering practices:
 
 <div align="center">
 
-**🎯 Built to demonstrate platform engineering excellence in action**
+---
 
-[![Astro](https://img.shields.io/badge/Astro-v5.14+-FF5D01?logo=astro&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
-[![CI/CD](https://img.shields.io/badge/GitHub_Actions-Bot_Orchestrated-success?logo=github&logoColor=white)](https://github.com/rafilkmp3/resume-as-code/actions)
-[![Context7](https://img.shields.io/badge/AI_Powered-Context7_MCP-purple?logo=openai&logoColor=white)](https://github.com/rafilkmp3/resume-as-code)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+**Built with** [![Astro](https://img.shields.io/badge/Astro-v5.14+-FF5D01?logo=astro&logoColor=white)](https://astro.build) • [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) • [![Context7](https://img.shields.io/badge/AI_Powered-Context7-purple?logo=openai&logoColor=white)](https://context7.com)
 
-**[🌐 View Live Resume](https://rafilkmp3.github.io/resume-as-code/) • [📦 See Releases](https://github.com/rafilkmp3/resume-as-code/releases) • [🚀 Check Pipeline Status](https://github.com/rafilkmp3/resume-as-code/actions)**
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) • Made by [Rafael Sathler](https://github.com/rafilkmp3)
 
 </div>
