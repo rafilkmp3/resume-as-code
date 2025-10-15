@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.0...v4.19.1) (2025-10-15)
+
+
+### Miscellaneous
+
+* **deps:** bump @playwright/test in the test group ([29f531f](https://github.com/rafilkmp3/resume-as-code/commit/29f531ff71c2ccdbb178801135a42fc20a987b73))
+* **deps:** bump the astro group with 2 updates ([79fbc05](https://github.com/rafilkmp3/resume-as-code/commit/79fbc05a0125a6c8999c827a39a931dbbbcb1803))
+
 ## [4.19.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.18.1...v4.19.0) (2025-10-15)
 
 
