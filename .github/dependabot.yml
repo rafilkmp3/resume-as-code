@@ -19,7 +19,6 @@ updates:
       prefix: 'chore(deps)'
       prefix-development: 'chore(deps)'
       # Don't include scope - prevents double-scoping with group names
-      include: null
     reviewers:
       - 'rafilkmp3'
     assignees:
