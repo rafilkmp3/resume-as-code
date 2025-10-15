@@ -16,9 +16,10 @@ updates:
     open-pull-requests-limit: 2
     rebase-strategy: 'auto'
     commit-message:
-      prefix: 'chore'
-      prefix-development: 'chore'
-      include: 'scope'
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(deps)'
+      # Don't include scope - prevents double-scoping with group names
+      include: null
     reviewers:
       - 'rafilkmp3'
     assignees:
@@ -27,10 +28,10 @@ updates:
       - 'dependencies'
       - 'automated'
       - 'needs-review'
-    # 🎯 Intelligent Enterprise Grouping Strategy
+    # 🎯 Intelligent Enterprise Grouping Strategy (SHORT NAMES for commit message compliance)
     groups:
       # 🔥 Critical Production Stack - Grouped patches for efficiency
-      core-runtime:
+      core:
         patterns:
           - 'handlebars'
           - 'puppeteer'
@@ -39,9 +40,9 @@ updates:
           - 'qrcode'
         update-types:
           - 'patch'
-        
+
       # 🧪 Testing & Quality Assurance Stack
-      testing-stack:
+      test:
         patterns:
           - 'jest*'
           - 'playwright*'
@@ -51,9 +52,9 @@ updates:
         update-types:
           - 'patch'
           - 'minor'
-          
+
       # 🚀 Astro Framework Stack - Critical Frontend Framework
-      astro-framework:
+      astro:
         patterns:
           - 'astro'
           - '@astrojs/*'
@@ -61,9 +62,9 @@ updates:
         update-types:
           - 'patch'
           - 'minor'
-          
+
       # 🔧 Build & Development Tools
-      build-tools:
+      build:
         patterns:
           - 'chokidar'
           - 'livereload'
@@ -73,9 +74,9 @@ updates:
         update-types:
           - 'patch'
           - 'minor'
-          
-      # 📝 TypeScript & Linting Ecosystem - All Updates Grouped  
-      code-quality:
+
+      # 📝 TypeScript & Linting Ecosystem - All Updates Grouped
+      lint:
         patterns:
           - '@types/*'
           - '*-types'
@@ -86,9 +87,9 @@ updates:
         update-types:
           - 'patch'
           - 'minor'
-          
+
       # 🎯 All Other Dependencies - Aggressive Grouping for Noise Reduction
-      general-dependencies:
+      deps:
         patterns:
           - '*'
         update-types:
@@ -172,10 +173,10 @@ updates:
       - 'ci-cd'
       - 'automated'
       - 'security'
-    # 🎯 Intelligent Action Grouping - Complete Coverage
+    # 🎯 Intelligent Action Grouping (SHORT NAMES for commit message compliance)
     groups:
       # 🔧 Core Actions (setup, cache, upload/download, checkout)
-      core-actions:
+      setup:
         patterns:
           - 'actions/setup-*'
           - 'actions/cache*'
@@ -189,7 +190,7 @@ updates:
           - 'patch'
           - 'minor'
       # 🛡️ Security & Code Quality
-      security-actions:
+      security:
         patterns:
           - 'github/codeql-action*'
           - 'google/osv-scanner-action*'
@@ -200,7 +201,7 @@ updates:
           - 'patch'
           - 'minor'
       # 🚀 Deployment & Release Management
-      deployment-actions:
+      deploy:
         patterns:
           - 'peaceiris/actions-gh-pages*'
           - 'treosh/lighthouse-ci-action*'
@@ -212,7 +213,7 @@ updates:
           - 'patch'
           - 'minor'
       # 🐳 Docker & Container Actions
-      docker-actions:
+      docker:
         patterns:
           - 'docker/setup-buildx-action*'
           - 'docker/login-action*'
@@ -222,7 +223,7 @@ updates:
           - 'patch'
           - 'minor'
       # 💬 PR & Comment Management
-      pr-management-actions:
+      pr:
         patterns:
           - 'peter-evans/create-or-update-comment*'
           - 'actions/github-script*'
