@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.19.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.18.1...v4.19.0) (2025-10-15)
+
+
+### Features
+
+* add location badge and smart version footer ([f76ae0e](https://github.com/rafilkmp3/resume-as-code/commit/f76ae0e842d09330e4c5c739e2b51a7bb40257ff))
+* add location badge and smart version footer ([#144](https://github.com/rafilkmp3/resume-as-code/issues/144)) ([d141f89](https://github.com/rafilkmp3/resume-as-code/commit/d141f89f0627434a7be1bc2b4c1455f2bdc3c547))
+* link version footer to PR in previews ([c81ba4f](https://github.com/rafilkmp3/resume-as-code/commit/c81ba4fff30e5bf3b7416fa165bd69316b82e389))
+* use preview version format in footer ([ed0c678](https://github.com/rafilkmp3/resume-as-code/commit/ed0c678505f2d8c4cb8d5af4543032c3c73f5df6))
+
+
+### Bug Fixes
+
+* **deps:** remove invalid null from dependabot.yml ([25018ff](https://github.com/rafilkmp3/resume-as-code/commit/25018fffbb087f0485e7892cacaaea08ae195c1c))
+* **deps:** remove invalid null from dependabot.yml ([#147](https://github.com/rafilkmp3/resume-as-code/issues/147)) ([8bde507](https://github.com/rafilkmp3/resume-as-code/commit/8bde5072680cd5df0dbc3dd0fb2207bf5a96ebca))
+* **deps:** shorten Dependabot group names ([2add1dd](https://github.com/rafilkmp3/resume-as-code/commit/2add1dd4aa2e693a43bd28614469e8aae0f25b9d))
+* **deps:** shorten Dependabot group names for conventional commits ([#146](https://github.com/rafilkmp3/resume-as-code/issues/146)) ([1c5e7d6](https://github.com/rafilkmp3/resume-as-code/commit/1c5e7d6b3ab3608776cd1b9c2a32295ffd12b37f))
+* remove resume.json from release-please config ([2c3f2c7](https://github.com/rafilkmp3/resume-as-code/commit/2c3f2c72da7bd2c654c2ebfd2f10c129c7d05b34))
+
 ## [4.18.1](https://github.com/rafilkmp3/resume-as-code/compare/v4.18.0...v4.18.1) (2025-10-09)
 
 
