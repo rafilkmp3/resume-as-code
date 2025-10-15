@@ -24,7 +24,7 @@
 
 </details>
 
-> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5.14+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
+> **💡 The Concept**: Instead of a static PDF, your resume becomes a living demonstration of modern development practices—featuring Astro v5+, enterprise CI/CD, automated testing, and production deployments. Every commit shows your platform engineering skills in action.
 
 ## 📑 Table of Contents
 
@@ -75,7 +75,7 @@ Jump straight to what matters:
 
 This isn't just a resume—it's a **comprehensive demonstration of modern Astro framework engineering excellence**:
 
-- **⚡ Astro v5.14+ Power**: Lightning-fast static site generation with server-side rendering capabilities
+- **⚡ Astro v5+ Power**: Lightning-fast static site generation with server-side rendering capabilities
 - **📊 Data-Driven Architecture**: Resume content managed through Astro's Content Collections with type-safe frontmatter
 - **🤖 Context7 AI Integration**: Real-time documentation and intelligent dependency management
 - **🔖 Semantic Versioning**: Ultra-simple context-based versioning across all environments
@@ -106,7 +106,7 @@ Test live: `/api/version` endpoint across all environments
 
 ```mermaid
 graph TB
-    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro v5.14+<br/>(SSG + SSR)"] 
+    A["📋 Content Collections<br/>(Type-Safe Data)"] --> B["🚀 Astro v5+<br/>(SSG + SSR)"] 
     B --> C["🔧 Build Process<br/>(ARM64 Optimized)"]
     C --> D["📄 Static HTML<br/>(Optimized Assets)"]
     C --> E["📱 Responsive Web<br/>(All Devices)"]
@@ -126,7 +126,7 @@ graph TB
 
 ### **⚡ Modern Technology Stack**
 
-- **🚀 Framework**: Astro v5.14+ with Islands Architecture and Content Collections
+- **🚀 Framework**: Astro v5+ with Islands Architecture and Content Collections
 - **🎨 Styling**: Tailwind CSS v4.1.12 + DaisyUI v5.0.50 for component-driven design
 - **🖼️ Image Optimization**: Sharp v0.34+ with WebP/AVIF generation and responsive sizing
 - **📄 Static Generation**: Pure HTML output for fast loading and reliable access
@@ -228,7 +228,7 @@ lighthouse                  # Performance auditing and Core Web Vitals
 | Test Type | Coverage | Technology | AI Integration |
 |-----------|----------|------------|----------------|
 | **Content Validation** | Type-safe frontmatter, schema validation | Astro Content Collections | ✅ Context7 schema insights |
-| **Build Process** | Asset optimization, static generation | Astro v5.14+ + Sharp | ✅ Performance recommendations |
+| **Build Process** | Asset optimization, static generation | Astro v5+ + Sharp | ✅ Performance recommendations |
 | **Visual Testing** | Cross-browser, responsive design | Playwright + Visual Regression | ✅ Automated PR comments |
 | **Accessibility** | WCAG 2.1 AA compliance | Axe-core + Playwright | ✅ Enhanced violation reports |
 | **Performance** | Core Web Vitals, asset optimization | Lighthouse + Real User Metrics | ✅ Performance budget alerts |
@@ -380,7 +380,7 @@ npm run preview                         # Production content preview
 
 | Metric | Target | Current Status | Technology |
 |--------|--------|----------------|------------|
-| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro v5.14+ |
+| **Build Time** | < 2 minutes | ✅ 90-120s | ARM64 runners + Astro v5+ |
 | **Pipeline Success** | > 95% | ✅ 99.5%+ | Bot orchestration + smart retries |
 | **Lighthouse Score** | > 95 | ✅ 98+ | Astro Islands + optimized assets |
 | **Bundle Size** | < 300KB | ✅ < 200KB | Astro SSG + tree-shaking |
@@ -490,7 +490,7 @@ This project demonstrates enterprise-level platform engineering practices:
 - ✅ Zero-downtime deployments with rollback capabilities
 
 ### **Developer Experience**
-- ✅ Astro v5.14+ with lightning-fast dev server (`npm run dev`)
+- ✅ Astro v5+ with lightning-fast dev server (`npm run dev`)
 - ✅ Context7 AI integration for real-time documentation
 - ✅ Islands Architecture with selective hydration
 - ✅ ARM64 optimization with 40% faster builds
