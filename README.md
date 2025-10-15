@@ -127,10 +127,10 @@ graph TB
 ### **⚡ Modern Technology Stack**
 
 - **🚀 Framework**: Astro v5+ with Islands Architecture and Content Collections
-- **🎨 Styling**: Tailwind CSS v4.1.12 + DaisyUI v5.0.50 for component-driven design
-- **🖼️ Image Optimization**: Sharp v0.34+ with WebP/AVIF generation and responsive sizing
+- **🎨 Styling**: Tailwind CSS v4+ and DaisyUI v5+ for component-driven design
+- **🖼️ Image Optimization**: Sharp with WebP/AVIF generation and responsive sizing
 - **📄 Static Generation**: Pure HTML output for fast loading and reliable access
-- **🧪 Testing**: Playwright v1.55+ (E2E/visual/accessibility) + Lighthouse performance auditing
+- **🧪 Testing**: Playwright (E2E/visual/accessibility) + Lighthouse performance auditing
 - **🤖 AI Integration**: Context7 MCP for real-time documentation and dependency insights
 - **🔄 CI/CD**: GitHub Actions with bot orchestration and ARM64 performance optimization
 - **📦 Deployment**: GitHub Pages (production) + Netlify (preview) with automated PR comments
@@ -166,7 +166,7 @@ Modern, semantic directory organization based on AI consensus and enterprise bes
 
 ### Prerequisites
 
-- **Node.js 18+** (LTS recommended) 
+- **Node.js 20+** (LTS recommended) 
 - **pnpm** or **npm** for package management
 - **GitHub CLI** (optional, for workflow monitoring)
 
@@ -475,7 +475,7 @@ This project follows enterprise-grade development practices:
 # Valid commit formats
 git commit -m "feat: add new resume section for certifications"
 git commit -m "fix: resolve QR code URL mismatch in preview environments"  
-git commit -m "chore(deps): bump playwright from 1.40.0 to 1.41.0"
+git commit -m "chore(deps): bump playwright to latest version"
 git commit -m "docs: update platform engineering documentation"
 ```
 
