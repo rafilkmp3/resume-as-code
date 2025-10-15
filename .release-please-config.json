@@ -7,7 +7,7 @@
   },
   "include-component-in-tag": false,
   "pull-request-title-pattern": "chore(release): 🚀 v${version}",
-  "pull-request-header": "## Release Notes\n\n**Live Site**: [rafilkmp3.github.io/resume-as-code](https://rafilkmp3.github.io/resume-as-code/)\n\n**What's Changed**:",
+  "pull-request-header": "## Release Notes\n\n**Staging Preview**: Check the deploy preview link above to test changes before merging.\n\n_Production site: Changes will be live at [rafilkmp3.github.io/resume-as-code](https://rafilkmp3.github.io/resume-as-code/) after this PR is merged._\n\n**What's Changed**:",
   "changelog-sections": [
     {"type": "feat", "section": "Features"},
     {"type": "fix", "section": "Bug Fixes"},
