@@ -35,7 +35,7 @@
     "@axe-core/cli": "^4.10.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.0",
     "axe-core": "^4.10.3",
     "husky": "^9.1.7",
     "lighthouse": "^12.8.2"
