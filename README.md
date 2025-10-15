@@ -19,11 +19,11 @@
 <table>
 <tr>
 <td width="60%">
-<img src="docs/images/readme-screenshot-desktop.png" alt="Desktop Resume View" />
+<img src="docs/images/readme-screenshot-desktop.webp" alt="Desktop Resume View" />
 <p align="center"><em>Desktop View</em></p>
 </td>
 <td width="40%">
-<img src="docs/images/readme-screenshot-mobile.png" alt="Mobile Resume View" />
+<img src="docs/images/readme-screenshot-mobile.webp" alt="Mobile Resume View" />
 <p align="center"><em>Mobile View</em></p>
 </td>
 </tr>
