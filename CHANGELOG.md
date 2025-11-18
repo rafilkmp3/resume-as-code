@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.19.3](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.2...v4.19.3) (2025-11-18)
+
+
+### Bug Fixes
+
+* **build:** correct QR code generation output directory path ([#167](https://github.com/rafilkmp3/resume-as-code/issues/167)) ([047d6b1](https://github.com/rafilkmp3/resume-as-code/commit/047d6b1d3789acb6a1ecb75240a125e94fe2ea2e))
+* **ci:** show correct staging URL in release PRs ([#162](https://github.com/rafilkmp3/resume-as-code/issues/162)) ([0eaf399](https://github.com/rafilkmp3/resume-as-code/commit/0eaf399c1b8105afbf02d916161a5f25ca0dfe58))
+* **ci:** update release PR header to show staging link ([#161](https://github.com/rafilkmp3/resume-as-code/issues/161)) ([0bfe735](https://github.com/rafilkmp3/resume-as-code/commit/0bfe73585c3764637bbd756e6e4cc151328b0c0d))
+
+
+### Miscellaneous
+
+* cleanup test artifacts from repository ([#159](https://github.com/rafilkmp3/resume-as-code/issues/159)) ([e8b3f64](https://github.com/rafilkmp3/resume-as-code/commit/e8b3f64c5a7840111d92719847a577d5e630ec6c))
+* **deps:** bump astro from 5.14.5 to 5.15.1 ([#166](https://github.com/rafilkmp3/resume-as-code/issues/166)) ([15e6a5f](https://github.com/rafilkmp3/resume-as-code/commit/15e6a5fec57cdc89835db9150bd3434bc417f989))
+
+
+### Documentation
+
+* modernize README badges and versions ([#163](https://github.com/rafilkmp3/resume-as-code/issues/163)) ([feb2c91](https://github.com/rafilkmp3/resume-as-code/commit/feb2c91cfaaaf18663cf573fe3cae194866b4ca3))
+
 ## [4.19.2](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.1...v4.19.2) (2025-10-15)
 
 
