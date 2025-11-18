@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 import QRCode from 'qrcode';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = resolve(__dirname, '../public');
+const PUBLIC_DIR = resolve(__dirname, '../../public');
 const ASSETS_DIR = resolve(PUBLIC_DIR, 'assets/images');
 
 // QR Code configurations for different use cases
