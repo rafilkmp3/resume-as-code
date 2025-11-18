@@ -24,7 +24,7 @@
     "@iconify-json/material-symbols": "^1.2.34",
     "@iconify-json/simple-icons": "^1.2.50",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "^4.1.17",
     "astro": "^5.15.1",
     "astro-compress": "^2.3.8",
     "astro-icon": "^1.1.5",
