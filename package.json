@@ -33,7 +33,7 @@
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
-    "@axe-core/cli": "^4.10.2",
+    "@axe-core/cli": "^4.11.3",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@playwright/test": "^1.56.0",
