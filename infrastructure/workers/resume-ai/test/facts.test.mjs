@@ -175,10 +175,49 @@ test('prompt strips [TODO placeholders and embeds facts + contact info', () => {
   assert.ok(!prompt.includes('[TODO'), 'no TODO placeholder leaks into the prompt');
   assert.ok(prompt.includes('rafaelbsathler@gmail.com'));
   assert.ok(prompt.includes('linkedin.com/in/rafaelbsathler'));
-  assert.ok(prompt.includes(`Total professional experience: ${facts.totalYears.toFixed(1)} years`));
+  assert.ok(prompt.includes(`My total professional experience: ${facts.totalYears.toFixed(1)} years`));
   assert.ok(prompt.includes('Open to Work'));
   // meta stripped except availability
   assert.ok(!prompt.includes('lastUpdated'));
+});
+
+test('prompt extracts FULL resume content: every work/education/training/project/skill entry present', () => {
+  const facts = computeFacts(realResume, '2026-07-20');
+  const prompt = buildSystemPrompt(realResume, facts, '2026-07-20');
+  for (const w of realResume.work) {
+    assert.ok(prompt.includes(w.name), `work entry missing: ${w.name}`);
+    assert.ok(prompt.includes(w.position), `position missing: ${w.position}`);
+  }
+  for (const e of realResume.education) {
+    assert.ok(prompt.includes(e.institution), `education missing: ${e.institution}`);
+  }
+  for (const t of realResume.training) {
+    assert.ok(prompt.includes(t.name), `training missing: ${t.name}`);
+  }
+  for (const p of realResume.projects) {
+    assert.ok(prompt.includes(p.name), `project missing: ${p.name}`);
+  }
+  for (const s of realResume.skills) {
+    for (const kw of s.keywords) assert.ok(prompt.includes(kw), `skill keyword missing: ${kw}`);
+  }
+  // no raw JSON dump — content must be extracted plaintext
+  assert.ok(!prompt.includes('"highlights":'), 'raw JSON leaked into prompt');
+});
+
+test('prompt stays within a sane token budget for free-tier models', () => {
+  const facts = computeFacts(realResume, '2026-07-20');
+  const prompt = buildSystemPrompt(realResume, facts, '2026-07-20');
+  // ~4 chars/token heuristic; llama free-tier context is 24k+, keep prompt ≤8k tokens
+  const approxTokens = Math.ceil(prompt.length / 4);
+  assert.ok(approxTokens <= 8000, `prompt too large: ~${approxTokens} tokens`);
+});
+
+test('prompt speaks as Rafael in the first person', () => {
+  const facts = computeFacts(realResume, '2026-07-20');
+  const prompt = buildSystemPrompt(realResume, facts, '2026-07-20');
+  assert.ok(prompt.includes('FIRST PERSON'));
+  assert.ok(prompt.includes('My total professional experience'));
+  assert.ok(prompt.includes('My current role'));
 });
 
 test('prompt keeps non-TODO part of a string containing a TODO fragment', () => {

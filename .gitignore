@@ -239,3 +239,4 @@ _bmad-output/
 
 # Wrangler local dev state (chatbot worker)
 .wrangler/
+.dev.vars

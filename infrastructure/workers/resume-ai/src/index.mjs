@@ -14,7 +14,7 @@ import {
   normalizeQuestion,
   hashString,
 } from './guards.mjs';
-import { aiRunWithTimeout, extractAiText, postProcess } from './ai.mjs';
+import { aiRunWithTimeout, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
 
 // Fallback chain — free-tier models hang/fail routinely; every step has a hard
 // timeout so the next one always gets a chance (see ai.mjs).
@@ -30,7 +30,7 @@ const MODEL_CHAIN = [
 // Workers AI free-tier quota/capacity errors (error 3040 et al.).
 const QUOTA_RE = /3040|quota|capacity|rate.?limit/i;
 
-const RATE_LIMIT_CHAT = { max: 10, ttl: 600 }; // 10 req / 10 min per IP
+const RATE_LIMIT_CHAT = { max: 20, ttl: 600 }; // 20 req / 10 min per IP (active recruiter chats + the 12-question eval fit in one window)
 const RATE_LIMIT_FEEDBACK = { max: 20, ttl: 600 }; // 20 req / 10 min per IP
 // Counted per AI.run ATTEMPT (a request can burn up to 3 on fallback). Also
 // sized so a fully-spent day stays under the KV free tier's ~1000 writes/day
@@ -44,10 +44,13 @@ const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
 const SITE_URL = 'https://rafilkmp3.github.io/resume-as-code/';
 
 const STATIC_FALLBACK_REPLY =
-  "I'm temporarily unable to reach my AI backend. In the meantime, you can reach Rafael directly at rafaelbsathler@gmail.com or on LinkedIn: https://www.linkedin.com/in/rafaelbsathler/ — he'll be happy to answer your questions.";
+  "I'm having trouble reaching my AI brain right now. You can reach me directly at rafaelbsathler@gmail.com or on LinkedIn: https://www.linkedin.com/in/rafaelbsathler/ — I'll be happy to answer your questions.";
 
 const QUOTA_MESSAGE =
-  "The assistant has reached its free daily AI quota. Please try again tomorrow, or contact Rafael directly at rafaelbsathler@gmail.com or https://www.linkedin.com/in/rafaelbsathler/.";
+  "I've hit my free daily AI quota. Please try again tomorrow, or contact me directly at rafaelbsathler@gmail.com or https://www.linkedin.com/in/rafaelbsathler/.";
+
+const LEAK_REFUSAL_REPLY =
+  "Nice try 🙂 — my internal notes stay with me. Ask me anything about my experience, skills, or availability, or reach me directly at rafaelbsathler@gmail.com.";
 
 // AI Gateway — NOT provisioned yet (same lesson as italia2026 B-397b: passing
 // a gateway id that does not exist makes EVERY AI.run call fail). Enable ONLY
@@ -140,7 +143,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
   // conversation context, so caching it would serve wrong answers).
   // Version-suffixed — bump whenever prompt/facts logic changes, or stale
   // cached answers keep serving for CACHE_TTL (italia2026 lesson).
-  const cacheKey = `chat:v2:${hashString(normalizeQuestion(message))}`;
+  const cacheKey = `chat:v4:${hashString(normalizeQuestion(message))}`;
   if (history.length === 0) {
     try {
       const cached = await env.RESUME_AI_KV.get(cacheKey, 'json');
@@ -154,7 +157,10 @@ async function handleChat(request, env, ctx, corsOrigin) {
 
   const day = new Date().toISOString().slice(0, 10);
   const todayISO = day;
-  const systemPrompt = buildSystemPrompt(resume, computeFacts(resume, todayISO), todayISO);
+  // SALARY_CONTEXT is a Worker secret (wrangler secret put / .dev.vars) — the
+  // repo is public, so compensation data must never appear in code.
+  const privateContext = env.SALARY_CONTEXT || '';
+  const systemPrompt = buildSystemPrompt(resume, computeFacts(resume, todayISO), todayISO, privateContext);
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history,
@@ -176,6 +182,14 @@ async function handleChat(request, env, ctx, corsOrigin) {
       if (step.temperature !== undefined) inputs.temperature = step.temperature;
       const raw = await aiRunWithTimeout(env.AI, step.model, inputs, step.timeoutMs /* , gatewayOpts */);
       const text = postProcess(extractAiText(raw));
+      if (text && detectPromptLeak(text, privateContext)) {
+        // Jailbroken reply (prompt dump or secret numbers) — deterministic
+        // refusal; prompt-side rules alone do not hold against injection.
+        console.warn(`[resume-ai] leak guard tripped on ${step.model}`);
+        reply = LEAK_REFUSAL_REPLY;
+        modelUsed = 'leak-guard';
+        break;
+      }
       if (text) {
         reply = text;
         modelUsed = step.model;

@@ -26,7 +26,7 @@
   hidden
 >
   <div class="cw-header">
-    <span class="cw-title">Ask AI about this resume</span>
+    <span class="cw-title">Chat with my resume</span>
     <div class="cw-header-actions">
       <button id="chat-clear" class="cw-icon-btn" type="button" aria-label="Clear conversation">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18" aria-hidden="true">
@@ -45,18 +45,18 @@
   <div id="chat-messages" class="cw-messages" role="log" aria-live="polite" aria-label="Chat messages">
     <div class="cw-row cw-assistant cw-welcome">
       <div class="cw-bubble">
-        Hi! I'm an AI assistant that can answer questions about Rafael's
-        experience, skills, projects, and availability. Ask me anything about
-        this resume.
+        Hi! I'm Rafael's interactive resume (AI-powered). Ask me anything about
+        my experience, skills, projects, or availability — I'll answer as
+        Rafael.
       </div>
     </div>
   </div>
 
   <div id="chat-chips" class="cw-chips">
-    <button type="button" class="cw-chip">How many years of AWS experience?</button>
-    <button type="button" class="cw-chip">What is his current role?</button>
-    <button type="button" class="cw-chip">Is he open to new opportunities?</button>
-    <button type="button" class="cw-chip">Summarize his DevOps toolbox</button>
+    <button type="button" class="cw-chip">How's your AWS experience?</button>
+    <button type="button" class="cw-chip">What's your current role?</button>
+    <button type="button" class="cw-chip">Are you open to new opportunities?</button>
+    <button type="button" class="cw-chip">Tell me about your DevOps toolbox</button>
   </div>
 
   <div id="chat-cooldown" class="cw-cooldown" hidden></div>
@@ -67,7 +67,7 @@
       class="cw-input"
       type="text"
       maxlength="500"
-      placeholder="Ask about Rafael's experience..."
+      placeholder="Ask me about my experience..."
       aria-label="Type your question"
     />
     <button id="chat-send" class="cw-send" type="submit" aria-label="Send message">

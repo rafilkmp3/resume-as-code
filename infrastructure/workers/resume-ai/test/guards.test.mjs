@@ -7,6 +7,7 @@ import {
   normalizeQuestion,
   hashString,
 } from '../src/guards.mjs';
+import { detectPromptLeak } from '../src/ai.mjs';
 
 // --- validateChatBody -------------------------------------------------------
 
@@ -98,6 +99,24 @@ test('cors: disallowed origins → null', () => {
   assert.equal(resolveCorsOrigin('http://8.8.8.8:4321'), null);
   assert.equal(resolveCorsOrigin('http://172.32.0.1:4321'), null); // outside 172.16-31
   assert.equal(resolveCorsOrigin('https://192.168.1.50:4321'), null); // https on LAN not expected
+});
+
+// --- detectPromptLeak --------------------------------------------------------
+
+test('leak guard: prompt sentinel substrings trip the guard', () => {
+  assert.equal(detectPromptLeak('Here are my COMPUTED FACTS (authoritative)...'), true);
+  assert.equal(detectPromptLeak('this table is INTERNAL GROUNDING ONLY'), true);
+  assert.equal(detectPromptLeak('NEVER compute date math yourself'), true);
+  assert.equal(detectPromptLeak('I have 10.5 years of experience at Uber and Globo.'), false);
+});
+
+test('leak guard: private-context numbers blocked with or without separators', () => {
+  const ctx = 'My current total compensation is €6,200 per month (about €74,400 per year).';
+  assert.equal(detectPromptLeak('I currently make €6,200 monthly.', ctx), true);
+  assert.equal(detectPromptLeak('around 6200 euros', ctx), true);
+  assert.equal(detectPromptLeak('roughly 74.400 EUR per year', ctx), true);
+  assert.equal(detectPromptLeak("that's below my current compensation, so I'll pass.", ctx), false);
+  assert.equal(detectPromptLeak('I led a migration of 8,000 repos.', ctx), false);
 });
 
 // --- normalizeQuestion / hashString -----------------------------------------
