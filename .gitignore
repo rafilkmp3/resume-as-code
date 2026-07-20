@@ -230,3 +230,9 @@ workspace/
 test-*.png
 test-*.jpg
 test-*.jpeg
+
+# Claude Code local settings (personal, per-machine)
+.claude/settings.local.json
+
+# BMAD runtime output (party memories, keepsakes)
+_bmad-output/
