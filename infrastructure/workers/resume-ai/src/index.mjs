@@ -143,7 +143,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
   // conversation context, so caching it would serve wrong answers).
   // Version-suffixed — bump whenever prompt/facts logic changes, or stale
   // cached answers keep serving for CACHE_TTL (italia2026 lesson).
-  const cacheKey = `chat:v4:${hashString(normalizeQuestion(message))}`;
+  const cacheKey = `chat:v5:${hashString(normalizeQuestion(message))}`;
   if (history.length === 0) {
     try {
       const cached = await env.RESUME_AI_KV.get(cacheKey, 'json');
