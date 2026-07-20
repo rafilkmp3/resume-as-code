@@ -103,5 +103,26 @@ jobs:
           [[ "$CODE" == "302" ]] || { echo "❌ expected 302 at /, got $CODE"; exit 1; }
           echo "✅ root redirect OK"
 
-          # NOTE: no live AI call here on purpose — CI must not burn free-tier
-          # neurons; model behavior is covered by local testing and unit tests.
+          # NOTE: no live AI probing beyond the prewarm below — CI must not
+          # burn free-tier neurons; model behavior is covered by unit tests
+          # and the local eval harness (npm run worker:eval).
+
+      - name: Prewarm example-card answers (KV cache)
+        run: |
+          BASE="https://resume.rafaracing.com.br"
+          # Must match the hero's card strings EXACTLY (modulo case/punct —
+          # the worker normalizes) so every card click is a free cache hit.
+          questions=(
+            "How's your AWS experience?"
+            "What's your current role?"
+            "Are you open to new opportunities?"
+            "Tell me about your DevOps toolbox"
+          )
+          for q in "${questions[@]}"; do
+            printf '⚡ warming: %s\n' "$q"
+            curl -s -m 60 -X POST "$BASE/api/chat" \
+              -H 'Origin: https://rafilkmp3.github.io' \
+              -H 'Content-Type: application/json' \
+              --data "$(jq -n --arg m "$q" '{message:$m}')" \
+              | jq -r '"   → model=\(.model) cached=\(.cached)"' || true
+          done
