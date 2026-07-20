@@ -4,6 +4,7 @@ import LiquidGlassCard from '../components/LiquidGlassCard.astro';
 import ContactButton from '../components/ContactButton.astro';
 import QRCodeButton from '../components/QRCodeButton.astro';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.astro';
+import ChatWidget from '../components/ChatWidget.astro';
 import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
@@ -525,6 +526,9 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     imageSrc={basics.image}
     title={basics.label}
   />
+
+  <!-- AI Chat Widget -->
+  <ChatWidget />
 </Layout>
 
 <style>

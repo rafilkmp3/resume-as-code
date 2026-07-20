@@ -236,3 +236,6 @@ test-*.jpeg
 
 # BMAD runtime output (party memories, keepsakes)
 _bmad-output/
+
+# Wrangler local dev state (chatbot worker)
+.wrangler/

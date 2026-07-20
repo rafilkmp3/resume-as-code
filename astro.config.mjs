@@ -84,6 +84,14 @@ export default defineConfig({
   // Performance optimization for LCP improvement  
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        // wrangler's local KV state churns on every chatbot request during
+        // `npm run worker:dev` — without this, each chat message full-reloads
+        // the dev page and kills the in-flight fetch
+        ignored: ['**/.wrangler/**']
+      }
+    },
     build: {
       // Optimize CSS delivery
       cssCodeSplit: true, // Split CSS by entry points for better caching

@@ -15,6 +15,9 @@
     "test:pdf-ci": "playwright test tests/pdf-routes.test.js",
     "test:pdf-dev": "node tests/pdf-routes.test.js",
     "test:build": "node tests/build-validation.js",
+    "worker:dev": "npx wrangler dev -c infrastructure/workers/resume-ai/wrangler.toml",
+    "worker:deploy": "npx wrangler deploy -c infrastructure/workers/resume-ai/wrangler.toml",
+    "worker:test": "node --test \"infrastructure/workers/resume-ai/test/*.test.mjs\"",
     "prepare": "husky || true"
   },
   "dependencies": {
