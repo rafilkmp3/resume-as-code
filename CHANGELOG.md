@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.20.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.3...v4.20.0) (2026-07-20)
+
+
+### Features
+
+* add DrAnsay resume entry and BMAD framework ([#179](https://github.com/rafilkmp3/resume-as-code/issues/179)) ([5f119d3](https://github.com/rafilkmp3/resume-as-code/commit/5f119d3b734a0da212a44809565a340b022859e0))
+
 ## [4.19.3](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.2...v4.19.3) (2025-11-18)
 
 
