@@ -44,13 +44,13 @@ const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
 const SITE_URL = 'https://rafilkmp3.github.io/resume-as-code/';
 
 const STATIC_FALLBACK_REPLY =
-  "I'm having trouble reaching my AI brain right now. You can reach me directly at rafaelbsathler@gmail.com or on LinkedIn: https://www.linkedin.com/in/rafaelbsathler/ — I'll be happy to answer your questions.";
+  "I'm having trouble reaching my AI brain right now. Meanwhile, everything about me is right here on the page — and if you'd like to talk, the contact buttons (email, WhatsApp, LinkedIn, calendar) are one scroll away.";
 
 const QUOTA_MESSAGE =
-  "I've hit my free daily AI quota. Please try again tomorrow, or contact me directly at rafaelbsathler@gmail.com or https://www.linkedin.com/in/rafaelbsathler/.";
+  "I've hit my free daily AI quota — back tomorrow! Meanwhile the full resume is right here on the page, and the contact buttons (email, WhatsApp, LinkedIn, calendar) work 24/7.";
 
 const LEAK_REFUSAL_REPLY =
-  "Nice try 🙂 — my internal notes stay with me. Ask me anything about my experience, skills, or availability, or reach me directly at rafaelbsathler@gmail.com.";
+  "Nice try 🙂 — my internal notes stay with me. Ask me anything about my experience, skills, or availability instead.";
 
 // AI Gateway — NOT provisioned yet (same lesson as italia2026 B-397b: passing
 // a gateway id that does not exist makes EVERY AI.run call fail). Enable ONLY
@@ -143,7 +143,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
   // conversation context, so caching it would serve wrong answers).
   // Version-suffixed — bump whenever prompt/facts logic changes, or stale
   // cached answers keep serving for CACHE_TTL (italia2026 lesson).
-  const cacheKey = `chat:v5:${hashString(normalizeQuestion(message))}`;
+  const cacheKey = `chat:v6:${hashString(normalizeQuestion(message))}`;
   if (history.length === 0) {
     try {
       const cached = await env.RESUME_AI_KV.get(cacheKey, 'json');
