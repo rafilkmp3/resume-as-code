@@ -7,7 +7,7 @@
  * to catch PDF route regressions before deployment. No browser needed!
  * 
  * Usage:
- *   node src/test/build-validation.js
+ *   node tests/build-validation.js
  *   npm run test:build
  */
 
@@ -15,10 +15,10 @@ import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
 const REQUIRED_FILES = [
-  'src/utils/qr-code.ts',
-  'src/pages/pdf-screen.astro',
-  'src/pages/pdf-print.astro', 
-  'src/pages/pdf-ats.astro'
+  'app/utils/qr-code.ts',
+  'app/pages/pdf-screen.astro',
+  'app/pages/pdf-print.astro',
+  'app/pages/pdf-ats.astro'
 ];
 
 const SECURITY_CHECKS = [
@@ -88,9 +88,9 @@ async function runBuildValidation() {
     try {
       let filePath;
       if (check.file === 'qr-code.ts') {
-        filePath = resolve(process.cwd(), 'src', 'utils', check.file);
+        filePath = resolve(process.cwd(), 'app', 'utils', check.file);
       } else {
-        filePath = resolve(process.cwd(), 'src', 'pages', check.file);
+        filePath = resolve(process.cwd(), 'app', 'pages', check.file);
       }
       
       const content = await readFile(filePath, 'utf8');
@@ -110,7 +110,7 @@ async function runBuildValidation() {
   // Quick QR test (if possible)
   console.log('\n🎯 Quick QR generation test...');
   try {
-    const { generateQRCodeDataURL } = await import('../utils/qr-code.ts');
+    const { generateQRCodeDataURL } = await import('../app/utils/qr-code.ts');
     const testQR = await generateQRCodeDataURL('test');
     
     if (testQR.startsWith('data:image/png;base64,')) {

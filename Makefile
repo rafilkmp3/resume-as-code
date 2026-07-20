@@ -37,7 +37,7 @@ help: ## Show this help message
 
 clean: ## Clean all generated files and dependencies
 	@echo "$(YELLOW)🧹 Cleaning environment...$(NC)"
-	rm -rf dist/
+	rm -rf workspace/build/
 	rm -rf node_modules/
 	rm -rf .astro/
 	rm -rf coverage/
@@ -162,8 +162,8 @@ ci-build: ## CI-optimized build process
 ci-test: ## CI-optimized test suite
 	@echo "$(CYAN)🤖 CI Test Suite$(NC)"
 	@echo "$(BLUE)📊 Build verification...$(NC)"
-	@[ -f dist/index.html ] && echo "  $(GREEN)✅ index.html generated$(NC)" || echo "  $(RED)❌ index.html missing$(NC)"
-	@[ -d dist/assets ] && echo "  $(GREEN)✅ Assets directory exists$(NC)" || echo "  $(YELLOW)⚠️  Assets directory missing$(NC)"
+	@[ -f workspace/build/index.html ] && echo "  $(GREEN)✅ index.html generated$(NC)" || echo "  $(RED)❌ index.html missing$(NC)"
+	@[ -d workspace/build/assets ] && echo "  $(GREEN)✅ Assets directory exists$(NC)" || echo "  $(YELLOW)⚠️  Assets directory missing$(NC)"
 	@echo "$(GREEN)✅ CI tests complete$(NC)"
 
 # =============================================================================
@@ -193,9 +193,9 @@ info: ## Show project information
 	@echo "  Icons: $(GREEN)Iconify$(NC)"
 	@echo ""
 	@echo "$(WHITE)📁 Project Structure:$(NC)"
-	@echo "  src/          - Source code (Astro components, layouts, pages)"
-	@echo "  src/data/     - Resume data (JSON)"
-	@echo "  dist/         - Built site (generated)"
+	@echo "  app/              - Source code (Astro components, layouts, pages)"
+	@echo "  app/data/         - Resume data (JSON)"
+	@echo "  workspace/build/  - Built site (generated)"
 	@echo "  .astro/       - Astro cache (generated)"
 	@echo ""
 	@echo "$(WHITE)🚀 Development Workflow:$(NC)"
