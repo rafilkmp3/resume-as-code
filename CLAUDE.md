@@ -71,6 +71,32 @@ git commit -m "chore(deps): bump playwright version"
 # ❌ Invalid - blocked by pre-commit hook
 git commit -m "update stuff"
 git commit -m "fixed bug"
+
+# ❌ Too long - subject must be ≤50 chars, full header ≤65 chars
+git commit -m "fix: update stale src/ and dist/ paths after directory restructure"
+```
+
+**Length limits (enforced by `infrastructure/scripts/ai-friendly-commitlint.cjs`):**
+- Subject (text after `type:`) ≤ 50 characters
+- Full header line ≤ 65 characters
+- PR titles follow the same rules (they become squash-merge commit subjects)
+
+### Release & Deployment Flow
+
+```
+feature branch → PR → Netlify preview (deploy-preview-{N}--resume-as-code.netlify.app)
+merge PR to main → staging deploy (Netlify) + release-please opens/updates release PR
+merge release PR → v*.*.* tag → 🚀 Production Deployment → GitHub Pages
+```
+
+- Production deploys **only** on semver tags created by release-please — merging a feature PR alone never reaches production
+- After `gh pr merge`, local main is usually stale: `git fetch origin && git reset --hard origin/main`
+
+### Test Commands (files live in tests/, not src/test/)
+
+```bash
+npm run test:build   # build validation (paths, security checks, QR generation)
+npm run test:pdf     # PDF routes validation (browser-free)
 ```
 
 ## 🤖 AI-Friendly Development Workflow (Claude Code Optimized)
