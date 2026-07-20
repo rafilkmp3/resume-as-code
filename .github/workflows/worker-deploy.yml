@@ -1,0 +1,107 @@
+---
+name: 🤖 AI Worker (resume-ai)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/workers/resume-ai/**'
+      # resume.json is bundled into the worker's system prompt at deploy time —
+      # content edits must redeploy the worker or the chatbot answers stale data
+      - 'app/data/resume.json'
+      - '.github/workflows/worker-deploy.yml'
+  pull_request:
+    paths:
+      - 'infrastructure/workers/resume-ai/**'
+      - 'app/data/resume.json'
+      - '.github/workflows/worker-deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: worker-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  WRANGLER_VERSION: '4.112.0'
+  WRANGLER_CONFIG: 'infrastructure/workers/resume-ai/wrangler.toml'
+
+jobs:
+  test:
+    name: 🧪 Worker Tests + Bundle Check
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-environment
+        with:
+          cache-suffix: 'worker'
+          skip-install: 'true'
+
+      - name: Unit tests (node --test, no Worker runtime)
+        run: node --test "infrastructure/workers/resume-ai/test/*.test.mjs"
+
+      - name: Bundle check (wrangler deploy --dry-run, no auth needed)
+        run: |
+          npx --yes wrangler@${{ env.WRANGLER_VERSION }} deploy \
+            --dry-run --outdir /tmp/worker-bundle -c "${{ env.WRANGLER_CONFIG }}"
+
+  deploy:
+    name: 🚀 Deploy Worker
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check CLOUDFLARE_API_TOKEN secret
+        run: |
+          if [[ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]]; then
+            echo "::error::CLOUDFLARE_API_TOKEN secret is not set."
+            echo "Create one at Cloudflare dashboard → My Profile → API Tokens"
+            echo "using the 'Edit Cloudflare Workers' template, then run:"
+            echo "  gh secret set CLOUDFLARE_API_TOKEN"
+            exit 1
+          fi
+
+      - name: Deploy resume-ai
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: deploy -c ${{ env.WRANGLER_CONFIG }}
+
+      - name: Verify live endpoint
+        run: |
+          BASE="https://resume.rafaracing.com.br"
+          echo "🔍 Verifying $BASE"
+
+          for i in {1..12}; do
+            CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "$BASE/api/health" || true)
+            [[ "$CODE" == "200" ]] && break
+            echo "⏳ Attempt $i/12: /api/health returned $CODE, retrying in 10s"
+            sleep 10
+          done
+          [[ "$CODE" == "200" ]] || { echo "❌ /api/health never returned 200"; exit 1; }
+          echo "✅ /api/health OK"
+
+          # Origin gate must reject POSTs without an allowed Origin
+          CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" -X POST "$BASE/api/chat" \
+            -H 'Content-Type: application/json' -d '{"message":"ci probe"}')
+          [[ "$CODE" == "403" ]] || { echo "❌ expected 403 for missing Origin, got $CODE"; exit 1; }
+          echo "✅ origin gate OK (403 without Origin)"
+
+          # Root must redirect humans to the resume site
+          CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "$BASE/")
+          [[ "$CODE" == "302" ]] || { echo "❌ expected 302 at /, got $CODE"; exit 1; }
+          echo "✅ root redirect OK"
+
+          # NOTE: no live AI call here on purpose — CI must not burn free-tier
+          # neurons; model behavior is covered by local testing and unit tests.
