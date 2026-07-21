@@ -155,10 +155,11 @@ const iconName = getIconName(network, icon);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-heading);
     color: var(--foreground);
-    /* Apple HIG Smart Text Handling - Responsive Approach */
-    overflow-wrap: break-word;
-    word-break: normal; /* Prevent awkward mid-word breaks */
-    hyphens: auto;
+    /* Emails/URLs must break WITHOUT an inserted hyphen (hyphens:auto was
+       rendering "gmail.-com"). anywhere breaks long tokens cleanly. */
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: none;
     /* Default: Single line with ellipsis */
     white-space: nowrap;
     overflow: hidden;
@@ -189,8 +190,9 @@ const iconName = getIconName(network, icon);
       white-space: normal;
       overflow: visible;
       text-overflow: unset;
-      hyphens: auto;
-      word-break: break-word;
+      hyphens: none;
+      overflow-wrap: anywhere;
+      word-break: normal;
       /* Limit to 2 lines maximum on mobile */
       display: -webkit-box;
       -webkit-line-clamp: 2;
