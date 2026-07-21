@@ -4,16 +4,22 @@ name: 🤖 AI Worker (resume-ai)
 on:
   push:
     branches: [main]
+    # The worker now serves the whole site (static assets) + the API, so a
+    # deploy must fire on ANY site or worker change, not just worker files.
     paths:
       - 'infrastructure/workers/resume-ai/**'
-      # resume.json is bundled into the worker's system prompt at deploy time —
-      # content edits must redeploy the worker or the chatbot answers stale data
-      - 'app/data/resume.json'
+      - 'app/**'
+      - 'astro.config.mjs'
+      - 'tailwind.config.mjs'
+      - 'package.json'
       - '.github/workflows/worker-deploy.yml'
   pull_request:
     paths:
       - 'infrastructure/workers/resume-ai/**'
-      - 'app/data/resume.json'
+      - 'app/**'
+      - 'astro.config.mjs'
+      - 'tailwind.config.mjs'
+      - 'package.json'
       - '.github/workflows/worker-deploy.yml'
   workflow_dispatch:
 
@@ -41,10 +47,12 @@ jobs:
         uses: ./.github/actions/setup-build-environment
         with:
           cache-suffix: 'worker'
-          skip-install: 'true'
 
       - name: Unit tests (node --test, no Worker runtime)
         run: node --test "infrastructure/workers/resume-ai/test/*.test.mjs"
+
+      - name: Build site (static-assets bundle the dry-run needs)
+        run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
 
       - name: Bundle check (wrangler deploy --dry-run, no auth needed)
         run: |
@@ -71,7 +79,15 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy resume-ai
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-environment
+        with:
+          cache-suffix: 'worker-site'
+
+      - name: Build site for prod domain (static assets bundle)
+        run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
+
+      - name: Deploy resume-ai (worker + static assets)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -98,10 +114,10 @@ jobs:
           [[ "$CODE" == "403" ]] || { echo "❌ expected 403 for missing Origin, got $CODE"; exit 1; }
           echo "✅ origin gate OK (403 without Origin)"
 
-          # Root must redirect humans to the resume site
-          CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "$BASE/")
-          [[ "$CODE" == "302" ]] || { echo "❌ expected 302 at /, got $CODE"; exit 1; }
-          echo "✅ root redirect OK"
+          # Root must serve the site itself (static assets), not redirect
+          ROOT=$(curl -s -m 10 "$BASE/")
+          echo "$ROOT" | grep -q "chat-hero" || { echo "❌ root did not serve the site"; exit 1; }
+          echo "✅ root serves the site"
 
           # NOTE: no live AI probing beyond the prewarm below — CI must not
           # burn free-tier neurons; model behavior is covered by unit tests
