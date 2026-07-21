@@ -47,7 +47,18 @@ const STATIC_FALLBACK_REPLY =
   "I'm having trouble reaching my AI brain right now. Meanwhile, everything about me is right here on the page — and if you'd like to talk, the contact buttons (email, WhatsApp, LinkedIn, calendar) are one scroll away.";
 
 const QUOTA_MESSAGE =
-  "I've hit my free daily AI quota — back tomorrow! Meanwhile the full resume is right here on the page, and the contact buttons (email, WhatsApp, LinkedIn, calendar) work 24/7.";
+  "I've hit my free daily AI quota. It resets at 00:00 UTC — the countdown below shows when I'm back. Meanwhile the full resume is right here, and the contact buttons (email, WhatsApp, LinkedIn, calendar) work 24/7.";
+
+// Workers AI free-tier neuron allocation resets on the UTC calendar day
+// (00:00 UTC), like all Cloudflare free-tier daily limits. Seconds from now
+// until that reset — sent to the client so it can show a live countdown.
+function secondsUntilUtcReset() {
+  const now = new Date();
+  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0);
+  return Math.max(1, Math.round((next - now.getTime()) / 1000));
+}
+// Standard quota 503 payload (message + live-countdown seconds).
+const quotaBody = () => ({ error: QUOTA_MESSAGE, resetInSeconds: secondsUntilUtcReset() });
 
 const LEAK_REFUSAL_REPLY =
   "Nice try 🙂 — my internal notes stay with me. Ask me anything about my experience, skills, or availability instead.";
@@ -177,7 +188,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
     // real neurons too) and checked AFTER the cache so cache hits are free.
     // Fail-closed: a KV outage must not disable the quota guard.
     if (!(await bumpCounter(env.RESUME_AI_KV, `budget:${day}`, DAILY_BUDGET, 172_800, true))) {
-      return jsonResponse(503, { error: QUOTA_MESSAGE }, corsOrigin);
+      return jsonResponse(503, quotaBody(), corsOrigin);
     }
     try {
       const inputs = { messages, max_tokens: 500 };
@@ -206,7 +217,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
       const msg = String(err?.message || err);
       if (QUOTA_RE.test(msg)) {
         console.warn(`[resume-ai] quota exhausted on ${step.model}: ${msg}`);
-        return jsonResponse(503, { error: QUOTA_MESSAGE }, corsOrigin);
+        return jsonResponse(503, quotaBody(), corsOrigin);
       }
       console.warn(`[resume-ai] ${step.model} failed: ${msg}`);
     }

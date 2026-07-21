@@ -943,15 +943,32 @@ const promptCards = [
     return Math.max(0, stored - Date.now(), memCooldownUntil - Date.now());
   }
 
-  function startCooldown(durationMs) {
+  // 'rate' = short high-demand pause; 'quota' = daily AI limit, counts down to
+  // the 00:00 UTC reset.
+  var cooldownReason = 'rate';
+
+  function startCooldown(durationMs, reason) {
+    cooldownReason = reason === 'quota' ? 'quota' : 'rate';
     const until = Date.now() + (durationMs || CHAT_COOLDOWN_MS);
     memCooldownUntil = until;
     try {
       sessionStorage.setItem(CHAT_COOLDOWN_KEY, String(until));
+      sessionStorage.setItem(CHAT_COOLDOWN_KEY + ':reason', cooldownReason);
     } catch (_e) {
       /* storage unavailable — memCooldownUntil covers us */
     }
     refreshCooldownUI();
+  }
+
+  // ms -> "3h 12m" / "12m 05s" / "45s"
+  function fmtCountdown(ms) {
+    const total = Math.max(0, Math.round(ms / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) return h + 'h ' + m + 'm';
+    if (m > 0) return m + 'm ' + String(s).padStart(2, '0') + 's';
+    return s + 's';
   }
 
   function refreshCooldownUI() {
@@ -961,12 +978,23 @@ const promptCards = [
     }
     const remaining = cooldownRemainingMs();
     if (remaining > 0) {
-      const mins = Math.max(1, Math.ceil(remaining / 60000));
-      cooldownEl.textContent =
-        'The assistant is taking a short break (high demand). Try again in about ' +
-        mins + ' minute' + (mins === 1 ? '' : 's') + '.';
+      let reason = cooldownReason;
+      try {
+        reason = sessionStorage.getItem(CHAT_COOLDOWN_KEY + ':reason') || cooldownReason;
+      } catch (_e) {
+        /* use in-memory reason */
+      }
+      if (reason === 'quota') {
+        cooldownEl.textContent =
+          "Daily AI limit reached — I'm back in " + fmtCountdown(remaining) + ' (resets 00:00 UTC).';
+      } else {
+        cooldownEl.textContent =
+          "Getting a lot of questions right now — back in " + fmtCountdown(remaining) + '.';
+      }
       cooldownEl.hidden = false;
-      cooldownTimer = setTimeout(refreshCooldownUI, Math.min(remaining, 30000));
+      // Tick every second in the final 2 min for a live feel; every 30s before.
+      const next = remaining > 120000 ? 30000 : 1000;
+      cooldownTimer = setTimeout(refreshCooldownUI, Math.min(remaining, next));
     } else {
       cooldownEl.hidden = true;
     }
@@ -1030,21 +1058,25 @@ const promptCards = [
             body && typeof body.retryAfterSeconds === 'number' && body.retryAfterSeconds > 0
               ? body.retryAfterSeconds * 1000
               : CHAT_COOLDOWN_MS;
-          startCooldown(retryMs);
+          startCooldown(retryMs, 'rate');
           appendBubble(
             'assistant',
             "I'm getting a lot of questions right now. Please try again in a few minutes.",
             { error: true }
           );
         } else {
-          // 503 = daily AI quota exhausted. Show the server's message — it is
-          // user-facing copy with the contact-Rafael escape hatch.
-          startCooldown(CHAT_QUOTA_COOLDOWN_MS);
+          // 503 = daily AI quota exhausted. Count down to the exact reset the
+          // server reports (resetInSeconds → 00:00 UTC), shown live below.
+          const resetMs =
+            body && typeof body.resetInSeconds === 'number' && body.resetInSeconds > 0
+              ? body.resetInSeconds * 1000
+              : CHAT_QUOTA_COOLDOWN_MS;
+          startCooldown(resetMs, 'quota');
           appendBubble(
             'assistant',
             body && typeof body.error === 'string' && body.error
               ? body.error
-              : 'The assistant reached its free daily AI quota. Please try again tomorrow.',
+              : 'The assistant reached its free daily AI quota. It resets at 00:00 UTC.',
             { error: true }
           );
         }
