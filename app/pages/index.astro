@@ -13,6 +13,25 @@ import { getVersionFooterData } from '../utils/version-footer';
 const { basics, work, skills, education, projects, training } = resumeData;
 const versionFooter = getVersionFooterData();
 
+// Human-readable dates: "2025-11" -> "Nov 2025", "2023-08-01" -> "Aug 2023".
+// Resumes should never show raw ISO date strings.
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate = (iso) => {
+  if (!iso) return '';
+  const [y, m] = String(iso).split('-');
+  const mi = parseInt(m, 10);
+  return mi >= 1 && mi <= 12 ? `${MONTHS[mi - 1]} ${y}` : String(y);
+};
+// "Nov 2025 – Present" / "Aug 2023 – Aug 2024" (en dash, human months)
+const fmtRange = (start, end) => `${fmtDate(start)} – ${end ? fmtDate(end) : 'Present'}`;
+
+// Strip [TODO ...] placeholders so draft entries never render them on the live
+// resume (same guard the chatbot applies). Text that is only a placeholder
+// collapses to empty and is dropped from lists.
+const stripTodo = (s) =>
+  typeof s === 'string' ? s.replace(/\[TODO[^\]]*\]/g, '').replace(/\s{2,}/g, ' ').trim() : s;
+const cleanList = (arr) => (arr || []).map(stripTodo).filter((x) => x && x.length > 0);
+
 // Use build-time site URL from Astro config for consistent deployment URLs
 // This leverages the same environment detection used in PDF API routes
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
@@ -241,16 +260,16 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     <p class="apple-title-3">{job.name}</p>
                   )}
                 </div>
-                <h5 class="mt-2 md:mt-0 font-medium">
-                  {job.startDate} - {job.endDate || 'Present'}
+                <h5 class="apple-date-badge">
+                  {fmtRange(job.startDate, job.endDate)}
                 </h5>
               </div>
               
-                <p class="apple-experience-summary">{job.summary}</p>
-                
-                {job.highlights && (
+                {stripTodo(job.summary) && <p class="apple-experience-summary">{stripTodo(job.summary)}</p>}
+
+                {cleanList(job.highlights).length > 0 && (
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                    {job.highlights.map((highlight) => (
+                    {cleanList(job.highlights).map((highlight) => (
                       <div class="apple-highlight-card">
                         <p class="apple-highlight-text">{highlight}</p>
                       </div>
@@ -267,12 +286,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <div class="text-center mt-8">
             <button 
               id="load-more-experience"
-              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
+              class="glass-button-modern inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-medium transition-all group"
               onclick="toggleExperienceItems()"
             >
-              <div class="mr-2">
-                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
-              </div>
+              <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
               <span id="experience-button-text">Show More Experience</span>
             </button>
           </div>
@@ -299,13 +316,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                       </a>
                     ) : project.name}
                   </h3>
-                  <p class="apple-experience-summary">{project.description}</p>
+                  {stripTodo(project.description) && <p class="apple-experience-summary">{stripTodo(project.description)}</p>}
                 </div>
               </div>
-              
-              {project.highlights && (
+
+              {cleanList(project.highlights).length > 0 && (
                 <div class="grid grid-cols-1 gap-3 mb-4">
-                  {project.highlights.map((highlight) => (
+                  {cleanList(project.highlights).map((highlight) => (
                     <div class="apple-highlight-card">
                       <p class="apple-highlight-text">{highlight}</p>
                     </div>
@@ -331,12 +348,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
           <div class="text-center mt-8">
             <button 
               id="load-more-projects"
-              class="glass-button-modern inline-flex items-center px-8 py-3 rounded-lg font-medium transition-all group"
+              class="glass-button-modern inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-medium transition-all group"
               onclick="toggleProjectItems()"
             >
-              <div class="mr-2">
-                <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
-              </div>
+              <LiquidGlassIcon name="heroicons:chevron-down" size={20} variant="subtle" />
               <span id="projects-button-text">Show More Projects</span>
             </button>
           </div>
@@ -390,7 +405,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="apple-footnote">{cert.date}</span>
+                      <span class="apple-footnote">{fmtDate(cert.date)}</span>
                       <div class="flex gap-2">
                         {cert.url && (
                           <a 
@@ -620,12 +635,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   }
 
   .apple-summary-block {
-    max-width: var(--measure);
+    /* Hero bio: a short, deliberately-centered blurb under the centered name
+       and title, so the whole hero card reads as one centered unit (no
+       left-floating block). Narrower measure keeps centered lines balanced. */
+    max-width: 54ch;
     margin: 0 auto;
-    /* Centered as a block under the centered name, but the copy itself is
-       left-aligned so long-form body keeps a clean left edge (HIG: center
-       only deliberately). */
-    text-align: left;
+    text-align: center;
+    text-wrap: pretty;
   }
 
   /* Sub-group label (overline) — subordinate to section titles, distinct from
@@ -1056,6 +1072,24 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     letter-spacing: var(--tracking-label);
     color: var(--foreground-muted);
     margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
+  }
+
+  /* Job / project date range — right-anchored, tabular digits so ranges line
+     up column-to-column, never wraps mid-range. */
+  .apple-date-badge {
+    flex-shrink: 0;
+    align-self: flex-start;
+    font-size: var(--text-footnote);
+    font-weight: var(--fw-medium);
+    line-height: 1.45;
+    letter-spacing: var(--tracking-label);
+    color: var(--foreground-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-top: var(--space-1);
+  }
+  @media (min-width: 768px) {
+    .apple-date-badge { margin-top: 0; }
   }
 
   /* Subtitle — Job title under hero name */
