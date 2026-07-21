@@ -1,8 +1,173 @@
 @import "tailwindcss";
 
-@layer base {
-  /* Theme variables removed to prevent conflicts - they are defined in index.astro for better control */
+/* =========================================================================
+   SHARED DESIGN TOKENS — single source of truth (Apple HIG)
+   Owns typography scale, spacing/radius scale, layout constants, semantic
+   colors and the liquid-glass material. Components reference these vars
+   instead of re-declaring literals, so every surface draws from one system.
+   Defined unlayered so they win over Tailwind's @layer base defaults.
+   ========================================================================= */
+:root {
+  /* ----- Font family (declared explicitly; no 'SF Pro Display' so the
+          optical size auto-picks Text vs Display) ----- */
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
 
+  /* ----- Type scale — few, intentional, unambiguously ranked steps -----
+          caption 13 < footnote 14 < body 16 < callout 17 < headline 18+ */
+  --text-caption: 0.8125rem;                        /* 13px — smallest allowed */
+  --text-footnote: 0.875rem;                        /* 14px */
+  --text-body: clamp(1rem, 1.25vw, 1.0625rem);      /* 16–17px — body FLOOR is 16 */
+  --text-callout: 1.0625rem;                        /* 17px */
+  --text-headline: clamp(1.125rem, 1.75vw, 1.25rem);/* 18–20px */
+  --text-subtitle: clamp(1.25rem, 2.5vw, 1.75rem);  /* 20–28px (hero subtitle) */
+  --text-title-3: clamp(1rem, 2vw, 1.375rem);       /* 16–22px (company/issuer) */
+  --text-title-2: clamp(1.125rem, 2.25vw, 1.5rem);  /* 18–24px (job/project title) */
+  --text-title-1: clamp(1.375rem, 2.75vw, 2rem);    /* 22–32px (section header) */
+  --text-display: clamp(2.25rem, 5vw, 3.5rem);      /* 36–56px (hero name) */
+
+  /* ----- Weights — 4 only ----- */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ----- Line-height — real values (no fake clamps) ----- */
+  --lh-display: 1.1;
+  --lh-heading: 1.25;
+  --lh-body: 1.5;
+
+  /* ----- Tracking — negative on display, positive only on small labels ----- */
+  --tracking-display: -0.035em;
+  --tracking-title: -0.015em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-label: 0.02em;
+
+  /* ----- Measure — single reading width for long-form text ----- */
+  --measure: 68ch;
+
+  /* ----- Spacing scale (4/8px base) ----- */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px (card padding) */
+  --space-8: 3rem;     /* 48px (section separator) */
+  --space-10: 4rem;    /* 64px (mobile section rhythm) */
+
+  /* ----- Radius scale ----- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* ----- Layout constants ----- */
+  --container-max: 72rem;  /* one shared page width for hero AND resume */
+  --tap-min: 44px;         /* HIG minimum touch target */
+
+  /* ----- Semantic colors — Light (Apple HIG) ----- */
+  --foreground: #1a1a1a;         /* Label Primary */
+  --foreground-muted: #6d6d70;   /* Label Secondary */
+  --link-color: #1e40af;         /* Accessible brand blue */
+  --link-color-rgb: 30, 64, 175;
+  --primary: #1e40af;
+  --accent: #1e40af;
+  --background: #ffffff;
+  --surface: rgba(255, 255, 255, 0.8);
+  --separator-light: rgba(0, 0, 0, 0.1);
+  --separator-dark: rgba(0, 0, 0, 0.05);
+
+  /* Icon theming */
+  --icon-invert: 0.2;
+  --icon-hue: 200deg;
+
+  /* ----- Liquid glass material — one consolidated recipe -----
+          Reserve for the control/interaction layer. Light theme uses a
+          luminosity-adjusted surface + a DARK border so glass edges stay
+          legible over the light body gradient (never white-on-white). */
+  --glass-radius: 16px;
+  --glass-radius-sm: 12px;
+  --glass-radius-pill: 999px;
+  --glass-blur: 20px;
+  --glass-saturate: 180%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  --glass-filter-sm: blur(12px) saturate(var(--glass-saturate));
+  --glass-surface: rgba(255, 255, 255, 0.6);
+  --glass-surface-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-hover-bg: rgba(255, 255, 255, 0.72);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-text: var(--foreground);      /* deterministic token text color */
+  /* Legacy alias kept for existing consumers (.glass-button-modern, .ch-card) */
+  --glass-bg: var(--glass-surface);
+  /* Accent (brand blue) tint for interactive tokens */
+  --glass-accent-bg: rgba(37, 99, 235, 0.1);
+  --glass-accent-border: rgba(37, 99, 235, 0.22);
+  --glass-accent-hover-bg: rgba(37, 99, 235, 0.15);
+  --glass-accent-hover-border: rgba(37, 99, 235, 0.3);
+}
+
+.dark {
+  /* ----- Semantic colors — Dark (Apple HIG) ----- */
+  --foreground: #f2f2f7;         /* Label Primary Dark */
+  --foreground-muted: #98989d;   /* Label Secondary Dark */
+  --link-color: #60a5fa;         /* WCAG AAA blue */
+  --link-color-rgb: 96, 165, 250;
+  --primary: #60a5fa;
+  --accent: #60a5fa;
+  --background: #0f1419;
+  --surface: rgba(255, 255, 255, 0.05);
+  --separator-light: rgba(255, 255, 255, 0.2);
+  --separator-dark: rgba(255, 255, 255, 0.1);
+
+  /* Icon theming */
+  --icon-invert: 1;
+  --icon-hue: 220deg;
+
+  /* ----- Liquid glass material — Dark ----- */
+  --glass-surface: rgba(15, 20, 25, 0.6);
+  --glass-surface-strong: rgba(15, 20, 25, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-hover-bg: rgba(15, 20, 25, 0.72);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --glass-bg: var(--glass-surface);
+  --glass-accent-bg: rgba(59, 130, 246, 0.12);
+  --glass-accent-border: rgba(59, 130, 246, 0.28);
+  --glass-accent-hover-bg: rgba(59, 130, 246, 0.18);
+  --glass-accent-hover-border: rgba(59, 130, 246, 0.4);
+}
+
+/* Shared liquid-glass card surface — one global rule so every .glass-card
+   (section cards via LiquidGlassCard AND nested skill sub-cards in index)
+   renders with the same material, radius and shadow. */
+.glass-card {
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--glass-hover-bg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Material hierarchy: hero uses a stronger surface, subtle variant lighter */
+.glass-card--intense {
+  background: var(--glass-surface-strong);
+}
+
+.glass-card--subtle {
+  backdrop-filter: var(--glass-filter-sm);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+}
+
+@layer base {
   * {
     box-sizing: border-box;
     position: relative;
@@ -15,6 +180,7 @@
 
   body {
     color: var(--foreground);
+    font-family: var(--font-sans);
     font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1, 'calt' 1;
     font-optical-sizing: auto;
     text-rendering: optimizeLegibility;

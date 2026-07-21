@@ -23,7 +23,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   <ChatHero />
 
   <main id="resume-content" class="min-h-screen py-8 px-4">
-    <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8 apple-motion-container">
+    <div class="resume-shell mx-auto space-y-8 apple-motion-container">
       
       <!-- Hero Section with Advanced Liquid Glass -->
       <LiquidGlassCard variant="intense" class="text-center p-8 md:p-12 apple-section-animate">
@@ -73,8 +73,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
         </div>
 
         <!-- Professional Summary with Apple Typography -->
-        <div class="max-w-4xl mx-auto">
-          <p class="apple-body text-center leading-relaxed apple-smart-break">
+        <div class="apple-summary-block">
+          <p class="apple-body leading-relaxed apple-smart-break">
             {basics.summary}
           </p>
         </div>
@@ -85,11 +85,11 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       
       <!-- Connect & Download Section -->
       <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="1">
-        <h2 class="apple-section-title text-center">Let's Connect</h2>
+        <h2 class="apple-section-title">Let's Connect</h2>
 
         <!-- Contact Methods -->
         <div class="mb-8">
-          <h3 class="mb-4 text-center">Get In Touch</h3>
+          <h3 class="apple-overline mb-4">Get In Touch</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- Email -->
             <ContactButton
@@ -161,7 +161,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
         <!-- PDF Downloads -->
         <div>
-          <h3 class="mb-4 text-center">Download Resume</h3>
+          <h3 class="apple-overline mb-4">Download Resume</h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a 
               href={`${siteUrl}/pdf-screen`}
@@ -316,7 +316,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
               {project.keywords && (
                 <div class="flex flex-wrap gap-2">
                   {project.keywords.map((keyword) => (
-                    <span class="glass-token apple-subheadline px-4 py-2 transition-all duration-200">
+                    <span class="glass-token apple-subheadline transition-all duration-200">
                       {keyword}
                     </span>
                   ))}
@@ -358,7 +358,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                   
                   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
                     <div class="flex-1">
-                      <h3 class="apple-job-title text-2xl font-semibold">
+                      <h3 class="apple-title-2">
                         {cert.courseUrl ? (
                           <a 
                             href={cert.courseUrl} 
@@ -373,7 +373,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                           cert.name
                         )}
                       </h3>
-                      <div class="apple-company">
+                      <div class="apple-title-3">
                         {cert.issuerUrl ? (
                           <a 
                             href={cert.issuerUrl} 
@@ -390,7 +390,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="apple-date">{cert.date}</span>
+                      <span class="apple-footnote">{cert.date}</span>
                       <div class="flex gap-2">
                         {cert.url && (
                           <a 
@@ -423,7 +423,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                   {cert.highlights && cert.highlights.length > 0 && (
                     <ul class="space-y-1 mb-4">
                       {cert.highlights.map((highlight) => (
-                        <li class="apple-list-item text-sm leading-relaxed">
+                        <li class="apple-body leading-relaxed">
                           {highlight}
                         </li>
                       ))}
@@ -433,7 +433,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                   {cert.keywords && cert.keywords.length > 0 && (
                     <div class="flex flex-wrap gap-2">
                       {cert.keywords.map((keyword) => (
-                        <span class="glass-token apple-subheadline px-3 py-1 text-xs opacity-90">
+                        <span class="glass-token apple-subheadline opacity-90">
                           {keyword}
                         </span>
                       ))}
@@ -451,7 +451,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
       
       <!-- Skills Section -->
       <LiquidGlassCard class="p-8 apple-section-animate" data-apple-delay="5">
-        <h2 class="apple-section-title text-center">Technical Skills</h2>
+        <h2 class="apple-section-title">Technical Skills</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {skills.map((skillGroup, index) => {
             // Map skill groups to appropriate icons (removing emoji duplication)
@@ -490,8 +490,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
                     } : {};
                     
                     return (
-                      <Component 
-                        class={`glass-token apple-subheadline px-4 py-2 transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
+                      <Component
+                        class={`glass-token apple-subheadline transition-all duration-200 ${hasLink ? 'hover:scale-105 hover:shadow-lg cursor-pointer' : 'opacity-90'}`}
                         style="color: var(--glass-text);"
                         {...linkProps}
                       >
@@ -612,70 +612,28 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     filter: invert(var(--icon-invert, 0.2)) sepia(1) saturate(2) hue-rotate(var(--icon-hue, 200deg));
   }
 
-  /* Apple HIG Semantic Color System - Complete theme-aware variables */
-  :root {
-    /* Icon theming */
-    --icon-invert: 0.2;
-    --icon-hue: 200deg;
-    
-    /* Apple HIG Semantic Colors - Light Theme */
-    --foreground: #1a1a1a; /* Apple HIG Label Primary */
-    --foreground-muted: #6d6d70; /* Apple HIG Label Secondary */  
-    --link-color: #1e40af; /* Apple HIG Brand Blue - Accessible contrast */
-    --primary: #1e40af; /* Same as link-color for consistency */
-    --background: #ffffff;
-    --surface: rgba(255, 255, 255, 0.8);
-  }
-  
-  :global(.dark) {
-    /* Icon theming */
-    --icon-invert: 1;
-    --icon-hue: 220deg;
-    
-    /* Apple HIG Semantic Colors - Dark Theme */
-    --foreground: #f2f2f7; /* Apple HIG Label Primary Dark */
-    --foreground-muted: #98989d; /* Apple HIG Label Secondary Dark */
-    --link-color: #60a5fa; /* Apple HIG Blue Dark - WCAG AAA compliant */
-    --primary: #60a5fa; /* Same as link-color for consistency */
-    --background: #1a1a1a;
-    --surface: rgba(255, 255, 255, 0.05);
-  }
-  
+  /* Color + glass tokens now live in app/styles/global.css (single owner). */
 
-  /* Apple HIG Token Design (Capsule Shape) */
-  .glass-token {
-    background: rgba(37, 99, 235, 0.08);
-    backdrop-filter: blur(10px) saturate(150%);
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 999px; /* Capsule shape as per Apple HIG */
-    color: var(--glass-text);
-    text-decoration: none;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
-    transition: all 0.2s ease-out;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-  
-  .glass-token:hover {
-    background: rgba(37, 99, 235, 0.15);
-    border-color: rgba(37, 99, 235, 0.3);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
-    transform: translateY(-1px) scale(1.02);
+  /* Shared page + text layout helpers */
+  .resume-shell {
+    max-width: var(--container-max);
   }
 
-  /* Theme-aware token styling */
-  :global(.dark) .glass-token {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.25);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  .apple-summary-block {
+    max-width: var(--measure);
+    margin: 0 auto;
   }
-  
-  :global(.dark) .glass-token:hover {
-    background: rgba(59, 130, 246, 0.18);
-    border-color: rgba(59, 130, 246, 0.4);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+
+  /* Sub-group label (overline) — subordinate to section titles, distinct from
+     job titles which share h3/.apple-title-2. */
+  .apple-overline {
+    font-size: var(--text-caption);
+    font-weight: var(--fw-semibold);
+    line-height: 1.3;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--foreground-muted);
+    margin-bottom: var(--space-4);
   }
 
   /* Wide Screen Layout Optimizations */
@@ -864,11 +822,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
   }
 
-  /* Enhanced Apple HIG Button Animations - now inherits base styles from Layout.astro */
+  /* Enhanced Apple HIG Button Animations - base surface from Layout.astro tokens */
   .glass-button-modern {
     /* Apple's preferred cubic-bezier for fluid motion */
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform-origin: center;
+    border-radius: var(--radius-lg);
+    min-height: var(--tap-min); /* HIG touch target */
   }
 
   .glass-button-modern:active {
@@ -877,15 +837,18 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Apple HIG Token Enhance Animations */
+  /* Apple HIG Token (capsule) — single canonical definition, accent-tinted
+     glass from shared tokens. */
   .glass-token {
-    background: rgba(37, 99, 235, 0.08);
-    backdrop-filter: blur(10px) saturate(150%);
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 999px; /* Capsule shape as per Apple HIG */
+    background: var(--glass-accent-bg);
+    backdrop-filter: var(--glass-filter-sm);
+    -webkit-backdrop-filter: var(--glass-filter-sm);
+    border: 1px solid var(--glass-accent-border);
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
     color: var(--glass-text);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
     /* Apple's spring-like easing for tokens */
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -894,10 +857,16 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     white-space: nowrap;
     transform-origin: center;
   }
-  
+
+  /* Interactive tokens are real tap targets — meet the 44px HIG minimum. */
+  a.glass-token,
+  button.glass-token {
+    min-height: var(--tap-min);
+  }
+
   .glass-token:hover {
-    background: rgba(37, 99, 235, 0.15);
-    border-color: rgba(37, 99, 235, 0.3);
+    background: var(--glass-accent-hover-bg);
+    border-color: var(--glass-accent-hover-border);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
     /* Apple HIG Gentle lift with slight scale */
     transform: translateY(-2px) scale(1.03);
@@ -960,9 +929,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
     
     .glass-token {
-      min-height: 32px;
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem; /* Slightly larger text on mobile */
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-footnote); /* readable label size on mobile */
     }
     
     /* Apple HIG: Reduce animation intensity on mobile for comfort */
@@ -983,7 +951,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   
   @media (min-width: 2560px) {
     /* Wide screen container optimization */
-    .max-w-4xl.lg\\:max-w-6xl.xl\\:max-w-7xl {
+    .resume-shell {
       max-width: 96rem; /* 1536px - even wider on large displays */
     }
     
@@ -1007,100 +975,124 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   /* ===== APPLE HIG COMPREHENSIVE TYPOGRAPHY SYSTEM ===== */
   /* Fluid typography that prevents text from being too big or too small */
   
-  /* Apple HIG Display Large - Hero name only (h1) */
+  /* All sizes/weights/line-heights/tracking draw from the shared tokens in
+     app/styles/global.css. One rule per level; levels are unambiguously
+     ranked (caption 13 < footnote 14 < body 16 < callout 17 < headline 18+). */
+
+  /* Display Large — Hero name only (h1). Bold (not 800): size + tight
+     tracking already carry the display hierarchy. */
   .apple-display-large, h1 {
-    font-size: clamp(2.25rem, 5vw, 3.5rem); /* 36pt - 56pt fluid scaling */
-    font-weight: 800; /* Extra Bold for impact */
-    line-height: clamp(1.05, 1.1, 1.15); /* Tight but readable */
-    letter-spacing: clamp(-0.04em, -0.035em, -0.03em); /* Responsive letter spacing */
+    font-size: var(--text-display);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-display);
+    letter-spacing: var(--tracking-display);
     color: var(--foreground);
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     font-optical-sizing: auto;
     margin-bottom: clamp(1rem, 2.5vw, 2rem);
   }
-  
-  /* Apple HIG Large Title - Major section headers (h2) */
+
+  /* Large Title — Major section headers (h2) */
   .apple-section-title, h2 {
-    font-size: clamp(1.375rem, 2.75vw, 2rem); /* 22pt - 32pt fluid scaling - Reduced from 40pt */
-    font-weight: 700; /* Bold */
-    line-height: clamp(1.2, 1.25, 1.3); /* Responsive line height */
-    letter-spacing: clamp(-0.025em, -0.02em, -0.015em);
-    margin-bottom: clamp(1.25rem, 2.5vw, 2rem); /* Reduced margin */
+    font-size: var(--text-title-1);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-heading);
+    letter-spacing: var(--tracking-title);
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
     color: var(--foreground);
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   }
-  
-  /* Apple HIG Title 1 - Subsection headers (h3) */
-  .apple-title-1, .apple-title-2, h3 {
-    font-size: clamp(1.125rem, 2.25vw, 1.5rem); /* 18pt - 24pt fluid scaling - Better balance */
-    font-weight: 600; /* Semi-bold */
-    line-height: clamp(1.25, 1.3, 1.35);
-    letter-spacing: clamp(-0.02em, -0.015em, -0.01em);
+
+  /* Title 1 — distinct larger subsection tier (kept separate from Title 2) */
+  .apple-title-1 {
+    font-size: var(--text-title-1);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-heading);
+    letter-spacing: var(--tracking-title);
     color: var(--foreground);
     margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
   }
-  
-  /* Apple HIG Title 2 - Company names/subheaders (h4) */
+
+  /* Title 2 — Job / project titles (h3) */
+  .apple-title-2, h3 {
+    font-size: var(--text-title-2);
+    font-weight: var(--fw-semibold);
+    line-height: 1.3;
+    letter-spacing: var(--tracking-tight);
+    color: var(--foreground);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  /* Title 3 — Company / issuer names (h4) */
   .apple-title-3, h4 {
-    font-size: clamp(1rem, 2vw, 1.375rem); /* 16pt - 22pt fluid scaling */
-    font-weight: 500; /* Medium */
-    line-height: clamp(1.3, 1.35, 1.4);
-    letter-spacing: clamp(-0.015em, -0.01em, -0.005em);
+    font-size: var(--text-title-3);
+    font-weight: var(--fw-medium);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
     color: var(--foreground);
     margin-bottom: clamp(0.5rem, 1vw, 1rem);
   }
-  
-  /* Apple HIG Headline - Subsection headers/skill categories */
+
+  /* Headline — Skill category headers */
   .apple-headline {
-    font-size: clamp(1rem, 1.75vw, 1.25rem); /* 16pt - 20pt fluid scaling - Increased for better balance */
-    font-weight: 600;
-    line-height: clamp(1.35, 1.4, 1.45);
-    letter-spacing: clamp(-0.01em, -0.005em, 0);
+    font-size: var(--text-headline);
+    font-weight: var(--fw-semibold);
+    line-height: 1.4;
+    letter-spacing: var(--tracking-tight);
     color: var(--link-color);
-    margin-bottom: clamp(0.75rem, 1.25vw, 1rem); /* Increased margin for better spacing */
+    margin-bottom: clamp(0.75rem, 1.25vw, 1rem);
   }
-  
-  /* Apple HIG h5 - For metadata like job dates */
+
+  /* h5 — Metadata like job dates. Separated from body by muted color, not
+     just a fractional size step. */
   h5 {
-    font-size: clamp(0.875rem, 1.25vw, 1rem); /* 14pt - 16pt fluid scaling */
-    font-weight: 500; /* Medium weight */
-    line-height: clamp(1.4, 1.45, 1.5);
-    letter-spacing: clamp(0, 0.005em, 0.01em);
-    color: var(--foreground);
-    opacity: 0.8; /* Slightly muted for metadata */
+    font-size: var(--text-footnote);
+    font-weight: var(--fw-medium);
+    line-height: 1.45;
+    letter-spacing: var(--tracking-label);
+    color: var(--foreground-muted);
     margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
   }
-  
-  /* Apple HIG Subtitle - For job title under hero name */
+
+  /* Subtitle — Job title under hero name */
   .apple-subtitle {
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem); /* 20pt - 28pt fluid scaling */
-    font-weight: 500; /* Medium weight, lighter than section titles */
-    line-height: clamp(1.3, 1.35, 1.4);
-    letter-spacing: clamp(-0.01em, -0.005em, 0);
-    color: var(--foreground-muted); /* Slightly muted for hierarchy */
+    font-size: var(--text-subtitle);
+    font-weight: var(--fw-medium);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
+    color: var(--foreground-muted);
     margin-bottom: clamp(1rem, 2vw, 1.5rem);
     text-align: center;
   }
-  
-  /* Apple HIG Subheadline - Small labels (h6) */
+
+  /* Subheadline — Small labels / capsule tokens (h6). One definition only. */
   .apple-subheadline, h6 {
-    font-size: clamp(0.875rem, 1.25vw, 1rem); /* 14pt - 16pt fluid scaling */
-    font-weight: 500;
-    line-height: clamp(1.4, 1.45, 1.5);
-    letter-spacing: clamp(0, 0.005em, 0.01em);
+    font-size: var(--text-footnote);
+    font-weight: var(--fw-medium);
+    line-height: 1.45;
+    letter-spacing: var(--tracking-label);
     color: var(--foreground);
     margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
   }
-  
-  /* Apple HIG Body - Main content/descriptions/paragraphs */
-  .apple-body, p, li, span:not(.apple-contact-label):not(.apple-contact-value) {
-    font-size: clamp(0.9375rem, 1.25vw, 1.0625rem); /* 15pt - 17pt fluid scaling */
-    font-weight: 400;
-    line-height: clamp(1.45, 1.47, 1.5); /* Apple's body line height */
+
+  /* Body — Main content. Floor is 16px (never smaller); capped to a reading
+     measure on block-level text. Label classes opt out so they stay their
+     ranked size. */
+  .apple-body,
+  p,
+  li,
+  span:not(.apple-contact-label):not(.apple-contact-value):not(.apple-subheadline):not(.apple-footnote) {
+    font-size: var(--text-body);
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-body);
     letter-spacing: 0;
     color: var(--foreground);
-    text-wrap: balance; /* Better text wrapping */
+    text-wrap: balance;
     margin-bottom: clamp(0.75rem, 1.25vw, 1rem);
+  }
+
+  p, li {
+    max-width: var(--measure);
   }
 
   /* Apple-Style Text Flow Enhancement */
@@ -1108,7 +1100,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     text-align: left;
     overflow-wrap: break-word;
     line-height: 1.6;
-    max-width: 65ch; /* Optimal reading width */
+    max-width: var(--measure);
   }
 
   /* Smart line breaking for responsive text */
@@ -1122,37 +1114,24 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   .apple-paragraph-spacing > * + * {
     margin-top: 1.5em;
   }
-  
-  /* Apple HIG Callout - For dates and secondary info */
+
+  /* Callout — Secondary info; ranked just above body via size + muted color */
   .apple-callout {
-    font-size: 1rem; /* 16pt = 16px = 1rem */
-    font-weight: 400;
+    font-size: var(--text-callout);
+    font-weight: var(--fw-regular);
     line-height: 1.5;
     letter-spacing: 0;
-    color: var(--foreground);
-    opacity: 0.8; /* Slightly muted for secondary info */
+    color: var(--foreground-muted);
   }
-  
-  /* Apple HIG Subheadline - For skill tags and small labels */
-  .apple-subheadline {
-    font-size: 0.9375rem; /* 15pt = 15px = 0.9375rem */
-    font-weight: 500;
-    line-height: 1.4;
-    letter-spacing: 0.005em;
-    color: var(--foreground);
-  }
-  
-  /* Apple HIG Footnote - For very small text */
+
+  /* Footnote — Small captions (dates, meta). 14px, ranked above caption. */
   .apple-footnote {
-    font-size: 0.8125rem; /* 13pt = 13px = 0.8125rem */
-    font-weight: 400;
-    line-height: 1.38;
-    letter-spacing: 0.01em;
-    color: var(--foreground);
-    opacity: 0.7;
+    font-size: var(--text-footnote);
+    font-weight: var(--fw-regular);
+    line-height: 1.4;
+    letter-spacing: var(--tracking-label);
+    color: var(--foreground-muted);
   }
-  
-  /* Legacy mobile/desktop scaling removed - fluid typography handles all breakpoints */
 
   /* Old .apple-display-large removed - now using fluid h1 system */
 
