@@ -25,6 +25,39 @@ export async function aiRunWithTimeout(ai, model, inputs, timeoutMs = 20_000, op
   }
 }
 
+/**
+ * Run through the AI Gateway when configured, self-healing if the gateway slug
+ * is not provisioned. Passing a nonexistent gateway id makes AI.run fail every
+ * time (italia2026 B-397b) — so on the FIRST error with the gateway attached we
+ * retry the SAME model once WITHOUT it. That makes turning the gateway on/off a
+ * pure env-var flip with zero risk of a bad slug taking the chatbot down.
+ * @param {object} ai env.AI binding
+ * @param {string} model
+ * @param {object} inputs
+ * @param {number} timeoutMs
+ * @param {string} [gatewayId] env.AI_GATEWAY_ID — empty/undefined disables the gateway
+ * @returns {Promise<{raw:unknown, viaGateway:boolean}>}
+ */
+export async function aiRunViaGateway(ai, model, inputs, timeoutMs, gatewayId) {
+  if (gatewayId) {
+    try {
+      const raw = await aiRunWithTimeout(ai, model, inputs, timeoutMs, {
+        gateway: { id: gatewayId },
+      });
+      return { raw, viaGateway: true };
+    } catch (err) {
+      // A quota/timeout error is real — rethrow so the fallback chain handles
+      // it. Anything else with the gateway attached (bad slug, gateway down)
+      // → retry once without the gateway so a misconfigured id never kills us.
+      const msg = String(err?.message || err);
+      if (/AI_TIMEOUT|3040|quota|capacity|rate.?limit/i.test(msg)) throw err;
+      console.warn(`[resume-ai] gateway '${gatewayId}' failed (${msg}) — retrying direct`);
+    }
+  }
+  const raw = await aiRunWithTimeout(ai, model, inputs, timeoutMs);
+  return { raw, viaGateway: false };
+}
+
 // Legacy text-generation models return { response }; chat-completions models
 // (2026-gen) return the OpenAI shape { choices: [{ message: { content } }] }.
 // Extract text from either.

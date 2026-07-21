@@ -14,7 +14,7 @@ import {
   normalizeQuestion,
   hashString,
 } from './guards.mjs';
-import { aiRunWithTimeout, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
+import { aiRunViaGateway, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
 
 // Fallback chain — free-tier models hang/fail routinely; every step has a hard
 // timeout so the next one always gets a chance (see ai.mjs).
@@ -52,12 +52,10 @@ const QUOTA_MESSAGE =
 const LEAK_REFUSAL_REPLY =
   "Nice try 🙂 — my internal notes stay with me. Ask me anything about my experience, skills, or availability instead.";
 
-// AI Gateway — NOT provisioned yet (same lesson as italia2026 B-397b: passing
-// a gateway id that does not exist makes EVERY AI.run call fail). Enable ONLY
-// after creating the gateway slug "resume-ai" in the Cloudflare dashboard
-// (AI > AI Gateway > Create gateway), then pass gatewayOpts as the 3rd arg of
-// AI.run (the `options` param of aiRunWithTimeout).
-// const gatewayOpts = { gateway: { id: 'resume-ai', cacheTtl: 604800 } };
+// AI Gateway is wired but env-gated (see aiRunViaGateway in ai.mjs). It turns
+// on only when the AI_GATEWAY_ID var is set (wrangler.toml [vars]); a missing
+// slug self-heals to a direct call, so flipping it is a zero-risk env change —
+// unlike italia2026 B-397b, where a hard-coded bad slug broke every request.
 
 function baseHeaders(corsOrigin, { json = true } = {}) {
   const headers = {
@@ -71,8 +69,11 @@ function baseHeaders(corsOrigin, { json = true } = {}) {
   return headers;
 }
 
-function jsonResponse(status, body, corsOrigin) {
-  return new Response(JSON.stringify(body), { status, headers: baseHeaders(corsOrigin) });
+function jsonResponse(status, body, corsOrigin, extraHeaders) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...baseHeaders(corsOrigin), ...(extraHeaders || {}) },
+  });
 }
 
 function preflightResponse(corsOrigin) {
@@ -170,6 +171,7 @@ async function handleChat(request, env, ctx, corsOrigin) {
   const started = Date.now();
   let reply = null;
   let modelUsed = null;
+  let viaGateway = false;
   for (const step of MODEL_CHAIN) {
     // Global daily budget, counted per AI.run ATTEMPT (fallback retries burn
     // real neurons too) and checked AFTER the cache so cache hits are free.
@@ -180,8 +182,12 @@ async function handleChat(request, env, ctx, corsOrigin) {
     try {
       const inputs = { messages, max_tokens: 500 };
       if (step.temperature !== undefined) inputs.temperature = step.temperature;
-      const raw = await aiRunWithTimeout(env.AI, step.model, inputs, step.timeoutMs /* , gatewayOpts */);
-      const text = postProcess(extractAiText(raw));
+      // AI Gateway is opt-in via the AI_GATEWAY_ID var (wrangler.toml [vars]).
+      // Unset → direct Workers AI (today's behavior). Set → routed through the
+      // gateway for analytics/caching, self-healing if the slug is missing.
+      const gwResult = await aiRunViaGateway(env.AI, step.model, inputs, step.timeoutMs, env.AI_GATEWAY_ID);
+      viaGateway = gwResult.viaGateway;
+      const text = postProcess(extractAiText(gwResult.raw));
       if (text && detectPromptLeak(text, privateContext)) {
         // Jailbroken reply (prompt dump or secret numbers) — deterministic
         // refusal; prompt-side rules alone do not hold against injection.
@@ -235,7 +241,8 @@ async function handleChat(request, env, ctx, corsOrigin) {
 
   const payload = { reply, model: modelUsed, cached: false };
   if (degraded) payload.degraded = true;
-  return jsonResponse(200, payload, corsOrigin);
+  // Verification signal: whether this answer was routed through the AI Gateway.
+  return jsonResponse(200, payload, corsOrigin, { 'X-Resume-AI-Gateway': viaGateway ? 'on' : 'off' });
 }
 
 async function handleFeedback(request, env, ctx, corsOrigin) {

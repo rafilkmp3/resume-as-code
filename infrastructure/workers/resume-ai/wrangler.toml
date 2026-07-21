@@ -19,5 +19,13 @@ remote = true
 binding = "RESUME_AI_KV"
 id = "1e15da87e1e94016a078b96292a99731"
 
+# AI Gateway "resume-ai": logs on, response cache (5min), rate limit 50/min,
+# spend cap $0.01/mo (keeps it free — blocks the instant any billable cost
+# accrues), retry 3x, authenticated (Worker binding auto-authenticates). A
+# missing/blank id self-heals to a direct call, so this stays a zero-risk
+# toggle. Verify routing via the X-Resume-AI-Gateway response header.
+[vars]
+AI_GATEWAY_ID = "resume-ai"
+
 [observability]
 enabled = true
