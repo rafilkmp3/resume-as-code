@@ -1181,6 +1181,67 @@ const promptCards = [
     trackEvent('chat_scroll_to_resume');
   }
 
+  // Animated placeholder: types out example questions and deletes them, like a
+  // search box, to invite input. Runs only in hero mode while the input is
+  // empty and untouched; stops for good on first interaction or reduced motion.
+  var CHAT_PLACEHOLDER_BASE = inputEl ? inputEl.getAttribute('placeholder') : '';
+  var CHAT_TYPED_EXAMPLES = [
+    'How many years with Kubernetes?',
+    'Walk me through the Uber migration',
+    'Are you open to remote roles?',
+    'What cloud platforms do you know?',
+    'Tell me about a tough outage you fixed',
+    'Pergunte em português…',
+  ];
+  var typeTimer = null;
+  var typeStopped = false;
+
+  function stopTypewriter(restoreBase) {
+    typeStopped = true;
+    if (typeTimer) {
+      clearTimeout(typeTimer);
+      typeTimer = null;
+    }
+    if (restoreBase && inputEl) inputEl.setAttribute('placeholder', CHAT_PLACEHOLDER_BASE);
+  }
+
+  function startTypewriter() {
+    if (typeStopped || CHAT_REDUCED_MOTION || !inputEl) return;
+    // pick a start index that varies per load without Date/Math.random reliance
+    var idx = CHAT_PLACEHOLDER_BASE.length % CHAT_TYPED_EXAMPLES.length;
+    var char = 0;
+    var deleting = false;
+
+    function tick() {
+      if (typeStopped || inputEl.value.length > 0 || heroEl.classList.contains('ch-conv')) {
+        stopTypewriter(true);
+        return;
+      }
+      var phrase = CHAT_TYPED_EXAMPLES[idx];
+      if (!deleting) {
+        char++;
+        inputEl.setAttribute('placeholder', phrase.slice(0, char));
+        if (char >= phrase.length) {
+          deleting = true;
+          typeTimer = setTimeout(tick, 1600); // hold the full phrase
+          return;
+        }
+        typeTimer = setTimeout(tick, 55);
+      } else {
+        char--;
+        inputEl.setAttribute('placeholder', phrase.slice(0, char));
+        if (char <= 0) {
+          deleting = false;
+          idx = (idx + 1) % CHAT_TYPED_EXAMPLES.length;
+          typeTimer = setTimeout(tick, 350); // brief pause before next phrase
+          return;
+        }
+        typeTimer = setTimeout(tick, 28);
+      }
+    }
+    typeTimer = setTimeout(tick, 700);
+  }
+
   function initChatHero() {
     if (!heroEl || !threadEl || !messagesEl || !formEl || !inputEl) return;
 
@@ -1196,6 +1257,14 @@ const promptCards = [
     formEl.addEventListener('submit', function (e) {
       e.preventDefault();
       sendMessage(inputEl.value, 'typed');
+    });
+
+    // First real interaction kills the animated placeholder for good.
+    inputEl.addEventListener('input', function () {
+      if (inputEl.value.length > 0) stopTypewriter(true);
+    });
+    inputEl.addEventListener('keydown', function () {
+      stopTypewriter(true);
     });
 
     const cards = cardsEl.querySelectorAll('.ch-card');
@@ -1228,6 +1297,10 @@ const promptCards = [
     // Autofocus the input on desktop only (pointer: fine) — never trigger the
     // mobile keyboard on load.
     if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+
+    // Animated placeholder only in fresh hero mode (skip if a conversation was
+    // restored from history).
+    if (!heroEl.classList.contains('ch-conv')) startTypewriter();
   }
 
   initChatHero();
