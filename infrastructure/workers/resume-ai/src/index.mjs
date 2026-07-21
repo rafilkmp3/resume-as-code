@@ -27,8 +27,11 @@ const MODEL_CHAIN = [
   { model: '@cf/meta/llama-3.1-8b-instruct-fast', timeoutMs: 8_000 },
 ];
 
-// Workers AI free-tier quota/capacity errors (error 3040 et al.).
-const QUOTA_RE = /3040|quota|capacity|rate.?limit/i;
+// Workers AI free-tier quota/capacity errors. 4006 = "used up your daily free
+// allocation of 10,000 neurons" (the real daily-limit code); 3040 = capacity.
+// Matching these returns the friendly "back tomorrow" 503 instead of the
+// generic degraded fallback.
+const QUOTA_RE = /3040|4006|quota|capacity|neuron|daily free allocation|rate.?limit/i;
 
 const RATE_LIMIT_CHAT = { max: 20, ttl: 600 }; // 20 req / 10 min per IP (active recruiter chats + the 12-question eval fit in one window)
 const RATE_LIMIT_FEEDBACK = { max: 20, ttl: 600 }; // 20 req / 10 min per IP

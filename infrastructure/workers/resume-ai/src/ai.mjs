@@ -47,10 +47,11 @@ export async function aiRunViaGateway(ai, model, inputs, timeoutMs, gatewayId) {
       return { raw, viaGateway: true };
     } catch (err) {
       // A quota/timeout error is real — rethrow so the fallback chain handles
-      // it. Anything else with the gateway attached (bad slug, gateway down)
-      // → retry once without the gateway so a misconfigured id never kills us.
+      // it (retrying direct would hit the same exhausted quota). Anything else
+      // with the gateway attached (bad slug, gateway down) → retry once without
+      // the gateway so a misconfigured id never kills us.
       const msg = String(err?.message || err);
-      if (/AI_TIMEOUT|3040|quota|capacity|rate.?limit/i.test(msg)) throw err;
+      if (/AI_TIMEOUT|3040|4006|quota|capacity|neuron|daily free allocation|rate.?limit/i.test(msg)) throw err;
       console.warn(`[resume-ai] gateway '${gatewayId}' failed (${msg}) — retrying direct`);
     }
   }
