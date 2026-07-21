@@ -240,3 +240,6 @@ _bmad-output/
 # Wrangler local dev state (chatbot worker)
 .wrangler/
 .dev.vars
+
+# Card-seed bulk payload (generated)
+infrastructure/workers/resume-ai/.cards-bulk.json

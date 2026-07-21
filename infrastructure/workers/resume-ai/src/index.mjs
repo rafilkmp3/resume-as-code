@@ -15,6 +15,7 @@ import {
   hashString,
 } from './guards.mjs';
 import { aiRunViaGateway, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
+import { cacheKey as buildCacheKey } from './cache-version.mjs';
 
 // Fallback chain — free-tier models hang/fail routinely; every step has a hard
 // timeout so the next one always gets a chance (see ai.mjs).
@@ -168,10 +169,10 @@ async function handleChat(request, env, ctx, corsOrigin) {
   }
 
   // Response cache — only for history-less questions (a follow-up depends on
-  // conversation context, so caching it would serve wrong answers).
-  // Version-suffixed — bump whenever prompt/facts logic changes, or stale
-  // cached answers keep serving for CACHE_TTL (italia2026 lesson).
-  const cacheKey = `chat:v6:${hashString(normalizeQuestion(message))}`;
+  // conversation context, so caching it would serve wrong answers). The key's
+  // version is a hash of the resume content (see cache-version.mjs), so editing
+  // resume.json auto-busts every cached answer.
+  const cacheKey = buildCacheKey(resume, hashString(normalizeQuestion(message)));
   if (history.length === 0) {
     try {
       const cached = await env.RESUME_AI_KV.get(cacheKey, 'json');

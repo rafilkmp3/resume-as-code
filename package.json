@@ -18,7 +18,8 @@
     "worker:dev": "npx wrangler dev -c infrastructure/workers/resume-ai/wrangler.toml",
     "worker:dev:remote": "npx wrangler dev --remote -c infrastructure/workers/resume-ai/wrangler.toml",
     "worker:deploy": "npx wrangler deploy -c infrastructure/workers/resume-ai/wrangler.toml",
-    "site:deploy": "DEPLOY_URL=https://resume.rafaracing.com.br npm run build && npm run worker:deploy",
+    "seed:cards": "node infrastructure/workers/resume-ai/scripts/seed-cards.mjs && npx wrangler kv bulk put infrastructure/workers/resume-ai/.cards-bulk.json --namespace-id 1e15da87e1e94016a078b96292a99731 --remote",
+    "site:deploy": "DEPLOY_URL=https://resume.rafaracing.com.br npm run build && npm run worker:deploy && npm run seed:cards",
     "worker:test": "node --test \"infrastructure/workers/resume-ai/test/*.test.mjs\"",
     "worker:eval": "node infrastructure/workers/resume-ai/eval/run-eval.mjs",
     "prepare": "husky || true"
