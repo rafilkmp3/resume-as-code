@@ -1,0 +1,1239 @@
+---
+// AI Chat Hero - the primary interface of the resume site (ChatGPT-style).
+// Talks to the resume-ai API (Cloudflare Worker) via plain JSON fetch (no streaming).
+// Replaces the old corner FAB ChatWidget: ONE chat surface, mounted as the
+// first viewport of index.astro. Resume content lives below (#resume-content).
+
+// Same build-time URL used by index.astro's PDF affordances (Astro.site already
+// includes the GitHub Pages /resume-as-code base path when GITHUB_PAGES=true).
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
+
+// EXACT strings — these are cache-prewarmed in CI. Do not alter.
+const promptCards = [
+  "How's your AWS experience?",
+  "What's your current role?",
+  'Are you open to new opportunities?',
+  'Tell me about your DevOps toolbox',
+];
+---
+
+<section id="chat-hero" class="ch-hero" aria-label="AI resume assistant">
+  <div class="ch-inner">
+    <!-- Greeting (hero mode only; JS rotates the line on load) -->
+    <div id="chat-intro" class="ch-intro">
+      <p id="chat-greeting" class="ch-greeting">Hi, I'm Rafael's resume &mdash; ask me anything.</p>
+      <p class="ch-disclosure">AI-powered &middot; answers as Rafael, grounded in the real resume</p>
+    </div>
+
+    <!-- Conversation thread (conversation mode only) -->
+    <div id="chat-thread" class="ch-thread" hidden>
+      <div class="ch-thread-header">
+        <span class="ch-thread-title">Chat with my resume</span>
+        <div class="ch-thread-actions">
+          <button id="chat-new" class="ch-text-btn" type="button">New chat</button>
+          <button id="chat-clear" class="ch-icon-btn" type="button" aria-label="Clear conversation">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            </svg>
+            <span id="chat-clear-hint" class="ch-clear-hint" hidden>Tap again</span>
+          </button>
+        </div>
+      </div>
+      <div id="chat-messages" class="ch-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+    </div>
+
+    <div id="chat-cooldown" class="ch-cooldown" hidden></div>
+
+    <!-- Input pill (always visible, anchored under the thread) -->
+    <form id="chat-form" class="ch-form" autocomplete="off">
+      <input
+        id="chat-input"
+        class="ch-input"
+        type="text"
+        maxlength="500"
+        placeholder="Ask me about my experience..."
+        aria-label="Type your question"
+      />
+      <button id="chat-send" class="ch-send" type="submit" aria-label="Send message">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+        </svg>
+      </button>
+    </form>
+
+    <!-- Example prompts (hero mode only) — cache-prewarmed strings -->
+    <div id="chat-cards" class="ch-cards">
+      {promptCards.map((prompt) => (
+        <button type="button" class="ch-card">{prompt}</button>
+      ))}
+    </div>
+
+    <!-- Secondary actions -->
+    <div class="ch-actions">
+      <a
+        id="chat-pdf-link"
+        class="ch-action-link"
+        href={`${siteUrl}/pdf-screen`}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-pdf-type="screen"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Download PDF
+      </a>
+      <span class="ch-action-sep" aria-hidden="true">&middot;</span>
+      <a id="chat-skip" class="ch-action-link" href="#resume-content">&darr; Skip to full resume</a>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <button id="chat-scroll-cue" class="ch-scroll-cue" type="button" aria-label="Scroll to full resume">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="26" height="26" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+    </svg>
+  </button>
+</section>
+
+<!-- Back-to-chat pill (visible only when the hero is scrolled out of view) -->
+<button id="chat-pill" class="ch-pill" type="button" hidden aria-label="Back to chat">
+  &uarr; Chat
+</button>
+
+<style is:global>
+  /* Chat hero - global styles (message elements are created dynamically via JS,
+     so Astro scoped styles would not apply). All selectors are ch- prefixed. */
+
+  .ch-hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* top padding keeps the greeting clear of the fixed theme toggle (top-right, z-50) */
+    padding: 4.5rem 1rem 4rem;
+    color: var(--foreground, #1a1a1a);
+    overflow: hidden;
+  }
+
+  /* Ambient color fields behind the glass — liquid glass reads as glass only
+     when there is something beneath it to blur and refract (HIG: the material
+     takes on colors from the content behind it). */
+  .ch-hero::before,
+  .ch-hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .ch-hero::before {
+    width: 44rem;
+    height: 44rem;
+    top: -12rem;
+    left: -10rem;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.28), transparent 65%);
+  }
+
+  .ch-hero::after {
+    width: 38rem;
+    height: 38rem;
+    bottom: -10rem;
+    right: -8rem;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.22), transparent 65%);
+  }
+
+  .dark .ch-hero::before {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.18), transparent 65%);
+  }
+
+  .dark .ch-hero::after {
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.16), transparent 65%);
+  }
+
+  .ch-inner {
+    width: 100%;
+    max-width: 680px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.375rem;
+  }
+
+  /* Entrance animation (fade-up, staggered) */
+  @keyframes ch-fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ch-intro,
+  .ch-thread,
+  .ch-form,
+  .ch-cards,
+  .ch-actions {
+    animation: ch-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .ch-form { animation-delay: 0.1s; }
+  .ch-cards { animation-delay: 0.2s; }
+  .ch-actions { animation-delay: 0.3s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch-intro,
+    .ch-thread,
+    .ch-form,
+    .ch-cards,
+    .ch-actions {
+      animation: none;
+    }
+  }
+
+  /* Greeting */
+  .ch-intro {
+    text-align: center;
+  }
+
+  .ch-greeting {
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .ch-disclosure {
+    margin: 0.875rem 0 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+    opacity: 0.6;
+  }
+
+  /* Conversation mode: greeting + example cards collapse, thread appears */
+  .ch-hero.ch-conv .ch-intro,
+  .ch-hero.ch-conv .ch-cards,
+  .ch-hero.ch-conv .ch-scroll-cue {
+    display: none;
+  }
+
+  /* Thread */
+  .ch-thread {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .ch-thread[hidden] {
+    display: none;
+  }
+
+  .dark .ch-thread {
+    background: rgba(15, 20, 25, 0.6);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .ch-thread-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+  }
+
+  .dark .ch-thread-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .ch-thread-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    opacity: 0.8;
+  }
+
+  .ch-thread-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .ch-text-btn {
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  .dark .ch-text-btn {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .ch-text-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .dark .ch-text-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .ch-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  .ch-icon-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .ch-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .ch-icon-btn.ch-armed,
+  .ch-text-btn.ch-armed {
+    color: #dc2626;
+    opacity: 1;
+  }
+
+  .ch-clear-hint {
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  /* Message list: scrolls internally so the input pill stays visible */
+  .ch-messages {
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    min-height: 160px;
+    max-height: calc(100vh - 23rem);
+    max-height: calc(100dvh - 23rem);
+    overscroll-behavior: contain;
+  }
+
+  .ch-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+  }
+
+  .ch-row.ch-user {
+    align-self: flex-end;
+    align-items: flex-end;
+  }
+
+  .ch-row.ch-assistant {
+    align-self: flex-start;
+    align-items: flex-start;
+  }
+
+  .ch-bubble {
+    padding: 0.625rem 0.875rem;
+    border-radius: 16px;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .ch-user .ch-bubble {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 6px;
+  }
+
+  .ch-assistant .ch-bubble {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom-left-radius: 6px;
+  }
+
+  .dark .ch-assistant .ch-bubble {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .ch-bubble a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  .dark .ch-bubble a {
+    color: #90cdf4;
+  }
+
+  .ch-error .ch-bubble {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+
+  /* Typing indicator */
+  .ch-typing .ch-bubble {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .ch-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+    animation: ch-blink 1.2s infinite ease-in-out;
+  }
+
+  .ch-dot:nth-child(2) { animation-delay: 0.2s; }
+  .ch-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes ch-blink {
+    0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+    40% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch-dot { animation: none; opacity: 0.7; }
+  }
+
+  /* Feedback */
+  .ch-feedback {
+    display: flex;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+  }
+
+  .ch-feedback-btn {
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: inherit;
+  }
+
+  .dark .ch-feedback-btn {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .ch-feedback-btn:hover {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  .ch-feedback-thanks {
+    font-size: 0.6875rem;
+    opacity: 0.6;
+    margin-top: 0.25rem;
+  }
+
+  /* Cooldown notice */
+  .ch-cooldown {
+    width: 100%;
+    max-width: 640px;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .dark .ch-cooldown {
+    color: #fbbf24;
+  }
+
+  .ch-cooldown[hidden] {
+    display: none;
+  }
+
+  /* Input pill */
+  .ch-form {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.4375rem 0.4375rem 1.375rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dark .ch-form {
+    background: rgba(15, 20, 25, 0.75);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .ch-form:focus-within {
+    border-color: rgba(37, 99, 235, 0.5);
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.14), 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .dark .ch-form:focus-within {
+    border-color: rgba(144, 205, 244, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(144, 205, 244, 0.18);
+  }
+
+  .ch-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0.6875rem 0;
+    font-size: 1rem;
+    color: inherit;
+  }
+
+  .ch-input::placeholder {
+    color: inherit;
+    opacity: 0.5;
+  }
+
+  .ch-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ch-send {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .ch-send:hover:not(:disabled) {
+    transform: scale(1.06);
+  }
+
+  .ch-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Example prompt cards */
+  .ch-cards {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+
+  .ch-card {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.1));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ch-card:hover:not(:disabled) {
+    background: var(--glass-hover-bg, rgba(255, 255, 255, 0.15));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .ch-card:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    .ch-cards {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .ch-card {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  /* Secondary actions */
+  .ch-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .ch-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+  }
+
+  .ch-action-link:hover {
+    opacity: 1;
+  }
+
+  .ch-action-sep {
+    opacity: 0.4;
+  }
+
+  /* Scroll cue */
+  .ch-scroll-cue {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    color: inherit;
+    opacity: 0.45;
+    cursor: pointer;
+    transform: translateX(-50%);
+    animation: ch-bob 2.4s ease-in-out infinite;
+    transition: opacity 0.2s ease;
+  }
+
+  .ch-scroll-cue:hover {
+    opacity: 0.9;
+  }
+
+  @keyframes ch-bob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch-scroll-cue { animation: none; }
+  }
+
+  /* Back-to-chat pill */
+  .ch-pill {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 999990; /* above content, below QR modal (999999) */
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 999px;
+    padding: 0.625rem 1.125rem;
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  }
+
+  .ch-pill:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.45);
+  }
+
+  .ch-pill[hidden] {
+    display: none;
+  }
+
+  /* Visible focus rings */
+  .ch-card:focus-visible,
+  .ch-send:focus-visible,
+  .ch-icon-btn:focus-visible,
+  .ch-text-btn:focus-visible,
+  .ch-feedback-btn:focus-visible,
+  .ch-action-link:focus-visible,
+  .ch-scroll-cue:focus-visible,
+  .ch-pill:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  .dark .ch-card:focus-visible,
+  .dark .ch-send:focus-visible,
+  .dark .ch-icon-btn:focus-visible,
+  .dark .ch-text-btn:focus-visible,
+  .dark .ch-feedback-btn:focus-visible,
+  .dark .ch-action-link:focus-visible,
+  .dark .ch-scroll-cue:focus-visible,
+  .dark .ch-pill:focus-visible {
+    outline-color: #90cdf4;
+  }
+
+  /* Small screens: tighter hero padding, taller thread allowance */
+  @media (max-width: 640px) {
+    .ch-hero {
+      padding: 4rem 1rem 3.5rem;
+    }
+
+    .ch-messages {
+      max-height: calc(100vh - 20rem);
+      max-height: calc(100dvh - 20rem);
+    }
+  }
+</style>
+
+<script>
+  // localhost AND LAN mobile testing (`make get-lan-ip` → private IP) both
+  // target a local `npm run worker:dev` on :8787; everything else hits prod.
+  const CHAT_IS_DEV_HOST =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    /^(?:192\.168\.|10\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(window.location.hostname);
+  const CHAT_API_BASE = CHAT_IS_DEV_HOST
+    ? 'http://' + window.location.hostname + ':8787'
+    : 'https://resume.rafaracing.com.br';
+
+  const CHAT_STORAGE_KEY = 'resume_chat_history_v1';
+  const CHAT_COOLDOWN_KEY = 'resume_chat_cooldown_until';
+  const CHAT_MAX_STORED = 20;
+  const CHAT_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+  const CHAT_COOLDOWN_MS = 5 * 60 * 1000; // default (rate limit) — server retryAfterSeconds wins when present
+  const CHAT_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 503 = daily AI quota gone; retrying in minutes is pointless
+  const CHAT_TIMEOUT_MS = 45 * 1000; // must exceed the worker's worst-case fallback chain (~35s)
+
+  // Autofocus / refocus only on devices with a precise pointer — never pop the
+  // keyboard on mobile.
+  const CHAT_POINTER_FINE = window.matchMedia('(pointer: fine)').matches;
+  const CHAT_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CHAT_SCROLL_BEHAVIOR = CHAT_REDUCED_MOTION ? 'instant' : 'smooth';
+
+  // Rotating hero greeting — picked at random on each load.
+  const CHAT_GREETINGS = [
+    "Hi, I'm Rafael's resume — ask me anything.",
+    '10+ years of platform engineering. What do you want to know?',
+    'Pergunte em português se preferir 🇧🇷',
+    'Kubernetes? AWS? Salary? Just ask.',
+  ];
+
+  // In-memory conversation state (mirrors localStorage)
+  let chatMessages = [];
+  let chatInFlight = false;
+  let clearArmed = false;
+  let clearArmTimer = null;
+  let cooldownTimer = null;
+
+  const heroEl = document.getElementById('chat-hero');
+  const greetingEl = document.getElementById('chat-greeting');
+  const threadEl = document.getElementById('chat-thread');
+  const messagesEl = document.getElementById('chat-messages');
+  const cardsEl = document.getElementById('chat-cards');
+  const cooldownEl = document.getElementById('chat-cooldown');
+  const formEl = document.getElementById('chat-form');
+  const inputEl = document.getElementById('chat-input');
+  const sendEl = document.getElementById('chat-send');
+  const clearEl = document.getElementById('chat-clear');
+  const clearHintEl = document.getElementById('chat-clear-hint');
+  const newChatEl = document.getElementById('chat-new');
+  const skipEl = document.getElementById('chat-skip');
+  const scrollCueEl = document.getElementById('chat-scroll-cue');
+  const pillEl = document.getElementById('chat-pill');
+
+  function trackEvent(eventName, props) {
+    try {
+      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+        window.dataLayer.push(Object.assign({ event: eventName }, props || {}));
+      }
+    } catch (_e) {
+      /* analytics must never break the chat */
+    }
+  }
+
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Autolink ONLY exact allowed URL prefixes found in already-escaped text.
+  // Runs on escaped text: '&' only appears as entities, so '&amp;' is allowed
+  // inside URLs while '&quot;'/'&#39;' terminate them.
+  function linkifyEscaped(escaped) {
+    const pattern = /(https:\/\/(?:www\.linkedin\.com|github\.com)\/(?:[^\s<&]|&amp;)*|mailto:(?:[^\s<&]|&amp;)+)/g;
+    return escaped.replace(pattern, function (match) {
+      let url = match;
+      let trailing = '';
+      while (/[.,!?;:)\]]$/.test(url)) {
+        trailing = url.slice(-1) + trailing;
+        url = url.slice(0, -1);
+      }
+      if (!url) return match;
+      return (
+        '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>' + trailing
+      );
+    });
+  }
+
+  function renderText(text) {
+    return linkifyEscaped(escapeHtml(text)).replace(/\n/g, '<br>');
+  }
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (!raw) return [];
+      const data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.messages)) return [];
+      if (typeof data.savedAt !== 'number' || Date.now() - data.savedAt > CHAT_EXPIRY_MS) {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+        return [];
+      }
+      return data.messages.filter(function (m) {
+        return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
+      });
+    } catch (_e) {
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    try {
+      const trimmed = chatMessages.slice(-CHAT_MAX_STORED);
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages: trimmed, savedAt: Date.now() }));
+    } catch (_e) {
+      /* storage may be unavailable (private mode) */
+    }
+  }
+
+  function scrollToBottom() {
+    if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // Hero morph: greeting + cards collapse, thread appears above the input.
+  function enterConversationMode() {
+    if (!heroEl.classList.contains('ch-conv')) {
+      heroEl.classList.add('ch-conv');
+      threadEl.hidden = false;
+    }
+  }
+
+  function exitConversationMode() {
+    heroEl.classList.remove('ch-conv');
+    threadEl.hidden = true;
+  }
+
+  function appendBubble(role, content, options) {
+    const opts = options || {};
+    const row = document.createElement('div');
+    row.className = 'ch-row ch-' + role + (opts.error ? ' ch-error' : '');
+    const bubble = document.createElement('div');
+    bubble.className = 'ch-bubble';
+    bubble.innerHTML = renderText(content);
+    row.appendChild(bubble);
+    if (role === 'assistant' && opts.feedback) {
+      row.appendChild(buildFeedbackBar(opts.question || '', content));
+    }
+    messagesEl.appendChild(row);
+    scrollToBottom();
+    return row;
+  }
+
+  function buildFeedbackBar(question, reply) {
+    const bar = document.createElement('div');
+    bar.className = 'ch-feedback';
+
+    function makeBtn(verdict, label, emoji) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ch-feedback-btn';
+      btn.setAttribute('aria-label', label);
+      btn.textContent = emoji;
+      btn.addEventListener('click', function () {
+        sendFeedback(verdict, question, reply);
+        const thanks = document.createElement('span');
+        thanks.className = 'ch-feedback-thanks';
+        thanks.textContent = 'Thanks for the feedback';
+        bar.replaceWith(thanks);
+        trackEvent('chat_feedback');
+      });
+      return btn;
+    }
+
+    bar.appendChild(makeBtn('up', 'Good response', '\u{1F44D}'));
+    bar.appendChild(makeBtn('down', 'Bad response', '\u{1F44E}'));
+    return bar;
+  }
+
+  function sendFeedback(verdict, question, reply) {
+    try {
+      fetch(CHAT_API_BASE + '/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verdict: verdict,
+          question: String(question).slice(0, 500),
+          reply: String(reply).slice(0, 2000),
+        }),
+      }).catch(function () {
+        /* fire-and-forget */
+      });
+    } catch (_e) {
+      /* never break UI on feedback */
+    }
+  }
+
+  function showTyping() {
+    const row = document.createElement('div');
+    row.className = 'ch-row ch-assistant ch-typing';
+    row.id = 'chat-typing';
+    row.setAttribute('role', 'status');
+    row.setAttribute('aria-live', 'polite');
+    row.setAttribute('aria-label', 'Assistant is typing');
+    const bubble = document.createElement('div');
+    bubble.className = 'ch-bubble';
+    for (let i = 0; i < 3; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'ch-dot';
+      bubble.appendChild(dot);
+    }
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    const typing = document.getElementById('chat-typing');
+    if (typing) typing.remove();
+  }
+
+  function setBusy(busy) {
+    chatInFlight = busy;
+    updateInputState();
+  }
+
+  // In-memory mirror so the cooldown still holds when sessionStorage is
+  // unavailable (Safari lockdown / storage-blocked browsers).
+  let memCooldownUntil = 0;
+
+  function cooldownRemainingMs() {
+    let stored = 0;
+    try {
+      stored = parseInt(sessionStorage.getItem(CHAT_COOLDOWN_KEY) || '0', 10);
+    } catch (_e) {
+      /* storage unavailable — memCooldownUntil covers us */
+    }
+    return Math.max(0, stored - Date.now(), memCooldownUntil - Date.now());
+  }
+
+  function startCooldown(durationMs) {
+    const until = Date.now() + (durationMs || CHAT_COOLDOWN_MS);
+    memCooldownUntil = until;
+    try {
+      sessionStorage.setItem(CHAT_COOLDOWN_KEY, String(until));
+    } catch (_e) {
+      /* storage unavailable — memCooldownUntil covers us */
+    }
+    refreshCooldownUI();
+  }
+
+  function refreshCooldownUI() {
+    if (cooldownTimer) {
+      clearTimeout(cooldownTimer);
+      cooldownTimer = null;
+    }
+    const remaining = cooldownRemainingMs();
+    if (remaining > 0) {
+      const mins = Math.max(1, Math.ceil(remaining / 60000));
+      cooldownEl.textContent =
+        'The assistant is taking a short break (high demand). Try again in about ' +
+        mins + ' minute' + (mins === 1 ? '' : 's') + '.';
+      cooldownEl.hidden = false;
+      cooldownTimer = setTimeout(refreshCooldownUI, Math.min(remaining, 30000));
+    } else {
+      cooldownEl.hidden = true;
+    }
+    updateInputState();
+  }
+
+  function updateInputState() {
+    const coolingDown = cooldownRemainingMs() > 0;
+    const disabled = chatInFlight || coolingDown;
+    inputEl.disabled = disabled;
+    sendEl.disabled = disabled;
+    const cards = cardsEl.querySelectorAll('.ch-card');
+    for (let i = 0; i < cards.length; i++) cards[i].disabled = disabled;
+  }
+
+  function buildApiHistory() {
+    // Last 4 exchanged messages, each trimmed to 400 chars (contract: max 6 x 400)
+    return chatMessages.slice(-4).map(function (m) {
+      return { role: m.role, content: m.content.slice(0, 400) };
+    });
+  }
+
+  async function sendMessage(text, source) {
+    const message = String(text || '').trim().slice(0, 500);
+    if (!message || chatInFlight || cooldownRemainingMs() > 0) return;
+
+    const history = buildApiHistory();
+    chatMessages.push({ role: 'user', content: message });
+    saveHistory();
+    enterConversationMode();
+    appendBubble('user', message);
+    inputEl.value = '';
+    trackEvent('chat_message_sent', { source: source === 'card' ? 'card' : 'typed' });
+
+    setBusy(true);
+    showTyping();
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(function () {
+      controller.abort();
+    }, CHAT_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(CHAT_API_BASE + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message, history: history }),
+        signal: controller.signal,
+      });
+
+      if (res.status === 429 || res.status === 503) {
+        let body = null;
+        try {
+          body = await res.json();
+        } catch (_e) {
+          /* non-JSON error body — fall back to defaults */
+        }
+        if (res.status === 429) {
+          // Honor the server's window so a retry can actually succeed.
+          const retryMs =
+            body && typeof body.retryAfterSeconds === 'number' && body.retryAfterSeconds > 0
+              ? body.retryAfterSeconds * 1000
+              : CHAT_COOLDOWN_MS;
+          startCooldown(retryMs);
+          appendBubble(
+            'assistant',
+            "I'm getting a lot of questions right now. Please try again in a few minutes.",
+            { error: true }
+          );
+        } else {
+          // 503 = daily AI quota exhausted. Show the server's message — it is
+          // user-facing copy with the contact-Rafael escape hatch.
+          startCooldown(CHAT_QUOTA_COOLDOWN_MS);
+          appendBubble(
+            'assistant',
+            body && typeof body.error === 'string' && body.error
+              ? body.error
+              : 'The assistant reached its free daily AI quota. Please try again tomorrow.',
+            { error: true }
+          );
+        }
+        return;
+      }
+
+      if (!res.ok) {
+        appendBubble('assistant', 'Sorry, something went wrong. Please try again.', {
+          error: true,
+        });
+        return;
+      }
+
+      const data = await res.json();
+      const reply = data && typeof data.reply === 'string' ? data.reply : '';
+      if (!reply) {
+        appendBubble('assistant', 'Sorry, I could not generate a reply. Please try again.', {
+          error: true,
+        });
+        return;
+      }
+
+      chatMessages.push({ role: 'assistant', content: reply });
+      saveHistory();
+      appendBubble('assistant', reply, { feedback: true, question: message });
+    } catch (_e) {
+      appendBubble('assistant', 'Connection issue, try again.', { error: true });
+    } finally {
+      clearTimeout(timeoutId);
+      hideTyping();
+      setBusy(false);
+      if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+    }
+  }
+
+  function restoreHistory() {
+    chatMessages = loadHistory();
+    if (chatMessages.length === 0) return;
+    enterConversationMode();
+    for (let i = 0; i < chatMessages.length; i++) {
+      const m = chatMessages[i];
+      if (m.role === 'assistant') {
+        const question = i > 0 && chatMessages[i - 1].role === 'user' ? chatMessages[i - 1].content : '';
+        appendBubble('assistant', m.content, { feedback: true, question: question });
+      } else {
+        appendBubble('user', m.content);
+      }
+    }
+  }
+
+  function resetClearArm() {
+    clearArmed = false;
+    clearEl.classList.remove('ch-armed');
+    newChatEl.classList.remove('ch-armed');
+    clearHintEl.hidden = true;
+    if (clearArmTimer) {
+      clearTimeout(clearArmTimer);
+      clearArmTimer = null;
+    }
+  }
+
+  function handleClearClick() {
+    if (!clearArmed) {
+      // First tap: arm and ask for a second tap (no native confirm dialogs)
+      clearArmed = true;
+      clearEl.classList.add('ch-armed');
+      newChatEl.classList.add('ch-armed');
+      clearHintEl.hidden = false;
+      clearArmTimer = setTimeout(resetClearArm, 3000);
+      return;
+    }
+    resetClearArm();
+    chatMessages = [];
+    try {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch (_e) {
+      /* ignore */
+    }
+    messagesEl.innerHTML = '';
+    exitConversationMode();
+    updateInputState();
+    if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+  }
+
+  function scrollToChatHero() {
+    heroEl.scrollIntoView({ behavior: CHAT_SCROLL_BEHAVIOR, block: 'start' });
+    if (!inputEl.disabled) inputEl.focus({ preventScroll: true });
+    trackEvent('chat_opened');
+  }
+
+  function scrollToResume(e) {
+    const target = document.getElementById('resume-content');
+    if (!target) return; // fall back to native anchor behavior
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    target.scrollIntoView({ behavior: CHAT_SCROLL_BEHAVIOR, block: 'start' });
+    trackEvent('chat_scroll_to_resume');
+  }
+
+  function initChatHero() {
+    if (!heroEl || !threadEl || !messagesEl || !formEl || !inputEl) return;
+
+    // Rotating greeting (random per visit)
+    if (greetingEl) {
+      greetingEl.textContent = CHAT_GREETINGS[Math.floor(Math.random() * CHAT_GREETINGS.length)];
+    }
+
+    restoreHistory();
+    refreshCooldownUI();
+    trackEvent('chat_hero_seen');
+
+    formEl.addEventListener('submit', function (e) {
+      e.preventDefault();
+      sendMessage(inputEl.value, 'typed');
+    });
+
+    const cards = cardsEl.querySelectorAll('.ch-card');
+    for (let i = 0; i < cards.length; i++) {
+      cards[i].addEventListener('click', function (e) {
+        sendMessage(e.currentTarget.textContent, 'card');
+      });
+    }
+
+    clearEl.addEventListener('click', handleClearClick);
+    newChatEl.addEventListener('click', handleClearClick);
+
+    if (skipEl) skipEl.addEventListener('click', scrollToResume);
+    if (scrollCueEl) scrollCueEl.addEventListener('click', scrollToResume);
+
+    // Back-to-chat pill: visible only while the hero is fully out of view.
+    if (pillEl && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        function (entries) {
+          for (let i = 0; i < entries.length; i++) {
+            pillEl.hidden = entries[i].isIntersecting;
+          }
+        },
+        { threshold: 0 }
+      );
+      observer.observe(heroEl);
+      pillEl.addEventListener('click', scrollToChatHero);
+    }
+
+    // Autofocus the input on desktop only (pointer: fine) — never trigger the
+    // mobile keyboard on load.
+    if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+  }
+
+  initChatHero();
+
+  // Expose for debugging/automation
+  if (typeof window !== 'undefined') {
+    window.scrollToChatHero = scrollToChatHero;
+  }
+</script>

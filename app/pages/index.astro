@@ -4,7 +4,7 @@ import LiquidGlassCard from '../components/LiquidGlassCard.astro';
 import ContactButton from '../components/ContactButton.astro';
 import QRCodeButton from '../components/QRCodeButton.astro';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.astro';
-import ChatWidget from '../components/ChatWidget.astro';
+import ChatHero from '../components/ChatHero.astro';
 import LiquidGlassIcon from '../components/LiquidGlassIcon.astro';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 import resumeData from '../data/resume.json';
@@ -19,7 +19,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 ---
 
 <Layout title={`${basics.name} - ${basics.label}`} description={basics.summary}>
-  <main class="min-h-screen py-8 px-4">
+  <!-- AI-first: the chat hero IS the first viewport; classic resume below -->
+  <ChatHero />
+
+  <main id="resume-content" class="min-h-screen py-8 px-4">
     <div class="max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto space-y-8 apple-motion-container">
       
       <!-- Hero Section with Advanced Liquid Glass -->
@@ -527,8 +530,6 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     title={basics.label}
   />
 
-  <!-- AI Chat Widget -->
-  <ChatWidget />
 </Layout>
 
 <style>
