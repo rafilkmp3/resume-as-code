@@ -200,18 +200,18 @@ const promptCards = [
   }
 
   .ch-greeting {
-    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+    font-size: var(--text-title-1);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--tracking-title);
+    line-height: var(--lh-display);
     text-wrap: balance;
     margin: 0;
   }
 
   .ch-disclosure {
-    margin: 0.875rem 0 0;
+    margin: var(--space-4) 0 0;
     font-size: var(--text-caption);
-    letter-spacing: 0.01em;
+    letter-spacing: var(--tracking-label);
     opacity: 0.6;
   }
 
@@ -225,71 +225,58 @@ const promptCards = [
   /* Thread */
   .ch-thread {
     width: 100%;
+    max-width: 640px;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    border-radius: 20px;
+    border-radius: var(--glass-radius);
     overflow: hidden;
     background: var(--glass-surface);
     backdrop-filter: var(--glass-filter);
     -webkit-backdrop-filter: var(--glass-filter);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--glass-shadow);
   }
 
   .ch-thread[hidden] {
     display: none;
   }
 
-  .dark .ch-thread {
-    background: rgba(15, 20, 25, 0.6);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-  }
-
   .ch-thread-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.625rem 0.875rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--glass-border);
     flex-shrink: 0;
-  }
-
-  .dark .ch-thread-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
   }
 
   .ch-thread-title {
     font-size: var(--text-caption);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-tight);
     opacity: 0.8;
   }
 
   .ch-thread-actions {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--space-2);
   }
 
   .ch-text-btn {
     background: none;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 999px;
-    padding: 3px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-2);
     font-size: var(--text-caption);
-    font-weight: 500;
-    line-height: 1.4;
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-body);
     color: inherit;
     cursor: pointer;
     opacity: 0.75;
     transition: opacity 0.2s ease, background 0.2s ease;
-  }
-
-  .dark .ch-text-btn {
-    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .ch-text-btn:hover {
@@ -332,7 +319,7 @@ const promptCards = [
 
   .ch-clear-hint {
     font-size: var(--text-caption);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
   }
 
   /* Message list: scrolls internally so the input pill stays visible */
@@ -365,10 +352,10 @@ const promptCards = [
   }
 
   .ch-bubble {
-    padding: 0.625rem 0.875rem;
-    border-radius: 16px;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
     font-size: var(--text-body); /* messages are primary reading content — 16px floor */
-    line-height: 1.55;
+    line-height: var(--lh-body);
     overflow-wrap: break-word;
     word-break: break-word;
     white-space: normal;
@@ -404,9 +391,9 @@ const promptCards = [
   /* Typing indicator */
   .ch-typing .ch-bubble {
     display: flex;
-    gap: 5px;
+    gap: var(--space-1);
     align-items: center;
-    padding: 0.75rem 0.875rem;
+    padding: var(--space-3) var(--space-4);
   }
 
   .ch-dot {
@@ -433,25 +420,21 @@ const promptCards = [
   /* Feedback */
   .ch-feedback {
     display: flex;
-    gap: 0.375rem;
-    margin-top: 0.25rem;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
   }
 
   .ch-feedback-btn {
     background: none;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 999px;
-    padding: 2px 8px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-2);
     font-size: var(--text-caption);
-    line-height: 1.4;
+    line-height: var(--lh-body);
     cursor: pointer;
     opacity: 0.75;
     transition: opacity 0.2s ease, transform 0.2s ease;
     color: inherit;
-  }
-
-  .dark .ch-feedback-btn {
-    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .ch-feedback-btn:hover {
@@ -462,17 +445,17 @@ const promptCards = [
   .ch-feedback-thanks {
     font-size: var(--text-caption);
     opacity: 0.6;
-    margin-top: 0.25rem;
+    margin-top: var(--space-1);
   }
 
   /* Cooldown notice */
   .ch-cooldown {
     width: 100%;
     max-width: 640px;
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
     font-size: var(--text-caption);
-    line-height: 1.4;
+    line-height: var(--lh-body);
     color: #b45309;
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.2);
@@ -492,21 +475,15 @@ const promptCards = [
     max-width: 640px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.4375rem 0.4375rem 0.4375rem 1.375rem;
-    border-radius: 999px;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+    border-radius: var(--glass-radius-pill);
     background: var(--glass-surface-strong);
     backdrop-filter: var(--glass-filter);
     -webkit-backdrop-filter: var(--glass-filter);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .dark .ch-form {
-    background: rgba(15, 20, 25, 0.75);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   .ch-form:focus-within {
@@ -525,7 +502,7 @@ const promptCards = [
     border: none;
     outline: none;
     background: transparent;
-    padding: 0.6875rem 0;
+    padding: var(--space-3) 0;
     font-size: var(--text-body); /* same body size as the message bubbles */
     color: inherit;
   }
@@ -541,8 +518,8 @@ const promptCards = [
   }
 
   .ch-send {
-    width: 42px;
-    height: 42px;
+    width: var(--tap-min);
+    height: var(--tap-min);
     flex-shrink: 0;
     border-radius: 50%;
     border: none;
@@ -570,18 +547,18 @@ const promptCards = [
     max-width: 640px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.625rem;
+    gap: var(--space-3);
   }
 
   .ch-card {
     background: var(--glass-bg, rgba(255, 255, 255, 0.1));
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: var(--glass-filter-sm);
+    -webkit-backdrop-filter: var(--glass-filter-sm);
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
-    border-radius: 14px;
-    padding: 0.75rem 1rem;
+    border-radius: var(--glass-radius-sm);
+    padding: var(--space-3) var(--space-4);
     font-size: var(--text-footnote);
-    line-height: 1.45;
+    line-height: var(--lh-body);
     text-align: left;
     color: inherit;
     cursor: pointer;
@@ -603,11 +580,11 @@ const promptCards = [
   @media (max-width: 480px) {
     .ch-cards {
       grid-template-columns: 1fr;
-      gap: 0.5rem;
+      gap: var(--space-2);
     }
 
     .ch-card {
-      padding: 0.625rem 0.875rem;
+      padding: var(--space-2) var(--space-3);
       font-size: var(--text-caption);
     }
   }
@@ -616,14 +593,14 @@ const promptCards = [
   .ch-actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     font-size: var(--text-caption);
   }
 
   .ch-action-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--space-2);
     color: inherit;
     text-decoration: none;
     opacity: 0.65;
@@ -641,11 +618,11 @@ const promptCards = [
   /* Scroll cue */
   .ch-scroll-cue {
     position: absolute;
-    bottom: 1rem;
+    bottom: var(--space-4);
     left: 50%;
     background: none;
     border: none;
-    padding: 0.5rem;
+    padding: var(--space-2);
     color: inherit;
     opacity: 0.45;
     cursor: pointer;
@@ -670,17 +647,17 @@ const promptCards = [
   /* Back-to-chat pill */
   .ch-pill {
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: var(--space-5);
+    right: var(--space-5);
     z-index: 999990; /* above content, below QR modal (999999) */
     border: 1px solid rgba(37, 99, 235, 0.3);
-    border-radius: 999px;
-    padding: 0.625rem 1.125rem;
+    border-radius: var(--radius-pill);
+    padding: var(--space-3) var(--space-4);
     background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     color: #ffffff;
     font-size: var(--text-footnote);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-tight);
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
@@ -704,25 +681,14 @@ const promptCards = [
   .ch-action-link:focus-visible,
   .ch-scroll-cue:focus-visible,
   .ch-pill:focus-visible {
-    outline: 2px solid #2563eb;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
-  }
-
-  .dark .ch-card:focus-visible,
-  .dark .ch-send:focus-visible,
-  .dark .ch-icon-btn:focus-visible,
-  .dark .ch-text-btn:focus-visible,
-  .dark .ch-feedback-btn:focus-visible,
-  .dark .ch-action-link:focus-visible,
-  .dark .ch-scroll-cue:focus-visible,
-  .dark .ch-pill:focus-visible {
-    outline-color: #90cdf4;
   }
 
   /* Small screens: tighter hero padding, taller thread allowance */
   @media (max-width: 640px) {
     .ch-hero {
-      padding: 4rem 1rem 3.5rem;
+      padding: var(--space-10) var(--space-4) var(--space-8);
     }
 
     .ch-messages {
