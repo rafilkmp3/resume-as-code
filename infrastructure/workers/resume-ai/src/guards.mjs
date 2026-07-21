@@ -2,6 +2,11 @@
 // Pure module — no Worker APIs, node-testable.
 
 const ALLOWED_ORIGINS = [
+  // Primary prod — the site is served from this same origin (Workers Static
+  // Assets), so its chat POSTs are same-origin and MUST be allowed.
+  'https://resume.rafaracing.com.br',
+  // Legacy origins kept allowed during the migration (they 301-redirect to the
+  // domain above; harmless to keep on the list, avoids any transition breakage).
   'https://rafilkmp3.github.io',
   'https://resume-as-code.netlify.app',
   'http://localhost:4321',

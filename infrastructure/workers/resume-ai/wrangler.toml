@@ -9,6 +9,15 @@ routes = [
   { pattern = "resume.rafaracing.com.br", custom_domain = true }
 ]
 
+# The Worker serves the built Astro site (Workers Static Assets) AND the API on
+# one domain. run_worker_first routes ONLY /api/* through the Worker; every
+# other path is served directly as a static file (no Worker invocation, no AI
+# quota touched on page loads). Path is relative to this config file.
+[assets]
+directory = "../../../workspace/build"
+binding = "ASSETS"
+run_worker_first = [ "/api/*" ]
+
 # Workers AI has NO local simulator — remote = true makes `wrangler dev`
 # proxy to the real binding (consumes real free-tier quota, ~10k neurons/day).
 [ai]

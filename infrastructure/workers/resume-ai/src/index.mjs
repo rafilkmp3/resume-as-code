@@ -40,9 +40,6 @@ const DAILY_FEEDBACK_BUDGET = 100; // caps fb:* KV writes so feedback spam can't
 const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days
 const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
 
-// Where humans land when they open the API host in a browser.
-const SITE_URL = 'https://rafilkmp3.github.io/resume-as-code/';
-
 const STATIC_FALLBACK_REPLY =
   "I'm having trouble reaching my AI brain right now. Meanwhile, everything about me is right here on the page — and if you'd like to talk, the contact buttons (email, WhatsApp, LinkedIn, calendar) are one scroll away.";
 
@@ -333,12 +330,9 @@ export default {
       }
     }
 
-    // Humans opening resume.rafaracing.com.br in a browser land on the resume
-    // site instead of a JSON 404. API-looking paths still get a 404.
-    if (!url.pathname.startsWith('/api/') && request.method === 'GET') {
-      return Response.redirect(SITE_URL, 302);
-    }
-
+    // Non-/api paths never reach here: run_worker_first = ["/api/*"] means the
+    // static-assets layer serves the site directly without invoking the Worker.
+    // Anything landing here is an unknown /api/* route.
     return jsonResponse(404, { error: 'Not found' }, corsOrigin);
   },
 };

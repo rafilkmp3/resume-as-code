@@ -622,6 +622,10 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   .apple-summary-block {
     max-width: var(--measure);
     margin: 0 auto;
+    /* Centered as a block under the centered name, but the copy itself is
+       left-aligned so long-form body keeps a clean left edge (HIG: center
+       only deliberately). */
+    text-align: left;
   }
 
   /* Sub-group label (overline) — subordinate to section titles, distinct from
@@ -1278,8 +1282,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(8px) saturate(110%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 0.875rem 1rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
     transition: all 0.2s ease-out;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     position: relative;
@@ -1309,11 +1313,11 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
 
 
   .apple-highlight-text {
-    font-size: 0.875rem; /* 14pt */
-    line-height: 1.5;
+    font-size: var(--text-body); /* body floor — bullets are reading content */
+    line-height: var(--lh-body);
     color: var(--foreground);
     margin: 0;
-    font-weight: 400; /* Normal weight for better readability */
+    font-weight: var(--fw-regular); /* Normal weight for better readability */
     overflow-wrap: break-word;
     hyphens: auto;
   }
@@ -1344,7 +1348,7 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   /* Responsive adjustments for highlight cards */
   @media (max-width: 768px) {
     .apple-highlight-card {
-      padding: 0.75rem 0.875rem;
+      padding: var(--space-3);
       gap: 0.625rem;
     }
     
@@ -1355,16 +1359,18 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
     }
     
     .apple-highlight-text {
-      font-size: 0.8125rem; /* 13pt on mobile */
-      line-height: 1.4;
+      font-size: var(--text-body); /* keep at body floor on mobile too */
+      line-height: 1.45;
     }
   }
 
   /* Apple Experience Container - Clean liquid glass hover boundaries */
   .apple-experience-container {
-    border-radius: 16px;
-    padding: 1.25rem;
-    margin: -1rem;
+    border-radius: var(--radius-lg);
+    /* Negative margin equals the padding so the hover surface insets
+       symmetrically to a predictable, on-grid offset. */
+    padding: var(--space-4);
+    margin: calc(-1 * var(--space-4));
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
@@ -1411,13 +1417,13 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   /* Enhanced Experience Summary Typography */
   .apple-experience-summary {
     font-size: clamp(1rem, 1.5vw, 1.125rem); /* 16pt - 18pt fluid */
-    font-weight: 400; /* Apple standard body weight - lighter and more readable */
-    line-height: clamp(1.5, 1.55, 1.6);
+    font-weight: var(--fw-regular); /* Apple standard body weight - lighter and more readable */
+    line-height: 1.55; /* was a no-op clamp(); single real value */
     letter-spacing: -0.002em; /* More subtle negative tracking */
     color: var(--foreground);
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
     text-wrap: balance;
-    max-width: 75ch; /* Optimal reading width */
+    max-width: var(--measure); /* single shared reading measure */
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     font-optical-sizing: auto;
     /* Apple HIG text rendering optimization */
@@ -1429,8 +1435,8 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   /* Mobile adjustments for experience summary */
   @media (max-width: 640px) {
     .apple-experience-container {
-      padding: 1rem;
-      margin: -0.25rem;
+      padding: var(--space-4);
+      margin: calc(-1 * var(--space-4));
     }
     
     .apple-experience-summary {
@@ -1472,8 +1478,9 @@ const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4
   .location-link {
     display: inline-flex;
     align-items: center;
+    min-height: var(--tap-min); /* HIG touch target */
     gap: 0.375rem;
-    font-size: 0.9375rem; /* 15pt - Apple HIG body size */
+    font-size: var(--text-body); /* 16px body floor */
     font-weight: 500;
     color: var(--foreground);
     opacity: 0.7;

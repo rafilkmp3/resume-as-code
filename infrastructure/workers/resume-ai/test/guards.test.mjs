@@ -66,6 +66,7 @@ test('feedback body: verdict up/down only', () => {
 
 test('cors: all allowed origins echo back', () => {
   const allowed = [
+    'https://resume.rafaracing.com.br',
     'https://rafilkmp3.github.io',
     'https://resume-as-code.netlify.app',
     'https://deploy-preview-123--resume-as-code.netlify.app',

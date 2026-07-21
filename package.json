@@ -18,6 +18,7 @@
     "worker:dev": "npx wrangler dev -c infrastructure/workers/resume-ai/wrangler.toml",
     "worker:dev:remote": "npx wrangler dev --remote -c infrastructure/workers/resume-ai/wrangler.toml",
     "worker:deploy": "npx wrangler deploy -c infrastructure/workers/resume-ai/wrangler.toml",
+    "site:deploy": "DEPLOY_URL=https://resume.rafaracing.com.br npm run build && npm run worker:deploy",
     "worker:test": "node --test \"infrastructure/workers/resume-ai/test/*.test.mjs\"",
     "worker:eval": "node infrastructure/workers/resume-ai/eval/run-eval.mjs",
     "prepare": "husky || true"
