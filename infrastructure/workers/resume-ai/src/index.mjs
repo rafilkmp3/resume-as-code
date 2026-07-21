@@ -40,8 +40,24 @@ const RATE_LIMIT_FEEDBACK = { max: 20, ttl: 600 }; // 20 req / 10 min per IP
 // (each request costs ~3-4 KV writes: rate-limit, budget, log, cache).
 const DAILY_BUDGET = 200;
 const DAILY_FEEDBACK_BUDGET = 100; // caps fb:* KV writes so feedback spam can't exhaust the KV write quota
-const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days
+const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days (normal questions)
 const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
+
+// The 4 hero suggestion cards are the primary demo surface — once warmed they
+// should answer INSTANTLY and never re-spend neurons. Their cached answers get
+// a ~400-day TTL (vs 7 days), so they effectively live "forever"; the cache
+// VERSION in the key (chat:vN) still busts them whenever the prompt/resume
+// changes and the deploy re-prewarms. Strings must match the hero cards EXACTLY
+// (normalizeQuestion folds case/punctuation/whitespace).
+const CARD_CACHE_TTL = 400 * 24 * 60 * 60; // ~400 days
+const CARD_QUESTIONS = [
+  "How's your AWS experience?",
+  "What's your current role?",
+  'Are you open to new opportunities?',
+  'Tell me about your DevOps toolbox',
+];
+const CARD_KEYS = new Set(CARD_QUESTIONS.map((q) => normalizeQuestion(q)));
+const isCardQuestion = (msg) => CARD_KEYS.has(normalizeQuestion(msg));
 
 const STATIC_FALLBACK_REPLY =
   "I'm having trouble reaching my AI brain right now. Meanwhile, everything about me is right here on the page — and if you'd like to talk, the contact buttons (email, WhatsApp, LinkedIn, calendar) are one scroll away.";
@@ -232,9 +248,11 @@ async function handleChat(request, env, ctx, corsOrigin) {
   }
 
   if (!degraded && history.length === 0) {
+    // Card questions live ~400 days (instant "forever"); everything else 7 days.
+    const ttl = isCardQuestion(message) ? CARD_CACHE_TTL : CACHE_TTL;
     ctx.waitUntil(
       env.RESUME_AI_KV.put(cacheKey, JSON.stringify({ reply, model: modelUsed }), {
-        expirationTtl: CACHE_TTL,
+        expirationTtl: ttl,
       }).catch(() => {}),
     );
   }
