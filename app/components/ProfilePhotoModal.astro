@@ -38,8 +38,8 @@ const { name, imageSrc, title, class: className } = Astro.props;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.8); /* modal scrim — not a glass surface */
+    backdrop-filter: blur(5px); /* light scrim blur, not the glass filter */
     display: none;
     justify-content: center;
     align-items: center;
@@ -48,14 +48,14 @@ const { name, imageSrc, title, class: className } = Astro.props;
   }
 
   .profile-content {
-    background: white;
-    border-radius: 20px; /* Apple-style larger border radius */
-    padding: 2rem;
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
     max-width: 500px; /* Larger for profile photo */
     width: 90%;
     text-align: center;
     position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* modal elevation — no glass-shadow match */
     animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -79,38 +79,45 @@ const { name, imageSrc, title, class: className } = Astro.props;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-5);
   }
 
   .profile-header h3 {
     margin: 0;
-    color: #2d3748;
-    font-size: 1.375rem; /* Apple HIG Title 2 */
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
+    color: var(--foreground);
+    font-size: var(--text-title-2); /* Apple HIG Title 2 */
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-heading);
+    letter-spacing: var(--tracking-title);
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   }
 
   .close-btn {
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 2rem; /* glyph size — iconographic, no token */
     cursor: pointer;
-    color: #718096;
+    color: var(--foreground-muted);
     line-height: 1;
-    padding: 4px;
-    border-radius: 6px;
+    /* HIG touch target — was ~32px (4px padding only) */
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .close-btn:hover {
-    color: #2d3748;
-    background: rgba(0, 0, 0, 0.05);
+    color: var(--foreground);
+    /* --separator-dark resolves to rgba(0,0,0,.05) light / rgba(255,255,255,.1)
+       dark — one rule covers both themes, so no .dark hover override needed */
+    background: var(--separator-dark);
   }
 
   .profile-image-container {
-    margin: 1.5rem 0;
+    margin: var(--space-5) 0;
     display: flex;
     justify-content: center;
   }
@@ -119,85 +126,58 @@ const { name, imageSrc, title, class: className } = Astro.props;
     max-width: 300px; /* Large high-res display */
     width: 100%;
     height: auto;
-    border-radius: 20px; /* Apple-style rounded corners */
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border: 3px solid #1e40af; /* Matching the profile badge border */
+    border-radius: var(--radius-lg); /* Apple-style rounded corners */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* photo elevation — no glass-shadow match */
+    border: 3px solid var(--primary); /* Matching the profile badge border */
   }
 
   .profile-info {
-    margin: 1.5rem 0;
+    margin: var(--space-5) 0;
   }
 
   .profile-info h4 {
-    margin: 0 0 0.5rem 0;
-    color: #2d3748;
-    font-size: 1.25rem; /* Apple HIG Title 3 */
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-2) 0;
+    color: var(--foreground);
+    font-size: var(--text-title-3); /* Apple HIG Title 3 */
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-heading);
+    letter-spacing: var(--tracking-tight);
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   }
 
   .profile-info p {
     margin: 0;
-    color: #667eea;
-    font-size: 1rem; /* Apple HIG Body */
-    font-weight: 400;
-    line-height: 1.47;
+    color: var(--link-color);
+    font-size: var(--text-body); /* Apple HIG Body */
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-body);
   }
 
   .profile-footer {
-    font-size: 0.875rem; /* Apple HIG Footnote */
-    color: #718096;
-    margin-top: 1rem;
-    font-weight: 400;
-    line-height: 1.43;
+    font-size: var(--text-footnote); /* Apple HIG Footnote */
+    color: var(--foreground-muted);
+    margin-top: var(--space-4);
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-body);
   }
 
-  /* Dark theme support */
+  /* Dark theme: the surface color (--background) and every text color already
+     flow from the shared (.dark) token overrides in global.css — only the card
+     edge needs an explicit override here. */
   :global(.dark) .profile-content {
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  :global(.dark) .profile-header h3 {
-    color: #f7fafc;
-  }
-
-  :global(.dark) .profile-info h4 {
-    color: #f7fafc;
-  }
-
-  :global(.dark) .profile-info p {
-    color: #90cdf4;
-  }
-
-  :global(.dark) .profile-footer {
-    color: #a0aec0;
-  }
-
-  :global(.dark) .close-btn {
-    color: #a0aec0;
-  }
-
-  :global(.dark) .close-btn:hover {
-    color: #f7fafc;
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
   }
 
   @media (max-width: 640px) {
     .profile-content {
-      padding: 1.5rem;
+      padding: var(--space-5);
       max-width: 95%;
     }
-    
+
+    /* radius unchanged from desktop (--radius-lg); h3 shrink is handled by the
+       fluid --text-title-2 clamp, so no per-breakpoint overrides are needed */
     .profile-image-container img {
       max-width: 250px;
-      border-radius: 16px;
-    }
-
-    .profile-header h3 {
-      font-size: 1.25rem; /* Smaller on mobile */
     }
   }
 </style>

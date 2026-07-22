@@ -1,3 +1,12 @@
+# Prod moved to the Cloudflare Worker at resume.rafaracing.com.br (site + AI on
+# one domain, Workers Static Assets). Netlify now just 301-redirects there so
+# old staging/preview links keep working and hand SEO to the new domain.
+[[redirects]]
+  from = "/*"
+  to = "https://resume.rafaracing.com.br/:splat"
+  status = 301
+  force = true
+
 [build]
   # Disable Netlify builds - we build in GitHub Actions
   command = "echo 'Build disabled - serving from GitHub Actions artifacts only'"

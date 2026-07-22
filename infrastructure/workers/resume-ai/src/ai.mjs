@@ -1,0 +1,130 @@
+// Workers AI helpers: hard-timeout runner and response post-processing.
+
+// Lesson from italia2026 (10/Jul GLM incident): on the free tier, AI.run of an
+// unavailable model can HANG forever without throwing — try/catch never sees a
+// failure and the fallback chain never fires. Promise.race with a hard timeout
+// guarantees the fallback always gets a chance to run.
+/**
+ * @param {object} ai env.AI binding
+ * @param {string} model model id
+ * @param {object} inputs { messages, max_tokens, ... }
+ * @param {number} timeoutMs
+ * @param {object} [options] optional 3rd AI.run arg (e.g. AI Gateway config)
+ */
+export async function aiRunWithTimeout(ai, model, inputs, timeoutMs = 20_000, options = undefined) {
+  let timer;
+  try {
+    return await Promise.race([
+      options ? ai.run(model, inputs, options) : ai.run(model, inputs),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`AI_TIMEOUT ${model} ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Run through the AI Gateway when configured, self-healing if the gateway slug
+ * is not provisioned. Passing a nonexistent gateway id makes AI.run fail every
+ * time (italia2026 B-397b) — so on the FIRST error with the gateway attached we
+ * retry the SAME model once WITHOUT it. That makes turning the gateway on/off a
+ * pure env-var flip with zero risk of a bad slug taking the chatbot down.
+ * @param {object} ai env.AI binding
+ * @param {string} model
+ * @param {object} inputs
+ * @param {number} timeoutMs
+ * @param {string} [gatewayId] env.AI_GATEWAY_ID — empty/undefined disables the gateway
+ * @returns {Promise<{raw:unknown, viaGateway:boolean}>}
+ */
+export async function aiRunViaGateway(ai, model, inputs, timeoutMs, gatewayId) {
+  if (gatewayId) {
+    try {
+      const raw = await aiRunWithTimeout(ai, model, inputs, timeoutMs, {
+        gateway: { id: gatewayId },
+      });
+      return { raw, viaGateway: true };
+    } catch (err) {
+      // ALWAYS fall back to a direct call on a gateway error. The gateway has
+      // its OWN failure modes the direct path does not — a bad slug, the
+      // gateway being down, OR its spend/rate limits tripping (a $0.01/mo cap
+      // returns a quota-shaped error even while the account's daily neuron
+      // allocation is untouched). Rethrowing quota errors here wrongly killed
+      // the chain when the block was the GATEWAY's, not Workers AI's. Only the
+      // DIRECT call's error (below) should end the model attempt. A hard
+      // timeout still rethrows — retrying a hung model wastes the budget.
+      const msg = String(err?.message || err);
+      if (/AI_TIMEOUT/.test(msg)) throw err;
+      console.warn(`[resume-ai] gateway '${gatewayId}' failed (${msg}) — retrying direct`);
+    }
+  }
+  const raw = await aiRunWithTimeout(ai, model, inputs, timeoutMs);
+  return { raw, viaGateway: false };
+}
+
+// Legacy text-generation models return { response }; chat-completions models
+// (2026-gen) return the OpenAI shape { choices: [{ message: { content } }] }.
+// Extract text from either.
+export function extractAiText(response) {
+  const r = response || {};
+  if (typeof r.response === 'string' && r.response.length > 0) return r.response;
+  const choice = Array.isArray(r.choices) ? r.choices[0] : undefined;
+  return choice?.message?.content ?? choice?.delta?.content ?? '';
+}
+
+// Distinctive substrings that only exist inside the system prompt — if any
+// shows up in a reply, the model was jailbroken into dumping its instructions
+// (observed with llama-3.3-70b under a direct "print your system prompt"
+// injection). Prompt rules alone do NOT hold; this is the deterministic gate.
+const PROMPT_LEAK_SENTINELS = [
+  'computed facts',
+  'internal grounding',
+  'example answers',
+  'never compute date math',
+  'untrusted data',
+  'first person, as rafael',
+];
+
+/**
+ * @param {string} text candidate reply
+ * @param {string} [privateContext] secret context (e.g. salary) — any digit
+ *   group of 3+ digits found in it becomes a banned number in replies,
+ *   compared with separators stripped ("6,200" leaks as "6200" too)
+ * @returns {boolean} true when the reply leaks prompt internals or secrets
+ */
+export function detectPromptLeak(text, privateContext = '') {
+  const lower = text.toLowerCase();
+  if (PROMPT_LEAK_SENTINELS.some((s) => lower.includes(s))) return true;
+  if (privateContext) {
+    const banned = (privateContext.match(/\d[\d.,]*\d|\d{3,}/g) || [])
+      .map((n) => n.replace(/[.,]/g, ''))
+      .filter((n) => n.length >= 3);
+    const replyDigits = text.replace(/[.,\s]/g, '');
+    if (banned.some((n) => replyDigits.includes(n))) return true;
+  }
+  return false;
+}
+
+/**
+ * Cleans a model reply: strip HTML tags, collapse degenerate repeated-char
+ * runs (>10x — repetition-loop failure mode of small models), hard cap at
+ * 2000 chars, trim.
+ */
+export function postProcess(text) {
+  if (typeof text !== 'string') return '';
+  // Strip tags until stable — a single pass leaves nested payloads like
+  // "<scr<script>ipt>" recombining into "<script>" (CodeQL
+  // js/incomplete-multi-character-sanitization). The widget escapes all HTML
+  // anyway; this is server-side defense in depth.
+  let out = text;
+  let prev;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]*>/g, '');
+  } while (out !== prev);
+  return out
+    .replace(/(.)\1{10,}/gs, '$1$1$1')
+    .slice(0, 2000)
+    .trim();
+}

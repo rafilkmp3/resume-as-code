@@ -1,0 +1,144 @@
+---
+name: 🤖 AI Worker (resume-ai)
+
+on:
+  push:
+    branches: [main]
+    # The worker now serves the whole site (static assets) + the API, so a
+    # deploy must fire on ANY site or worker change, not just worker files.
+    paths:
+      - 'infrastructure/workers/resume-ai/**'
+      - 'app/**'
+      - 'astro.config.mjs'
+      - 'tailwind.config.mjs'
+      - 'package.json'
+      - '.github/workflows/worker-deploy.yml'
+  pull_request:
+    paths:
+      - 'infrastructure/workers/resume-ai/**'
+      - 'app/**'
+      - 'astro.config.mjs'
+      - 'tailwind.config.mjs'
+      - 'package.json'
+      - '.github/workflows/worker-deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: worker-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  WRANGLER_VERSION: '4.112.0'
+  WRANGLER_CONFIG: 'infrastructure/workers/resume-ai/wrangler.toml'
+
+jobs:
+  test:
+    name: 🧪 Worker Tests + Bundle Check
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-environment
+        with:
+          cache-suffix: 'worker'
+
+      - name: Unit tests (node --test, no Worker runtime)
+        run: node --test "infrastructure/workers/resume-ai/test/*.test.mjs"
+
+      - name: Build site (static-assets bundle the dry-run needs)
+        run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
+
+      - name: Bundle check (wrangler deploy --dry-run, no auth needed)
+        run: |
+          npx --yes wrangler@${{ env.WRANGLER_VERSION }} deploy \
+            --dry-run --outdir /tmp/worker-bundle -c "${{ env.WRANGLER_CONFIG }}"
+
+  deploy:
+    name: 🚀 Deploy Worker
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check CLOUDFLARE_API_TOKEN secret
+        run: |
+          if [[ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]]; then
+            echo "::error::CLOUDFLARE_API_TOKEN secret is not set."
+            echo "Create one at Cloudflare dashboard → My Profile → API Tokens"
+            echo "using the 'Edit Cloudflare Workers' template, then run:"
+            echo "  gh secret set CLOUDFLARE_API_TOKEN"
+            exit 1
+          fi
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build-environment
+        with:
+          cache-suffix: 'worker-site'
+
+      - name: Build site for prod domain (static assets bundle)
+        run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
+
+      - name: Deploy resume-ai (worker + static assets)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: deploy -c ${{ env.WRANGLER_CONFIG }}
+
+      - name: Verify live endpoint
+        run: |
+          BASE="https://resume.rafaracing.com.br"
+          echo "🔍 Verifying $BASE"
+
+          for i in {1..12}; do
+            CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" "$BASE/api/health" || true)
+            [[ "$CODE" == "200" ]] && break
+            echo "⏳ Attempt $i/12: /api/health returned $CODE, retrying in 10s"
+            sleep 10
+          done
+          [[ "$CODE" == "200" ]] || { echo "❌ /api/health never returned 200"; exit 1; }
+          echo "✅ /api/health OK"
+
+          # Origin gate must reject POSTs without an allowed Origin
+          CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" -X POST "$BASE/api/chat" \
+            -H 'Content-Type: application/json' -d '{"message":"ci probe"}')
+          [[ "$CODE" == "403" ]] || { echo "❌ expected 403 for missing Origin, got $CODE"; exit 1; }
+          echo "✅ origin gate OK (403 without Origin)"
+
+          # Root must serve the site itself (static assets), not redirect
+          ROOT=$(curl -s -m 10 "$BASE/")
+          echo "$ROOT" | grep -q "chat-hero" || { echo "❌ root did not serve the site"; exit 1; }
+          echo "✅ root serves the site"
+
+          # NOTE: no live AI probing beyond the prewarm below — CI must not
+          # burn free-tier neurons; model behavior is covered by unit tests
+          # and the local eval harness (npm run worker:eval).
+
+      - name: Prewarm example-card answers (KV cache)
+        run: |
+          BASE="https://resume.rafaracing.com.br"
+          # Must match the hero's card strings EXACTLY (modulo case/punct —
+          # the worker normalizes) so every card click is a free cache hit.
+          questions=(
+            "How's your AWS experience?"
+            "What's your current role?"
+            "Are you open to new opportunities?"
+            "Tell me about your DevOps toolbox"
+          )
+          for q in "${questions[@]}"; do
+            printf '⚡ warming: %s\n' "$q"
+            curl -s -m 60 -X POST "$BASE/api/chat" \
+              -H 'Origin: https://rafilkmp3.github.io' \
+              -H 'Content-Type: application/json' \
+              --data "$(jq -n --arg m "$q" '{message:$m}')" \
+              | jq -r '"   → model=\(.model) cached=\(.cached)"' || true
+          done

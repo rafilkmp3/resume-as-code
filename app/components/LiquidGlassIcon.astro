@@ -19,146 +19,75 @@ const iconSize = typeof size === 'number' ? `${size}px` : size;
 </div>
 
 <style>
-  /* Base Liquid Glass Icon Container */
+  /* Base Liquid Glass Icon Container — draws from the shared glass tokens
+     (app/styles/global.css) so it renders as a smaller sibling of .glass-card.
+     Dark theme is handled entirely by the token .dark overrides, so no
+     component-level .dark rules are needed. */
   .liquid-glass-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: var(--glass-radius-sm);
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Multi-layer Liquid Glass Effect */
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    
-    /* Advanced Backdrop Filter - Apple's signature blur + saturation */
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    
-    /* Specular Highlights & Dynamic Shadows */
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 1px 0 rgba(255, 255, 255, 0.1);
-    
-    /* Translucent Border */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    
-    /* Container Sizing */
+
+    /* Liquid Glass material (single consolidated recipe) */
+    background: var(--glass-surface);
+
+    /* Apple's signature blur + saturation */
+    backdrop-filter: var(--glass-filter);
+    -webkit-backdrop-filter: var(--glass-filter);
+
+    /* Depth shadow (legible dark border in light, luminous in dark) */
+    box-shadow: var(--glass-shadow);
+    border: 1px solid var(--glass-border);
+
+    /* Container Sizing — fixed chip that comfortably exceeds --tap-min (44px) */
     width: 48px;
     height: 48px;
   }
-  
+
   /* Icon Styling - currentColor for native theming */
   .liquid-glass-icon :global(svg) {
     color: var(--foreground, currentColor);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
   }
-  
-  /* Hover Effects - Dynamic Lighting Response */
+
+  /* Hover Effects - Dynamic Lighting Response (mirrors .glass-card:hover) */
   .liquid-glass-icon:hover {
     transform: translateY(-2px) scale(1.05);
-    
-    /* Enhanced lighting on hover */
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.15) 100%
-    );
-    
-    /* Intensified shadows and highlights */
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      0 2px 0 rgba(255, 255, 255, 0.15);
-    
-    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--glass-hover-bg);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
-  
+
   .liquid-glass-icon:hover :global(svg) {
     color: var(--link-color, var(--foreground, currentColor));
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
   }
-  
+
   /* Variant: Default */
   .liquid-glass-icon--default {
     /* Standard configuration - already applied above */
   }
-  
-  /* Variant: Intense - More pronounced effects */
+
+  /* Variant: Intense - stronger surface (matches .glass-card--intense) */
   .liquid-glass-icon--intense {
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
-    
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.15) 100%
-    );
-    
-    box-shadow: 
-      0 10px 36px rgba(0, 0, 0, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25),
-      0 1px 0 rgba(255, 255, 255, 0.12);
+    background: var(--glass-surface-strong);
   }
-  
-  /* Variant: Subtle - Minimal effects */
+
+  /* Variant: Subtle - lighter blur (matches .glass-card--subtle) */
   .liquid-glass-icon--subtle {
-    backdrop-filter: blur(15px) saturate(150%);
-    -webkit-backdrop-filter: blur(15px) saturate(150%);
-    
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 50%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    
-    box-shadow: 
-      0 6px 24px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: var(--glass-filter-sm);
+    -webkit-backdrop-filter: var(--glass-filter-sm);
   }
-  
-  /* Dark Theme Adaptations */
-  :global(.dark) .liquid-glass-icon {
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
-    
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 1px 0 rgba(255, 255, 255, 0.05);
-    
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  :global(.dark) .liquid-glass-icon:hover {
-    background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.04) 50%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 2px 0 rgba(255, 255, 255, 0.08);
-  }
-  
+
   /* Accessibility: Reduce motion for users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     .liquid-glass-icon {
       transition: none;
     }
-    
+
     .liquid-glass-icon:hover {
       transform: none;
     }

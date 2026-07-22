@@ -1,0 +1,40 @@
+name = "resume-ai"
+account_id = "b76ee39565b02457698bb56c4ed12363"
+main = "src/index.mjs"
+# Highest date the locally-installed wrangler's runtime supports (dev parity).
+compatibility_date = "2026-04-01"
+workers_dev = false
+
+routes = [
+  { pattern = "resume.rafaracing.com.br", custom_domain = true }
+]
+
+# The Worker serves the built Astro site (Workers Static Assets) AND the API on
+# one domain. run_worker_first routes ONLY /api/* through the Worker; every
+# other path is served directly as a static file (no Worker invocation, no AI
+# quota touched on page loads). Path is relative to this config file.
+[assets]
+directory = "../../../workspace/build"
+binding = "ASSETS"
+run_worker_first = [ "/api/*" ]
+
+# Workers AI has NO local simulator — remote = true makes `wrangler dev`
+# proxy to the real binding (consumes real free-tier quota, ~10k neurons/day).
+[ai]
+binding = "AI"
+remote = true
+
+[[kv_namespaces]]
+binding = "RESUME_AI_KV"
+id = "1e15da87e1e94016a078b96292a99731"
+
+# AI Gateway "resume-ai": logs on, response cache (5min), rate limit 50/min,
+# spend cap $0.01/mo (keeps it free — blocks the instant any billable cost
+# accrues), retry 3x, authenticated (Worker binding auto-authenticates). A
+# missing/blank id self-heals to a direct call, so this stays a zero-risk
+# toggle. Verify routing via the X-Resume-AI-Gateway response header.
+[vars]
+AI_GATEWAY_ID = "resume-ai"
+
+[observability]
+enabled = true

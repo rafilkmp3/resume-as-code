@@ -51,19 +51,23 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
 </div>
 
 <style>
-  /* Apple-Style Contact Badge Components - Consistent with ContactButton.astro */
+  /* Apple-Style Contact Badge Components - Consistent with ContactButton.astro.
+     Material now draws from the shared liquid-glass tokens (global.css) instead
+     of raw literals, so this badge matches the migrated .glass-card surfaces and
+     flips light/dark automatically via the --glass-* overrides. */
   .apple-contact-badge {
     display: flex;
     align-items: center;
-    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(0.875rem, 2vw, 1.25rem);
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px; /* Apple HIG rounded corners */
+    padding: clamp(var(--space-3), 1.5vw, var(--space-4)) clamp(var(--space-4), 2vw, var(--space-5));
+    background: var(--glass-surface);
+    backdrop-filter: var(--glass-filter-sm);
+    -webkit-backdrop-filter: var(--glass-filter-sm);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius); /* Apple HIG rounded corners */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--glass-shadow);
     min-width: 0; /* Allow flex shrinkage */
     width: 100%; /* Full width for better text space */
     box-sizing: border-box;
@@ -73,29 +77,29 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
   }
 
   .apple-contact-badge:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: var(--glass-hover-bg);
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* hover elevation — no token */
   }
 
   .apple-contact-icon {
-    width: 44px;
+    width: 44px; /* liquid-glass icon material box */
     height: 44px;
-    /* Liquid Glass Background - Matching LiquidGlassIcon component */
+    /* Liquid Glass Background - Matching LiquidGlassIcon component (decorative
+       gradient + white highlight border have no single token; kept literal). */
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.05) 50%,
       rgba(255, 255, 255, 0.1) 100%
     );
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: var(--glass-filter);
+    -webkit-backdrop-filter: var(--glass-filter);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border-radius: var(--glass-radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 12px;
+    margin-right: var(--space-3);
     flex-shrink: 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     /* Enhanced shadows for depth */
@@ -128,22 +132,21 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
   }
 
   .apple-contact-label {
-    font-size: clamp(0.75rem, 1vw, 0.8125rem); /* Fluid: 12pt - 13pt */
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--foreground);
-    opacity: 0.7;
-    margin-bottom: 2px;
+    font-size: var(--text-caption); /* 13px caption — smallest allowed */
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-heading);
+    color: var(--foreground-muted); /* semantic secondary label (was fg + opacity) */
+    margin-bottom: var(--space-1);
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: var(--tracking-label);
     white-space: nowrap; /* Prevent label wrapping */
     text-align: left; /* Prevent centering */
   }
 
   .apple-contact-value {
-    font-size: clamp(0.875rem, 1.25vw, 0.9375rem); /* Fluid: 14pt - 15pt */
-    font-weight: 600;
-    line-height: 1.3;
+    font-size: var(--text-footnote); /* 14px */
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-heading);
     color: var(--foreground);
     /* Apple HIG Smart Text Handling - Responsive Approach */
     overflow-wrap: break-word;
@@ -169,13 +172,13 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
   /* Enhanced responsive breakpoints for contact badges */
   @media (max-width: 640px) {
     .apple-contact-badge {
-      padding: 0.75rem 0.875rem; /* Tighter on mobile */
-      min-height: 60px; /* Ensure touch target */
+      padding: var(--space-3); /* Tighter on mobile */
+      min-height: 60px; /* Ensure touch target (well above --tap-min) */
     }
 
     .apple-contact-value {
-      font-size: 0.875rem; /* 14pt on mobile */
-      line-height: 1.25;
+      font-size: var(--text-footnote); /* 14px on mobile */
+      line-height: var(--lh-heading);
       /* Mobile: Allow controlled wrapping */
       white-space: normal;
       overflow: visible;
@@ -190,18 +193,10 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     }
   }
 
-  /* Dark theme adaptations */
-  :global(.dark) .apple-contact-badge {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  :global(.dark) .apple-contact-badge:hover {
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  }
-
+  /* Dark theme: the badge material now flows from the theme-aware --glass-* tokens,
+     so the old .dark badge background/border/shadow overrides are gone. Only the
+     decorative liquid-glass ICON (its own white gradient + highlight, which have no
+     token) still needs an explicit dark treatment. */
   :global(.dark) .apple-contact-icon {
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.05) 0%,
@@ -233,20 +228,24 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.8); /* modal scrim — not a glass surface */
     backdrop-filter: blur(5px);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 999999; /* Above Netlify deploy preview (z-index: 999998) */
     overflow-y: auto; /* Allow scrolling if content is taller than viewport */
-    padding: 2rem 0; /* Add vertical padding for better spacing */
+    padding: var(--space-6) 0; /* Add vertical padding for better spacing */
   }
 
+  /* Self-contained light "QR card": intentionally white with fixed ink colors in
+     BOTH themes so the QR code always scans. Geometry uses shared spacing/radius
+     tokens; the white surface + text colors stay literal on purpose — theme color
+     tokens would flip to dark and destroy the contrast the QR relies on. */
   .qr-content {
     background: white;
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
     max-width: 400px;
     width: 90%;
     margin: auto; /* Center in scrollable container */
@@ -259,22 +258,29 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-5);
   }
 
   .qr-header h3 {
     margin: 0;
     color: #2d3748;
-    font-size: 1.25rem;
+    font-size: var(--text-headline);
   }
 
   .close-btn {
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 2rem; /* glyph size — iconographic, no token */
     cursor: pointer;
     color: #718096;
     line-height: 1;
+    /* HIG touch target — was a ~32px hit area */
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
   }
 
   .close-btn:hover {
@@ -282,7 +288,7 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
   }
 
   .qr-image-container {
-    margin: 1.5rem 0;
+    margin: var(--space-5) 0;
     display: flex;
     justify-content: center;
   }
@@ -291,28 +297,28 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     max-width: 250px;
     width: 100%;
     height: auto;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
   }
 
   .qr-url {
-    font-size: 0.9rem;
-    color: #667eea;
+    font-size: var(--text-footnote);
+    color: #667eea; /* stays literal — see .qr-content note (always-white card) */
     word-break: break-all;
-    margin: 1rem 0;
-    font-weight: 500;
+    margin: var(--space-4) 0;
+    font-weight: var(--fw-medium);
   }
 
   .qr-footer {
-    font-size: 0.8rem;
+    font-size: var(--text-caption);
     color: #718096;
-    margin-top: 1rem;
+    margin-top: var(--space-4);
   }
 
   @media (max-width: 640px) {
     .qr-content {
-      padding: 1.5rem;
+      padding: var(--space-5);
     }
-    
+
     .qr-image-container img {
       max-width: 200px;
     }
@@ -324,12 +330,12 @@ const qrCodeUrl = '/assets/images/qr-code-modal.png';
     const modal = document.getElementById('qr-modal');
     const image = document.getElementById('qr-image');
     const urlElement = document.getElementById('qr-url');
-    
+
     if (modal && image && urlElement) {
       image.src = qrImageUrl;
       urlElement.textContent = url;
       modal.style.display = 'flex';
-      
+
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     }

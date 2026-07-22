@@ -20,25 +20,25 @@ const getIconName = (network: string, fallbackIcon: string) => {
     'cal.com': 'heroicons:calendar',
     'Email': 'heroicons:envelope'
   };
-  
+
   // If fallbackIcon is already an Iconify name (contains ':'), use it directly
   if (fallbackIcon.includes(':')) {
     return fallbackIcon;
   }
-  
+
   // If fallbackIcon is a URL (contains 'http'), ignore it and use network mapping
   if (fallbackIcon.includes('http')) {
     return iconMap[network] || 'heroicons:link';
   }
-  
+
   return iconMap[network] || iconMap[fallbackIcon] || 'heroicons:link';
 };
 
 const iconName = getIconName(network, icon);
 ---
 
-<a 
-  href={href} 
+<a
+  href={href}
   class="apple-contact-badge group"
   target="_blank"
   rel="noopener noreferrer"
@@ -60,19 +60,21 @@ const iconName = getIconName(network, icon);
 </a>
 
 <style>
-  /* Apple-Style Contact Badge Components - Consistent with main stylesheet */
+  /* Apple-Style Contact Badge — draws from the shared liquid-glass tokens
+     (app/styles/global.css) so it matches every other glass surface. */
   .apple-contact-badge {
     display: flex;
     align-items: center;
-    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(0.875rem, 2vw, 1.25rem);
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px; /* Apple HIG rounded corners */
+    padding: var(--space-3) var(--space-4);
+    background: var(--glass-surface);
+    backdrop-filter: var(--glass-filter-sm);
+    -webkit-backdrop-filter: var(--glass-filter-sm);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius); /* Apple HIG rounded corners */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--glass-shadow);
     min-width: 0; /* Allow flex shrinkage */
     width: 100%; /* Full width for better text space */
     box-sizing: border-box;
@@ -81,33 +83,35 @@ const iconName = getIconName(network, icon);
   }
 
   .apple-contact-badge:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: var(--glass-hover-bg);
     transform: translateY(-2px) scale(1.02);
+    /* Deeper lift shadow — no dedicated hover-shadow token to reference */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   }
 
   .apple-contact-icon {
-    width: 44px;
-    height: 44px;
-    /* Liquid Glass Background - Matching LiquidGlassIcon component */
+    width: var(--tap-min);
+    height: var(--tap-min);
+    /* Liquid Glass Background — mirrors the LiquidGlassIcon component. This
+       gradient + inset-highlight recipe has no flat token, so it stays raw;
+       the material primitives (filter/radius) use the shared tokens. */
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.05) 50%,
       rgba(255, 255, 255, 0.1) 100%
     );
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: var(--glass-filter);
+    -webkit-backdrop-filter: var(--glass-filter);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border-radius: var(--glass-radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 12px;
+    margin-right: var(--space-3);
     flex-shrink: 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     /* Enhanced shadows for depth */
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
       0 1px 0 rgba(255, 255, 255, 0.1);
@@ -122,7 +126,7 @@ const iconName = getIconName(network, icon);
       rgba(255, 255, 255, 0.15) 100%
     );
     /* Intensified shadows and highlights */
-    box-shadow: 
+    box-shadow:
       0 12px 40px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.3),
       0 2px 0 rgba(255, 255, 255, 0.15);
@@ -136,26 +140,26 @@ const iconName = getIconName(network, icon);
   }
 
   .apple-contact-label {
-    font-size: clamp(0.75rem, 1vw, 0.8125rem); /* Fluid: 12pt - 13pt */
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--foreground);
-    opacity: 0.7;
-    margin-bottom: 2px;
+    font-size: var(--text-caption); /* 13px — HIG caption */
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-heading);
+    color: var(--foreground-muted); /* secondary label */
+    margin-bottom: var(--space-1);
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: var(--tracking-label);
     white-space: nowrap; /* Prevent label wrapping */
   }
 
   .apple-contact-value {
-    font-size: clamp(0.875rem, 1.25vw, 0.9375rem); /* Fluid: 14pt - 15pt */
-    font-weight: 600;
-    line-height: 1.3;
+    font-size: var(--text-footnote); /* 14px */
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-heading);
     color: var(--foreground);
-    /* Apple HIG Smart Text Handling - Responsive Approach */
-    overflow-wrap: break-word;
-    word-break: normal; /* Changed from break-word to prevent awkward breaks */
-    hyphens: auto;
+    /* Emails/URLs must break WITHOUT an inserted hyphen (hyphens:auto was
+       rendering "gmail.-com"). anywhere breaks long tokens cleanly. */
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: none;
     /* Default: Single line with ellipsis */
     white-space: nowrap;
     overflow: hidden;
@@ -171,23 +175,24 @@ const iconName = getIconName(network, icon);
       word-spacing: -0.02em; /* Tighter word spacing for better fit */
     }
   }
-  
+
   /* Enhanced responsive breakpoints for contact badges */
   @media (max-width: 640px) {
     .apple-contact-badge {
-      padding: 0.75rem 0.875rem; /* Tighter on mobile */
-      min-height: 60px; /* Ensure touch target */
+      padding: var(--space-3); /* Tighter, even padding on mobile */
+      min-height: var(--tap-min); /* HIG touch target (44px floor) */
     }
-    
+
     .apple-contact-value {
-      font-size: 0.875rem; /* 14pt on mobile */
-      line-height: 1.25;
+      font-size: var(--text-footnote); /* 14px on mobile */
+      line-height: var(--lh-heading);
       /* Mobile: Allow controlled wrapping */
       white-space: normal;
       overflow: visible;
       text-overflow: unset;
-      hyphens: auto;
-      word-break: break-word;
+      hyphens: none;
+      overflow-wrap: anywhere;
+      word-break: normal;
       /* Limit to 2 lines maximum on mobile */
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -196,15 +201,11 @@ const iconName = getIconName(network, icon);
     }
   }
 
-  /* Dark theme adaptations */
-  :global(.dark) .apple-contact-badge {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-  
+  /* Dark theme — the badge surface/border/shadow now flow from the shared
+     glass tokens, which redefine themselves under .dark, so the badge adapts
+     automatically. Only the non-tokenized pieces keep explicit dark overrides:
+     the hover lift shadow and the liquid-glass icon gradient recipe. */
   :global(.dark) .apple-contact-badge:hover {
-    background: rgba(0, 0, 0, 0.3);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
   }
 
@@ -214,20 +215,20 @@ const iconName = getIconName(network, icon);
       rgba(255, 255, 255, 0.02) 50%,
       rgba(255, 255, 255, 0.05) 100%
     );
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 1px 0 rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   :global(.dark) .apple-contact-badge:hover .apple-contact-icon {
     background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.08) 0%,
       rgba(255, 255, 255, 0.04) 50%,
       rgba(255, 255, 255, 0.08) 100%
     );
-    box-shadow: 
+    box-shadow:
       0 12px 40px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       0 2px 0 rgba(255, 255, 255, 0.08);
