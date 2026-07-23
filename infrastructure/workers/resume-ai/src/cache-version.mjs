@@ -13,7 +13,7 @@
 
 import { hashString } from './guards.mjs';
 
-export const PROMPT_VERSION = 'p7';
+export const PROMPT_VERSION = 'p8';
 
 /** @param {object} resume the bundled JSON Resume object */
 export function contentSig(resume) {

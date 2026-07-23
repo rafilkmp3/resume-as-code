@@ -22,6 +22,7 @@
     "site:deploy": "DEPLOY_URL=https://resume.rafaracing.com.br npm run build && npm run worker:deploy && npm run seed:cards",
     "worker:test": "node --test \"infrastructure/workers/resume-ai/test/*.test.mjs\"",
     "worker:eval": "node infrastructure/workers/resume-ai/eval/run-eval.mjs",
+    "worker:logs": "node infrastructure/workers/resume-ai/scripts/analyze-logs.mjs",
     "prepare": "husky || true"
   },
   "dependencies": {

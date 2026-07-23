@@ -8,21 +8,35 @@
 // includes the GitHub Pages /resume-as-code base path when GITHUB_PAGES=true).
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'http://localhost:4321';
 
-// EXACT strings — these are cache-prewarmed in CI. Do not alter.
-const promptCards = [
-  "How's your AWS experience?",
-  "What's your current role?",
-  'Are you open to new opportunities?',
-  'Tell me about your DevOps toolbox',
-];
+// Card strings are KV cache keys, prewarmed on every deploy. Single source of
+// truth: app/data/chat-cards.json (shared with the worker + seed script) —
+// edit labels/answers THERE, never here.
+import chatCards from '../data/chat-cards.json';
+const promptCards = chatCards.cards.map((card) => card.q);
 ---
 
 <section id="chat-hero" class="ch-hero" aria-label="AI resume assistant">
   <div class="ch-inner">
-    <!-- Greeting (hero mode only; JS rotates the line on load) -->
+    <!-- Greeting (hero mode only; the inline script below rotates the line
+         BEFORE first paint — no post-load text flash) -->
     <div id="chat-intro" class="ch-intro">
-      <p id="chat-greeting" class="ch-greeting">Hi, I'm Rafael's resume &mdash; ask me anything.</p>
-      <p class="ch-disclosure">AI-powered &middot; answers as Rafael, grounded in the real resume</p>
+      <p id="chat-greeting" class="ch-greeting">Hi &mdash; I'm Rafael's AI resume. Ask me anything.</p>
+      <script is:inline>
+        // Runs during HTML parsing, before paint: swap in a rotating greeting
+        // variant with zero flash. Every variant self-introduces as the AI resume.
+        (function () {
+          var g = document.getElementById('chat-greeting');
+          if (!g) return;
+          var lines = [
+            "Hi — I'm Rafael's AI resume. Ask me anything.",
+            "I'm Rafael's AI resume — the version you can interview.",
+            "I'm Rafael's AI resume — 10+ years of platform engineering.",
+            "I'm Rafael's AI resume — English or português, ask away.",
+          ];
+          g.textContent = lines[Math.floor(Math.random() * lines.length)];
+        })();
+      </script>
+      <p class="ch-disclosure">Everything I say comes from the real resume &mdash; the full version and PDF downloads are one scroll below.</p>
     </div>
 
     <!-- Conversation thread (conversation mode only) -->
@@ -61,10 +75,13 @@ const promptCards = [
       </button>
     </form>
 
-    <!-- Example prompts (hero mode only) — cache-prewarmed strings -->
+    <!-- Example prompts — cache-prewarmed strings. Persist in conversation
+         mode as compact chips docked above the input (never disappear). The
+         canonical question lives in data-q: it is the KV cache key, so it must
+         never be derived from rendered textContent. -->
     <div id="chat-cards" class="ch-cards">
       {promptCards.map((prompt) => (
-        <button type="button" class="ch-card">{prompt}</button>
+        <button type="button" class="ch-card" data-q={prompt}>{prompt}</button>
       ))}
     </div>
 
@@ -81,10 +98,10 @@ const promptCards = [
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
-        Download PDF
+        Get the PDF
       </a>
       <span class="ch-action-sep" aria-hidden="true">&middot;</span>
-      <a id="chat-skip" class="ch-action-link" href="#resume-content">&darr; Skip to full resume</a>
+      <a id="chat-skip" class="ch-action-link" href="#resume-content">&darr; Or read the full resume</a>
     </div>
   </div>
 
@@ -215,11 +232,54 @@ const promptCards = [
     opacity: 0.6;
   }
 
-  /* Conversation mode: greeting + example cards collapse, thread appears */
+  /* Conversation mode: greeting collapses, thread appears. The suggestion
+     cards NEVER disappear — they become a compact chip row docked directly
+     above the input pill (flex order, no DOM moves). */
   .ch-hero.ch-conv .ch-intro,
-  .ch-hero.ch-conv .ch-cards,
   .ch-hero.ch-conv .ch-scroll-cue {
     display: none;
+  }
+
+  .ch-hero.ch-conv .ch-thread { order: 1; }
+  .ch-hero.ch-conv .ch-cooldown { order: 2; }
+  .ch-hero.ch-conv .ch-cards { order: 3; }
+  .ch-hero.ch-conv .ch-form { order: 4; }
+  .ch-hero.ch-conv .ch-actions { order: 5; }
+
+  .ch-hero.ch-conv .ch-cards {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: var(--space-2);
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ch-hero.ch-conv .ch-cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ch-hero.ch-conv .ch-card {
+    flex: 0 0 auto;
+    max-width: 75vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-caption);
+    box-shadow: none;
+  }
+
+  .ch-hero.ch-conv .ch-card:hover:not(:disabled) {
+    transform: none;
+  }
+
+  /* Already-asked chip: dimmed but still tappable (asking again is a free
+     cache hit) */
+  .ch-card.ch-asked {
+    opacity: 0.55;
   }
 
   /* Thread */
@@ -446,6 +506,47 @@ const promptCards = [
     font-size: var(--text-caption);
     opacity: 0.6;
     margin-top: var(--space-1);
+  }
+
+  /* Retry affordance under a failed/interrupted turn */
+  .ch-retry-row {
+    margin-top: var(--space-1);
+  }
+
+  .ch-retry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-caption);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-body);
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  }
+
+  .ch-retry-btn:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .dark .ch-retry-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* One-time "full resume is below" hint row — quieter than a real reply */
+  .ch-hint .ch-bubble {
+    background: none;
+    border: none;
+    padding: var(--space-1) var(--space-4);
+    font-size: var(--text-caption);
+    opacity: 0.65;
   }
 
   /* Cooldown notice */
@@ -678,6 +779,7 @@ const promptCards = [
   .ch-icon-btn:focus-visible,
   .ch-text-btn:focus-visible,
   .ch-feedback-btn:focus-visible,
+  .ch-retry-btn:focus-visible,
   .ch-action-link:focus-visible,
   .ch-scroll-cue:focus-visible,
   .ch-pill:focus-visible {
@@ -723,23 +825,17 @@ const promptCards = [
   const CHAT_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CHAT_SCROLL_BEHAVIOR = CHAT_REDUCED_MOTION ? 'instant' : 'smooth';
 
-  // Rotating hero greeting — picked at random on each load.
-  const CHAT_GREETINGS = [
-    "Hi, I'm Rafael's resume — ask me anything.",
-    '10+ years of platform engineering. What do you want to know?',
-    'Pergunte em português se preferir 🇧🇷',
-    'Kubernetes? AWS? Salary? Just ask.',
-  ];
-
   // In-memory conversation state (mirrors localStorage)
   let chatMessages = [];
   let chatInFlight = false;
   let clearArmed = false;
   let clearArmTimer = null;
   let cooldownTimer = null;
+  // Card "typed into the chat bar" animation state (see askCard)
+  let cardTypingActive = false;
+  let cardTypeTimer = null;
 
   const heroEl = document.getElementById('chat-hero');
-  const greetingEl = document.getElementById('chat-greeting');
   const threadEl = document.getElementById('chat-thread');
   const messagesEl = document.getElementById('chat-messages');
   const cardsEl = document.getElementById('chat-cards');
@@ -777,7 +873,7 @@ const promptCards = [
   // Runs on escaped text: '&' only appears as entities, so '&amp;' is allowed
   // inside URLs while '&quot;'/'&#39;' terminate them.
   function linkifyEscaped(escaped) {
-    const pattern = /(https:\/\/(?:www\.linkedin\.com|github\.com)\/(?:[^\s<&]|&amp;)*|mailto:(?:[^\s<&]|&amp;)+)/g;
+    const pattern = /(https:\/\/(?:www\.linkedin\.com|github\.com|resume\.rafaracing\.com\.br)\/(?:[^\s<&]|&amp;)*|mailto:(?:[^\s<&]|&amp;)+)/g;
     return escaped.replace(pattern, function (match) {
       let url = match;
       let trailing = '';
@@ -997,6 +1093,8 @@ const promptCards = [
       cooldownTimer = setTimeout(refreshCooldownUI, Math.min(remaining, next));
     } else {
       cooldownEl.hidden = true;
+      // Input may have just been re-enabled — let the placeholder cycle again.
+      scheduleTypewriterRestart();
     }
     updateInputState();
   }
@@ -1006,22 +1104,46 @@ const promptCards = [
     const disabled = chatInFlight || coolingDown;
     inputEl.disabled = disabled;
     sendEl.disabled = disabled;
+    // Cards also lock while one is being "typed" into the input — the input
+    // itself stays enabled so the user can grab the text mid-animation.
     const cards = cardsEl.querySelectorAll('.ch-card');
-    for (let i = 0; i < cards.length; i++) cards[i].disabled = disabled;
+    for (let i = 0; i < cards.length; i++) cards[i].disabled = disabled || cardTypingActive;
   }
 
-  function buildApiHistory() {
+  function buildApiHistory(msgs) {
     // Last 4 exchanged messages, each trimmed to 400 chars (contract: max 6 x 400)
-    return chatMessages.slice(-4).map(function (m) {
+    return (msgs || chatMessages).slice(-4).map(function (m) {
       return { role: m.role, content: m.content.slice(0, 400) };
     });
+  }
+
+  // A "Retry" affordance under a failed/interrupted turn. Re-runs inference for
+  // a question that is ALREADY in the thread — the antidote to the dead-end
+  // where a dropped answer leaves the visitor stranded on their own message.
+  function appendRetryRow(question) {
+    const row = document.createElement('div');
+    row.className = 'ch-row ch-assistant ch-retry-row';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ch-retry-btn';
+    btn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg><span>Retry</span>';
+    btn.addEventListener('click', function () {
+      if (chatInFlight || cooldownRemainingMs() > 0) return;
+      row.remove();
+      resendMessage(question);
+    });
+    row.appendChild(btn);
+    messagesEl.appendChild(row);
+    scrollToBottom();
   }
 
   async function sendMessage(text, source) {
     const message = String(text || '').trim().slice(0, 500);
     if (!message || chatInFlight || cooldownRemainingMs() > 0) return;
 
-    const history = buildApiHistory();
+    // History is everything so far (the new user turn is sent separately).
+    const history = buildApiHistory(chatMessages);
     chatMessages.push({ role: 'user', content: message });
     saveHistory();
     enterConversationMode();
@@ -1029,6 +1151,23 @@ const promptCards = [
     inputEl.value = '';
     trackEvent('chat_message_sent', { source: source === 'card' ? 'card' : 'typed' });
 
+    await runInference(message, history);
+  }
+
+  // Re-run inference for a message already shown in the thread (retry / reload
+  // recovery). No new user bubble; the trailing user turn is excluded from the
+  // history sent to the API so it is not duplicated.
+  async function resendMessage(message) {
+    if (!message || chatInFlight || cooldownRemainingMs() > 0) return;
+    const priorTurns =
+      chatMessages.length && chatMessages[chatMessages.length - 1].role === 'user'
+        ? chatMessages.slice(0, -1)
+        : chatMessages;
+    trackEvent('chat_message_retried');
+    await runInference(message, buildApiHistory(priorTurns));
+  }
+
+  async function runInference(message, history) {
     setBusy(true);
     showTyping();
 
@@ -1080,36 +1219,64 @@ const promptCards = [
             { error: true }
           );
         }
+        // Cooldown UI + persistent cards are the forward path here; a Retry
+        // button would only no-op while the cooldown holds.
         return;
       }
 
       if (!res.ok) {
-        appendBubble('assistant', 'Sorry, something went wrong. Please try again.', {
-          error: true,
-        });
+        appendBubble('assistant', 'Sorry, something went wrong.', { error: true });
+        appendRetryRow(message);
         return;
       }
 
       const data = await res.json();
       const reply = data && typeof data.reply === 'string' ? data.reply : '';
       if (!reply) {
-        appendBubble('assistant', 'Sorry, I could not generate a reply. Please try again.', {
-          error: true,
-        });
+        appendBubble('assistant', 'Sorry, I could not generate a reply.', { error: true });
+        appendRetryRow(message);
         return;
       }
 
       chatMessages.push({ role: 'assistant', content: reply });
       saveHistory();
       appendBubble('assistant', reply, { feedback: true, question: message });
+      maybeShowResumeHint();
     } catch (_e) {
-      appendBubble('assistant', 'Connection issue, try again.', { error: true });
+      appendBubble('assistant', 'Connection issue.', { error: true });
+      appendRetryRow(message);
     } finally {
       clearTimeout(timeoutId);
       hideTyping();
       setBusy(false);
       if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+      scheduleTypewriterRestart();
     }
+  }
+
+  // One-time quiet system row after the first answer: the logs show visitors
+  // never discover the classic resume/PDFs below the chat on their own.
+  let resumeHintShown = false;
+  function maybeShowResumeHint() {
+    if (resumeHintShown) return;
+    try {
+      if (sessionStorage.getItem('resume_chat_hint_shown')) return;
+      sessionStorage.setItem('resume_chat_hint_shown', '1');
+    } catch (_e) {
+      /* storage unavailable — the in-memory flag still limits to once per load */
+    }
+    resumeHintShown = true;
+    const row = document.createElement('div');
+    row.className = 'ch-row ch-assistant ch-hint';
+    const bubble = document.createElement('div');
+    bubble.className = 'ch-bubble';
+    bubble.innerHTML =
+      'Prefer to skim? The <a href="#resume-content">full resume and PDF downloads</a> are right below this chat.';
+    const link = bubble.querySelector('a');
+    if (link) link.addEventListener('click', scrollToResume);
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    scrollToBottom();
   }
 
   function restoreHistory() {
@@ -1123,6 +1290,25 @@ const promptCards = [
         appendBubble('assistant', m.content, { feedback: true, question: question });
       } else {
         appendBubble('user', m.content);
+      }
+    }
+    // Dead-end guard: a trailing USER turn with no assistant reply means the
+    // last answer never arrived (network drop / tab closed mid-reply). Rather
+    // than strand the visitor on their own unanswered message (the exact
+    // scenario that reads as broken), offer to retry it — and if we're not in
+    // a cooldown, kick the retry off automatically.
+    const last = chatMessages[chatMessages.length - 1];
+    if (last && last.role === 'user') {
+      if (cooldownRemainingMs() > 0) {
+        appendBubble('assistant', "My last answer didn't come through — tap retry when the cooldown clears.", {
+          error: true,
+        });
+        appendRetryRow(last.content);
+      } else {
+        appendBubble('assistant', "Looks like my last answer didn't come through — let me try again.", {
+          error: true,
+        });
+        resendMessage(last.content);
       }
     }
   }
@@ -1157,8 +1343,12 @@ const promptCards = [
     }
     messagesEl.innerHTML = '';
     exitConversationMode();
+    // Fresh start: un-dim the suggestion cards and let the placeholder cycle again.
+    const cards = cardsEl.querySelectorAll('.ch-card');
+    for (let i = 0; i < cards.length; i++) cards[i].classList.remove('ch-asked');
     updateInputState();
     if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
+    scheduleTypewriterRestart();
   }
 
   function scrollToChatHero() {
@@ -1176,39 +1366,56 @@ const promptCards = [
   }
 
   // Animated placeholder: types out example questions and deletes them, like a
-  // search box, to invite input. Runs only in hero mode while the input is
-  // empty and untouched; stops for good on first interaction or reduced motion.
+  // search box, to invite input. Runs whenever the input is empty — hero AND
+  // conversation mode — pausing on interaction and quietly resuming after a
+  // few seconds of idle-empty input. It never stops for good (except with
+  // reduced motion, where it never starts).
   var CHAT_PLACEHOLDER_BASE = inputEl ? inputEl.getAttribute('placeholder') : '';
   var CHAT_TYPED_EXAMPLES = [
-    'How many years with Kubernetes?',
-    'Walk me through the Uber migration',
-    'Are you open to remote roles?',
-    'What cloud platforms do you know?',
-    'Tell me about a tough outage you fixed',
-    'Pergunte em português…',
+    "What's your strongest skill?",
+    'Tell me about Kubernetes at Uber',
+    "How's your AWS experience?",
+    'What was your biggest impact at Globo?',
+    'Are you open to remote or contract work?',
+    'Qual é sua experiência com Kubernetes?',
   ];
   var typeTimer = null;
-  var typeStopped = false;
+  var typeRestartTimer = null;
 
-  function stopTypewriter(restoreBase) {
-    typeStopped = true;
+  function pauseTypewriter() {
     if (typeTimer) {
       clearTimeout(typeTimer);
       typeTimer = null;
     }
-    if (restoreBase && inputEl) inputEl.setAttribute('placeholder', CHAT_PLACEHOLDER_BASE);
+    if (inputEl) inputEl.setAttribute('placeholder', CHAT_PLACEHOLDER_BASE);
+    scheduleTypewriterRestart();
+  }
+
+  // Resume cycling once the input has been empty and idle for a moment.
+  function scheduleTypewriterRestart() {
+    clearTimeout(typeRestartTimer);
+    typeRestartTimer = setTimeout(function () {
+      if (
+        !typeTimer &&
+        inputEl &&
+        inputEl.value.length === 0 &&
+        !inputEl.disabled &&
+        !cardTypingActive
+      ) {
+        startTypewriter();
+      }
+    }, 5000);
   }
 
   function startTypewriter() {
-    if (typeStopped || CHAT_REDUCED_MOTION || !inputEl) return;
-    // pick a start index that varies per load without Date/Math.random reliance
-    var idx = CHAT_PLACEHOLDER_BASE.length % CHAT_TYPED_EXAMPLES.length;
+    if (CHAT_REDUCED_MOTION || !inputEl || typeTimer) return;
+    var idx = Math.floor(Math.random() * CHAT_TYPED_EXAMPLES.length);
     var char = 0;
     var deleting = false;
 
     function tick() {
-      if (typeStopped || inputEl.value.length > 0 || heroEl.classList.contains('ch-conv')) {
-        stopTypewriter(true);
+      if (inputEl.value.length > 0 || inputEl.disabled || cardTypingActive) {
+        pauseTypewriter();
         return;
       }
       var phrase = CHAT_TYPED_EXAMPLES[idx];
@@ -1236,13 +1443,54 @@ const promptCards = [
     typeTimer = setTimeout(tick, 700);
   }
 
+  // Card click = the question visibly typed into the chat bar, then sent.
+  // Canonical string comes from data-q (it is the KV cache key — rendered
+  // textContent could silently diverge and break instant answers). Any user
+  // interaction with the input mid-animation cancels the auto-send and leaves
+  // the text editable.
+  function cancelCardTyping() {
+    cardTypingActive = false;
+    if (cardTypeTimer) {
+      clearTimeout(cardTypeTimer);
+      cardTypeTimer = null;
+    }
+    updateInputState();
+  }
+
+  function askCard(cardEl) {
+    var question = cardEl.getAttribute('data-q') || cardEl.textContent;
+    if (!question || chatInFlight || cardTypingActive || cooldownRemainingMs() > 0) return;
+    cardEl.classList.add('ch-asked');
+    pauseTypewriter();
+    if (CHAT_REDUCED_MOTION) {
+      sendMessage(question, 'card');
+      return;
+    }
+    cardTypingActive = true;
+    updateInputState();
+    // Never pop the mobile keyboard — focus precise-pointer devices only.
+    if (CHAT_POINTER_FINE) inputEl.focus({ preventScroll: true });
+    // ~25ms/char, capped so long questions still land in about a second.
+    var step = Math.max(12, Math.min(28, Math.round(900 / question.length)));
+    var pos = 0;
+    (function typeChar() {
+      if (!cardTypingActive) return; // user took over the input — leave it editable
+      pos++;
+      inputEl.value = question.slice(0, pos);
+      if (pos < question.length) {
+        cardTypeTimer = setTimeout(typeChar, step);
+      } else {
+        cardTypeTimer = setTimeout(function () {
+          if (!cardTypingActive) return;
+          cancelCardTyping();
+          sendMessage(question, 'card');
+        }, 250);
+      }
+    })();
+  }
+
   function initChatHero() {
     if (!heroEl || !threadEl || !messagesEl || !formEl || !inputEl) return;
-
-    // Rotating greeting (random per visit)
-    if (greetingEl) {
-      greetingEl.textContent = CHAT_GREETINGS[Math.floor(Math.random() * CHAT_GREETINGS.length)];
-    }
 
     restoreHistory();
     refreshCooldownUI();
@@ -1253,18 +1501,24 @@ const promptCards = [
       sendMessage(inputEl.value, 'typed');
     });
 
-    // First real interaction kills the animated placeholder for good.
+    // Typing pauses the animated placeholder (it resumes after idle-empty)
+    // and cancels any in-flight card auto-send, leaving the text editable.
     inputEl.addEventListener('input', function () {
-      if (inputEl.value.length > 0) stopTypewriter(true);
+      if (inputEl.value.length > 0) {
+        pauseTypewriter();
+      } else {
+        scheduleTypewriterRestart();
+      }
     });
     inputEl.addEventListener('keydown', function () {
-      stopTypewriter(true);
+      if (cardTypingActive) cancelCardTyping();
+      pauseTypewriter();
     });
 
     const cards = cardsEl.querySelectorAll('.ch-card');
     for (let i = 0; i < cards.length; i++) {
       cards[i].addEventListener('click', function (e) {
-        sendMessage(e.currentTarget.textContent, 'card');
+        askCard(e.currentTarget);
       });
     }
 
@@ -1292,9 +1546,9 @@ const promptCards = [
     // mobile keyboard on load.
     if (CHAT_POINTER_FINE && !inputEl.disabled) inputEl.focus({ preventScroll: true });
 
-    // Animated placeholder only in fresh hero mode (skip if a conversation was
-    // restored from history).
-    if (!heroEl.classList.contains('ch-conv')) startTypewriter();
+    // Animated placeholder runs in both hero and conversation mode — the
+    // input pill is always visible.
+    startTypewriter();
   }
 
   initChatHero();

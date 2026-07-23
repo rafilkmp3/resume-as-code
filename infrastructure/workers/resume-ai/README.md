@@ -52,6 +52,28 @@ curl -s http://localhost:8787/api/chat \
 npm run worker:test   # node --test over test/*.test.mjs (pure modules only)
 ```
 
+## Self-improvement loop (real-user log mining)
+
+Every production Q&A is logged to KV (`log:*`, 30-day TTL, no client
+identifiers) and thumbs-up/down feedback to `fb:*`. Mine them with:
+
+```bash
+npm run worker:logs            # human report
+npm run worker:logs -- --json  # machine-readable
+```
+
+The report buckets real questions by topic (noise-filtered), lists downvoted /
+degraded / slow answers, and flags topics that neither the hero cards nor
+`eval/questions.json` cover. The loop:
+
+1. Run `npm run worker:logs` periodically (or before any prompt change).
+2. Fold frequent real questions into `eval/questions.json` as new cases.
+3. Promote the most-asked ones into `app/data/chat-cards.json` — either as a
+   hero card, an alias of an existing card, or a `seeded` (cache-only) Q&A.
+   That one file feeds the hero UI, the worker's long-TTL cache detection,
+   and the KV seeding — no strings to keep in sync by hand.
+4. Fix downvoted answers via prompt tweaks, then `npm run worker:eval`.
+
 ## Deploy
 
 ```bash

@@ -1,0 +1,59 @@
+{
+  "comment": "Single source of truth for the chat hero suggestion cards. Imported by app/components/ChatHero.astro (labels), infrastructure/workers/resume-ai/src/index.mjs (CARD_QUESTIONS — long-TTL cache detection), and infrastructure/workers/resume-ai/scripts/seed-cards.mjs (curated answers + alias seeding). Card strings are cache keys: the SAME string must appear everywhere, so never edit one copy — edit here. 'aliases' are real production log phrasings pre-seeded to the same curated answer. 'seeded' entries are cached Q&A that are not shown as cards.",
+  "cards": [
+    {
+      "q": "Are you open to new opportunities?",
+      "a": "Yes — I'm open to new opportunities. I'm currently a Platform Engineer at DrAnsay, and I'm happy to talk full-time, contract, or remote. With 10+ years in DevOps and platform engineering, I'm most at home building Kubernetes platforms, CI/CD, and cloud infrastructure on AWS and GCP. Want to hear what I'm doing at DrAnsay right now, or how to schedule a call?",
+      "aliases": [
+        "Is Rafael open to new opportunities?",
+        "Hi Rafael, are you still in the job market?",
+        "Are you still in the job market?"
+      ]
+    },
+    {
+      "q": "What's your current role?",
+      "a": "Right now I'm a Platform Engineer at DrAnsay, a telehealth company — I own the platform side: Kubernetes, Terraform, CI/CD, and cloud infrastructure across AWS and GCP. Before that I was at Bluecore, Uber, Triumph, and Globo, which adds up to 10+ years of DevOps and platform engineering. Curious about the project I'm proudest of — the 8,000-repo CI migration at Uber?",
+      "aliases": [
+        "What is your current role right now?",
+        "What is your current role?"
+      ]
+    },
+    {
+      "q": "Can I get your resume as a PDF?",
+      "a": "Of course — pick whichever suits you best:\n\n- ATS-friendly (for your system): https://resume.rafaracing.com.br/pdf-ats\n- Screen-optimized: https://resume.rafaracing.com.br/pdf-screen\n- Print version: https://resume.rafaracing.com.br/pdf-print\n\nThe full resume is also right below this chat if you'd rather read it here. Anything you'd like me to walk you through before you download?",
+      "aliases": [
+        "Can I download your resume?",
+        "Send me your CV",
+        "Do you have a PDF version of your resume?",
+        "Can you send me the PDF?"
+      ]
+    },
+    {
+      "q": "How can I schedule a call with you?",
+      "a": "I'd love that. The fastest way is the calendar booking button right here on this page — grab any slot that works for you. Prefer email, WhatsApp, or LinkedIn instead? Those buttons are on the page too. While you're booking: want a quick summary of my experience, or the PDF to share with your team?",
+      "aliases": [
+        "How can I schedule a time with you about a position in my company?",
+        "How can I contact you?",
+        "How do I book a call?"
+      ]
+    }
+  ],
+  "seeded": [
+    {
+      "q": "What do you currently earn?",
+      "a": "I'd rather keep my current number to myself — share the range you're working with and I'll tell you straight away if it works. Full-time, contract, and remote are all on the table, and the contact buttons right here on the page can take it from there. What role did you have in mind?",
+      "aliases": [
+        "What's your current salary?",
+        "What is your expected salary?"
+      ]
+    },
+    {
+      "q": "How did you build this chat?",
+      "a": "I built this whole site myself — it's part of the resume. An Astro static site plus this AI assistant running on a Cloudflare Worker with Workers AI, KV caching and rate limiting, shipped through a fully automated GitHub Actions pipeline. The code is open source at https://github.com/rafilkmp3/resume-as-code. Consider it my platform-engineering skills running in production — want the architecture details?",
+      "aliases": [
+        "How was this site built?",
+        "Did you build this chatbot?"
+      ]
+    }
+  ]
+}
