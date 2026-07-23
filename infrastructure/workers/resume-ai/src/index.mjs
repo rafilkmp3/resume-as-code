@@ -5,6 +5,7 @@
 // Import attribute keeps this file loadable by BOTH wrangler's esbuild
 // (bundles the JSON at deploy time) and plain Node (smoke tests).
 import resume from '../../../../app/data/resume.json' with { type: 'json' };
+import chatCards from '../../../../app/data/chat-cards.json' with { type: 'json' };
 import { computeFacts } from './facts.mjs';
 import { buildSystemPrompt } from './prompt.mjs';
 import {
@@ -44,20 +45,20 @@ const DAILY_FEEDBACK_BUDGET = 100; // caps fb:* KV writes so feedback spam can't
 const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days (normal questions)
 const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
 
-// The 4 hero suggestion cards are the primary demo surface — once warmed they
+// The hero suggestion cards are the primary demo surface — once warmed they
 // should answer INSTANTLY and never re-spend neurons. Their cached answers get
 // a ~400-day TTL (vs 7 days), so they effectively live "forever"; the cache
 // VERSION in the key (chat:vN) still busts them whenever the prompt/resume
-// changes and the deploy re-prewarms. Strings must match the hero cards EXACTLY
-// (normalizeQuestion folds case/punctuation/whitespace).
+// changes and the deploy re-prewarms. Card strings (and their production-log
+// aliases) come from app/data/chat-cards.json — the single source of truth
+// shared with the hero UI and the seed script (normalizeQuestion folds
+// case/punctuation/whitespace).
 const CARD_CACHE_TTL = 400 * 24 * 60 * 60; // ~400 days
-const CARD_QUESTIONS = [
-  "How's your AWS experience?",
-  "What's your current role?",
-  'Are you open to new opportunities?',
-  'Tell me about your DevOps toolbox',
-];
-const CARD_KEYS = new Set(CARD_QUESTIONS.map((q) => normalizeQuestion(q)));
+const CARD_KEYS = new Set(
+  [...chatCards.cards, ...chatCards.seeded].flatMap(({ q, aliases }) =>
+    [q, ...(aliases || [])].map((question) => normalizeQuestion(question)),
+  ),
+);
 const isCardQuestion = (msg) => CARD_KEYS.has(normalizeQuestion(msg));
 
 const STATIC_FALLBACK_REPLY =

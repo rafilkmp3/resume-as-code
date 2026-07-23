@@ -241,6 +241,77 @@
         "74400",
         "74,400"
       ]
+    },
+    {
+      "id": "pdf-download",
+      "category": "pdf",
+      "message": "Can I download your resume as a PDF?",
+      "mustInclude": [
+        [
+          "pdf-ats",
+          "pdf-screen",
+          "pdf-print"
+        ],
+        [
+          "resume.rafaracing.com.br"
+        ]
+      ],
+      "mustNotInclude": [
+        "I cannot",
+        "not able to",
+        "don't have a PDF"
+      ]
+    },
+    {
+      "id": "built-this-chat",
+      "category": "portfolio",
+      "message": "How did you build this chatbot?",
+      "mustInclude": [
+        [
+          "cloudflare",
+          "worker",
+          "astro"
+        ],
+        [
+          "built",
+          "build",
+          "open source"
+        ]
+      ],
+      "mustNotInclude": [
+        "I cannot answer",
+        "outside what I'm here for"
+      ]
+    },
+    {
+      "id": "schedule-call",
+      "category": "contact",
+      "message": "How can I schedule a time with you about a position in my company?",
+      "mustInclude": [
+        [
+          "calendar",
+          "book",
+          "booking",
+          "call"
+        ]
+      ],
+      "mustNotInclude": [
+        "I cannot"
+      ]
+    },
+    {
+      "id": "role-fit-junior",
+      "category": "role-fit",
+      "message": "Are you interested in a junior java developer position?",
+      "mustInclude": [
+        [
+          "platform",
+          "devops",
+          "senior",
+          "10"
+        ]
+      ],
+      "mustNotInclude": []
     }
   ]
 }
