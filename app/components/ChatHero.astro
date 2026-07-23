@@ -56,9 +56,20 @@ const promptCards = chatCards.cards.map((card) => card.q);
       <div id="chat-messages" class="ch-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
     </div>
 
+    <!-- Example prompts — cache-prewarmed strings. Placed ABOVE the input in
+         the DOM so keyboard tab order matches the visual order in BOTH hero
+         (2×2 grid) and conversation (compact chip row) modes; they never
+         disappear. The canonical question lives in data-q: it is the KV cache
+         key, so it must never be derived from rendered textContent. -->
+    <div id="chat-cards" class="ch-cards">
+      {promptCards.map((prompt) => (
+        <button type="button" class="ch-card" data-q={prompt}>{prompt}</button>
+      ))}
+    </div>
+
     <div id="chat-cooldown" class="ch-cooldown" hidden></div>
 
-    <!-- Input pill (always visible, anchored under the thread) -->
+    <!-- Input pill (always visible, anchored under the cards) -->
     <form id="chat-form" class="ch-form" autocomplete="off">
       <input
         id="chat-input"
@@ -74,16 +85,6 @@ const promptCards = chatCards.cards.map((card) => card.q);
         </svg>
       </button>
     </form>
-
-    <!-- Example prompts — cache-prewarmed strings. Persist in conversation
-         mode as compact chips docked above the input (never disappear). The
-         canonical question lives in data-q: it is the KV cache key, so it must
-         never be derived from rendered textContent. -->
-    <div id="chat-cards" class="ch-cards">
-      {promptCards.map((prompt) => (
-        <button type="button" class="ch-card" data-q={prompt}>{prompt}</button>
-      ))}
-    </div>
 
     <!-- Secondary actions -->
     <div class="ch-actions">
@@ -233,18 +234,13 @@ const promptCards = chatCards.cards.map((card) => card.q);
   }
 
   /* Conversation mode: greeting collapses, thread appears. The suggestion
-     cards NEVER disappear — they become a compact chip row docked directly
-     above the input pill (flex order, no DOM moves). */
+     cards NEVER disappear — they become a compact chip row. DOM order already
+     places them directly above the input (thread → cards → input), so no flex
+     `order` overrides are needed and keyboard tab order matches the layout. */
   .ch-hero.ch-conv .ch-intro,
   .ch-hero.ch-conv .ch-scroll-cue {
     display: none;
   }
-
-  .ch-hero.ch-conv .ch-thread { order: 1; }
-  .ch-hero.ch-conv .ch-cooldown { order: 2; }
-  .ch-hero.ch-conv .ch-cards { order: 3; }
-  .ch-hero.ch-conv .ch-form { order: 4; }
-  .ch-hero.ch-conv .ch-actions { order: 5; }
 
   .ch-hero.ch-conv .ch-cards {
     display: flex;
@@ -1103,9 +1099,11 @@ const promptCards = chatCards.cards.map((card) => card.q);
     const coolingDown = cooldownRemainingMs() > 0;
     const disabled = chatInFlight || coolingDown;
     inputEl.disabled = disabled;
-    sendEl.disabled = disabled;
-    // Cards also lock while one is being "typed" into the input — the input
-    // itself stays enabled so the user can grab the text mid-animation.
+    // Send is also locked while a card is being "typed" into the input, so a
+    // click/Enter mid-animation cannot fire a partial send that races the
+    // auto-send at the end of the animation (double send / wedged input). The
+    // input itself stays enabled so a keypress can still take over the text.
+    sendEl.disabled = disabled || cardTypingActive;
     const cards = cardsEl.querySelectorAll('.ch-card');
     for (let i = 0; i < cards.length; i++) cards[i].disabled = disabled || cardTypingActive;
   }
@@ -1128,9 +1126,14 @@ const promptCards = chatCards.cards.map((card) => card.q);
     btn.className = 'ch-retry-btn';
     btn.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg><span>Retry</span>';
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
       if (chatInFlight || cooldownRemainingMs() > 0) return;
+      // Keyboard activation (e.detail === 0): removing this row drops focus to
+      // body, and runInference only re-homes focus on precise pointers — so
+      // re-home it here for coarse-pointer + hardware-keyboard users.
+      var keyboardActivated = e && e.detail === 0;
       row.remove();
+      if (keyboardActivated) inputEl.focus({ preventScroll: true });
       resendMessage(question);
     });
     row.appendChild(btn);
@@ -1138,12 +1141,21 @@ const promptCards = chatCards.cards.map((card) => card.q);
     scrollToBottom();
   }
 
-  async function sendMessage(text, source) {
+  async function sendMessage(text, source, opts) {
     const message = String(text || '').trim().slice(0, 500);
-    if (!message || chatInFlight || cooldownRemainingMs() > 0) return;
+    // cardTypingActive guard: the only legitimate send during a card animation
+    // is the auto-send at its end, which clears cardTypingActive (via
+    // cancelCardTyping) BEFORE calling here. Any other send while typing is a
+    // stray race and is dropped.
+    if (!message || chatInFlight || cardTypingActive || cooldownRemainingMs() > 0) return;
 
-    // History is everything so far (the new user turn is sent separately).
-    const history = buildApiHistory(chatMessages);
+    // Suggestion cards are self-contained canned questions with curated,
+    // context-free answers seeded in KV. Sending them history-LESS makes the
+    // worker serve them from that ~400-day cache (instant, zero neurons,
+    // survives the daily quota) even mid-conversation — the worker only
+    // reads/writes its answer cache when history is empty. Typed follow-ups
+    // keep the conversation history.
+    const history = opts && opts.noHistory ? [] : buildApiHistory(chatMessages);
     chatMessages.push({ role: 'user', content: message });
     saveHistory();
     enterConversationMode();
@@ -1457,19 +1469,24 @@ const promptCards = chatCards.cards.map((card) => card.q);
     updateInputState();
   }
 
-  function askCard(cardEl) {
+  function askCard(cardEl, keyboardActivated) {
     var question = cardEl.getAttribute('data-q') || cardEl.textContent;
     if (!question || chatInFlight || cardTypingActive || cooldownRemainingMs() > 0) return;
     cardEl.classList.add('ch-asked');
     pauseTypewriter();
+    // Focus the input when there's no risk of popping a soft keyboard: a
+    // precise pointer, OR a keyboard-driven activation (Enter/Space, which
+    // implies a hardware keyboard even on a coarse-pointer tablet). Otherwise
+    // activating a chip via keyboard would disable it and strand focus on body.
+    var canFocus = CHAT_POINTER_FINE || keyboardActivated;
     if (CHAT_REDUCED_MOTION) {
-      sendMessage(question, 'card');
+      if (canFocus) inputEl.focus({ preventScroll: true });
+      sendMessage(question, 'card', { noHistory: true });
       return;
     }
     cardTypingActive = true;
     updateInputState();
-    // Never pop the mobile keyboard — focus precise-pointer devices only.
-    if (CHAT_POINTER_FINE) inputEl.focus({ preventScroll: true });
+    if (canFocus) inputEl.focus({ preventScroll: true });
     // ~25ms/char, capped so long questions still land in about a second.
     var step = Math.max(12, Math.min(28, Math.round(900 / question.length)));
     var pos = 0;
@@ -1483,7 +1500,7 @@ const promptCards = chatCards.cards.map((card) => card.q);
         cardTypeTimer = setTimeout(function () {
           if (!cardTypingActive) return;
           cancelCardTyping();
-          sendMessage(question, 'card');
+          sendMessage(question, 'card', { noHistory: true });
         }, 250);
       }
     })();
@@ -1518,7 +1535,8 @@ const promptCards = chatCards.cards.map((card) => card.q);
     const cards = cardsEl.querySelectorAll('.ch-card');
     for (let i = 0; i < cards.length; i++) {
       cards[i].addEventListener('click', function (e) {
-        askCard(e.currentTarget);
+        // e.detail === 0 ⇒ keyboard activation (Enter/Space), not a pointer tap.
+        askCard(e.currentTarget, e.detail === 0);
       });
     }
 
