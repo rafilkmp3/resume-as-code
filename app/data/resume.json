@@ -46,11 +46,13 @@
       "position": "Platform Engineer",
       "url": "https://dransay.com",
       "startDate": "2025-11",
-      "summary": "Platform engineering for DrAnsay (dransay.com), a telehealth platform. [TODO: refine summary]",
+      "summary": "Platform engineering for DrAnsay (dransay.com), a leading German telemedicine provider handling patient health data under GDPR. Own cloud platform, IaC, and security across GCP and Cloudflare — ~€120K/year in cloud savings while hardening the estate.",
       "highlights": [
-        "[TODO: achievement #1 — infrastructure/platform win with a metric]",
-        "[TODO: achievement #2 — CI/CD, reliability, or observability improvement]",
-        "[TODO: achievement #3 — cost, automation, or developer-experience impact]"
+        "Self-service IaC platform: Replaced 100% manual provisioning — GCP and Cloudflare resources in Pulumi, applied via Atlantis by ~100 engineers through pull-request plan/review/apply. One auditable source of truth",
+        "Cloud cost cleanup: Cut ~€8K/month (~€96K/year) — found 24 orphaned Kubernetes clusters, safely decommissioned ~20 plus their unused GCP resources billing for nothing",
+        "FinOps data tiering: Cut production-database cost ~€2K/month (~€24K/year) with pipelines tiering cold data into BigQuery — still fully queryable for analytics",
+        "Network security baseline from scratch: Cloudflare WAF over public endpoints that had none, and a Tailscale mesh VPN placing internal services behind a private network boundary",
+        "AI-assisted operations and hardening: Codified infrastructure gives AI ground truth to read instead of guess — scanning misconfigurations and vulnerabilities and remediating the estate runs orders of magnitude faster"
       ]
     },
     {
@@ -436,7 +438,7 @@
     }
   ],
   "meta": {
-    "lastUpdated": "2025-08-21",
+    "lastUpdated": "2026-07-24",
     "availability": {
       "status": "open_to_work",
       "icon": "🟢",
