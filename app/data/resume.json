@@ -1,12 +1,12 @@
 {
   "basics": {
     "name": "Rafael Bernardo Sathler",
-    "label": "Infrastructure Engineer • DevOps • Platform Engineer • AWS/GCP Cloud Architect",
+    "label": "Platform Engineer • Infrastructure & DevOps • Cloud Security & FinOps • AWS/GCP",
     "image": "assets/images/profile-optimized.jpg",
     "email": "rafaelbsathler@gmail.com",
     "phone": "+55 21 997988682",
     "url": "https://rafilkmp3.github.io/resume-as-code/",
-    "summary": "Platform Engineer with 10+ years evolving from Linux system administration to enterprise-scale cloud-native architecture. Worn many hats across DevOps, infrastructure automation, and platform engineering. Led 8,000-repo GitHub Actions migration, orchestrated zero-downtime Kubernetes upgrades protecting revenue, and delivered $265K+ cost reductions through rightsizing initiatives, spot-instance strategies, and automation serving 5,000+ engineers across AWS/GCP.",
+    "summary": "Platform Engineer, 10+ years across DevOps, infrastructure automation, and cloud-native systems. At a GDPR-regulated German telemedicine provider: self-service IaC (Pulumi + Atlantis) for ~100 engineers, ~€120K/year recurring FinOps savings (orphaned-cluster decommissioning, BigQuery data tiering), security from zero (Cloudflare WAF, Tailscale mesh VPN), and AI-native operations on machine-readable infra. Earlier: an 8,000-repo GitHub Actions migration on a 1,000-node GKE fleet serving 5,000+ engineers, zero-downtime Kubernetes upgrades, $265K+ cumulative.",
     "location": {
       "city": "Rio de Janeiro",
       "countryCode": "BR",
