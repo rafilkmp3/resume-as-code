@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.21.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.20.0...v4.21.0) (2026-07-24)
+
+
+### Features
+
+* add AI resume chatbot ([#183](https://github.com/rafilkmp3/resume-as-code/issues/183)) ([a392d3f](https://github.com/rafilkmp3/resume-as-code/commit/a392d3fd685a9afe99fadc4e405ff94c63dd8dda))
+* fill DrAnsay highlights + cal.com booking ([#188](https://github.com/rafilkmp3/resume-as-code/issues/188)) ([63b8321](https://github.com/rafilkmp3/resume-as-code/commit/63b8321eb921813135ad87ed83eed44a23e78bac))
+* inviting AI-resume hero, PDF links, no dead ends ([#187](https://github.com/rafilkmp3/resume-as-code/issues/187)) ([a2fb272](https://github.com/rafilkmp3/resume-as-code/commit/a2fb272ca5978f9e5382c191d81f1868540d9a0c))
+
+
+### Miscellaneous
+
+* CF Web Analytics + resilient worker CI ([#186](https://github.com/rafilkmp3/resume-as-code/issues/186)) ([6381925](https://github.com/rafilkmp3/resume-as-code/commit/638192501825abf792da1cdf2b49acfc9b71cdf4))
+
+
+### Documentation
+
+* add commit length rules and release flow ([#181](https://github.com/rafilkmp3/resume-as-code/issues/181)) ([f8d45ea](https://github.com/rafilkmp3/resume-as-code/commit/f8d45eab28719c039c41f4bdc1fda353a6e1b61c))
+
+
+### Continuous Integration
+
+* redirect GitHub Pages to CF worker domain ([#185](https://github.com/rafilkmp3/resume-as-code/issues/185)) ([e7384f5](https://github.com/rafilkmp3/resume-as-code/commit/e7384f52e0b6973351ae3ba4372b808073c5a469))
+
 ## [4.20.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.19.3...v4.20.0) (2026-07-20)
 
 
