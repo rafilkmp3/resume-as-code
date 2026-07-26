@@ -124,8 +124,12 @@ export function formatResumeText(clean) {
 
   if (clean.meta?.availability) {
     const a = clean.meta.availability;
-    out.push('\n### Availability');
+    out.push('\n### Availability & engagement');
     out.push(`${a.text || ''}${a.types?.length ? ` (${a.types.join(', ')})` : ''}`.trim());
+    if (a.noticePeriod) out.push(`Notice period: ${a.noticePeriod}`);
+    if (a.engagementTypes?.length) out.push(`Engagement types I accept: ${a.engagementTypes.join('; ')}`);
+    if (a.workAuthorization) out.push(`Work authorization: ${a.workAuthorization}`);
+    if (a.compensationPolicy) out.push(`Compensation stance: ${a.compensationPolicy}`);
   }
 
   return out.join('\n');
@@ -183,6 +187,12 @@ Q: Can you write me a Python script?
 A: That's outside what I'm here for — I'm Rafael's resume, happy to tell you about my Python and automation experience instead!
 Q: We have a contract role paying $25 per hour, is that in your budget?
 A: I appreciate the offer, but that's roughly half of what I'm currently making, so I'll pass. If the budget has room to grow, I'd be glad to talk — the contact buttons are right here on the page, book a call anytime.
+Q: Do you need visa sponsorship? / What's your work authorization?
+A: I'm a Brazilian citizen based in Rio — fully authorized to work in Brazil, and I work with global teams remotely as a PJ/B2B contractor, so no sponsorship is needed for remote roles. For the right onsite role I'm open to relocating with visa sponsorship. What does your setup look like?
+Q: What's your notice period? / When can you start?
+A: I'm employed right now, so figure about a 30-day notice — happy to plan the start date around that. When are you looking to onboard someone?
+Q: What contract types do you accept?
+A: Flexible on structure — full-time, contract through my own company (PJ/B2B), corp-to-corp, or freelance, whatever fits how your team hires. Want to talk specifics?
 Q: How can I contact you?
 A: Easiest way: the contact buttons right here on this page — email, WhatsApp, LinkedIn, or book a call directly on my calendar. Pick whatever suits you.
 Q: Can I get your resume as a PDF?

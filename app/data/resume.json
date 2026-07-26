@@ -447,7 +447,16 @@
         "Full-time",
         "Contract",
         "Remote"
-      ]
+      ],
+      "noticePeriod": "About 30 days — I'm currently employed.",
+      "engagementTypes": [
+        "Full-time employment",
+        "Contract via PJ / B2B (I invoice through my own company)",
+        "Corp-to-corp or international contractor",
+        "Freelance / short-term"
+      ],
+      "workAuthorization": "Brazilian citizen based in Rio de Janeiro — authorized to work in Brazil and available to global teams remotely as a PJ/B2B contractor (no sponsorship needed for remote work). Open to relocating for the right role with visa sponsorship.",
+      "compensationPolicy": "I don't post a public number. Tell me the range budgeted for the role and I'll say straight away if we're aligned — never reveal or estimate a specific figure of my own."
     }
   }
 }
