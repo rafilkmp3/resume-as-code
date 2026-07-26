@@ -25,7 +25,8 @@
         "Can I download your resume?",
         "Send me your CV",
         "Do you have a PDF version of your resume?",
-        "Can you send me the PDF?"
+        "Can you send me the PDF?",
+        "Can you send your updated CV?"
       ]
     },
     {
@@ -53,6 +54,52 @@
       "aliases": [
         "How was this site built?",
         "Did you build this chatbot?"
+      ]
+    },
+    {
+      "q": "What are your compensation expectations?",
+      "a": "I keep my target number out of public chat, but I won't waste your time either — tell me the range budgeted for the role and I'll say straight away if we're aligned. Structure matters too: full-time, PJ/B2B contract, corp-to-corp, or freelance all change the math. Easiest way to talk specifics is a quick call (https://cal.com/rafaelbsathler) or the email/WhatsApp buttons on this page. What range are you working with?",
+      "aliases": [
+        "What are your salary expectations?",
+        "What's your expected compensation?",
+        "What compensation are you looking for?",
+        "What's your desired salary range?",
+        "How much are you looking to make?"
+      ]
+    },
+    {
+      "q": "What contract types or engagement structures do you accept?",
+      "a": "I'm flexible on structure: full-time employment, contract through my own company (PJ/B2B), corp-to-corp or international contractor, and freelance or short-term — whatever fits how your team hires. I'm based in Rio de Janeiro and work remotely with global teams. Want to sort out the details? Book a call at https://cal.com/rafaelbsathler or use the contact buttons here.",
+      "aliases": [
+        "Are you open to contract work?",
+        "Do you do B2B or PJ contracts?",
+        "Can you work as a contractor?",
+        "Do you work corp to corp?",
+        "Are you available for full-time or contract?",
+        "What engagement structures do you accept?"
+      ]
+    },
+    {
+      "q": "What is your availability to start?",
+      "a": "I'm currently employed, so I'd come with about a 30-day notice period — happy to line the start date up around that. Full-time, contract, and remote are all open. If your timing is tight, let's talk: https://cal.com/rafaelbsathler or the contact buttons here. When are you looking to have someone start?",
+      "aliases": [
+        "When can you start?",
+        "What is your notice period?",
+        "How soon can you join?",
+        "What's your availability?",
+        "Are you available immediately?"
+      ]
+    },
+    {
+      "q": "What is your work authorization?",
+      "a": "I'm a Brazilian citizen based in Rio de Janeiro — fully authorized to work in Brazil, and I work with global teams remotely as a PJ/B2B contractor, so no sponsorship is needed for remote roles. For the right onsite role I'm open to relocating with visa sponsorship. Anything specific your process needs? My calendar and contact buttons are right here (https://cal.com/rafaelbsathler).",
+      "aliases": [
+        "Do you need visa sponsorship?",
+        "Are you authorized to work?",
+        "Where are you authorized to work?",
+        "Do you require sponsorship?",
+        "Are you open to relocation?",
+        "What is your work eligibility?"
       ]
     }
   ]
