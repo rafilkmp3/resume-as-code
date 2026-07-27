@@ -31,10 +31,27 @@ export function resolveCorsOrigin(originHeader) {
   return null;
 }
 
+// Optional client metadata (additive to the frozen contract — old clients
+// simply omit them). sessionId is a client-generated UUID from sessionStorage;
+// anything non-UUID-shaped is dropped (not rejected) so the log never stores
+// attacker-controlled junk as an identifier.
+const SESSION_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SOURCES = new Set(['typed', 'card', 'retry']);
+
+/** @returns {string|null} the sessionId if well-formed, else null (never an error) */
+export function sanitizeSessionId(value) {
+  return typeof value === 'string' && SESSION_ID_RE.test(value) ? value.toLowerCase() : null;
+}
+
+/** @returns {string|null} the source tag if known, else null (never an error) */
+export function sanitizeSource(value) {
+  return typeof value === 'string' && SOURCES.has(value) ? value : null;
+}
+
 /**
  * Validates POST /api/chat body per the frozen API contract.
  * @param {unknown} body parsed JSON
- * @returns {{ok:true, message:string, history:Array<{role:string,content:string}>} | {error:string, status:number}}
+ * @returns {{ok:true, message:string, history:Array<{role:string,content:string}>, sessionId:string|null, source:string|null, turnstileToken:string|null} | {error:string, status:number}}
  */
 export function validateChatBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
@@ -68,7 +85,18 @@ export function validateChatBody(body) {
     }
     history = body.history.map((e) => ({ role: e.role, content: e.content }));
   }
-  return { ok: true, message, history };
+  const turnstileToken =
+    typeof body.turnstileToken === 'string' && body.turnstileToken.length <= 2048
+      ? body.turnstileToken
+      : null;
+  return {
+    ok: true,
+    message,
+    history,
+    sessionId: sanitizeSessionId(body.sessionId),
+    source: sanitizeSource(body.source),
+    turnstileToken,
+  };
 }
 
 /**
@@ -89,7 +117,13 @@ export function validateFeedbackBody(body) {
   if (body.reply !== undefined && (typeof body.reply !== 'string' || body.reply.length > 2000)) {
     return { error: 'reply must be a string of max 2000 characters', status: 400 };
   }
-  return { ok: true, verdict: body.verdict, question: body.question, reply: body.reply };
+  return {
+    ok: true,
+    verdict: body.verdict,
+    question: body.question,
+    reply: body.reply,
+    sessionId: sanitizeSessionId(body.sessionId),
+  };
 }
 
 /**

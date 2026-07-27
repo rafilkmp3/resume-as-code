@@ -17,6 +17,14 @@ import {
 } from './guards.mjs';
 import { aiRunViaGateway, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
 import { cacheKey as buildCacheKey } from './cache-version.mjs';
+import {
+  classifyUserAgent,
+  cfMetadata,
+  verifyTurnstile,
+  logChat,
+  logFeedback,
+  runRetention,
+} from './d1-log.mjs';
 
 // Fallback chain — free-tier models hang/fail routinely; every step has a hard
 // timeout so the next one always gets a chance (see ai.mjs).
@@ -43,7 +51,6 @@ const RATE_LIMIT_FEEDBACK = { max: 20, ttl: 600 }; // 20 req / 10 min per IP
 const DAILY_BUDGET = 200;
 const DAILY_FEEDBACK_BUDGET = 100; // caps fb:* KV writes so feedback spam can't exhaust the KV write quota
 const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days (normal questions)
-const LOG_TTL = 30 * 24 * 60 * 60; // 30 days
 
 // The hero suggestion cards are the primary demo surface — once warmed they
 // should answer INSTANTLY and never re-spend neurons. Their cached answers get
@@ -157,7 +164,14 @@ async function handleChat(request, env, ctx, corsOrigin) {
   if (!validated.ok) {
     return jsonResponse(validated.status, { error: validated.error }, corsOrigin);
   }
-  const { message, history } = validated;
+  const { message, history, sessionId, source, turnstileToken } = validated;
+
+  // Obvious scraper/CLI user agents never reach the AI (or the log). Narrow
+  // list by design — see d1-log.mjs; Turnstile + zone Bot Fight Mode do the
+  // real work. 403 with a stable code so it is distinguishable from CORS 403s.
+  if (classifyUserAgent(request.headers.get('User-Agent')) === 'bot') {
+    return jsonResponse(403, { error: 'Automated clients are not allowed', code: 'bot' }, corsOrigin);
+  }
 
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const rl = await rateLimit(env.RESUME_AI_KV, 'rl', ip, RATE_LIMIT_CHAT);
@@ -169,6 +183,11 @@ async function handleChat(request, env, ctx, corsOrigin) {
     );
   }
 
+  // Coarse request.cf metadata (country/city/AS org) — attached to every log
+  // row. Company-level signal; deliberately nothing person-level (no IP, ever).
+  const meta = cfMetadata(request);
+  const turn = Math.floor(history.length / 2) + 1;
+
   // Response cache — only for history-less questions (a follow-up depends on
   // conversation context, so caching it would serve wrong answers). The key's
   // version is a hash of the resume content (see cache-version.mjs), so editing
@@ -178,10 +197,43 @@ async function handleChat(request, env, ctx, corsOrigin) {
     try {
       const cached = await env.RESUME_AI_KV.get(cacheKey, 'json');
       if (cached && cached.reply) {
+        // Cache hits ARE logged (they were the corpus's biggest blind spot:
+        // the most popular questions are exactly the ones served from cache).
+        // Turnstile is skipped here — a cache hit spends no AI quota.
+        ctx.waitUntil(
+          logChat(env.CHAT_DB, {
+            sessionId,
+            turn,
+            source,
+            q: message,
+            reply: cached.reply,
+            model: cached.model,
+            ms: 0,
+            cached: true,
+            historyLen: history.length,
+            ...meta,
+            turnstile: env.TURNSTILE_SECRET ? 'skip' : 'off',
+          }).catch(() => {}),
+        );
         return jsonResponse(200, { reply: cached.reply, model: cached.model, cached: true }, corsOrigin);
       }
     } catch {
       // fail open — treat as cache miss
+    }
+  }
+
+  // Turnstile gate — env-gated like AI_GATEWAY_ID: no TURNSTILE_SECRET, no
+  // check (zero-risk toggle). Runs only in front of real AI spend; the
+  // verification service failing open is deliberate (see d1-log.mjs).
+  let turnstile = 'off';
+  if (env.TURNSTILE_SECRET) {
+    turnstile = await verifyTurnstile(env.TURNSTILE_SECRET, turnstileToken, ip);
+    if (turnstile === 'fail') {
+      return jsonResponse(
+        403,
+        { error: 'Bot check failed — please reload the page and try again.', code: 'turnstile' },
+        corsOrigin,
+      );
     }
   }
 
@@ -258,16 +310,25 @@ async function handleChat(request, env, ctx, corsOrigin) {
       }).catch(() => {}),
     );
   }
-  // Fire-and-forget Q&A log — learning/eval corpus. Deliberately NO client
-  // identifier: a djb2 "hash" of an IPv4 is brute-forceable in minutes, so
-  // storing it would be storing the IP.
-  const logKey = `log:${new Date().toISOString()}:${Math.random().toString(36).slice(2, 8)}`;
+  // Fire-and-forget conversation log — the learning/eval corpus (D1, was KV).
+  // Deliberately NO IP or fingerprint: session_id is a per-tab client UUID and
+  // geo/network columns are coarse request.cf signals (company-level only).
   ctx.waitUntil(
-    env.RESUME_AI_KV.put(
-      logKey,
-      JSON.stringify({ q: message, replyLen: reply.length, model: modelUsed, ms, cached: false }),
-      { expirationTtl: LOG_TTL },
-    ).catch(() => {}),
+    logChat(env.CHAT_DB, {
+      sessionId,
+      turn,
+      source,
+      q: message,
+      reply,
+      model: modelUsed,
+      ms,
+      cached: false,
+      degraded,
+      gateway: viaGateway,
+      historyLen: history.length,
+      ...meta,
+      turnstile,
+    }).catch(() => {}),
   );
 
   const payload = { reply, model: modelUsed, cached: false };
@@ -298,22 +359,18 @@ async function handleFeedback(request, env, ctx, corsOrigin) {
     );
   }
 
-  // Daily cap on feedback persistence (fail-closed): without it, feedback spam
-  // could exhaust the KV free tier's write quota and knock out every KV-backed
-  // guard. Over cap → feedback is silently dropped, response stays 204.
+  // Daily cap on feedback persistence (fail-closed): caps how many D1 rows
+  // feedback spam can write per day. Over cap → feedback is silently dropped,
+  // response stays 204.
   const day = new Date().toISOString().slice(0, 10);
   if (await bumpCounter(env.RESUME_AI_KV, `budget-fb:${day}`, DAILY_FEEDBACK_BUDGET, 172_800, true)) {
-    const fbKey = `fb:${new Date().toISOString()}:${Math.random().toString(36).slice(2, 8)}`;
     ctx.waitUntil(
-      env.RESUME_AI_KV.put(
-        fbKey,
-        JSON.stringify({
-          verdict: validated.verdict,
-          question: validated.question,
-          reply: validated.reply,
-        }),
-        { expirationTtl: LOG_TTL },
-      ).catch(() => {}),
+      logFeedback(env.CHAT_DB, {
+        sessionId: validated.sessionId,
+        verdict: validated.verdict,
+        question: validated.question,
+        reply: validated.reply,
+      }).catch(() => {}),
     );
   }
 
@@ -368,5 +425,16 @@ export default {
     // static-assets layer serves the site directly without invoking the Worker.
     // Anything landing here is an unknown /api/* route.
     return jsonResponse(404, { error: 'Not found' }, corsOrigin);
+  },
+
+  // Weekly retention sweep (cron in wrangler.toml): age purge is the policy,
+  // size watermark is the bot-flood fuse. See runRetention in d1-log.mjs.
+  async scheduled(_event, env, _ctx) {
+    try {
+      const { purged, trimmed } = await runRetention(env.CHAT_DB);
+      console.log(`[resume-ai] retention sweep: purged=${purged} trimmed=${trimmed}`);
+    } catch (err) {
+      console.error('[resume-ai] retention sweep failed:', err);
+    }
   },
 };
