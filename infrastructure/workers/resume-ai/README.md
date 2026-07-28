@@ -54,8 +54,14 @@ npm run worker:test   # node --test over test/*.test.mjs (pure modules only)
 
 ## Self-improvement loop (real-user log mining)
 
-Every production Q&A is logged to KV (`log:*`, 30-day TTL, no client
-identifiers) and thumbs-up/down feedback to `fb:*`. Mine them with:
+Every conversation turn — cache hits included — is logged to D1
+(`resume-ai-logs`, tables `chats` + `feedback`) with metadata: per-tab
+session id (sessionStorage UUID — never cross-visit), turn number,
+`typed`/`card`/`retry` source, full reply (truncated at 500 chars), model,
+latency, and coarse `request.cf` audience signals (country, city, network
+org). No IP or fingerprint, ever. Retention: 180-day age purge + a
+75%-of-free-tier size fuse, swept by the weekly cron (`scheduled` handler).
+Mine the corpus with:
 
 ```bash
 npm run worker:logs            # human report
@@ -67,12 +73,39 @@ degraded / slow answers, and flags topics that neither the hero cards nor
 `eval/questions.json` cover. The loop:
 
 1. Run `npm run worker:logs` periodically (or before any prompt change).
-2. Fold frequent real questions into `eval/questions.json` as new cases.
+2. Fold graduation candidates (typed by **≥3 distinct sessions** — the
+   report computes this) into `eval/questions.json` as new cases.
 3. Promote the most-asked ones into `app/data/chat-cards.json` — either as a
    hero card, an alias of an existing card, or a `seeded` (cache-only) Q&A.
    That one file feeds the hero UI, the worker's long-TTL cache detection,
    and the KV seeding — no strings to keep in sync by hand.
 4. Fix downvoted answers via prompt tweaks, then `npm run worker:eval`.
+
+Raw questions/replies stay OUT of the public repo and public GitHub issues —
+the repo is public and chat text can contain recruiter PII. Aggregates only.
+
+## Bot & DDoS protection
+
+Layered, mostly free:
+
+- **DDoS (L3/4/7)**: automatic and unmetered on every Cloudflare zone —
+  nothing to configure.
+- **UA blocklist** (`src/d1-log.mjs`): obvious scrapers/CLIs (curl, wget,
+  scrapy, python-requests…) get a 403 before any AI spend. Deliberately
+  narrow so Playwright E2E and the node eval runner still pass.
+- **Per-IP rate limits + daily budgets** (KV): see Architecture summary.
+- **Turnstile** (OFF by default, zero-risk toggle — both halves must be set):
+  1. Dashboard → Turnstile → Add widget (Invisible) for
+     `resume.rafaracing.com.br` → copy sitekey + secret.
+  2. `npx wrangler secret put TURNSTILE_SECRET -c infrastructure/workers/resume-ai/wrangler.toml`
+  3. Build the site with `PUBLIC_TURNSTILE_SITEKEY=<sitekey>` (add it to the
+     worker-deploy workflow build step).
+  Missing secret → worker skips verification; missing sitekey → widget sends
+  no token. siteverify outages fail OPEN (availability beats bot filtering).
+- **Zone toggles (dashboard, one-time, free plan)**: Security → Bots →
+  **Bot Fight Mode** ON; Security → WAF → enable the **Cloudflare Free
+  Managed Ruleset**; optionally add the free plan's one **rate limiting
+  rule** on `/api/chat` as an edge backstop above the Worker's KV limits.
 
 ## Deploy
 
@@ -114,11 +147,13 @@ passing a gateway id that does not exist makes **every** `AI.run` call fail
 - **KV (`RESUME_AI_KV`)**: per-IP fixed-window rate limit 10/10min (chat) and
   20/10min (feedback), global daily budget of 200 model **attempts** (cache
   hits free; fallback retries count), daily feedback-write cap of 100,
-  7-day response cache for history-less questions, 30-day Q&A/feedback logs
-  (no client identifier stored at all). Per-IP limits fail open on KV errors;
-  the daily budgets fail **closed** so exhausting KV can't disable the quota
-  guards. KV counters are best-effort (no atomic increment) — throttles, not
-  exact quotas.
+  7-day response cache for history-less questions. Per-IP limits fail open on
+  KV errors; the daily budgets fail **closed** so exhausting KV can't disable
+  the quota guards. KV counters are best-effort (no atomic increment) —
+  throttles, not exact quotas.
+- **D1 (`CHAT_DB`, `resume-ai-logs`)**: the conversation corpus — see
+  "Self-improvement loop" above. Writes are fire-and-forget (`ctx.waitUntil`,
+  errors swallowed): a D1 outage can never break a chat reply.
 - **CORS**: strict origin allowlist, `Vary: Origin` always, `Origin` echoed
   only when allowed; `no-store`, `nosniff`, `strict-origin-when-cross-origin`
   on every `/api/*` response.

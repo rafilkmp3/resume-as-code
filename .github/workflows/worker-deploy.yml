@@ -87,6 +87,13 @@ jobs:
       - name: Build site for prod domain (static assets bundle)
         run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
 
+      - name: Apply D1 migrations (chat-log schema)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: d1 migrations apply resume-ai-logs --remote -c ${{ env.WRANGLER_CONFIG }}
+
       - name: Deploy resume-ai (worker + static assets)
         uses: cloudflare/wrangler-action@v3
         with:

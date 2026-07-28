@@ -85,6 +85,8 @@ const promptCards = chatCards.cards.map((card) => card.q);
         </svg>
       </button>
     </form>
+    <!-- Invisible Turnstile mount (only used when PUBLIC_TURNSTILE_SITEKEY is set) -->
+    <div id="chat-turnstile" aria-hidden="true"></div>
 
     <!-- Secondary actions -->
     <div class="ch-actions">
@@ -808,6 +810,7 @@ const promptCards = chatCards.cards.map((card) => card.q);
     : 'https://resume.rafaracing.com.br';
 
   const CHAT_STORAGE_KEY = 'resume_chat_history_v1';
+  const CHAT_SESSION_KEY = 'resume_chat_session_v1';
   const CHAT_COOLDOWN_KEY = 'resume_chat_cooldown_until';
   const CHAT_MAX_STORED = 20;
   const CHAT_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -845,6 +848,72 @@ const promptCards = chatCards.cards.map((card) => card.q);
   const skipEl = document.getElementById('chat-skip');
   const scrollCueEl = document.getElementById('chat-scroll-cue');
   const pillEl = document.getElementById('chat-pill');
+
+  // Anonymous conversation grouping for the worker's chat log. sessionStorage
+  // by DESIGN (never localStorage): per-tab, dies on close — groups one
+  // conversation without ever tracking a person across visits.
+  function chatSessionId() {
+    try {
+      let id = sessionStorage.getItem(CHAT_SESSION_KEY);
+      if (!id && window.crypto && typeof crypto.randomUUID === 'function') {
+        id = crypto.randomUUID();
+        sessionStorage.setItem(CHAT_SESSION_KEY, id);
+      }
+      return id || null;
+    } catch (_e) {
+      return null; // storage unavailable — logging just loses the grouping
+    }
+  }
+
+  // Turnstile (bot gate) — build-time gated: without PUBLIC_TURNSTILE_SITEKEY
+  // nothing loads and requests carry no token (worker skips the check unless
+  // its TURNSTILE_SECRET is set — flip both to enable, either alone is inert).
+  const TURNSTILE_SITEKEY = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
+  let turnstileWidgetId = null;
+  function initTurnstile() {
+    if (!TURNSTILE_SITEKEY) return;
+    const s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    s.async = true;
+    s.onload = function () {
+      try {
+        turnstileWidgetId = window.turnstile.render('#chat-turnstile', {
+          sitekey: TURNSTILE_SITEKEY,
+          size: 'invisible',
+        });
+      } catch (_e) {
+        /* widget render failed — sends proceed tokenless; server decides */
+      }
+    };
+    document.head.appendChild(s);
+  }
+  function getTurnstileToken() {
+    return new Promise(function (resolve) {
+      if (!TURNSTILE_SITEKEY || !window.turnstile || turnstileWidgetId === null) {
+        resolve(null);
+        return;
+      }
+      const timer = setTimeout(function () {
+        resolve(null); // challenge hung — send tokenless rather than freeze the chat
+      }, 4000);
+      try {
+        window.turnstile.execute(turnstileWidgetId, {
+          callback: function (token) {
+            clearTimeout(timer);
+            resolve(token || null);
+          },
+          'error-callback': function () {
+            clearTimeout(timer);
+            resolve(null);
+          },
+        });
+      } catch (_e) {
+        clearTimeout(timer);
+        resolve(null);
+      }
+    });
+  }
+  initTurnstile();
 
   function trackEvent(eventName, props) {
     try {
@@ -976,14 +1045,17 @@ const promptCards = chatCards.cards.map((card) => card.q);
 
   function sendFeedback(verdict, question, reply) {
     try {
+      const fbPayload = {
+        verdict: verdict,
+        question: String(question).slice(0, 500),
+        reply: String(reply).slice(0, 2000),
+      };
+      const fbSid = chatSessionId();
+      if (fbSid) fbPayload.sessionId = fbSid;
       fetch(CHAT_API_BASE + '/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          verdict: verdict,
-          question: String(question).slice(0, 500),
-          reply: String(reply).slice(0, 2000),
-        }),
+        body: JSON.stringify(fbPayload),
       }).catch(function () {
         /* fire-and-forget */
       });
@@ -1163,7 +1235,7 @@ const promptCards = chatCards.cards.map((card) => card.q);
     inputEl.value = '';
     trackEvent('chat_message_sent', { source: source === 'card' ? 'card' : 'typed' });
 
-    await runInference(message, history);
+    await runInference(message, history, source === 'card' ? 'card' : 'typed');
   }
 
   // Re-run inference for a message already shown in the thread (retry / reload
@@ -1176,10 +1248,10 @@ const promptCards = chatCards.cards.map((card) => card.q);
         ? chatMessages.slice(0, -1)
         : chatMessages;
     trackEvent('chat_message_retried');
-    await runInference(message, buildApiHistory(priorTurns));
+    await runInference(message, buildApiHistory(priorTurns), 'retry');
   }
 
-  async function runInference(message, history) {
+  async function runInference(message, history, source) {
     setBusy(true);
     showTyping();
 
@@ -1189,10 +1261,17 @@ const promptCards = chatCards.cards.map((card) => card.q);
     }, CHAT_TIMEOUT_MS);
 
     try {
+      const payload = { message: message, history: history };
+      const sid = chatSessionId();
+      if (sid) payload.sessionId = sid;
+      if (source) payload.source = source;
+      const turnstileToken = await getTurnstileToken();
+      if (turnstileToken) payload.turnstileToken = turnstileToken;
+
       const res = await fetch(CHAT_API_BASE + '/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message, history: history }),
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
 

@@ -21,6 +21,8 @@
     "seed:cards": "node infrastructure/workers/resume-ai/scripts/seed-cards.mjs && npx wrangler kv bulk put infrastructure/workers/resume-ai/.cards-bulk.json --namespace-id 1e15da87e1e94016a078b96292a99731 --remote",
     "site:deploy": "DEPLOY_URL=https://resume.rafaracing.com.br npm run build && npm run worker:deploy && npm run seed:cards",
     "worker:test": "node --test \"infrastructure/workers/resume-ai/test/*.test.mjs\"",
+    "worker:db:migrate:local": "npx wrangler d1 migrations apply resume-ai-logs --local -c infrastructure/workers/resume-ai/wrangler.toml",
+    "worker:db:migrate": "npx wrangler d1 migrations apply resume-ai-logs --remote -c infrastructure/workers/resume-ai/wrangler.toml",
     "worker:eval": "node infrastructure/workers/resume-ai/eval/run-eval.mjs",
     "worker:logs": "node infrastructure/workers/resume-ai/scripts/analyze-logs.mjs",
     "prepare": "husky || true"

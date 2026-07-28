@@ -28,6 +28,21 @@ remote = true
 binding = "RESUME_AI_KV"
 id = "1e15da87e1e94016a078b96292a99731"
 
+# Chat-log corpus (self-improvement loop). D1, not KV: queryable SQL, 100k
+# writes/day free (vs KV's ~1k), no forced TTL — retention is enforced by the
+# scheduled handler below (age purge + size watermark). Local dev uses
+# wrangler's local D1 simulator; run `npm run worker:db:migrate:local` once.
+[[d1_databases]]
+binding = "CHAT_DB"
+database_name = "resume-ai-logs"
+database_id = "d146e1df-5b34-4d90-8781-2b3ba059b7a2"
+migrations_dir = "migrations"
+
+# Weekly retention sweep (scheduled handler in src/index.mjs): age purge
+# (policy) + 75%-of-free-tier size watermark (fuse). Mondays 04:00 UTC.
+[triggers]
+crons = ["0 4 * * 1"]
+
 # AI Gateway "resume-ai": logs on, response cache (5min), rate limit 50/min,
 # spend cap $0.01/mo (keeps it free — blocks the instant any billable cost
 # accrues), retry 3x, authenticated (Worker binding auto-authenticates). A
