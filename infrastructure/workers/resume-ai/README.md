@@ -118,6 +118,13 @@ Requires `wrangler login` (or `CLOUDFLARE_API_TOKEN`) on the account
 `b76ee39565…`. The custom domain `resume.rafaracing.com.br` is created
 automatically from the route config on first deploy.
 
+D1 schema changes: `npm run worker:db:migrate` (remote) /
+`npm run worker:db:migrate:local` (local dev). The CI token (from the "Edit
+Cloudflare Workers" template) currently lacks the **Account → D1 → Edit**
+scope, so the CI migrations step is warn-only (code 7403) until that scope is
+added to `CLOUDFLARE_API_TOKEN` in the dashboard — after which the
+`continue-on-error` in `worker-deploy.yml` should be removed.
+
 ## Enabling AI Gateway later (currently OFF)
 
 The commented `gatewayOpts` block in `src/index.mjs` is intentionally disabled:
