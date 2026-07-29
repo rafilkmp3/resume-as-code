@@ -1,10 +1,16 @@
 // Request validation, CORS origin resolution, cache-key helpers.
 // Pure module — no Worker APIs, node-testable.
 
+// Turnstile is enforced ONLY for this origin: preview/localhost/LAN origins
+// can never obtain tokens (their hostnames aren't registered on the widget),
+// and bot floods target prod — the other origins keep rate-limit + budget
+// guards but skip the token check.
+export const PROD_ORIGIN = 'https://resume.rafaracing.com.br';
+
 const ALLOWED_ORIGINS = [
   // Primary prod — the site is served from this same origin (Workers Static
   // Assets), so its chat POSTs are same-origin and MUST be allowed.
-  'https://resume.rafaracing.com.br',
+  PROD_ORIGIN,
   // Legacy origins kept allowed during the migration (they 301-redirect to the
   // domain above; harmless to keep on the list, avoids any transition breakage).
   'https://rafilkmp3.github.io',

@@ -85,8 +85,10 @@ const promptCards = chatCards.cards.map((card) => card.q);
         </svg>
       </button>
     </form>
-    <!-- Invisible Turnstile mount (only used when PUBLIC_TURNSTILE_SITEKEY is set) -->
-    <div id="chat-turnstile" aria-hidden="true"></div>
+    <!-- Turnstile mount (only used when PUBLIC_TURNSTILE_SITEKEY is set).
+         Managed mode usually passes invisibly, but can render an interactive
+         challenge here for high-risk visitors — must stay accessible. -->
+    <div id="chat-turnstile"></div>
 
     <!-- Secondary actions -->
     <div class="ch-actions">
@@ -870,6 +872,7 @@ const promptCards = chatCards.cards.map((card) => card.q);
   // its TURNSTILE_SECRET is set — flip both to enable, either alone is inert).
   const TURNSTILE_SITEKEY = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
   let turnstileWidgetId = null;
+  let turnstileExecuted = false;
   function initTurnstile() {
     if (!TURNSTILE_SITEKEY) return;
     const s = document.createElement('script');
@@ -877,9 +880,12 @@ const promptCards = chatCards.cards.map((card) => card.q);
     s.async = true;
     s.onload = function () {
       try {
+        // Invisibility comes from the widget's dashboard mode (Invisible);
+        // execution:'execute' defers the challenge until each send asks for
+        // a token instead of running it once at page load (tokens expire).
         turnstileWidgetId = window.turnstile.render('#chat-turnstile', {
           sitekey: TURNSTILE_SITEKEY,
-          size: 'invisible',
+          execution: 'execute',
         });
       } catch (_e) {
         /* widget render failed — sends proceed tokenless; server decides */
@@ -894,9 +900,13 @@ const promptCards = chatCards.cards.map((card) => card.q);
         return;
       }
       const timer = setTimeout(function () {
-        resolve(null); // challenge hung — send tokenless rather than freeze the chat
-      }, 4000);
+        resolve(null); // challenge hung/unsolved — send tokenless rather than freeze the chat
+      }, 12000); // generous: Managed mode may show an interactive challenge needing a human click
       try {
+        // Tokens are single-use: after the first execute the widget must be
+        // reset before it can issue another.
+        if (turnstileExecuted) window.turnstile.reset(turnstileWidgetId);
+        turnstileExecuted = true;
         window.turnstile.execute(turnstileWidgetId, {
           callback: function (token) {
             clearTimeout(timer);

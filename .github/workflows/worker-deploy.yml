@@ -85,7 +85,13 @@ jobs:
           cache-suffix: 'worker-site'
 
       - name: Build site for prod domain (static assets bundle)
+        # PUBLIC_TURNSTILE_SITEKEY (repo variable) arms the chat widget's
+        # Turnstile challenge; unset/empty keeps it inert. Prod build only —
+        # preview builds stay keyless (their hostnames aren't on the widget,
+        # and the worker skips enforcement for non-prod origins anyway).
         run: DEPLOY_URL=https://resume.rafaracing.com.br npm run build
+        env:
+          PUBLIC_TURNSTILE_SITEKEY: ${{ vars.PUBLIC_TURNSTILE_SITEKEY }}
 
       - name: Apply D1 migrations (chat-log schema)
         # continue-on-error: the current CLOUDFLARE_API_TOKEN ("Edit Cloudflare
