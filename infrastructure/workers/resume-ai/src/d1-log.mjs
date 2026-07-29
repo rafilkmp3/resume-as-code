@@ -40,9 +40,15 @@ export function cfMetadata(request) {
  * TURNSTILE_SECRET Worker secret is set. Verification-service outage fails
  * OPEN (availability of the chat beats bot filtering, same philosophy as the
  * per-IP rate limit); a definite "invalid token" verdict fails the request.
+ *
+ * Per Turnstile server-side best practices, a successful verdict also checks
+ * the response's `action` and `hostname` (when present) — a valid token
+ * minted by a DIFFERENT widget flow or on a different hostname must not be
+ * replayable into the chat API.
  * @returns {Promise<'pass'|'fail'>}
  */
-export async function verifyTurnstile(secret, token, ip) {
+export const TURNSTILE_ACTION = 'chat';
+export async function verifyTurnstile(secret, token, ip, expectedHostname) {
   try {
     const form = new FormData();
     form.append('secret', secret);
@@ -54,7 +60,10 @@ export async function verifyTurnstile(secret, token, ip) {
     });
     if (!res.ok) return 'pass'; // siteverify outage — fail open
     const data = await res.json();
-    return data.success ? 'pass' : 'fail';
+    if (!data.success) return 'fail';
+    if (data.action && data.action !== TURNSTILE_ACTION) return 'fail';
+    if (expectedHostname && data.hostname && data.hostname !== expectedHostname) return 'fail';
+    return 'pass';
   } catch {
     return 'pass'; // network failure — fail open
   }

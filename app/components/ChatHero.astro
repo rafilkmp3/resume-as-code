@@ -903,6 +903,9 @@ const promptCards = chatCards.cards.map((card) => card.q);
         execution: 'execute',
         appearance: 'interaction-only',
         theme: turnstileTheme(),
+        // Echoed back by siteverify; the worker rejects tokens minted for a
+        // different action (token-replay hardening).
+        action: 'chat',
       });
       turnstileExecuted = false;
     } catch (_e) {

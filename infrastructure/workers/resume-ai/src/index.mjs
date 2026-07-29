@@ -232,7 +232,12 @@ async function handleChat(request, env, ctx, corsOrigin) {
   let turnstile = 'off';
   if (env.TURNSTILE_SECRET) {
     if (corsOrigin === PROD_ORIGIN) {
-      turnstile = await verifyTurnstile(env.TURNSTILE_SECRET, turnstileToken, ip);
+      turnstile = await verifyTurnstile(
+        env.TURNSTILE_SECRET,
+        turnstileToken,
+        ip,
+        new URL(PROD_ORIGIN).hostname,
+      );
       if (turnstile === 'fail') {
         return jsonResponse(
           403,
