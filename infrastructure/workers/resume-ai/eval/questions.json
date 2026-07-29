@@ -312,6 +312,85 @@
         ]
       ],
       "mustNotInclude": []
+    },
+    {
+      "id": "recruiter-stack-combo",
+      "category": "recruiter-qualifying",
+      "message": "What's your experience with Python and Kubernetes?",
+      "mustInclude": [
+        [
+          "Python",
+          "python"
+        ],
+        [
+          "Kubernetes",
+          "kubernetes",
+          "K8s"
+        ]
+      ],
+      "mustNotInclude": [
+        "not sure",
+        "can't answer"
+      ]
+    },
+    {
+      "id": "recruiter-mixed-tech-honesty",
+      "category": "honesty",
+      "message": "Do you have experience with Helm or Ceph?",
+      "mustInclude": [
+        [
+          "Helm",
+          "helm"
+        ],
+        [
+          "isn't",
+          "not",
+          "don't",
+          "no direct"
+        ]
+      ],
+      "mustNotInclude": [
+        "years of Ceph experience",
+        "extensive Ceph"
+      ]
+    },
+    {
+      "id": "recruiter-english-level",
+      "category": "recruiter-qualifying",
+      "message": "What is your English level?",
+      "mustInclude": [
+        [
+          "fluent",
+          "Fluent",
+          "proficient",
+          "Proficient"
+        ]
+      ],
+      "mustNotInclude": [
+        "basic English",
+        "beginner"
+      ]
+    },
+    {
+      "id": "recruiter-remote-usd",
+      "category": "recruiter-qualifying",
+      "message": "Are you open to 100% remote long-term roles paid in USD?",
+      "mustInclude": [
+        [
+          "remote",
+          "Remote"
+        ],
+        [
+          "open",
+          "interest",
+          "yes",
+          "Yes"
+        ]
+      ],
+      "mustNotInclude": [
+        "not open",
+        "only on-site"
+      ]
     }
   ]
 }

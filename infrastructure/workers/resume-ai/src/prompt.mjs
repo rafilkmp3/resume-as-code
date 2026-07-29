@@ -46,7 +46,7 @@ function humanDuration(years) {
 function formatFactsBlock(facts) {
   const lines = [];
   lines.push(
-    `- My total professional experience: ${facts.totalYears.toFixed(1)} years of summed employment (career span since my first role: ${facts.careerSpanYears.toFixed(1)} years — the difference is employment gaps, never present gap time as experience)`,
+    `- My total professional experience: ${facts.totalYears.toFixed(1)} years of summed employment. When asked how much experience I have, ${facts.totalYears.toFixed(1)} years IS the answer — do not volunteer the career-span figure (${facts.careerSpanYears.toFixed(1)} years since my first role); it exists only so you never present gap time as experience if someone does the date math`,
   );
   if (facts.currentRole) {
     lines.push(
