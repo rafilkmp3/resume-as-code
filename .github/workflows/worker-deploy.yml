@@ -96,24 +96,14 @@ jobs:
           PUBLIC_TURNSTILE_SITEKEY: ${{ vars.PUBLIC_TURNSTILE_SITEKEY }}
 
       - name: Apply D1 migrations (chat-log schema)
-        # continue-on-error: the current CLOUDFLARE_API_TOKEN ("Edit Cloudflare
-        # Workers" template) lacks the Account → D1 → Edit scope (API code
-        # 7403), and a missing-scope failure must not block site deploys.
-        # Schema is already applied manually (npm run worker:db:migrate).
-        # TODO(rafael): add D1:Edit to the token in the dashboard, then remove
-        # continue-on-error so future migrations gate the deploy again.
-        id: d1-migrations
-        continue-on-error: true
+        # Hard gate: CLOUDFLARE_API_TOKEN carries Account → D1 → Edit
+        # (added 2026-07-29), so a migration failure here is real and must
+        # block the deploy.
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           wranglerVersion: ${{ env.WRANGLER_VERSION }}
           command: d1 migrations apply resume-ai-logs --remote -c ${{ env.WRANGLER_CONFIG }}
-
-      - name: Warn if D1 migrations were skipped
-        if: steps.d1-migrations.outcome == 'failure'
-        run: |
-          echo "::warning::D1 migrations step failed (most likely the API token lacks the D1 Edit scope — code 7403). Deploy continues; apply pending migrations with 'npm run worker:db:migrate' and add Account → D1 → Edit to CLOUDFLARE_API_TOKEN."
 
       - name: Deploy resume-ai (worker + static assets)
         uses: cloudflare/wrangler-action@v3
