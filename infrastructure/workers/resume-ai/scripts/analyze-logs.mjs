@@ -3,8 +3,9 @@
 // visitors ask against the hero suggestion cards and the eval corpus — so
 // cards, curated answers, and evals evolve from production usage, not guesses.
 //
-// Usage:  npm run worker:logs            (human report)
-//         npm run worker:logs -- --json  (machine-readable, for tooling)
+// Usage:  npm run worker:logs                 (human report)
+//         npm run worker:logs -- --json       (machine-readable, for tooling)
+//         npm run worker:logs -- --threads    (every conversation, full text)
 //
 // Auth: same wrangler OAuth/API token as every other worker script.
 
@@ -19,7 +20,8 @@ const CARDS_PATH = new URL('../src/index.mjs', import.meta.url);
 const EVAL_PATH = new URL('../eval/questions.json', import.meta.url);
 
 // Test/diagnostic noise we generate ourselves — never "real user" signal.
-const NOISE_RE = /\b(?:ping|diag|gw ?test|gwtest|gw \d|reachability|prod unified|post-guardrail)\b|\b\d{4,}\b/i;
+const NOISE_RE =
+  /\b(?:ping|diag|probe|tokenless|gate-live|rotated-secret|e2e|gw ?test|gwtest|gw \d|reachability|prod unified|post-guardrail)\b|\b\d{4,}\b/i;
 
 function d1Query(sql) {
   const out = execFileSync(
@@ -58,7 +60,7 @@ function topicOf(q) {
 }
 
 const logs = d1Query(
-  'SELECT ts, session_id, source, q, reply, reply_len, model, ms, cached, degraded, geo_country, geo_city, network_org FROM chats ORDER BY ts',
+  'SELECT id, ts, session_id, source, q, reply, reply_len, model, ms, cached, degraded, turnstile, geo_country, geo_city, network_org FROM chats ORDER BY id',
 ).filter((l) => typeof l.q === 'string');
 const feedback = d1Query('SELECT ts, session_id, verdict, question, reply FROM feedback ORDER BY ts');
 console.error(`fetched ${logs.length} chat rows + ${feedback.length} feedback rows from D1…`);
@@ -93,7 +95,34 @@ const graduationCandidates = [...typedBySessions.values()]
   .map((e) => ({ q: e.q, distinctSessions: e.sessions.size }))
   .sort((a, b) => b.distinctSessions - a.distinctSessions);
 
-// Conversation + audience shape (coarse request.cf metadata — company-level).
+// Conversation threads — the corpus's raison d'être: one recruiter tab = one
+// session. Noise-only sessions (our own diagnostics) drop out entirely.
+const threadMap = new Map();
+for (const l of logs) {
+  if (!l.session_id) continue;
+  if (!threadMap.has(l.session_id)) threadMap.set(l.session_id, []);
+  threadMap.get(l.session_id).push(l);
+}
+const threads = [...threadMap.values()]
+  .filter((rows) => rows.some((r) => !NOISE_RE.test(r.q)))
+  .map((rows) => ({
+    sessionId: rows[0].session_id,
+    started: rows[0].ts,
+    city: rows[0].geo_city,
+    country: rows[0].geo_country,
+    org: rows[0].network_org,
+    turns: rows.map((r) => ({
+      ts: r.ts,
+      q: r.q,
+      reply: r.reply || '',
+      source: r.source,
+      cached: r.cached === 1,
+      turnstile: r.turnstile,
+      ms: r.ms,
+    })),
+  }))
+  .sort((a, b) => (a.started < b.started ? 1 : -1));
+
 const sessions = new Set(real.filter((l) => l.session_id).map((l) => l.session_id));
 const orgCounts = {};
 for (const l of real) if (l.network_org) orgCounts[l.network_org] = (orgCounts[l.network_org] || 0) + 1;
@@ -108,6 +137,7 @@ const report = {
     rows: logs.length,
     realUserQuestions: real.length,
     distinctSessions: sessions.size,
+    conversations: threads.length,
     feedback: feedback.length,
   },
   topics: Object.fromEntries(Object.entries(byTopic).map(([t, qs]) => [t, qs.length])),
@@ -115,24 +145,62 @@ const report = {
   uncoveredTopics: gaps,
   graduationCandidates,
   topNetworkOrgs: Object.fromEntries(topOrgs),
+  conversations: threads,
   downvoted: downvoted.map((f) => ({ q: f.question, reply: (f.reply || '').slice(0, 160) })),
   degradedReplies: degraded.map((l) => ({ q: l.q, model: l.model })),
   slowReplies: slow.map((l) => ({ q: l.q, ms: l.ms })),
 };
 
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+const when = (ts) => ts.slice(0, 16).replace('T', ' ');
+
+function printThread(t, { full = false } = {}) {
+  const where = [t.city, t.country].filter(Boolean).join(', ');
+  const head = [when(t.started), where || null, t.org || null, `${t.turns.length} turn${t.turns.length === 1 ? '' : 's'}`]
+    .filter(Boolean)
+    .join('  ·  ');
+  console.log(`  ┌─ ${head}`);
+  for (const turn of t.turns) {
+    const tags = [turn.source, turn.cached ? 'cached' : null, turn.turnstile === 'pass' ? '✓' : null]
+      .filter(Boolean)
+      .join(',');
+    console.log(`  │ Q ${full ? turn.q : clip(turn.q, 76)}${tags ? `  (${tags})` : ''}`);
+    const reply = turn.reply.replace(/\s+/g, ' ');
+    if (full) {
+      console.log(`  │ A ${reply}`);
+    } else {
+      console.log(`  │ A ${clip(reply, 76)}`);
+    }
+  }
+  console.log('  └─');
+}
+
 if (process.argv.includes('--json')) {
   console.log(JSON.stringify(report, null, 2));
+} else if (process.argv.includes('--threads')) {
+  console.log(`\n💬 resume-ai — every conversation (${threads.length}), newest first\n`);
+  for (const t of threads) printThread(t, { full: true });
 } else {
-  console.log('\n📊 resume-ai — real-user question mining (D1 corpus)');
+  const T = report.totals;
+  console.log('\n📊 resume-ai — chat corpus report (D1)');
+  console.log('══════════════════════════════════════════════════════════');
   console.log(
-    `   ${report.totals.realUserQuestions} real questions in ${report.totals.distinctSessions} sessions (${report.totals.rows} rows, noise filtered)\n`,
+    `   ${T.realUserQuestions} real questions · ${T.conversations} conversations · ${T.feedback} feedback · ${T.rows} rows total\n`,
   );
+
+  if (threads.length) {
+    console.log(`💬 recent conversations (${Math.min(threads.length, 5)} of ${threads.length}) — full text: npm run worker:logs -- --threads`);
+    for (const t of threads.slice(0, 5)) printThread(t);
+    console.log();
+  }
+
+  console.log('🧭 what visitors ask (by topic)');
   for (const [topic, qs] of Object.entries(byTopic).sort((a, b) => b[1].length - a[1].length)) {
     console.log(`   ${topic} (${qs.length})`);
-    for (const q of [...new Set(qs)].slice(0, 5)) console.log(`     · ${q}`);
+    for (const q of [...new Set(qs)].slice(0, 3)) console.log(`     · ${clip(q, 70)}`);
   }
   if (topOrgs.length) {
-    console.log('\n🏢 top visitor networks (request.cf asOrganization):');
+    console.log('\n🏢 top visitor networks');
     for (const [org, n] of topOrgs.slice(0, 5)) console.log(`     · ${org} (${n})`);
   }
   if (gaps.length) console.log(`\n⚠️  topics users ask that cards/eval do not cover: ${gaps.join(', ')}`);
@@ -146,6 +214,6 @@ if (process.argv.includes('--json')) {
     for (const f of downvoted) console.log(`     · ${f.q}`);
   }
   if (degraded.length) console.log(`\n🩹 degraded/guarded replies: ${degraded.length}`);
-  if (slow.length) console.log(`🐢 replies >8s: ${slow.length}`);
+  if (slow.length) console.log(`🐢 replies >8s (uncached): ${slow.length}`);
   console.log('\nNext: fold graduation candidates into eval/questions.json and, if card-worthy, into the hero cards + seed-cards.mjs.');
 }

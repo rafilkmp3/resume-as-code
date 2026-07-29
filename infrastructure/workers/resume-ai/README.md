@@ -64,8 +64,9 @@ org). No IP or fingerprint, ever. Retention: 180-day age purge + a
 Mine the corpus with:
 
 ```bash
-npm run worker:logs            # human report
-npm run worker:logs -- --json  # machine-readable
+npm run worker:logs                  # report: recent conversations, topics, gaps
+npm run worker:logs -- --threads     # every conversation, full Q&A text
+npm run -s worker:logs -- --json     # machine-readable (-s keeps npm's banner out)
 ```
 
 The report buckets real questions by topic (noise-filtered), lists downvoted /
