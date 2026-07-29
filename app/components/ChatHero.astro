@@ -592,6 +592,19 @@ const promptCards = chatCards.cards.map((card) => card.q);
     box-shadow: 0 8px 32px rgba(37, 99, 235, 0.14), 0 0 0 3px rgba(37, 99, 235, 0.15);
   }
 
+  /* Turnstile mount: zero footprint while the widget is hidden
+     (appearance: interaction-only), centered card when a challenge shows. */
+  #chat-turnstile {
+    display: flex;
+    justify-content: center;
+  }
+  #chat-turnstile:not(:empty) {
+    margin-top: var(--space-3);
+  }
+  #chat-turnstile iframe {
+    border-radius: 8px;
+  }
+
   .dark .ch-form:focus-within {
     border-color: rgba(144, 205, 244, 0.5);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(144, 205, 244, 0.18);
@@ -887,8 +900,10 @@ const promptCards = chatCards.cards.map((card) => card.q);
           sitekey: TURNSTILE_SITEKEY,
           execution: 'execute',
           // Hide the widget box entirely unless a challenge actually needs a
-          // human click (Managed mode renders a visible placeholder otherwise).
+          // human click (Managed mode renders a visible placeholder otherwise
+          // and parks a branded "Success!" card after solving).
           appearance: 'interaction-only',
+          theme: 'dark',
         });
       } catch (_e) {
         /* widget render failed — sends proceed tokenless; server decides */
