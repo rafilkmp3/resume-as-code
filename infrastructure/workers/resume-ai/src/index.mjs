@@ -14,6 +14,7 @@ import {
   resolveCorsOrigin,
   normalizeQuestion,
   hashString,
+  PROD_ORIGIN,
 } from './guards.mjs';
 import { aiRunViaGateway, extractAiText, postProcess, detectPromptLeak } from './ai.mjs';
 import { cacheKey as buildCacheKey } from './cache-version.mjs';
@@ -223,17 +224,24 @@ async function handleChat(request, env, ctx, corsOrigin) {
   }
 
   // Turnstile gate — env-gated like AI_GATEWAY_ID: no TURNSTILE_SECRET, no
-  // check (zero-risk toggle). Runs only in front of real AI spend; the
-  // verification service failing open is deliberate (see d1-log.mjs).
+  // check (zero-risk toggle). Enforced ONLY for the prod origin: preview/
+  // localhost/LAN origins can't obtain tokens (hostnames not on the widget)
+  // and would be bricked by enforcement — they keep rate-limit + budget
+  // guards. Runs only in front of real AI spend; the verification service
+  // failing open is deliberate (see d1-log.mjs).
   let turnstile = 'off';
   if (env.TURNSTILE_SECRET) {
-    turnstile = await verifyTurnstile(env.TURNSTILE_SECRET, turnstileToken, ip);
-    if (turnstile === 'fail') {
-      return jsonResponse(
-        403,
-        { error: 'Bot check failed — please reload the page and try again.', code: 'turnstile' },
-        corsOrigin,
-      );
+    if (corsOrigin === PROD_ORIGIN) {
+      turnstile = await verifyTurnstile(env.TURNSTILE_SECRET, turnstileToken, ip);
+      if (turnstile === 'fail') {
+        return jsonResponse(
+          403,
+          { error: 'Bot check failed — please reload the page and try again.', code: 'turnstile' },
+          corsOrigin,
+        );
+      }
+    } else {
+      turnstile = 'skip-origin';
     }
   }
 
