@@ -1,0 +1,6 @@
+Contact: https://github.com/rafilkmp3/resume-as-code/security/advisories/new
+Contact: https://www.linkedin.com/in/rafaelsathler
+Expires: 2027-07-29T00:00:00.000Z
+Preferred-Languages: en, pt
+Canonical: https://resume.rafaracing.com.br/.well-known/security.txt
+Policy: https://github.com/rafilkmp3/resume-as-code/security/policy
