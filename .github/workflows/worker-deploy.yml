@@ -9,6 +9,7 @@ on:
     paths:
       - 'infrastructure/workers/resume-ai/**'
       - 'app/**'
+      - 'public/**'
       - 'astro.config.mjs'
       - 'tailwind.config.mjs'
       - 'package.json'
@@ -17,6 +18,7 @@ on:
     paths:
       - 'infrastructure/workers/resume-ai/**'
       - 'app/**'
+      - 'public/**'
       - 'astro.config.mjs'
       - 'tailwind.config.mjs'
       - 'package.json'
