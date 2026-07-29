@@ -886,6 +886,9 @@ const promptCards = chatCards.cards.map((card) => card.q);
         turnstileWidgetId = window.turnstile.render('#chat-turnstile', {
           sitekey: TURNSTILE_SITEKEY,
           execution: 'execute',
+          // Hide the widget box entirely unless a challenge actually needs a
+          // human click (Managed mode renders a visible placeholder otherwise).
+          appearance: 'interaction-only',
         });
       } catch (_e) {
         /* widget render failed — sends proceed tokenless; server decides */
