@@ -886,27 +886,49 @@ const promptCards = chatCards.cards.map((card) => card.q);
   const TURNSTILE_SITEKEY = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
   let turnstileWidgetId = null;
   let turnstileExecuted = false;
+  // Follow the SITE's theme toggle (html.dark set by Layout.astro), not the
+  // OS preference — Turnstile's own 'auto' would mismatch a manual toggle.
+  function turnstileTheme() {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  }
+  function renderTurnstile() {
+    try {
+      if (turnstileWidgetId !== null) window.turnstile.remove(turnstileWidgetId);
+      // execution:'execute' defers the challenge until each send asks for a
+      // token; appearance:'interaction-only' keeps the widget invisible except
+      // while a challenge actually needs a human (otherwise Managed mode shows
+      // a placeholder box and parks a branded "Success!" card after solving).
+      turnstileWidgetId = window.turnstile.render('#chat-turnstile', {
+        sitekey: TURNSTILE_SITEKEY,
+        execution: 'execute',
+        appearance: 'interaction-only',
+        theme: turnstileTheme(),
+      });
+      turnstileExecuted = false;
+    } catch (_e) {
+      /* widget render failed — sends proceed tokenless; server decides */
+    }
+  }
   function initTurnstile() {
     if (!TURNSTILE_SITEKEY) return;
     const s = document.createElement('script');
     s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
     s.async = true;
     s.onload = function () {
+      renderTurnstile();
+      // Theme is a render-time param — re-render when the visitor flips the
+      // site toggle so a mid-session challenge matches the page.
       try {
-        // Invisibility comes from the widget's dashboard mode (Invisible);
-        // execution:'execute' defers the challenge until each send asks for
-        // a token instead of running it once at page load (tokens expire).
-        turnstileWidgetId = window.turnstile.render('#chat-turnstile', {
-          sitekey: TURNSTILE_SITEKEY,
-          execution: 'execute',
-          // Hide the widget box entirely unless a challenge actually needs a
-          // human click (Managed mode renders a visible placeholder otherwise
-          // and parks a branded "Success!" card after solving).
-          appearance: 'interaction-only',
-          theme: 'dark',
-        });
+        let lastTheme = turnstileTheme();
+        new MutationObserver(function () {
+          const t = turnstileTheme();
+          if (t !== lastTheme && turnstileWidgetId !== null) {
+            lastTheme = t;
+            renderTurnstile();
+          }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
       } catch (_e) {
-        /* widget render failed — sends proceed tokenless; server decides */
+        /* cosmetic only — a mismatched challenge theme never blocks the chat */
       }
     };
     document.head.appendChild(s);
