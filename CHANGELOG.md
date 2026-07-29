@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.22.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.21.0...v4.22.0) (2026-07-29)
+
+
+### Features
+
+* add RFC 9116 security.txt ([#196](https://github.com/rafilkmp3/resume-as-code/issues/196)) ([5eb1c98](https://github.com/rafilkmp3/resume-as-code/commit/5eb1c989ef8712feeff6fa3604d0bc4b2fec70f9))
+* arm Turnstile on prod chat origin ([#195](https://github.com/rafilkmp3/resume-as-code/issues/195)) ([7c3fcaf](https://github.com/rafilkmp3/resume-as-code/commit/7c3fcaf8a58ff4d863959bf49e6bff77a48d4abe))
+* chat-log corpus in D1 + bot guards ([#193](https://github.com/rafilkmp3/resume-as-code/issues/193)) ([6084fe4](https://github.com/rafilkmp3/resume-as-code/commit/6084fe48b9a40976d37f6f2da01ab4036e7c339f))
+* conversation-thread view in log report ([#199](https://github.com/rafilkmp3/resume-as-code/issues/199)) ([bb253f3](https://github.com/rafilkmp3/resume-as-code/commit/bb253f31a438baa989b72c0284194667e620558a))
+* cover real recruiter qualifying questions ([#200](https://github.com/rafilkmp3/resume-as-code/issues/200)) ([9f13a5c](https://github.com/rafilkmp3/resume-as-code/commit/9f13a5cfc91bc707718c56fafb098557aa7c9dc7))
+* train chatbot on recruiter qualifying Qs ([#190](https://github.com/rafilkmp3/resume-as-code/issues/190)) ([6b6df3b](https://github.com/rafilkmp3/resume-as-code/commit/6b6df3beaf9e34024bc45d5415fe51128b041b86))
+
+
+### Bug Fixes
+
+* hide Turnstile box; restore D1 gate in CI ([#198](https://github.com/rafilkmp3/resume-as-code/issues/198)) ([5547de8](https://github.com/rafilkmp3/resume-as-code/commit/5547de80b0329173e5df9ce2faf54fe3522acf74))
+
+
+### Continuous Integration
+
+* deploy worker on public/ asset changes ([#197](https://github.com/rafilkmp3/resume-as-code/issues/197)) ([b9d103d](https://github.com/rafilkmp3/resume-as-code/commit/b9d103d0585f0699991494e4220d99f457b4a446))
+* warn-only D1 migrations until token scoped ([#194](https://github.com/rafilkmp3/resume-as-code/issues/194)) ([31957f5](https://github.com/rafilkmp3/resume-as-code/commit/31957f5add406fe2f9dffd7887200ab9fb7eb7bb))
+
 ## [4.21.0](https://github.com/rafilkmp3/resume-as-code/compare/v4.20.0...v4.21.0) (2026-07-24)
 
 
